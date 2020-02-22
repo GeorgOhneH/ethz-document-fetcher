@@ -1,4 +1,4 @@
-import settings
+from settings import settings
 
 SSO_URL = "https://aai-logon.ethz.ch/idp/profile/SAML2/Redirect/SSO"
 SSO_DATA = {

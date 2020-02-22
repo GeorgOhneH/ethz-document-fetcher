@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 import moodle
-import settings
+from settings import settings
 
 
 async def download_files(session, queue):
