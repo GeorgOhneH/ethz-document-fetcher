@@ -4,6 +4,7 @@ import re
 import asyncio
 from itertools import repeat
 from pathlib import Path
+from utils import *
 
 import aiostream
 from bs4 import BeautifulSoup
@@ -50,14 +51,7 @@ async def parse_sections(session, queue, section, header_name, use_cache):
             name = str(instance.a.span.contents[0])
 
             url_reference_path = os.path.join(CACHE_PATH, "url.json")
-            url_reference = load_url_reference(url_reference_path)
-            driver_url = url_reference.get(url, None)
-
-            if driver_url is None:
-                async with session.get(url, raise_for_status=False) as response:
-                    driver_url = str(response.url)
-                url_reference[url] = driver_url
-                save_url_reference(url_reference, url_reference_path)
+            driver_url = await check_url_reference(session, url, url_reference_path)
 
             if "onedrive.live.com" in driver_url:
                 await collector(session, queue, driver_url, base_path + f"; {name}")
@@ -106,25 +100,3 @@ async def parse_sub_folders(queue, soup, folder_path, use_sub_folder_name=True):
 def test_for_sub_folder(tag):
     return tag.previous_sibling.img["src"] == SUB_FOLDER_IMG
 
-
-def save_txt(section, path):
-    Path(os.path.dirname(path)).mkdir(parents=True, exist_ok=True)
-    with open(path, "w+") as f:
-        f.write(str(section))
-
-
-def load_txt(path):
-    with open(path, "r") as f:
-        return f.read()
-
-
-def load_url_reference(path):
-    if not os.path.exists(path):
-        return {}
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-def save_url_reference(url_reference, path):
-    with open(path, "w+") as f:
-        return json.dump(url_reference, f)

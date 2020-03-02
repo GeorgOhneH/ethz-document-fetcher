@@ -1,5 +1,7 @@
 import os
 from urllib.parse import parse_qs, urlparse
+from utils import *
+from .constants import *
 
 
 async def collector(session, queue, driver_url, base_path):
@@ -15,4 +17,10 @@ async def collector(session, queue, driver_url, base_path):
 
     for item in item_data["value"]:
         path = os.path.join(base_path, item["name"])
-        await queue.put({"path": path, "url": item["@content.downloadUrl"]})
+        if item.get("@content.downloadUrl", None) is not None:
+            await queue.put({"path": path, "url": item["@content.downloadUrl"]})
+
+        elif item.get("folder", None) is not None:
+            url_reference_path = os.path.join(CACHE_PATH, "url.json")
+            folder_url = await check_url_reference(session, item['webUrl'], url_reference_path)
+            await collector(session, queue, f"{folder_url}?authkey={authkey}", path)
