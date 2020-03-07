@@ -3,7 +3,7 @@ import shutil
 
 
 def setup():
-    base_path = os.path.dirname(__file__)
+    base_path = os.path.abspath(os.path.dirname(__file__))
     settings_path = os.path.join(base_path, "settings.config")
     bat_file_path = os.path.join(base_path, "run.bat")
     template_path = os.path.join(base_path, "settings\\settings.config.template")
