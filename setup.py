@@ -16,11 +16,12 @@ def setup():
                 key, value = [x.strip() for x in line.split("=")]
                 settings[key] = value
 
-    with open(settings_path, "r") as f:
-        for line in f.readlines():
-            if "=" in line:
-                key, value = [x.strip() for x in line.split("=")]
-                settings[key] = value
+    if os.path.exists(settings_path):
+        with open(settings_path, "r") as f:
+            for line in f.readlines():
+                if "=" in line:
+                    key, value = [x.strip() for x in line.split("=")]
+                    settings[key] = value
 
     with open(settings_path, "w+") as f:
         for key, value in settings.items():
