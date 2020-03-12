@@ -1,3 +1,3 @@
-username=exampleUserName
-password=examplePassword
-base_path=C:\\example\\path\\to\\folder
+username:=exampleUserName
+password:=base64(password)
+base_path:=C:\\example\\path\\to\\folder

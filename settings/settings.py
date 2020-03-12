@@ -1,25 +1,62 @@
 import os
 import errno
 import sys
+import base64
+from .exceptions import NoValue, InvalidPath
 
 ERROR_INVALID_NAME = 123
 
 
 class Settings(object):
     def __init__(self):
-        base_path = os.path.dirname(os.path.dirname(__file__))
-        settings_path = os.path.join(base_path, "settings.config")
+        self.separator = ":="
+        self.FOLDER_PATH = os.path.dirname(__file__)
+        self.BASE_PATH = os.path.dirname(self.FOLDER_PATH)
+        self.SETTINGS_PATH = os.path.join(self.BASE_PATH, "settings.config")
+        self.TEMPLATE_PATH = os.path.join(self.FOLDER_PATH, "settings.config.template")
 
-        with open(settings_path, "r") as f:
-            for line in f.readlines():
-                if "=" in line:
-                    key, value = [x.strip() for x in line.split("=")]
-                    if not value:
-                        raise ValueError("variables in settings.config must be set")
-                    if "path" in key:
-                        if not is_path_exists_or_creatable(value):
-                            raise ValueError(f"The {key}: {value} is not a valid path")
-                    setattr(self, key, value)
+    def init(self, raise_exception=True):
+        if not os.path.exists(self.SETTINGS_PATH):
+            raise EnvironmentError("Please run 'python setup.py")
+        self.init_attributes(raise_exception)
+
+    def init_attributes(self, raise_exception):
+        with open(self.SETTINGS_PATH, "r") as f:
+            for key, value in self.get_key_value(f.readlines()):
+                if raise_exception:
+                    self.test_key_value(key, value)
+                setattr(self, key, value)
+
+    def test_key_value(self, key, value):
+        if not value:
+            raise NoValue("Variables in settings.config must be set. Run 'python setup.py'")
+        if "path" in key:
+            if not os.path.exists(value):
+                raise InvalidPath(f"The ({key}: {value}) in settings.config is not a valid path")
+
+    def get_key_value(self, line_gen):
+        for line in line_gen:
+            if self.separator in line:
+                key, value = [x.strip() for x in line.split(self.separator)]
+                if "password" in key:
+                    value = base64.b64decode(value).decode("utf-8")
+                yield key, value
+
+    def get_settings(self):
+        settings = {}
+        for path in [self.TEMPLATE_PATH, self.SETTINGS_PATH]:
+            with open(path, "r") as f:
+                for key, value in self.get_key_value(f.readlines()):
+                    settings[key] = value
+
+        return settings
+
+    def set_settings(self, data):
+        with open(self.SETTINGS_PATH, "w+") as f:
+            for key, value in data.items():
+                if "password" in key:
+                    value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
+                f.write(f"{key}{self.separator}{value}\n")
 
 
 def is_path_creatable(pathname: str) -> bool:

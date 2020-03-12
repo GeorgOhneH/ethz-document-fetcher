@@ -1,34 +1,43 @@
 import os
-import shutil
+import getpass
+from settings import settings
+from settings.exceptions import NoValue, InvalidPath
+
+BASE_PATH = os.path.abspath(os.path.dirname(__file__))
+BAT_FILE_PATH = os.path.join(BASE_PATH, "run.bat")
 
 
 def setup():
-    base_path = os.path.abspath(os.path.dirname(__file__))
-    settings_path = os.path.join(base_path, "settings.config")
-    bat_file_path = os.path.join(base_path, "run.bat")
-    template_path = os.path.join(base_path, "settings\\settings.config.template")
+    settings.init(raise_exception=False)
+    data = settings.get_settings()
 
-    settings = {}
+    print("To skip a value enter nothing")
+    for key, value in data.items():
+        while True:
+            if "password" in key and value:
+                value = value[0] + "*" * (len(value)-1)
+            current = f" (current: {value})" if value else ""
 
-    with open(template_path, "r") as f:
-        for line in f.readlines():
-            if "=" in line:
-                key, value = [x.strip() for x in line.split("=")]
-                settings[key] = value
+            if "password" in key:
+                i = getpass.getpass(f"Please enter your password{current} (password is not shown): ")
+            else:
+                current = f" (current: {value})" if value else ""
+                print(f"Please enter the value for {key}{current}: ", end="")
+                i = input().strip()
+            try:
+                if not i and value:
+                    break
+                settings.test_key_value(key, i)
+                data[key] = i
+                break
+            except (NoValue, InvalidPath) as e:
+                print("Please enter a valid value")
+                continue
 
-    if os.path.exists(settings_path):
-        with open(settings_path, "r") as f:
-            for line in f.readlines():
-                if "=" in line:
-                    key, value = [x.strip() for x in line.split("=")]
-                    settings[key] = value
+    settings.set_settings(data)
 
-    with open(settings_path, "w+") as f:
-        for key, value in settings.items():
-            f.write(f"{key}={value}\n")
-
-    with open(bat_file_path, "w+") as f:
-        f.write(f"python {os.path.join(base_path, 'main.py')}\n")
+    with open(BAT_FILE_PATH, "w+") as f:
+        f.write(f"python {os.path.join(BASE_PATH, 'main.py')}\n")
         f.write("pause")
 
 

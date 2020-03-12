@@ -1,3 +1,6 @@
+from settings import settings
+settings.init()
+
 import aiohttp
 import asyncio
 
@@ -6,6 +9,7 @@ from downloader import *
 
 
 async def main():
+
     queue = asyncio.Queue()
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
