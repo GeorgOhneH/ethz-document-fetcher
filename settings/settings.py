@@ -16,12 +16,16 @@ class Settings(object):
         self.TEMPLATE_PATH = os.path.join(self.FOLDER_PATH, "settings.config.template")
 
     def init(self, raise_exception=True):
-        if not os.path.exists(self.SETTINGS_PATH):
+        if raise_exception and not os.path.exists(self.SETTINGS_PATH):
             raise EnvironmentError("Please run 'python setup.py")
         self.init_attributes(raise_exception)
 
     def init_attributes(self, raise_exception):
-        with open(self.SETTINGS_PATH, "r") as f:
+        path = self.SETTINGS_PATH
+        if not os.path.exists(path):
+            path = self.TEMPLATE_PATH
+
+        with open(path, "r") as f:
             for key, value in self.get_key_value(f.readlines()):
                 if raise_exception:
                     self.test_key_value(key, value)
@@ -45,9 +49,10 @@ class Settings(object):
     def get_settings(self):
         settings = {}
         for path in [self.TEMPLATE_PATH, self.SETTINGS_PATH]:
-            with open(path, "r") as f:
-                for key, value in self.get_key_value(f.readlines()):
-                    settings[key] = value
+            if os.path.exists(path):
+                with open(path, "r") as f:
+                    for key, value in self.get_key_value(f.readlines()):
+                        settings[key] = value
 
         return settings
 
