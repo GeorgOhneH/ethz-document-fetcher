@@ -27,3 +27,4 @@ async def login_async(session: ClientSession, response_text: str):
 
     async with session.post(f"{SAML_URL}", data=saml_data) as resp:
         resp.raise_for_status()
+        await resp.text()
