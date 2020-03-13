@@ -17,21 +17,15 @@ async def main():
         analysis2 = custom_producer(analysis.parse_main_page, session, queue)
         informatik1 = custom_producer(informatik.parse_main_page, session, queue)
 
-        v_nus = video_portal.producer(session, queue, "d-itet", "2020", "spring", "227-0002-00L",
-                                      pwd_username="bie-20s", pwd_password=settings.portal_nus2_pwd)
-
-        v_inf = video_portal.producer(session, queue, "d-infk", "2020", "spring", "252-0848-00L",
-                                      pwd_username="scw-20s", pwd_password=settings.portal_inf1_pwd)
-
-        v_analysis = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0232-10L")
-        v_koma = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0302-10L")
-
-        producers_no_login = [
-            asyncio.create_task(analysis2),
-            asyncio.create_task(informatik1),
-        ]
-
         if settings.use_video_portal:
+
+            v_nus = video_portal.producer(session, queue, "d-itet", "2020", "spring", "227-0002-00L",
+                                          pwd_username="bie-20s", pwd_password=settings.portal_nus2_pwd)
+            v_inf = video_portal.producer(session, queue, "d-infk", "2020", "spring", "252-0848-00L",
+                                          pwd_username="scw-20s", pwd_password=settings.portal_inf1_pwd)
+            v_analysis = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0232-10L")
+            v_koma = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0302-10L")
+
             producers_portal = [
                 asyncio.create_task(v_nus),
                 asyncio.create_task(v_inf),
@@ -40,6 +34,11 @@ async def main():
             ]
         else:
             producers_portal = []
+
+        producers_no_login = [
+            asyncio.create_task(analysis2),
+            asyncio.create_task(informatik1),
+        ]
 
         await moodle.login_async(session)
 
