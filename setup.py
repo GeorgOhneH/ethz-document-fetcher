@@ -1,7 +1,7 @@
 import os
 import getpass
 from settings import settings
-from settings.exceptions import NoValue, InvalidPath
+from settings.exceptions import InvalidPath
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 BAT_FILE_PATH = os.path.join(BASE_PATH, "run.bat")
@@ -14,23 +14,30 @@ def setup():
     print("To skip a value enter nothing")
     for key, value in data.items():
         while True:
-            if "password" in key and value:
-                value = value[0] + "*" * (len(value)-1)
-            current = f" (current: {value})" if value else ""
 
-            if "password" in key:
-                i = getpass.getpass(f"Please enter your password{current} (password is not shown): ")
-            else:
-                current = f" (current: {value})" if value else ""
-                print(f"Please enter the value for {key}{current}: ", end="")
-                i = input().strip()
             try:
-                if not i and value:
+                if "password" in key:
+                    censored = value[0] + "*" * (len(value)-1)
+                    current = f" (current: {censored})" if value else ""
+                    i = getpass.getpass(f"Please enter your password{current} (password is not shown): ")
+                elif "use_" in key:
+                    current = f" (current: yes)" if value else " (current: no)"
+                    current += " (yes/no)"
+                    print(f"Please enter the value for {key}{current}: ", end="")
+                    i = input().strip()
+                    if not i:
+                        break
+                    i = True if "y" in i.lower() else False
+                else:
+                    current = f" (current: {value})" if value else ""
+                    print(f"Please enter the value for {key}{current}: ", end="")
+                    i = input().strip()
+                if i == "":
                     break
                 settings.test_key_value(key, i)
                 data[key] = i
                 break
-            except (NoValue, InvalidPath) as e:
+            except InvalidPath as e:
                 print("Please enter a valid value")
                 continue
 

@@ -1,6 +1,3 @@
-from settings import settings
-
-settings.init()
 from video_portal.constants import *
 
 
@@ -8,8 +5,6 @@ async def login(session, department, year, semester, course_id, pwd_username=Non
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 
     meta_url = course_url + ".series-metadata.json"
-
-    print(meta_url)
 
     async with session.get(meta_url) as response:
         meta_data = await response.json()
@@ -38,16 +33,3 @@ async def login(session, department, year, semester, course_id, pwd_username=Non
 
     return meta_data
 
-
-if __name__ == "__main__":
-    import aiohttp
-    import asyncio
-
-
-    async def main():
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            await login(session, "d-itet", "2020", "spring", "227-0002-00L", pwd_username="bie-20s", pwd_password="57KgsM2")
-
-
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
