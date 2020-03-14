@@ -1,13 +1,12 @@
 import video_portal
 from custom import analysis, informatik
 from downloader import *
-from settings.constants import SETTINGS_PATH
 
 import asyncio
 
 
 async def main():
-    if not os.path.exists(SETTINGS_PATH):
+    if not settings.check_if_set():
         raise ValueError("Please run 'python setup.py'")
 
     queue = asyncio.Queue()

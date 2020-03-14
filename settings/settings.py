@@ -36,6 +36,14 @@ class Settings(object):
                 value.load_value(file_value)
             setattr(Settings, value.name, property(value.get_value, value.set_value))
 
+    def check_if_set(self):
+        for value in self.values:
+            if value.is_active() and not value.is_set():
+                return False
+        return True
+
+
+
     def save(self):
         with open(SETTINGS_PATH, "w+") as f:
             for value in self.values:

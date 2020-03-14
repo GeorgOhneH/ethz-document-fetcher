@@ -22,6 +22,9 @@ class String(object):
     def is_active(self):
         return self.active_func()
 
+    def is_set(self):
+        return self._value != ""
+
 
 class Path(String):
     def get_value(self, obj=None):
@@ -53,3 +56,6 @@ class Bool(String):
 
     def load_value(self, value):
         self.set_value(None, value.lower())
+
+    def is_set(self):
+        return True
