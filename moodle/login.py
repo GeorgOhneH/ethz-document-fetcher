@@ -2,7 +2,7 @@ import aai_logon
 from .constants import *
 
 
-async def login_async(session, use_cache=True):
+async def login_async(session, use_cache=False):
     file_path = os.path.join(CACHE_PATH, "session.pickle")
 
     if use_cache and os.path.exists(file_path):

@@ -14,9 +14,9 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
     for episode in meta_data["episodes"]:
         ep_id = episode['id']
         name = episode["title"]
-        date = episode["createdAt"]
+        date_time = episode["createdAt"]
 
-        date, time = date.split("T")
+        date, time = date_time.split("T")
 
         file_name = f"{date} {name}.mp4"
 
@@ -26,11 +26,12 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
 
         async with session.get(meta_video_url) as response:
             meta_video_data = await response.json()
+
         try:
             url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
         except KeyError as e:
             print(meta_video_data)
-            print(video_url)
+            print(meta_data)
             raise e
         await queue.put({"path": os.path.join(base_path, file_name), "url": url, "absolute_path": True})
 
