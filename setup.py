@@ -13,26 +13,16 @@ def setup():
     print("To skip a value enter nothing")
     for value in settings.values:
         if not value.is_active():
-            break
+            continue
+
         while True:
             try:
-                if isinstance(value, setting_values.Password):
-                    if value.get_value():
-                        censored = value.get_value()[0] + "*" * (len(value.get_value())-1)
-                        current = f" (current: {censored})"
-                    else:
-                        current = ""
-                elif isinstance(value, setting_values.Bool):
-                    current = f" (current: yes)" if value.get_value() else " (current: no)"
-                    current += " (yes/no)"
-                    print(f"Please enter the value for {value.name}{current}: ", end="")
-                else:
-                    current = f" (current: {value.get_value()})" if value.get_value() else ""
-                    print(f"Please enter the value for {value.name}{current}: ", end="")
+                user_prompt = value.get_user_prompt()
 
                 if isinstance(value, setting_values.Password):
-                    i = getpass.getpass(f"Please enter your password{current} (password is not shown): ")
+                    i = getpass.getpass(user_prompt)
                 else:
+                    print(user_prompt, end="")
                     i = input().strip()
 
                 if i == "":

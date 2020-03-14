@@ -25,6 +25,10 @@ class String(object):
     def is_set(self):
         return self._value != ""
 
+    def get_user_prompt(self):
+        current = f" (current: {self.get_value()})" if self.get_value() else ""
+        return f"Please enter the {self.__class__.__name__.lower()} for {self.name}{current}: "
+
 
 class Path(String):
     def get_value(self, obj=None):
@@ -46,6 +50,15 @@ class Password(String):
     def set_value(self, obj, value):
         self._value = base64.b64encode(value.encode("utf-8")).decode("utf-8")
 
+    def get_user_prompt(self):
+        return f"Please enter your password{self._get_current()} (password is not shown): "
+
+    def _get_current(self):
+        if self.get_value():
+            censored = self.get_value()[0] + "*" * (len(self.get_value()) - 1)
+            return f" (current: {censored})"
+        return ""
+
 
 class Bool(String):
     def get_value(self, obj=None):
@@ -59,3 +72,9 @@ class Bool(String):
 
     def is_set(self):
         return True
+
+    def get_user_prompt(self):
+        string_value = "yes" if self.get_value() else "no"
+        current = f" (current: {string_value}) (yes/no)"
+
+        return f"Please enter the bool for {self.name}{current}: "

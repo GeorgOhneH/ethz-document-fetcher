@@ -42,8 +42,6 @@ class Settings(object):
                 return False
         return True
 
-
-
     def save(self):
         with open(SETTINGS_PATH, "w+") as f:
             for value in self.values:
