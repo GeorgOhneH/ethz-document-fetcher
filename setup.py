@@ -1,5 +1,7 @@
-import os
 import getpass
+import os
+
+import settings.values as setting_values
 from settings import settings
 from settings.exceptions import InvalidPath
 
@@ -8,40 +10,45 @@ BAT_FILE_PATH = os.path.join(BASE_PATH, "run.bat")
 
 
 def setup():
-    settings.init(raise_exception=False)
-    data = settings.get_settings()
-
     print("To skip a value enter nothing")
-    for key, value in data.items():
+    for value in settings.values:
+        if not value.is_active():
+            break
         while True:
-
             try:
-                if "password" in key:
-                    censored = value[0] + "*" * (len(value)-1)
-                    current = f" (current: {censored})" if value else ""
-                    i = getpass.getpass(f"Please enter your password{current} (password is not shown): ")
-                elif "use_" in key:
-                    current = f" (current: yes)" if value else " (current: no)"
+                if isinstance(value, setting_values.Password):
+                    if value.get_value():
+                        censored = value.get_value()[0] + "*" * (len(value.get_value())-1)
+                        current = f" (current: {censored})"
+                    else:
+                        current = ""
+                elif isinstance(value, setting_values.Bool):
+                    current = f" (current: yes)" if value.get_value() else " (current: no)"
                     current += " (yes/no)"
-                    print(f"Please enter the value for {key}{current}: ", end="")
-                    i = input().strip()
-                    if not i:
-                        break
-                    i = True if "y" in i.lower() else False
+                    print(f"Please enter the value for {value.name}{current}: ", end="")
                 else:
-                    current = f" (current: {value})" if value else ""
-                    print(f"Please enter the value for {key}{current}: ", end="")
+                    current = f" (current: {value.get_value()})" if value.get_value() else ""
+                    print(f"Please enter the value for {value.name}{current}: ", end="")
+
+                if isinstance(value, setting_values.Password):
+                    i = getpass.getpass(f"Please enter your password{current} (password is not shown): ")
+                else:
                     i = input().strip()
+
                 if i == "":
                     break
-                settings.test_key_value(key, i)
-                data[key] = i
+
+                if isinstance(value, setting_values.Bool):
+                    value._value = i
+                else:
+                    value.set_value(None, i)
                 break
+
             except InvalidPath as e:
-                print("Please enter a valid value")
+                print(str(e))
                 continue
 
-    settings.set_settings(data)
+    settings.save()
 
     with open(BAT_FILE_PATH, "w+") as f:
         f.write(f"python {os.path.join(BASE_PATH, 'main.py')}\n")

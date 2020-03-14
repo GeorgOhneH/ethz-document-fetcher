@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from settings import settings
 
 BASE_URL = "https://video.ethz.ch/lectures/"

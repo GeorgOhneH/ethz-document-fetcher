@@ -1,5 +1,3 @@
-import os
-
 import aai_logon
 from .constants import *
 

@@ -1,6 +1,6 @@
-import asyncio
 import os
 from pathlib import Path
+
 import aiohttp
 
 import moodle
@@ -11,8 +11,14 @@ async def download_files(session: aiohttp.ClientSession, queue):
     timeout = aiohttp.ClientTimeout(total=0)
     while True:
         item = await queue.get()
-        file_path = item.get("path").replace(":", ";").replace("/", " ").replace("|", "")
-        absolute_path = os.path.join(settings.base_path, file_path)
+        if item.get("absolute_path", False):
+            absolute_path = item.get("path")
+        else:
+            file_path = item.get("path")
+            absolute_path = os.path.join(settings.base_path, file_path)
+
+        absolute_path = absolute_path[:3] + absolute_path[3:].replace(":", ";").replace("/", " ").replace("|", "")
+
         url = item.get("url")
         Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
@@ -21,12 +27,12 @@ async def download_files(session: aiohttp.ClientSession, queue):
                 response.raise_for_status()
                 with open(absolute_path, 'wb') as f:
                     while True:
-                        chunk = await response.content.read(64)
+                        chunk = await response.content.read(256)
                         if not chunk:
                             break
                         f.write(chunk)
 
-            print("Added new file: {} in '{}'".format(os.path.basename(file_path), os.path.dirname(file_path)))
+            print(f"Added new file: {os.path.basename(absolute_path)} in '{os.path.dirname(absolute_path)}'")
 
         queue.task_done()
 

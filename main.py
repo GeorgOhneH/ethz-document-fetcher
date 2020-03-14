@@ -1,13 +1,15 @@
-from settings import settings
-import aiohttp
-import asyncio
-
+import video_portal
 from custom import analysis, informatik
 from downloader import *
-import video_portal
+from settings.constants import SETTINGS_PATH
+
+import asyncio
 
 
 async def main():
+    if not os.path.exists(SETTINGS_PATH):
+        raise ValueError("Please run 'python setup.py'")
+
     queue = asyncio.Queue()
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:

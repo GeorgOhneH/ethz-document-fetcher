@@ -1,6 +1,5 @@
-from video_portal.login import login
-
 from video_portal.constants import *
+from video_portal.login import login
 
 
 async def producer(session, queue, department, year, semester, course_id, pwd_username=None, pwd_password=None):
@@ -10,7 +9,7 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
 
     course_name = meta_data["title"]
 
-    base_path = os.path.join("video portal", course_name)
+    base_path = os.path.join(settings.video_portal_path, course_name)
 
     for episode in meta_data["episodes"]:
         ep_id = episode['id']
@@ -27,7 +26,11 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
 
         async with session.get(meta_video_url) as response:
             meta_video_data = await response.json()
-
-        url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
-        await queue.put({"path": os.path.join(base_path, file_name), "url": url})
+        try:
+            url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
+        except KeyError as e:
+            print(meta_video_data)
+            print(video_url)
+            raise e
+        await queue.put({"path": os.path.join(base_path, file_name), "url": url, "absolute_path": True})
 
