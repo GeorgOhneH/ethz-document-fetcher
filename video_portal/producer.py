@@ -27,6 +27,9 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
         async with session.get(meta_video_url) as response:
             meta_video_data = await response.json()
 
+        if not meta_video_data["authorized"]:
+            meta_video_data = await login(session, department, year, semester, course_id, pwd_username, pwd_password)
+
         try:
             url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
         except KeyError as e:

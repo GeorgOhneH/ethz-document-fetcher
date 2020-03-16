@@ -15,6 +15,7 @@ async def main():
         nus2 = moodle_producer(session, queue, 11838)
         physik1 = moodle_producer(session, queue, 12228)
         koma1 = moodle_producer(session, queue, 12301)
+        analysis2_moodle = moodle_producer(session, queue, 12611)
         analysis2 = custom_producer(analysis.parse_main_page, session, queue)
         informatik1 = custom_producer(informatik.parse_main_page, session, queue)
 
@@ -50,6 +51,7 @@ async def main():
             asyncio.create_task(nus2),
             asyncio.create_task(physik1),
             asyncio.create_task(koma1),
+            asyncio.create_task(analysis2_moodle),
             *producers_no_login,
             *producers_portal,
         ]

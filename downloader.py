@@ -23,6 +23,11 @@ async def download_files(session: aiohttp.ClientSession, queue):
         Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
         if not os.path.exists(absolute_path):
+            file_name = os.path.basename(absolute_path)
+            extension = file_name.split(".")[-1]
+            if extension.lower() in ["mp4", "webm", "avi", "mkv", "mov"]:
+                print(f"Starting to download {file_name}")
+
             async with session.get(url, timeout=timeout) as response:
                 response.raise_for_status()
                 with open(absolute_path, 'wb') as f:
@@ -32,7 +37,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
                             break
                         f.write(chunk)
 
-            print(f"Added new file: {os.path.basename(absolute_path)} in '{os.path.dirname(absolute_path)}'")
+            print(f"Added new file: {file_name} in '{os.path.dirname(absolute_path)}'")
 
         queue.task_done()
 

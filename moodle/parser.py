@@ -74,29 +74,50 @@ async def parse_folder(session, queue, instance, base_path, use_cache=False):
 
     folder_soup = BeautifulSoup(text, "lxml")
     folder_path = os.path.join(base_path, folder_name)
-    await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path, use_sub_folder_name=False)
+    await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)
 
 
 async def parse_sub_folders(queue, soup, folder_path, use_sub_folder_name=True):
-    sub_folders = filter(test_for_sub_folder, soup.find_all("span", class_="fp-filename"))
+    sub_folders = remove_duplicated(set(filter(test_for_sub_folder, soup.find_all("span", class_="fp-filename"))))
     for sub_folder in sub_folders:
         sub_folder_name = str(sub_folder.string)
         sub_folder_content = sub_folder.parent.next_sibling
         if sub_folder_content is None:
-            return
+            continue
 
-        sub_files = sub_folder_content.find_all("span", class_="fp-filename")
-        if sub_files is None:
-            return
+        sub_files_or_sub_sub_folders = sub_folder_content.find_all("span", class_="fp-filename")
+        if sub_files_or_sub_sub_folders is None:
+            continue
 
-        sub_folder_path = os.path.join(folder_path, sub_folder_name) if use_sub_folder_name else folder_path
+        sub_files = filter(test_for_not_sub_folder, sub_files_or_sub_sub_folders)
+
+        if sub_folder_name not in ["None"]:
+            sub_folder_path = os.path.join(folder_path, sub_folder_name)
+        else:
+            sub_folder_path = folder_path
 
         for sub_file in sub_files:
             sub_file_name = str(sub_file.string)
-            sub_url = sub_file.parent["href"]
-            await queue.put({"path": os.path.join(sub_folder_path, sub_file_name), "url": sub_url})
+            sub_url = sub_file.parent.get("href", None)
+            if sub_url is not None:
+                await queue.put({"path": os.path.join(sub_folder_path, sub_file_name), "url": sub_url})
+
+
+def remove_duplicated(tags):
+    to_be_removed = set([])
+    for tag in tags:
+        sub_folder_content = tag.parent.next_sibling
+        sub_sub_folders = filter(test_for_sub_folder, sub_folder_content.find_all("span", class_="fp-filename"))
+        if any([(x in tags) for x in sub_sub_folders]):
+            to_be_removed.add(tag)
+
+    return tags - to_be_removed
+
 
 
 def test_for_sub_folder(tag):
     return tag.previous_sibling.img["src"] == SUB_FOLDER_IMG
 
+
+def test_for_not_sub_folder(tag):
+    return tag.previous_sibling.img["src"] != SUB_FOLDER_IMG
