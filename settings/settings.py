@@ -18,8 +18,9 @@ class Settings(object):
             base_path,
             video_portal,
             Path(name="video_portal_path", active_func=video_portal.get_value),
-            String(name="portal_nus2_pwd", active_func=video_portal.get_value),
-            String(name="portal_inf1_pwd", active_func=video_portal.get_value),
+            String(name="portal_nus2_2020_password", active_func=video_portal.get_value),
+            String(name="portal_nus2_2019_password", active_func=video_portal.get_value),
+            String(name="portal_inf1_password", active_func=video_portal.get_value),
         ]
         self.init()
 

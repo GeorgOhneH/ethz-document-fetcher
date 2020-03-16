@@ -1,7 +1,7 @@
 from video_portal.constants import *
 
 
-async def login(session, department, year, semester, course_id, pwd_username=None, pwd_password=None):
+async def login(session, department, year, semester, course_id, pwd_username=None, pwd_password=None, depth=0):
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 
     meta_url = course_url + ".series-metadata.json"
@@ -11,6 +11,9 @@ async def login(session, department, year, semester, course_id, pwd_username=Non
 
     if meta_data["authorized"]:
         return meta_data
+
+    if depth >= 4:
+        raise Exception("could not log in after 4 tries")
 
     protection = meta_data["protection"]
 
@@ -31,5 +34,5 @@ async def login(session, department, year, semester, course_id, pwd_username=Non
         async with session.post(series_url, data=pwd_data) as response:
             await response.text()
 
-    return meta_data
+    return await login(session, department, year, semester, course_id, pwd_username=pwd_username, pwd_password=pwd_password, depth=depth+1)
 

@@ -82,7 +82,12 @@ async def parse_sub_folders(queue, soup, folder_path, use_sub_folder_name=True):
     for sub_folder in sub_folders:
         sub_folder_name = str(sub_folder.string)
         sub_folder_content = sub_folder.parent.next_sibling
+        if sub_folder_content is None:
+            return
+
         sub_files = sub_folder_content.find_all("span", class_="fp-filename")
+        if sub_files is None:
+            return
 
         sub_folder_path = os.path.join(folder_path, sub_folder_name) if use_sub_folder_name else folder_path
 
