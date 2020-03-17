@@ -2,6 +2,7 @@ import asyncio
 import re
 
 from bs4 import BeautifulSoup
+import bs4
 
 import one_drive
 from utils import *
@@ -10,7 +11,10 @@ import polybox
 
 
 async def parse_main_page(session, queue, html, use_cache):
-    soup = BeautifulSoup(html, "lxml")
+    try:
+        soup = BeautifulSoup(html, "lxml")
+    except bs4.FeatureNotFound:
+        soup = BeautifulSoup(html, "html.parser")
 
     header = soup.find("div", class_="page-header-headings")
     header_name = str(header.h1.string)
@@ -77,7 +81,10 @@ async def parse_folder(session, queue, instance, base_path, use_cache=False):
     async with session.get(href) as response:
         text = await response.text()
 
-    folder_soup = BeautifulSoup(text, "lxml")
+    try:
+        folder_soup = BeautifulSoup(text, "lxml")
+    except bs4.FeatureNotFound:
+        folder_soup = BeautifulSoup(text, "html.parser")
     folder_path = os.path.join(base_path, folder_name)
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)
 
