@@ -18,7 +18,9 @@ async def download_files(session: aiohttp.ClientSession, queue):
             file_path = item.get("path")
             absolute_path = os.path.join(settings.base_path, file_path)
 
-        absolute_path = absolute_path[:3] + absolute_path[3:].replace(":", ";").replace("/", " ").replace("|", "")
+        drive, path = os.path.splitdrive(absolute_path)
+
+        absolute_path = os.path.join(drive, path.replace(":", ";").replace("|", ""))
 
         url = item.get("url")
         Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
@@ -51,5 +53,3 @@ async def moodle_producer(session, queue, moodle_id, use_cache=False):
 
 async def custom_producer(func, session, queue, **kwargs):
     return await func(session, queue, **kwargs)
-
-

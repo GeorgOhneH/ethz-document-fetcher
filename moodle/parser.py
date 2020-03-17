@@ -27,7 +27,7 @@ async def parse_main_page(session, queue, html, use_cache):
 
 async def parse_sections(session, queue, section, header_name, use_cache):
     section_name = str(section["aria-label"])
-    base_path = os.path.join(header_name, section_name)
+    base_path = os.path.join(header_name.replace("/", " "), section_name.replace("/", " "))
 
     instances = section.find_all("div", class_="activityinstance")
 
@@ -41,7 +41,7 @@ async def parse_sections(session, queue, section, header_name, use_cache):
         if img == PDF_IMG:
             file_name = str(instance.a.span.contents[0]) + ".pdf"
             url = instance.a["href"] + "&redirect=1"
-            await queue.put({"path": os.path.join(base_path, file_name), "url": url})
+            await queue.put({"path": os.path.join(base_path, file_name.replace("/", " ")), "url": url})
 
         elif img == FOLDER_IMG:
             await parse_folder(session, queue, instance, base_path, use_cache)
@@ -54,11 +54,11 @@ async def parse_sections(session, queue, section, header_name, use_cache):
             driver_url = await check_url_reference(session, url, url_reference_path)
 
             if "onedrive.live.com" in driver_url:
-                await one_drive.collector(session, queue, driver_url, base_path + f"; {name}")
+                await one_drive.collector(session, queue, driver_url, base_path + f"; {name.replace('/', ' ')}")
 
             elif "polybox" in driver_url:
                 poly_id = driver_url.split("/")[-1]
-                await polybox.producer(session, queue, poly_id, os.path.join(base_path, name))
+                await polybox.producer(session, queue, poly_id, os.path.join(base_path, name.replace("/", " ")))
 
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 
@@ -67,7 +67,7 @@ async def parse_folder(session, queue, instance, base_path, use_cache=False):
     folder_name = str(instance.a.span.contents[0])
     href = instance.a["href"]
 
-    file_name = (base_path + ".txt").replace(":", " ").replace("/", " ")
+    file_name = (base_path + ".txt")
     file_path = os.path.join(CACHE_PATH, file_name)
 
     if use_cache and os.path.exists(file_path):
@@ -85,7 +85,7 @@ async def parse_folder(session, queue, instance, base_path, use_cache=False):
         folder_soup = BeautifulSoup(text, "lxml")
     except bs4.FeatureNotFound:
         folder_soup = BeautifulSoup(text, "html.parser")
-    folder_path = os.path.join(base_path, folder_name)
+    folder_path = os.path.join(base_path, folder_name.replace("/", " "))
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)
 
 
@@ -104,7 +104,7 @@ async def parse_sub_folders(queue, soup, folder_path, use_sub_folder_name=True):
         sub_files = filter(test_for_not_sub_folder, sub_files_or_sub_sub_folders)
 
         if sub_folder_name not in ["None"]:
-            sub_folder_path = os.path.join(folder_path, sub_folder_name)
+            sub_folder_path = os.path.join(folder_path, sub_folder_name.replace("/", " "))
         else:
             sub_folder_path = folder_path
 
@@ -112,7 +112,7 @@ async def parse_sub_folders(queue, soup, folder_path, use_sub_folder_name=True):
             sub_file_name = str(sub_file.string)
             sub_url = sub_file.parent.get("href", None)
             if sub_url is not None:
-                await queue.put({"path": os.path.join(sub_folder_path, sub_file_name), "url": sub_url})
+                await queue.put({"path": os.path.join(sub_folder_path, sub_file_name.replace("/", " ")), "url": sub_url})
 
 
 def remove_duplicated(tags):

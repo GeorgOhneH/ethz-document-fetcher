@@ -16,7 +16,7 @@ async def collector(session, queue, driver_url, base_path):
         item_data = await response.json()
 
     for item in item_data["value"]:
-        path = os.path.join(base_path, item["name"])
+        path = os.path.join(base_path, item["name"].replace("/", " "))
         if item.get("@content.downloadUrl", None) is not None:
             await queue.put({"path": path, "url": item["@content.downloadUrl"]})
 
