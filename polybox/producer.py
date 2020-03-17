@@ -55,11 +55,9 @@ def go_down_tree(tree, *args, to_text=False):
     return tree
 
 
-async def main():
-    async with aiohttp.ClientSession(raise_for_status=True) as session:
-        await producer(session, asyncio.Queue(), "4YGUCHIXorTsvVL")
-
-
 if __name__ == "__main__":
+    async def main():
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            await producer(session, asyncio.Queue(), "4YGUCHIXorTsvVL")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())

@@ -32,15 +32,18 @@ async def main():
                                                pwd_username="bie-20s", pwd_password=settings.portal_nus2_2020_password)
             v_nus_2019 = video_portal.producer(session, queue, "d-itet", "2019", "spring", "227-0002-00L",
                                                pwd_username="bie-19s", pwd_password=settings.portal_nus2_2019_password)
-            v_inf = video_portal.producer(session, queue, "d-infk", "2020", "spring", "252-0848-00L",
-                                          pwd_username="scw-20s", pwd_password=settings.portal_inf1_password)
+            v_inf_2020 = video_portal.producer(session, queue, "d-infk", "2020", "spring", "252-0848-00L",
+                                          pwd_username="scw-20s", pwd_password=settings.portal_inf1_2020_password)
+            v_inf_2019 = video_portal.producer(session, queue, "d-infk", "2019", "autumn", "252-0847-00L",
+                                          pwd_username="scw-19w", pwd_password=settings.portal_inf1_2019_password)
             v_analysis = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0232-10L")
             v_koma = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0302-10L")
 
             producers_portal = [
                 asyncio.create_task(v_nus_2020),
                 asyncio.create_task(v_nus_2019),
-                asyncio.create_task(v_inf),
+                asyncio.create_task(v_inf_2020),
+                asyncio.create_task(v_inf_2019),
                 asyncio.create_task(v_analysis),
                 asyncio.create_task(v_koma),
             ]
