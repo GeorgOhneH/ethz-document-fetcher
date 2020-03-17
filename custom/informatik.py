@@ -1,7 +1,7 @@
 from .utils import validate_url
 
 
-async def parse_main_page(session, queue):
+async def parse_main_page(session, queue, **kwargs):
 
     BASE_URL = "http://lec.inf.ethz.ch/itet/informatik1/2020/"
 
@@ -11,4 +11,4 @@ async def parse_main_page(session, queue):
         "Exercise": "dl/exercises/exercises{:02d}.pdf".format,
     }
 
-    await validate_url(session, queue, links_to_pdf, BASE_URL)
+    await validate_url(session, queue, links_to_pdf, BASE_URL, **kwargs)

@@ -3,13 +3,13 @@ import os
 from bs4 import BeautifulSoup
 
 
-async def validate_url(session, queue, links_to_pdf, base_url):
-    async with session.get(base_url) as response:
+async def validate_url(session, queue, links_to_pdf, base_url, folder_name=None, **kwargs):
+    async with session.get(base_url, **kwargs) as response:
         html = await response.text()
 
     soup = BeautifulSoup(html, "lxml")
 
-    header_name = str(soup.title.string)
+    header_name = str(soup.title.string) if folder_name is None else folder_name
 
     all_urls_from_site = set([])
 
@@ -25,4 +25,4 @@ async def validate_url(session, queue, links_to_pdf, base_url):
                 continue
 
             item_path = os.path.join(path, name + f" {i}.pdf")
-            await queue.put({"path": item_path, "url": base_url + real_url})
+            await queue.put({"path": item_path, "url": base_url + real_url, "kwargs": kwargs})

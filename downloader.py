@@ -11,6 +11,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
     timeout = aiohttp.ClientTimeout(total=0)
     while True:
         item = await queue.get()
+        kwargs = item.get("kwargs", {})
         if item.get("absolute_path", False):
             absolute_path = item.get("path")
         else:
@@ -28,7 +29,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
             if extension.lower() in ["mp4", "webm", "avi", "mkv", "mov"]:
                 print(f"Starting to download {file_name}")
 
-            async with session.get(url, timeout=timeout) as response:
+            async with session.get(url, timeout=timeout, **kwargs) as response:
                 response.raise_for_status()
                 with open(absolute_path, 'wb') as f:
                     while True:
@@ -48,7 +49,7 @@ async def moodle_producer(session, queue, moodle_id, use_cache=False):
     return await moodle.parse_main_page(session, queue, text, use_cache)
 
 
-async def custom_producer(func, session, queue):
-    return await func(session, queue)
+async def custom_producer(func, session, queue, **kwargs):
+    return await func(session, queue, **kwargs)
 
 

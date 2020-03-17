@@ -1,6 +1,7 @@
 import video_portal
 from custom import analysis, informatik
 from downloader import *
+from aiohttp import BasicAuth
 
 import asyncio
 
@@ -16,15 +17,15 @@ async def main():
         physik1 = moodle_producer(session, queue, 12228)
         koma1 = moodle_producer(session, queue, 12301)
         analysis2_moodle = moodle_producer(session, queue, 12611)
-        analysis2 = custom_producer(analysis.parse_main_page, session, queue)
-        informatik1 = custom_producer(informatik.parse_main_page, session, queue)
+        analysis2 = analysis.parse_main_page(session, queue, folder_name="401-0232-10L Analysis 2 FS2020")
+        informatik1 = informatik.parse_main_page(session, queue,
+                                                 auth=BasicAuth(settings.username, settings.password))
 
         if settings.use_video_portal:
-
             v_nus_2020 = video_portal.producer(session, queue, "d-itet", "2020", "spring", "227-0002-00L",
-                                          pwd_username="bie-20s", pwd_password=settings.portal_nus2_2020_password)
+                                               pwd_username="bie-20s", pwd_password=settings.portal_nus2_2020_password)
             v_nus_2019 = video_portal.producer(session, queue, "d-itet", "2019", "spring", "227-0002-00L",
-                                          pwd_username="bie-19s", pwd_password=settings.portal_nus2_2019_password)
+                                               pwd_username="bie-19s", pwd_password=settings.portal_nus2_2019_password)
             v_inf = video_portal.producer(session, queue, "d-infk", "2020", "spring", "252-0848-00L",
                                           pwd_username="scw-20s", pwd_password=settings.portal_inf1_password)
             v_analysis = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0232-10L")
