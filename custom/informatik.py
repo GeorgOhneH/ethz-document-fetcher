@@ -1,13 +1,12 @@
-from .utils import validate_url
+from custom.utils import validate_url
 
 
 async def parse_main_page(session, queue, **kwargs):
-
-    BASE_URL = "http://lec.inf.ethz.ch/itet/informatik1/2020/"
+    BASE_URL = "https://lec.inf.ethz.ch/itet/informatik1/2020/"
 
     links_to_pdf = {
-        "Overlays": lambda x: "slides/lecture{}.pdf".format(x+1),
-        "Handout": lambda x: "slides/lecture{}.handout.pdf".format(x+1),
+        "Overlays": lambda x: "slides/lecture{}.pdf".format(x + 1),
+        "Handout": lambda x: "slides/lecture{}.handout.pdf".format(x + 1),
         "Exercise": "dl/exercises/exercises{:02d}.pdf".format,
     }
 

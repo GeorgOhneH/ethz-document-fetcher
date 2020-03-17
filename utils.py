@@ -1,6 +1,16 @@
 import json
 import os
 from pathlib import Path
+import base64
+from settings import settings
+
+
+def get_basic_auth_header():
+    auth_string = (settings.username + ':' + settings.password).encode("utf-8")
+    auth_string = base64.b64encode(auth_string).decode("utf-8")
+    return {
+        "Authorization": f"Basic {auth_string}",
+    }
 
 
 async def check_url_reference(session, url, url_reference_path):
