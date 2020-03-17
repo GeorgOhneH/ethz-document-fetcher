@@ -3,9 +3,10 @@ import re
 
 from bs4 import BeautifulSoup
 
-from one_drive import collector
+import one_drive
 from utils import *
 from .constants import *
+import polybox
 
 
 async def parse_main_page(session, queue, html, use_cache):
@@ -49,7 +50,11 @@ async def parse_sections(session, queue, section, header_name, use_cache):
             driver_url = await check_url_reference(session, url, url_reference_path)
 
             if "onedrive.live.com" in driver_url:
-                await collector(session, queue, driver_url, base_path + f"; {name}")
+                await one_drive.collector(session, queue, driver_url, base_path + f"; {name}")
+
+            elif "polybox" in driver_url:
+                poly_id = driver_url.split("/")[-1]
+                await polybox.producer(session, queue, poly_id, os.path.join(base_path, name))
 
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 
@@ -112,7 +117,6 @@ def remove_duplicated(tags):
             to_be_removed.add(tag)
 
     return tags - to_be_removed
-
 
 
 def test_for_sub_folder(tag):
