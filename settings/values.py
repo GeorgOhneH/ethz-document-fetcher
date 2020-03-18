@@ -37,6 +37,8 @@ class Path(String):
     def set_value(self, obj, value):
         if value and not os.path.exists(value):
             raise InvalidPath("please enter a valid path, which exists")
+        if value and not os.path.isabs(value):
+            raise InvalidPath("please enter an absolute path")
         self._value = value
 
     def load_value(self, value):
