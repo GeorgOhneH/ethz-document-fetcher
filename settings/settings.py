@@ -22,6 +22,7 @@ class Settings(object):
             String(name="portal_nus2_2019_password", active_func=video_portal.get_value),
             String(name="portal_inf1_2020_password", active_func=video_portal.get_value),
             String(name="portal_inf1_2019_password", active_func=video_portal.get_value),
+            String(name="nus2_poly_uebung", active_func=video_portal.get_value),
         ]
         self.init()
 

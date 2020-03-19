@@ -12,10 +12,10 @@ async def download_files(session: aiohttp.ClientSession, queue):
     while True:
         item = await queue.get()
         kwargs = item.get("kwargs", {})
-        if item.get("absolute_path", False):
-            absolute_path = item.get("path")
+        file_path = item.get("path")
+        if os.path.isabs(file_path):
+            absolute_path = file_path
         else:
-            file_path = item.get("path")
             absolute_path = os.path.join(settings.base_path, file_path)
 
         drive, path = os.path.splitdrive(absolute_path)

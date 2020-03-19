@@ -19,13 +19,12 @@ async def main():
         koma1 = moodle_producer(session, queue, 12301)
         analysis2_moodle = moodle_producer(session, queue, 12611)
         analysis2 = analysis.parse_main_page(session, queue, folder_name="401-0232-10L Analysis 2 FS2020")
-        informatik1 = informatik.parse_main_page(session, queue,
-                                                 auth=BasicAuth(settings.username, settings.password))
+        informatik1 = informatik.parse_main_page(session, queue, auth=BasicAuth(settings.username, settings.password))
 
         poly_nus_path = os.path.join("227-0002-00L Netzwerke und Schaltungen II FS2020", "Daniel Biek Polybox")
-        poly_nus = polybox.producer(session, queue, "4YGUCHIXorTsvVL", poly_nus_path)
+        poly_nus = polybox.producer(queue, "4YGUCHIXorTsvVL", poly_nus_path)
         poly_analysis_path = os.path.join("401-0232-10L Analysis 2 FS2020", "Jonas Wahlen Polybox")
-        poly_analysis = polybox.producer(session, queue, "C8LWUyvLRUbh3zX", poly_analysis_path)
+        poly_analysis = polybox.producer(queue, "C8LWUyvLRUbh3zX", poly_analysis_path)
 
         if settings.use_video_portal:
             v_nus_2020 = video_portal.producer(session, queue, "d-itet", "2020", "spring", "227-0002-00L",
@@ -39,6 +38,10 @@ async def main():
             v_analysis = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0232-10L")
             v_koma = video_portal.producer(session, queue, "d-math", "2020", "spring", "401-0302-10L")
 
+            poly_nus_uebung_path = os.path.join(settings.video_portal_path, "NuS2 Übungen")
+            poly_nus_uebung = polybox.producer(queue, "SU2lkCtdoLH3X1w", poly_nus_uebung_path,
+                                               password=settings.nus2_poly_uebung)
+
             producers_portal = [
                 asyncio.create_task(v_nus_2020),
                 asyncio.create_task(v_nus_2019),
@@ -46,6 +49,7 @@ async def main():
                 asyncio.create_task(v_inf_2019),
                 asyncio.create_task(v_analysis),
                 asyncio.create_task(v_koma),
+                asyncio.create_task(poly_nus_uebung),
             ]
         else:
             producers_portal = []

@@ -37,4 +37,4 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
                                       meta_video_url, pwd_username, pwd_password)
 
         url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
-        await queue.put({"path": os.path.join(base_path, file_name), "url": url, "absolute_path": True})
+        await queue.put({"path": os.path.join(base_path, file_name), "url": url})

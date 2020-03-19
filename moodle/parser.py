@@ -58,7 +58,7 @@ async def parse_sections(session, queue, section, header_name, use_cache):
 
             elif "polybox" in driver_url:
                 poly_id = driver_url.split("/")[-1]
-                await polybox.producer(session, queue, poly_id, os.path.join(base_path, name.replace("/", " ")))
+                await polybox.producer(queue, poly_id, os.path.join(base_path, name.replace("/", " ")))
 
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 
@@ -119,6 +119,9 @@ def remove_duplicated(tags):
     to_be_removed = set([])
     for tag in tags:
         sub_folder_content = tag.parent.next_sibling
+        if sub_folder_content is None:
+            to_be_removed.add(tag)
+            continue
         sub_sub_folders = filter(test_for_sub_folder, sub_folder_content.find_all("span", class_="fp-filename"))
         if any([(x in tags) for x in sub_sub_folders]):
             to_be_removed.add(tag)
