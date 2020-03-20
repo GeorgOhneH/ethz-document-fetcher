@@ -43,13 +43,3 @@ async def download_files(session: aiohttp.ClientSession, queue):
             print(f"Added new file: {file_name} in '{os.path.dirname(absolute_path)}'")
 
         queue.task_done()
-
-
-async def moodle_producer(session, queue, moodle_id, use_cache=False):
-    async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={moodle_id}") as response:
-        text = await response.read()
-    return await moodle.parse_main_page(session, queue, text, use_cache)
-
-
-async def custom_producer(func, session, queue, **kwargs):
-    return await func(session, queue, **kwargs)

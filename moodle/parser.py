@@ -8,7 +8,7 @@ from utils import *
 from .constants import *
 
 
-async def parse_main_page(session, queue, html, use_cache):
+async def parse_main_page(session, queue, html):
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
     header = soup.find("div", class_="page-header-headings")
@@ -16,11 +16,11 @@ async def parse_main_page(session, queue, html, use_cache):
 
     sections = soup.find_all("li", id=re.compile("section-([0-9]+)"))
 
-    coroutines = [parse_sections(session, queue, section, header_name, use_cache) for section in sections]
+    coroutines = [parse_sections(session, queue, section, header_name) for section in sections]
     await asyncio.gather(*coroutines)
 
 
-async def parse_sections(session, queue, section, header_name, use_cache):
+async def parse_sections(session, queue, section, header_name):
     section_name = str(section["aria-label"])
     base_path = safe_path_join(header_name, section_name)
 
@@ -39,7 +39,7 @@ async def parse_sections(session, queue, section, header_name, use_cache):
             await queue.put({"path": safe_path_join(base_path, file_name), "url": url})
 
         elif img == FOLDER_IMG:
-            await parse_folder(session, queue, instance, base_path, use_cache)
+            await parse_folder(session, queue, instance, base_path)
 
         elif img == EXTERNAL_LINK_IMG:
             url = instance.a["href"] + "&redirect=1"
@@ -58,20 +58,9 @@ async def parse_sections(session, queue, section, header_name, use_cache):
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 
 
-async def parse_folder(session, queue, instance, base_path, use_cache=False):
+async def parse_folder(session, queue, instance, base_path):
     folder_name = str(instance.a.span.contents[0])
     href = instance.a["href"]
-
-    file_name = (base_path + ".txt")
-    file_path = os.path.join(CACHE_PATH, file_name)
-
-    if use_cache and os.path.exists(file_path):
-        cached_href = load_txt(file_path)
-        if cached_href == str(href):
-            return
-
-    if use_cache:
-        save_txt(href, file_path)
 
     async with session.get(href) as response:
         text = await response.text()

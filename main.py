@@ -5,6 +5,7 @@ from aiohttp import BasicAuth
 import ilias
 import polybox
 import video_portal
+import moodle
 from custom import analysis, informatik
 from downloader import *
 
@@ -16,12 +17,12 @@ async def main():
     queue = asyncio.Queue()
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
-        nus2 = moodle_producer(session, queue, 11838)
-        physik1 = moodle_producer(session, queue, 12228)
+        nus2 = moodle.producer(session, queue, 11838)
+        physik1 = moodle.producer(session, queue, 12228)
         physik1_poly = polybox.producer(queue, "iSYMs1nnDAzDWtU",
                                         base_path=os.path.join("Physik 1 D-ITET (FS20)", "polybox"))
-        koma1 = moodle_producer(session, queue, 12301)
-        analysis2_moodle = moodle_producer(session, queue, 12611)
+        koma1 = moodle.producer(session, queue, 12301)
+        analysis2_moodle = moodle.producer(session, queue, 12611)
         ilias_path = os.path.join("401-0232-10L Analysis 2 FS2020", "ilias")
         analysis2_ilias = ilias.producer(session, queue, "187834", base_path=ilias_path)
         analysis2 = analysis.parse_main_page(session, queue, folder_name="401-0232-10L Analysis 2 FS2020")
