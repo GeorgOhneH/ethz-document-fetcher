@@ -17,6 +17,8 @@ async def main():
     async with aiohttp.ClientSession(raise_for_status=True) as session:
         nus2 = moodle_producer(session, queue, 11838)
         physik1 = moodle_producer(session, queue, 12228)
+        physik1_poly = polybox.producer(queue, "iSYMs1nnDAzDWtU",
+                                        base_path=os.path.join("Physik 1 D-ITET (FS20)", "polybox"))
         koma1 = moodle_producer(session, queue, 12301)
         analysis2_moodle = moodle_producer(session, queue, 12611)
         ilias_path = os.path.join("401-0232-10L Analysis 2 FS2020", "ilias")
@@ -62,6 +64,7 @@ async def main():
             asyncio.create_task(informatik1),
             asyncio.create_task(poly_nus),
             asyncio.create_task(poly_analysis),
+            asyncio.create_task(physik1_poly),
         ]
 
         await moodle.login(session)
