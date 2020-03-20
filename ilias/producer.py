@@ -22,7 +22,7 @@ async def search_tree(session, queue, fold_id, base_path):
     async with session.get(url) as response:
         html = await response.text()
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
     rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})
     for row in rows:
         content = row.find("div", attrs={"class": "ilContainerListItemContent"})
