@@ -1,13 +1,16 @@
 import asyncio
+import os
 
+import aiohttp
 from aiohttp import BasicAuth
 
 import ilias
 import polybox
 import video_portal
 import moodle
+from settings import settings
 from custom import analysis, informatik
-from downloader import *
+from downloader import download_files
 
 
 async def main():
