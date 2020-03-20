@@ -1,13 +1,13 @@
-import aiohttp
-import re
-from settings import settings
-import os
 import asyncio
+import re
+
+import aiohttp
+from bs4 import BeautifulSoup
+
+from constants import *
 from ilias.constants import *
 from ilias.login import login
-import aai_logon
-from constants import *
-from bs4 import BeautifulSoup
+from utils import *
 
 
 async def producer(session, queue, fold_id, base_path=None):
@@ -29,7 +29,7 @@ async def search_tree(session, queue, fold_id, base_path):
         link = content.find("a")
         href = link["href"]
         name = str(link.string)
-        path = os.path.join(base_path, name.replace("/", " "))
+        path = safe_path_join(base_path, name)
         if "download" in href:
             extension = str(content.find("span", attrs={"class": "il_ItemProperty"}).string).strip()
             await queue.put({"url": href, "path": f"{path}.{extension}"})

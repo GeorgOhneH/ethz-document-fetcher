@@ -1,14 +1,15 @@
-import xml.etree.ElementTree as ET
-import base64
-from polybox.constants import *
 import asyncio
-import aiohttp
+import base64
 import copy
 import os
-from urllib.parse import unquote, quote
-from pathlib import PurePath
 import re
-import time
+import xml.etree.ElementTree as ET
+from pathlib import PurePath
+from urllib.parse import unquote, quote
+
+import aiohttp
+
+from polybox.constants import *
 
 
 async def producer(queue, poly_id, base_path=None, password=None):

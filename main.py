@@ -1,11 +1,12 @@
+import asyncio
+
+from aiohttp import BasicAuth
+
+import ilias
+import polybox
 import video_portal
 from custom import analysis, informatik
-import polybox
 from downloader import *
-from aiohttp import BasicAuth
-import ilias
-
-import asyncio
 
 
 async def main():

@@ -1,5 +1,4 @@
 from video_portal.constants import *
-import aiohttp
 
 
 async def login(session, department, year, semester, course_id, meta_video_url,

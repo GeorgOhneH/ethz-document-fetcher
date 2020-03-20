@@ -1,7 +1,6 @@
+from utils import safe_path_join
 from video_portal.constants import *
 from video_portal.login import login
-import aiohttp
-import asyncio
 
 
 async def producer(session, queue, department, year, semester, course_id, pwd_username=None, pwd_password=None):
@@ -14,7 +13,7 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
 
     course_name = meta_data["title"]
 
-    base_path = os.path.join(settings.video_portal_path, course_name)
+    base_path = safe_path_join(settings.video_portal_path, course_name)
 
     downloaded_episodes = os.listdir(base_path)
 
@@ -37,4 +36,4 @@ async def producer(session, queue, department, year, semester, course_id, pwd_us
                                       meta_video_url, pwd_username, pwd_password)
 
         url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
-        await queue.put({"path": os.path.join(base_path, file_name), "url": url})
+        await queue.put({"path": safe_path_join(base_path, file_name), "url": url})

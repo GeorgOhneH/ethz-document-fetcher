@@ -1,5 +1,5 @@
-from ilias.constants import *
 import aai_logon
+from ilias.constants import *
 
 
 async def login(session):

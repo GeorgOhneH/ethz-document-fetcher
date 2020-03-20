@@ -1,7 +1,8 @@
+import base64
 import json
 import os
 from pathlib import Path
-import base64
+
 from settings import settings
 
 
@@ -47,3 +48,11 @@ def load_url_reference(path):
 def save_url_reference(url_reference, path):
     with open(path, "w+") as f:
         return json.dump(url_reference, f)
+
+
+def safe_path_join(path, *paths):
+    return os.path.join(path, *[x.replace("/", " ") for x in paths])
+
+
+def make_string_path_safe(string):
+    return string.replace("/", " ")
