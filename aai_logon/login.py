@@ -5,11 +5,13 @@ from aiohttp import ClientSession
 from .constants import *
 
 
-async def login_async(session: ClientSession, response_text: str):
-    jsessionid = re.search("jsessionid=.*=e1s1", response_text).group()
+async def login(session: ClientSession, text: str, sam_url):
+    if "you must press the Continue button once to proceed" not in text:
 
-    async with session.post(f"{SSO_URL};{jsessionid}", data=SSO_DATA) as resp:
-        text = await resp.text()
+        jsessionid = re.search("jsessionid=.*=e1s1", text).group()
+
+        async with session.post(f"{SSO_URL};{jsessionid}", data=SSO_DATA) as resp:
+            text = await resp.text()
 
     try:
         match = re.search("""name="RelayState" value="ss&#x3a;mem&#x3a;(.*)"/>""", text)
@@ -25,6 +27,6 @@ async def login_async(session: ClientSession, response_text: str):
         "SAMLResponse": sam,
     }
 
-    async with session.post(f"{SAML_URL}", data=saml_data) as resp:
+    async with session.post(f"{sam_url}", data=saml_data) as resp:
         resp.raise_for_status()
         await resp.text()

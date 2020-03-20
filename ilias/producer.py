@@ -1,76 +1,49 @@
-import requests
+import aiohttp
 import re
-import settings
+from settings import settings
+import os
+import asyncio
+from ilias.constants import *
+from ilias.login import login
+import aai_logon
+from constants import *
+from bs4 import BeautifulSoup
 
 
-def get_technishce_mechanik():
-    session = requests.Session()
+async def producer(session, queue, fold_id, base_path=None):
+    if base_path is None:
+        base_path = "ilias"
+    await search_tree(session, queue, fold_id, base_path)
 
-    response = session.get("https://ilias-app2.let.ethz.ch/login.php")
-    response = session.get("https://ilias-app2.let.ethz.ch/shib_login.php?target=")
-    response = session.get(response.url)
 
-    data = {
-        "user_idp": "https://aai-logon.ethz.ch/idp/shibboleth",
-        "Select": "Auswählen",
-    }
+async def search_tree(session, queue, fold_id, base_path):
+    url = GOTO_URL + fold_id
 
-    r = session.post(response.url, data=data)
+    async with session.get(url) as response:
+        html = await response.text()
 
-    match = re.search("jsessionid=.*=e1s1", r.text)
-
-    data = {
-        ":formid": "_content_main_de_jcr_content_par_start",
-        ":formstart": "/content/main/de/jcr:content/par/start",
-        "_charset_": "UTF-8",
-        "form_flavour": "eth_form",
-        "j_username": settings.username,
-        "j_password": settings.password,
-        "_eventId_proceed": "",
-    }
-
-    r = session.post("https://aai-logon.ethz.ch/idp/profile/SAML2/Redirect/SSO;{}".format(match.group()), data=data)
-
-    match = re.search("""name="RelayState" value="(.*)"/>""", r.text)
-    ssm = match.group(1)
-
-    match = re.search("""name="SAMLResponse" value="(.*)"/>""", r.text)
-    sam = match.group(1)
-    ssm = ssm[17:]
-    data = {
-        "RelayState": "ss:mem:{}".format(ssm),
-        "SAMLResponse": sam,
-    }
-
-    r = session.post("https://ilias-app2.let.ethz.ch/Shibboleth.sso/SAML2/POST", data=data)
-    r = session.get(
-        "https://ilias-app2.let.ethz.ch/ilias.php?ref_id=175238&cmd=view&cmdClass=ilrepositorygui&cmdNode=7z&baseClass=ilRepositoryGUI")
-
-    match = re.findall(
-        """<h4 class="il_ContainerItemTitle"><a href="(.*)" class="il_ContainerItemTitle"  >(Serie [0-9]+)</a></h4>""",
-        r.text)
-    resu = {}
-    for serie, i in match:
-        rr = {}
-        serie = serie.replace('amp;', "")
-        r = session.get("https://ilias-app2.let.ethz.ch/{}".format(serie))
-        match = re.findall(
-            """<h4 class="il_ContainerItemTitle"><a href="(.*)" class="il_ContainerItemTitle".*>(.*)</a></h4>""",
-            r.text)
-        for url, name in match:
-            if name != "Lösungen":
-                rr[name] = url
-            else:
-                url = url.replace('amp;', "")
-                r = session.get("https://ilias-app2.let.ethz.ch/{}".format(url))
-                match = re.findall(
-                    """<h4 class="il_ContainerItemTitle"><a href="(.*)" class="il_ContainerItemTitle".*>(.*)</a></h4>""",
-                    r.text)
-                for url2, name2 in match:
-                    rr[name2] = url2
-        resu[i] = rr
-    return {"uebungen": resu, }, session
+    soup = BeautifulSoup(html, "html.parser")
+    rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})
+    for row in rows:
+        content = row.find("div", attrs={"class": "ilContainerListItemContent"})
+        link = content.find("a")
+        href = link["href"]
+        name = str(link.string)
+        path = os.path.join(base_path, name.replace("/", " "))
+        if "download" in href:
+            extension = str(content.find("span", attrs={"class": "il_ItemProperty"}).string).strip()
+            await queue.put({"url": href, "path": f"{path}.{extension}"})
+        else:
+            ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
+            await search_tree(session, queue, ref_id, path)
 
 
 if __name__ == "__main__":
-    print(get_technishce_mechanik())
+    async def main():
+        async with aiohttp.ClientSession(raise_for_status=True) as session:
+            await login(session)
+            await producer(session, asyncio.Queue(), "187834")
+
+
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())

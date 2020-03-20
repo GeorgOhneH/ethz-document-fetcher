@@ -1,3 +1,3 @@
-from .login import login_async
+from .login import login
 
 from .parser import parse_main_page

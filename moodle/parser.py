@@ -7,14 +7,12 @@ import bs4
 import one_drive
 from utils import *
 from .constants import *
+from constants import *
 import polybox
 
 
 async def parse_main_page(session, queue, html, use_cache):
-    try:
-        soup = BeautifulSoup(html, "lxml")
-    except bs4.FeatureNotFound:
-        soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
     header = soup.find("div", class_="page-header-headings")
     header_name = str(header.h1.string)
@@ -54,7 +52,7 @@ async def parse_sections(session, queue, section, header_name, use_cache):
             driver_url = await check_url_reference(session, url, url_reference_path)
 
             if "onedrive.live.com" in driver_url:
-                await one_drive.collector(session, queue, driver_url, base_path + f"; {name.replace('/', ' ')}")
+                await one_drive.producer(session, queue, driver_url, base_path + f"; {name.replace('/', ' ')}")
 
             elif "polybox" in driver_url:
                 poly_id = driver_url.split("/")[-1]
@@ -81,10 +79,7 @@ async def parse_folder(session, queue, instance, base_path, use_cache=False):
     async with session.get(href) as response:
         text = await response.text()
 
-    try:
-        folder_soup = BeautifulSoup(text, "lxml")
-    except bs4.FeatureNotFound:
-        folder_soup = BeautifulSoup(text, "html.parser")
+    folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER)
     folder_path = os.path.join(base_path, folder_name.replace("/", " "))
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)
 

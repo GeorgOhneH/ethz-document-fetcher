@@ -1,17 +1,15 @@
 import os
 
 from bs4 import BeautifulSoup
-import bs4
+
+from constants import *
 
 
 async def validate_url(session, queue, links_to_pdf, base_url, folder_name=None, **kwargs):
     async with session.get(base_url, **kwargs) as response:
         html = await response.text()
 
-    try:
-        soup = BeautifulSoup(html, "lxml")
-    except bs4.FeatureNotFound:
-        soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
     header_name = str(soup.title.string) if folder_name is None else folder_name
 

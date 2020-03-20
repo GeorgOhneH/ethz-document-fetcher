@@ -4,7 +4,7 @@ from utils import *
 from .constants import *
 
 
-async def collector(session, queue, driver_url, base_path):
+async def producer(session, queue, driver_url, base_path):
     parameters = parse_qs(urlparse(driver_url).query)
     authkey = parameters['authkey'][0]
     resid = parameters['resid'][0]
@@ -23,4 +23,4 @@ async def collector(session, queue, driver_url, base_path):
         elif item.get("folder", None) is not None:
             url_reference_path = os.path.join(CACHE_PATH, "url.json")
             folder_url = await check_url_reference(session, item['webUrl'], url_reference_path)
-            await collector(session, queue, f"{folder_url}?authkey={authkey}", path)
+            await producer(session, queue, f"{folder_url}?authkey={authkey}", path)

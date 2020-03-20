@@ -3,6 +3,7 @@ from custom import analysis, informatik
 import polybox
 from downloader import *
 from aiohttp import BasicAuth
+import ilias
 
 import asyncio
 
@@ -18,6 +19,8 @@ async def main():
         physik1 = moodle_producer(session, queue, 12228)
         koma1 = moodle_producer(session, queue, 12301)
         analysis2_moodle = moodle_producer(session, queue, 12611)
+        ilias_path = os.path.join("401-0232-10L Analysis 2 FS2020", "ilias")
+        analysis2_ilias = ilias.producer(session, queue, "187834", base_path=ilias_path)
         analysis2 = analysis.parse_main_page(session, queue, folder_name="401-0232-10L Analysis 2 FS2020")
         informatik1 = informatik.parse_main_page(session, queue, auth=BasicAuth(settings.username, settings.password))
 
@@ -61,13 +64,15 @@ async def main():
             asyncio.create_task(poly_analysis),
         ]
 
-        await moodle.login_async(session)
+        await moodle.login(session)
+        await ilias.login(session)
 
         producers = [
             asyncio.create_task(nus2),
             asyncio.create_task(physik1),
             asyncio.create_task(koma1),
             asyncio.create_task(analysis2_moodle),
+            asyncio.create_task(analysis2_ilias),
             *producers_no_login,
             *producers_portal,
         ]

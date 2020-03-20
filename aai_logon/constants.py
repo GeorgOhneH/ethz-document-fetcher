@@ -11,4 +11,5 @@ SSO_DATA = {
     "_eventId_proceed": "",
 }
 
-SAML_URL = "https://moodle-app2.let.ethz.ch/Shibboleth.sso/SAML2/POST"
+MOODLE_URL = "https://moodle-app2.let.ethz.ch/Shibboleth.sso/SAML2/POST"
+ILIAS_URL = "https://ilias-app2.let.ethz.ch/Shibboleth.sso/SAML2/POST"

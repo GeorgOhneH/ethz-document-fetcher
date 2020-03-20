@@ -12,7 +12,8 @@ import time
 
 
 async def producer(queue, poly_id, base_path=None, password=None):
-    # We create a new session, because the polybox doesn't like it when you jump between different ones
+    # We create a new session, because the polybox doesn't like it
+    # when you jump between different ids with the same session
     async with aiohttp.ClientSession(raise_for_status=True) as session:
         poly_id_with_null = poly_id + ":null"
 
@@ -35,12 +36,10 @@ async def producer(queue, poly_id, base_path=None, password=None):
             async with session.post(auth_url, data=data) as response:
                 await response.text()
 
-            headers["requesttoken"] = requesttoken
-
         if base_path is None:
             base_path = f"polybox {poly_id}"
 
-        async with session.request("PROPFIND", url=WEBDAV_URL, data=PROPFIND_DATA, headers=headers, raise_for_status=True) as response:
+        async with session.request("PROPFIND", url=WEBDAV_URL, data=PROPFIND_DATA, headers=headers) as response:
             xml = await response.text()
 
     tree = ET.fromstring(xml)

@@ -1,1 +1,1 @@
-from .collector import collector
+from one_drive.producer import producer
