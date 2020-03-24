@@ -1,6 +1,7 @@
 import os
 
 from constants import *
+from utils import safe_path_join
 
 
 async def validate_url(session, queue, links_to_pdf, base_url, folder_name=None, **kwargs):
@@ -26,3 +27,24 @@ async def validate_url(session, queue, links_to_pdf, base_url, folder_name=None,
 
             item_path = os.path.join(path, name + f" {i}.pdf")
             await queue.put({"path": item_path, "url": base_url + real_url, "kwargs": kwargs})
+
+
+async def collect_all_links(session, queue, url, base_path, valid_extensions=None):
+    if valid_extensions is None:
+        valid_extensions = ['pdf', 'mp4']
+
+    async with session.get(url) as response:
+        html = await response.text()
+
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+
+    links = soup.find_all("a")
+    for link in links:
+        href = link.get("href")
+        if "." not in href:
+            continue
+
+        name, extension = href.split(".")
+        if extension not in valid_extensions:
+            continue
+        await queue.put({"url": url + href, "path": safe_path_join(base_path, href)})

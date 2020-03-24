@@ -11,6 +11,7 @@ import moodle
 from settings import settings
 from custom import analysis, informatik
 from downloader import download_files
+from custom.utils import collect_all_links
 
 
 async def main():
@@ -20,6 +21,9 @@ async def main():
     queue = asyncio.Queue()
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
+        tiagos_path = os.path.join("401-0302-10L Komplexe Analysis FS2020", "tiagos")
+        tiagos = collect_all_links(session, queue, "https://n.ethz.ch/~tiagos/download/2020/", tiagos_path)
+
         nus2 = moodle.producer(session, queue, 11838)
         physik1 = moodle.producer(session, queue, 12228)
         physik1_poly = polybox.producer(queue, "iSYMs1nnDAzDWtU",
@@ -70,6 +74,7 @@ async def main():
             asyncio.create_task(poly_nus),
             asyncio.create_task(poly_analysis),
             asyncio.create_task(physik1_poly),
+            asyncio.create_task(tiagos),
         ]
 
         await moodle.login(session)
