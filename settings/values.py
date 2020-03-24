@@ -41,8 +41,12 @@ class Path(String):
             raise InvalidPath("please enter an absolute path")
         self._value = value
 
-    def load_value(self, value):
-        self.set_value(None, value)
+    def is_set(self):
+        try:
+            self.set_value(None, self._value)
+        except InvalidPath:
+            return False
+        return True
 
 
 class Password(String):
