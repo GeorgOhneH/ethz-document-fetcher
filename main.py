@@ -27,7 +27,7 @@ async def main():
         nus2 = moodle.producer(session, queue, 11838)
         physik1 = moodle.producer(session, queue, 12228)
         physik1_poly = polybox.producer(queue, "iSYMs1nnDAzDWtU",
-                                        base_path=os.path.join("Physik 1 D-ITET (FS20)", "polybox"))
+                                        base_path=os.path.join("Physik 1 D-ITET (FS20)", "Thomas Thurnher polybox"))
         koma1 = moodle.producer(session, queue, 12301)
         analysis2_moodle = moodle.producer(session, queue, 12611)
         ilias_path = os.path.join("401-0232-10L Analysis 2 FS2020", "ilias")
