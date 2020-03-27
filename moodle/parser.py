@@ -51,14 +51,14 @@ async def parse_sections(session, queue, section, header_name):
             driver_url = await check_url_reference(session, url, url_reference_path)
 
             if "onedrive.live.com" in driver_url:
-                await one_drive.producer(session, queue, driver_url, base_path + f"; {make_string_path_safe(name)}")
+                await one_drive.producer(session, queue, driver_url, base_path + f"; {safe_path(name)}")
 
             elif "polybox" in driver_url:
                 poly_id = driver_url.split("s/")[-1].split("/")[0]
                 try:
                     await polybox.producer(queue, poly_id, safe_path_join(base_path, name))
                 except ClientResponseError:
-                    print(f"Was not able to access polybox with id: {poly_id}")
+                    print(f"Couldn't access polybox with id: {poly_id} from moodle: {header_name}")
 
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 

@@ -51,8 +51,8 @@ def save_url_reference(url_reference, path):
 
 
 def safe_path_join(path, *paths):
-    return os.path.join(path, *[x.replace("/", " ") for x in paths])
+    return os.path.join(path, *[safe_path(x) for x in paths])
 
 
-def make_string_path_safe(string):
+def safe_path(string):
     return string.replace("/", " ")

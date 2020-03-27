@@ -35,15 +35,18 @@ class Path(String):
         return self._value
 
     def set_value(self, obj, value):
+        self.test_value(value)
+        self._value = value
+
+    def test_value(self, value):
         if value and not os.path.exists(value):
             raise InvalidPath("please enter a valid path, which exists")
         if value and not os.path.isabs(value):
             raise InvalidPath("please enter an absolute path")
-        self._value = value
 
     def is_set(self):
         try:
-            self.set_value(None, self._value)
+            self.test_value(self._value)
         except InvalidPath:
             return False
         return True
