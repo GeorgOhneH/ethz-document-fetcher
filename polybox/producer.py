@@ -10,11 +10,12 @@ from urllib.parse import unquote, quote
 import aiohttp
 
 from polybox.constants import *
+from downloader import download_if_not_exist
 
 
 async def producer(queue, poly_id, base_path=None, password=None):
-    # We create a new session, because polybox doesn't like it
-    # when you jump between different ids with the same session
+    # We create a new session, because polybox doesn't work
+    # when you jump around with the same session
     async with aiohttp.ClientSession(raise_for_status=True) as session:
         poly_id_with_null = poly_id + ":null"
 
@@ -45,22 +46,25 @@ async def producer(queue, poly_id, base_path=None, password=None):
         async with session.request("PROPFIND", url=WEBDAV_URL, data=PROPFIND_DATA, headers=headers) as response:
             xml = await response.text()
 
-    tree = ET.fromstring(xml)
+        tree = ET.fromstring(xml)
 
-    for response in tree:
-        href = go_down_tree(response, "d:href", to_text=True)
-        prop = go_down_tree(response, "d:propstat", "d:prop")
-        checksum = go_down_tree(prop, "oc:checksums", "oc:checksum", to_text=True)
-        contenttype = go_down_tree(prop, "d:getcontenttype", to_text=True)
-        if contenttype is not None:
-            path = PurePath(unquote(href))
-            path = os.path.join(*path.parts[3:])
-            absolute_path = os.path.join(base_path, path)
-            files = os.path.basename(href)
-            url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
+        for response in tree:
+            href = go_down_tree(response, "d:href", to_text=True)
+            prop = go_down_tree(response, "d:propstat", "d:prop")
+            checksum = go_down_tree(prop, "oc:checksums", "oc:checksum", to_text=True)
+            contenttype = go_down_tree(prop, "d:getcontenttype", to_text=True)
+            if contenttype is not None:
+                path = PurePath(unquote(href))
+                path = os.path.join(*path.parts[3:])
+                absolute_path = os.path.join(base_path, path)
+                files = os.path.basename(href)
+                url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
 
-            url = f"{INDEX_URL}{poly_id}/download?files={files}&path={url_path}"
-            await queue.put({"url": url, "path": absolute_path})
+                url = f"{INDEX_URL}{poly_id}/download?files={files}&path={url_path}"
+                if password is not None:
+                    await download_if_not_exist(session, file_path=absolute_path, url=url)
+                else:
+                    await queue.put({"url": url, "path": absolute_path})
 
 
 def go_down_tree(tree, *args, to_text=False):
