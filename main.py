@@ -24,6 +24,9 @@ async def main():
         tiagos_path = os.path.join("401-0302-10L Komplexe Analysis FS2020", "tiagos")
         tiagos = collect_all_links(session, queue, "https://n.ethz.ch/~tiagos/download/2020/", tiagos_path)
 
+        colin_path = os.path.join("401-0232-10L Analysis 2 FS2020", "Colin Dirren")
+        colin = collect_all_links(session, queue, "https://n.ethz.ch/~cdirren/downloads/Analysis_2/", colin_path)
+
         nus2 = moodle.producer(session, queue, 11838)
         physik1 = moodle.producer(session, queue, 12228)
         physik1_poly = polybox.producer(queue, "iSYMs1nnDAzDWtU",
@@ -75,6 +78,7 @@ async def main():
             asyncio.create_task(poly_analysis),
             asyncio.create_task(physik1_poly),
             asyncio.create_task(tiagos),
+            asyncio.create_task(colin),
         ]
 
         await moodle.login(session)
