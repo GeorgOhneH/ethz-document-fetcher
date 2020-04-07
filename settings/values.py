@@ -5,7 +5,10 @@ from .exceptions import *
 
 
 class String(object):
-    def __init__(self, name, value="", active_func=lambda: True):
+    def __init__(self, name, value="", active_func=lambda: True, depends_on=None):
+        if depends_on is None:
+            depends_on = []
+        self.depends_on = depends_on
         self._value = value
         self.name = name
         self.active_func = active_func
@@ -20,7 +23,7 @@ class String(object):
         self._value = value
 
     def is_active(self):
-        return self.active_func()
+        return self.active_func() and all([x.get_value() for x in self.depends_on])
 
     def is_set(self):
         return self._value != ""
@@ -71,7 +74,7 @@ class Password(String):
 
 class Bool(String):
     def get_value(self, obj=None):
-        return "y" in self._value
+        return "y" in self._value and self.is_active()
 
     def set_value(self, obj, value):
         self._value = "yes" if "y" in value else "no"

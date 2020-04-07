@@ -8,7 +8,6 @@ from settings import settings
 
 
 async def download_files(session: aiohttp.ClientSession, queue):
-    timeout = aiohttp.ClientTimeout(total=0)
     while True:
         item = await queue.get()
         kwargs = item.get("kwargs", {})
@@ -40,6 +39,8 @@ async def download_if_not_exist(session, file_path, url, kwargs=None):
         file_name = os.path.basename(absolute_path)
         extension = file_name.split(".")[-1]
         if extension.lower() in ["mp4", "webm", "avi", "mkv", "mov", "m4v"]:
+            if not settings.download_videos:
+                return
             print(f"Starting to download {file_name}")
 
         async with session.get(url, timeout=timeout, **kwargs) as response:
