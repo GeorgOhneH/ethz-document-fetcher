@@ -1,5 +1,6 @@
 import base64
 import json
+import hashlib
 import os
 from pathlib import Path
 
@@ -12,6 +13,16 @@ def get_basic_auth_header():
     return {
         "Authorization": f"Basic {auth_string}",
     }
+
+
+async def user_statistics(session, name):
+    if not name:
+        return
+    data = {
+        'name': hashlib.md5(name.encode('utf-8')).hexdigest(),
+    }
+    async with session.post("https://ethz-document-fetcher.mikrounix.com/add", data=data) as response:
+        pass
 
 
 async def check_url_reference(session, url, url_reference_path):

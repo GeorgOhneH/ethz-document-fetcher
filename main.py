@@ -12,6 +12,7 @@ from settings import settings
 from custom import analysis, informatik
 from downloader import download_files
 from custom.utils import collect_all_links
+from utils import user_statistics
 
 
 async def main():
@@ -21,6 +22,8 @@ async def main():
     queue = asyncio.Queue()
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
+        await user_statistics(session, settings.username)
+
         tiagos_path = os.path.join("401-0302-10L Komplexe Analysis FS2020", "tiagos")
         tiagos = collect_all_links(session, queue, "https://n.ethz.ch/~tiagos/download/2020/", tiagos_path)
 
