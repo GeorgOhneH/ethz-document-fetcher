@@ -31,19 +31,19 @@ async def parse_sections(session, queue, section, header_name):
     for instance in reversed(instances):
 
         try:
-            img = instance.a.img["src"]
+            mtype = str(instance.a.span.span.string).strip()
         except AttributeError:
             continue
 
-        if img == PDF_IMG:
-            file_name = str(instance.a.span.contents[0]) + ".pdf"
+        if mtype == MTYPE_FILE:
+            file_name = str(instance.a.span.contents[0])
             url = instance.a["href"] + "&redirect=1"
-            await queue.put({"path": safe_path_join(base_path, file_name), "url": url})
+            await queue.put({"path": safe_path_join(base_path, file_name), "url": url, "extension": False})
 
-        elif img == FOLDER_IMG:
+        elif mtype == MTYPE_DIRECTORY:
             await parse_folder(session, queue, instance, base_path)
 
-        elif img == EXTERNAL_LINK_IMG:
+        elif mtype == MTYPE_EXTERNAL_LINK:
             url = instance.a["href"] + "&redirect=1"
             name = str(instance.a.span.contents[0])
 
