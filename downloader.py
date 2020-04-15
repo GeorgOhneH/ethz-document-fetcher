@@ -7,6 +7,10 @@ import aiohttp
 
 from settings import settings
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 async def download_files(session: aiohttp.ClientSession, queue):
     while True:
@@ -45,7 +49,7 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
         if file_extension.lower() in ["mp4", "webm", "avi", "mkv", "mov", "m4v"]:
             if not settings.download_videos:
                 return
-            print(f"Starting to download {file_name}")
+            logger.info(f"Starting to download {file_name}")
 
     async with session.get(url, timeout=timeout, **kwargs) as response:
         response.raise_for_status()
@@ -63,7 +67,7 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
                     break
                 f.write(chunk)
 
-    print(f"Added new file: {file_name} in '{os.path.dirname(absolute_path)}'")
+    logger.info(f"Added new file: {file_name} in '{os.path.dirname(absolute_path)}'")
 
 
 def get_extension(file):
