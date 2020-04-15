@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import re
 
 from aiohttp.client_exceptions import ClientResponseError
@@ -8,7 +9,6 @@ import polybox
 from constants import *
 from utils import *
 from .constants import *
-import logging
 
 logger = logging.getLogger(__name__)
 

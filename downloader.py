@@ -1,11 +1,10 @@
+import glob
 import os
 import re
-import glob
 from pathlib import Path
 
 import aiohttp
 
-import moodle
 from settings import settings
 
 

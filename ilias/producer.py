@@ -2,7 +2,6 @@ import asyncio
 import re
 
 import aiohttp
-from bs4 import BeautifulSoup
 
 from constants import *
 from ilias.constants import *

@@ -2,7 +2,6 @@ import asyncio
 import base64
 import copy
 import logging
-import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
@@ -10,8 +9,8 @@ from urllib.parse import unquote, quote
 
 import aiohttp
 
-from polybox.constants import *
 from downloader import download_if_not_exist
+from polybox.constants import *
 
 logger = logging.getLogger(__name__)
 

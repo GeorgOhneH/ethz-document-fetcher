@@ -1,8 +1,7 @@
 import asyncio
-import os
-import sys
-import logging
 import logging.config
+import os
+
 from settings.logger import LOGGER
 
 logging.config.dictConfig(LOGGER)
@@ -120,4 +119,4 @@ if __name__ == '__main__':
     start_t = time.time()
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
-    print(f"finished in {time.time() - start_t} seconds")
+    logger.info(f"Finished in {(time.time() - start_t):.2f} seconds")
