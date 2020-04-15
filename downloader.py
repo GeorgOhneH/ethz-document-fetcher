@@ -78,7 +78,7 @@ def file_exists(path, extension):
     if not extension:
         valid_paths = glob.glob(f"{path}.*")
         if len(valid_paths) > 2:
-            print("Found file with same filename, but different extension, could cause problems")
+            logger.warning("Found file with same filename, but different extension, could cause problems")
 
         return len(valid_paths) >= 1
 
