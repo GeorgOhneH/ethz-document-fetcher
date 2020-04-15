@@ -3,7 +3,6 @@ import os
 
 import settings.values as setting_values
 from settings import settings
-from settings.exceptions import InvalidPath
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 BAT_FILE_PATH = os.path.join(BASE_PATH, "run.bat")
@@ -16,27 +15,26 @@ def setup():
             continue
 
         while True:
-            try:
-                user_prompt = value.get_user_prompt()
+            user_prompt = value.get_user_prompt()
 
-                if isinstance(value, setting_values.Password):
-                    i = getpass.getpass(user_prompt)
-                else:
-                    print(user_prompt, end="")
-                    i = input().strip()
+            if isinstance(value, setting_values.Password):
+                i = getpass.getpass(user_prompt)
+            else:
+                print(user_prompt, end="")
+                i = input().strip()
 
-                if i == "":
-                    break
-
-                if isinstance(value, setting_values.Bool):
-                    value._value = i
-                else:
-                    value.set_value(None, i)
+            if i == "":
                 break
 
-            except InvalidPath as e:
-                print(str(e))
-                continue
+            if isinstance(value, setting_values.Bool):
+                value._value = i
+            else:
+                valid, msg = value.test_value(i)
+                if not valid:
+                    print(msg)
+                    continue
+                value.set_value(None, i)
+            break
 
     settings.save()
 

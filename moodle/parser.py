@@ -8,6 +8,9 @@ import polybox
 from constants import *
 from utils import *
 from .constants import *
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 async def parse_main_page(session, queue, html):
@@ -58,7 +61,7 @@ async def parse_sections(session, queue, section, header_name):
                 try:
                     await polybox.producer(queue, poly_id, safe_path_join(base_path, name))
                 except ClientResponseError:
-                    print(f"Couldn't access polybox with id: {poly_id} from moodle: {header_name}")
+                    logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {header_name}")
 
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 

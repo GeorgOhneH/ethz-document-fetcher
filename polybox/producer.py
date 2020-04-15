@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import copy
+import logging
 import os
 import re
 import xml.etree.ElementTree as ET
@@ -11,6 +12,8 @@ import aiohttp
 
 from polybox.constants import *
 from downloader import download_if_not_exist
+
+logger = logging.getLogger(__name__)
 
 
 async def producer(queue, poly_id, base_path=None, password=None):

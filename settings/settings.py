@@ -26,6 +26,7 @@ class Settings(object):
             String(name="portal_inf1_2020_password", depends_on=[download_videos, video_portal]),
             String(name="portal_inf1_2019_password", depends_on=[download_videos, video_portal]),
             String(name="nus2_poly_uebung", depends_on=[download_videos, video_portal]),
+            Option(name="loglevel", value="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])
         ]
         self.init()
 

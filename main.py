@@ -1,5 +1,12 @@
 import asyncio
 import os
+import sys
+import logging
+import logging.config
+from settings.logger import LOGGER
+
+logging.config.dictConfig(LOGGER)
+logger = logging.getLogger(__name__)
 
 import aiohttp
 from aiohttp import BasicAuth
