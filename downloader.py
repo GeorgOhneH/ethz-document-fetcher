@@ -1,14 +1,16 @@
 import glob
 import os
 import re
+import copy
+import shutil
 from pathlib import Path
 
 import aiohttp
+from colorama import Fore, Back, Style
 
 from settings import settings
 
 import logging
-
 logger = logging.getLogger(__name__)
 
 
@@ -67,7 +69,50 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
                     break
                 f.write(chunk)
 
-    logger.info(f"Added new file: {file_name} in '{os.path.dirname(absolute_path)}'")
+    start = {
+        "name": f"Added new file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",
+        "var": copy.copy(file_name),
+        "priority": 100,
+        "cut": "back",
+    }
+
+    end = {
+        "name": " in '{}'",
+        "var": copy.copy(os.path.dirname(absolute_path)),
+        "priority": -100,
+        "cut": "front",
+    }
+
+    log(start, end, margin=-7)
+
+
+def log(*args, filler="..", min_length=10, margin=2):
+    min_length = len(filler) + min_length
+    c, _ = shutil.get_terminal_size(fallback=(0, 0))
+    orig_sections = list(args)
+    sections = copy.copy(orig_sections)
+    sections.sort(key=lambda s: -s["priority"])
+
+    free = c - sum([len(x["name"])-2 for x in sections]) - margin - 6
+    length_vars = []
+    count = 0
+    for section in reversed(sections):
+        length_vars.append(count)
+        count += min(len(section["var"]), min_length)
+    length_vars.reverse()
+    if c:
+        for length_var, section in zip(length_vars, sections):
+            c_free = free - length_var
+            if c_free < len(section["var"]) and len(section["var"]) > min_length:
+                cut_length = max(c_free, min_length)
+                if section["cut"] == "front":
+                    section["var"] = (filler + section["var"][-cut_length+len(filler):])
+                elif section["cut"] == "back":
+                    section["var"] = (section["var"][:cut_length-len(filler)] + filler)
+
+            free -= len(section["var"])
+
+    logger.info("".join([x["name"].format(x["var"]) for x in orig_sections]))
 
 
 def get_extension(file):

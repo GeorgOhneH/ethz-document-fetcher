@@ -5,3 +5,4 @@ aiostream
 lxml
 aiodns
 cchardet
+colorama

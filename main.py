@@ -2,6 +2,9 @@ import asyncio
 import logging.config
 import os
 
+from colorama import init
+init()
+
 from settings.logger import LOGGER
 
 logging.config.dictConfig(LOGGER)
