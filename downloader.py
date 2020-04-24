@@ -83,10 +83,10 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
         "cut": "front",
     }
 
-    log(start, end, margin=-7)
+    logger.info(fit_sections_to_console(start, end, margin=-8))
 
 
-def log(*args, filler="..", min_length=10, margin=2):
+def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
     min_length = len(filler) + min_length
     c, _ = shutil.get_terminal_size(fallback=(0, 0))
     orig_sections = list(args)
@@ -112,7 +112,7 @@ def log(*args, filler="..", min_length=10, margin=2):
 
             free -= len(section["var"])
 
-    logger.info("".join([x["name"].format(x["var"]) for x in orig_sections]))
+    return "".join([x["name"].format(x["var"]) for x in orig_sections])
 
 
 def get_extension(file):
