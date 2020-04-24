@@ -31,7 +31,7 @@ async def main():
     queue = asyncio.Queue()
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
-        #await user_statistics(session, settings.username)
+        await user_statistics(session, settings.username)
 
         tiagos_path = os.path.join("401-0302-10L Komplexe Analysis FS2020", "tiagos")
         tiagos = collect_all_links(session, queue, "https://n.ethz.ch/~tiagos/download/2020/", tiagos_path)
