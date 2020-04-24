@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import copy
 import re
 
 from aiohttp.client_exceptions import ClientResponseError
@@ -78,7 +79,30 @@ async def parse_folder(session, queue, instance, base_path):
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)
 
 
-async def parse_sub_folders(queue, soup, folder_path, use_sub_folder_name=True):
+async def parse_sub_folders(queue, soup, folder_path):
+    folder_trees = soup.find_all("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
+    for folder_tree in folder_trees:
+        await parse_folder_tree(queue, folder_tree.ul, folder_path)
+
+
+async def parse_folder_tree(queue, soup, folder_path):
+    children = soup.findChildren("li", recursive=False)
+    for child in children:
+        if child.find("div", recursive=False) is not None:
+            sub_folder_path = safe_path_join(folder_path, child.div.span.img["alt"])
+        else:
+            sub_folder_path = folder_path
+
+        if child.find("ul", recursive=False) is not None:
+            await parse_folder_tree(queue, child.ul, sub_folder_path)
+
+        if child.find("span", recursive=False) is not None:
+            url = child.span.a["href"]
+            name = child.span.a.span.next_sibling.get_text(strip=True)
+            await queue.put({"path": safe_path_join(sub_folder_path, name), "url": url})
+
+
+async def parse_sub_folders2(queue, soup, folder_path, use_sub_folder_name=True):
     sub_folders = remove_duplicated(set(filter(test_for_sub_folder, soup.find_all("span", class_="fp-filename"))))
     for sub_folder in sub_folders:
         sub_folder_name = str(sub_folder.string)

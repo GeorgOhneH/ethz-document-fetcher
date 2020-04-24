@@ -62,7 +62,7 @@ def save_url_reference(url_reference, path):
 
 
 def safe_path_join(path, *paths):
-    return os.path.join(path, *[safe_path(x) for x in paths])
+    return os.path.join(path, *[safe_path(x) for x in paths if x])
 
 
 def safe_path(string):
