@@ -5,9 +5,9 @@ import os
 from colorama import init
 init()
 
-from settings.logger import LOGGER
+from settings.logger import LOGGER_CONFIG
 
-logging.config.dictConfig(LOGGER)
+logging.config.dictConfig(LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
 
 import aiohttp

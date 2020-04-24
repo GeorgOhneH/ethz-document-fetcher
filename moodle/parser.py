@@ -98,5 +98,5 @@ async def parse_folder_tree(queue, soup, folder_path):
 
         if child.find("span", recursive=False) is not None:
             url = child.span.a["href"]
-            name = child.span.a.span.next_sibling.get_text(strip=True)
+            name = child.span.a.find("span", recursive=False, class_="fp-filename").get_text(strip=True)
             await queue.put({"path": safe_path_join(sub_folder_path, name), "url": url})
