@@ -86,7 +86,7 @@ async def parse_sub_folders(queue, soup, folder_path):
 
 
 async def parse_folder_tree(queue, soup, folder_path):
-    children = soup.findChildren("li", recursive=False)
+    children = soup.find_all("li", recursive=False)
     for child in children:
         if child.find("div", recursive=False) is not None:
             sub_folder_path = safe_path_join(folder_path, child.div.span.img["alt"])

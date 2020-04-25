@@ -20,6 +20,7 @@ import moodle
 from settings import settings
 from custom import analysis, informatik
 from downloader import download_files
+import nethz
 from custom.utils import collect_all_links
 from utils import user_statistics
 
@@ -34,10 +35,10 @@ async def main():
         await user_statistics(session, settings.username)
 
         tiagos_path = os.path.join("401-0302-10L Komplexe Analysis FS2020", "tiagos")
-        tiagos = collect_all_links(session, queue, "https://n.ethz.ch/~tiagos/download/2020/", tiagos_path)
+        tiagos = nethz.producer(session, queue, "https://n.ethz.ch/~tiagos/download/2020", tiagos_path)
 
         colin_path = os.path.join("401-0232-10L Analysis 2 FS2020", "Colin Dirren")
-        colin = collect_all_links(session, queue, "https://n.ethz.ch/~cdirren/downloads/Analysis_2/", colin_path)
+        colin = nethz.producer(session, queue, "https://n.ethz.ch/~cdirren/downloads/Analysis_2/", colin_path)
 
         nus2 = moodle.producer(session, queue, 11838)
         physik1 = moodle.producer(session, queue, 12228)

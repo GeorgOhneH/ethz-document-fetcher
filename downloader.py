@@ -58,7 +58,7 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
 
         if not extension:
             disposition = response.headers['content-disposition']
-            resp_file_name = re.findall("""filename="(.+)"$""", disposition)[0]
+            resp_file_name = re.findall("""filename="(.+).""", disposition)[0]
             absolute_path += "." + get_extension(resp_file_name)
             file_name = os.path.basename(absolute_path)
 
@@ -71,14 +71,14 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
 
     start = {
         "name": f"Added new file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",
-        "var": copy.copy(file_name),
+        "var": file_name,
         "priority": 100,
         "cut": "back",
     }
 
     end = {
         "name": " in '{}'",
-        "var": copy.copy(os.path.dirname(absolute_path)),
+        "var": os.path.dirname(absolute_path),
         "priority": -100,
         "cut": "front",
     }
