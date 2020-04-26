@@ -9,5 +9,3 @@ MTYPE_FILE = "resource"
 MTYPE_EXTERNAL_LINK = "url"
 MTYPE_DIRECTORY = "folder"
 
-CACHE_PATH = os.path.join(os.path.dirname(__file__), "cache")
-Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)

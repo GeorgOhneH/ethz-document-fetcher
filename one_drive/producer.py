@@ -3,7 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
-from one_drive.constants import *
+from constants import CACHE_PATH
 from utils import *
 
 
@@ -41,11 +41,11 @@ async def producer(session, queue, driver_url, base_path):
 
     for item in item_data["value"]:
         path = safe_path_join(base_path, item["name"])
-        if item.get("@content.downloadUrl", None) is not None:
+        if "@content.downloadUrl" in item:
             await queue.put({"path": path, "url": item["@content.downloadUrl"]})
 
-        elif item.get("folder", None) is not None:
-            url_reference_path = os.path.join(CACHE_PATH, "url.json")
+        elif "folder" in item:
+            url_reference_path = os.path.join(CACHE_PATH, "one_drive_url.json")
             folder_url = await check_url_reference(session, item['webUrl'], url_reference_path)
             await producer(session, queue, f"{folder_url}?authkey={authkey}", path)
 

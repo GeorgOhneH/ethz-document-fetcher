@@ -1,13 +1,15 @@
 import asyncio
 import re
+import logging
 
 from aiohttp.client_exceptions import ClientResponseError
+from bs4 import BeautifulSoup
 
 import one_drive
 import polybox
-from constants import *
+from constants import BEAUTIFUL_SOUP_PARSER, CACHE_PATH
 from utils import *
-from .constants import *
+from .constants import MTYPE_EXTERNAL_LINK, MTYPE_DIRECTORY, MTYPE_FILE
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
             url = instance.a["href"] + "&redirect=1"
             name = str(instance.a.span.contents[0])
 
-            url_reference_path = os.path.join(CACHE_PATH, "url.json")
+            url_reference_path = os.path.join(CACHE_PATH, "moodle_url.json")
             driver_url = await check_url_reference(session, url, url_reference_path)
 
             if "onedrive.live.com" in driver_url:

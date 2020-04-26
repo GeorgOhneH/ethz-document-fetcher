@@ -28,22 +28,28 @@ async def main():
     async with aiohttp.ClientSession(raise_for_status=True) as session:
         await user_statistics(session, settings.username)
 
+        logger.debug("Logging in")
         await moodle.login(session)
         await ilias.login(session)
 
+        logger.debug("Loading model")
         producers = []
         model_file = os.path.join(os.path.dirname(__file__), "models/FS2020/semester2.yml")
         await model_parser.parse(session, producers, model_file)
 
         queue = asyncio.Queue()
 
+        logger.debug("Starting producers")
         producers = [asyncio.create_task(function(session=session, queue=queue, base_path=base_path, **kwargs))
                      for function, kwargs, base_path in producers]
 
+        logger.debug("Starting consumers")
         consumers = [asyncio.create_task(download_files(session, queue)) for _ in range(20)]
 
+        logger.debug("Gathering producers")
         await asyncio.gather(*producers)
 
+        logger.debug("Waiting for the queue")
         await queue.join()
 
         for c in consumers:

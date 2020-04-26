@@ -2,6 +2,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import time
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 async def user_statistics(session, name):

@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import logging
 
 import bs4
@@ -11,3 +14,6 @@ try:
 except bs4.FeatureNotFound:
     logger.warning("It appears that 'lxml' is not installed. Falling back to 'html.parser'")
     BEAUTIFUL_SOUP_PARSER = "html.parser"
+
+CACHE_PATH = os.path.join(os.path.dirname(__file__), "cache")
+Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)
