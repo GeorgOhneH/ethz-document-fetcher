@@ -9,14 +9,23 @@ from ilias.login import login
 from utils import *
 
 
-async def producer(session, queue, fold_id, base_path=None):
-    if base_path is None:
-        base_path = "ilias"
-    await search_tree(session, queue, fold_id, base_path)
+async def get_folder_name(session, id):
+    url = GOTO_URL + str(id)
+    async with session.get(url) as response:
+        html = await response.text()
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    ol = soup.find("ol", class_="breadcrumb")
+    return str(ol.find_all("li")[2].string)
 
 
-async def search_tree(session, queue, fold_id, base_path):
-    url = GOTO_URL + fold_id
+async def producer(session, queue, base_path, id):
+    await search_tree(session, queue, base_path, id)
+
+
+async def search_tree(session, queue, base_path, fold_id):
+    url = GOTO_URL + str(fold_id)
 
     async with session.get(url) as response:
         html = await response.text()
@@ -41,7 +50,7 @@ if __name__ == "__main__":
     async def main():
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             await login(session)
-            await producer(session, asyncio.Queue(), "187834")
+            await get_folder_name(session, "187834")
 
 
     loop = asyncio.get_event_loop()

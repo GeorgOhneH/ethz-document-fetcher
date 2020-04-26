@@ -1,9 +1,23 @@
+import re
+
 from bs4 import BeautifulSoup
+
 from constants import BEAUTIFUL_SOUP_PARSER
 from utils import safe_path_join
 
 
-async def producer(session, queue, url, base_path, allowed_extensions=None):
+async def get_folder_name(session, url):
+    async with session.get(url) as response:
+        html = await response.text()
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+
+    header_name = str(soup.head.title.string)
+    name = re.search("/~([^/]+)/", header_name)[1]
+
+    return name
+
+
+async def producer(session, queue, url, base_path):
     if url[-1] != "/":
         url += "/"
 
@@ -24,8 +38,6 @@ async def producer(session, queue, url, base_path, allowed_extensions=None):
         path = safe_path_join(base_path, href)
 
         if "." in href:
-            extension = href.split(".")[-1]
-            if allowed_extensions is None or extension in allowed_extensions:
-                await queue.put({"url": url + href, "path": path})
+            await queue.put({"url": url + href, "path": path})
         else:
-            await producer(session, queue, url + href, path, allowed_extensions=allowed_extensions)
+            await producer(session, queue, url + href, path)

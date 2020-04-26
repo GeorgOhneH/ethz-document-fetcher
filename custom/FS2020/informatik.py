@@ -1,7 +1,10 @@
+from aiohttp import BasicAuth
+
 from custom.utils import validate_url
+from settings import settings
 
 
-async def parse_main_page(session, queue, **kwargs):
+async def parse_main_page(session, queue, base_path):
     BASE_URL = "https://lec.inf.ethz.ch/itet/informatik1/2020/"
 
     links_to_pdf = {
@@ -10,4 +13,5 @@ async def parse_main_page(session, queue, **kwargs):
         "Exercise": "dl/exercises/exercises{:02d}.pdf".format,
     }
 
-    await validate_url(session, queue, links_to_pdf, BASE_URL, **kwargs)
+    await validate_url(session, queue, links_to_pdf, BASE_URL, base_path,
+                       auth=BasicAuth(settings.username, settings.password))

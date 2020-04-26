@@ -1,16 +1,16 @@
+import copy
 import glob
+import logging
 import os
 import re
-import copy
 import shutil
 from pathlib import Path
 
 import aiohttp
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 
 from settings import settings
 
-import logging
 logger = logging.getLogger(__name__)
 
 

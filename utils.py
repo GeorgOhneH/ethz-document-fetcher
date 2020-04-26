@@ -1,18 +1,7 @@
-import base64
 import hashlib
 import json
 import os
 from pathlib import Path
-
-from settings import settings
-
-
-def get_basic_auth_header():
-    auth_string = (settings.username + ':' + settings.password).encode("utf-8")
-    auth_string = base64.b64encode(auth_string).decode("utf-8")
-    return {
-        "Authorization": f"Basic {auth_string}",
-    }
 
 
 async def user_statistics(session, name):
@@ -66,4 +55,4 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    return string.replace("/", " ")
+    return string.replace("/", "-")

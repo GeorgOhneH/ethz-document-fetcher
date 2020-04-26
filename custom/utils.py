@@ -4,13 +4,11 @@ from constants import *
 from utils import safe_path_join
 
 
-async def validate_url(session, queue, links_to_pdf, base_url, folder_name=None, **kwargs):
+async def validate_url(session, queue, links_to_pdf, base_url, base_path, **kwargs):
     async with session.get(base_url, **kwargs) as response:
         html = await response.text()
 
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
-
-    header_name = str(soup.title.string) if folder_name is None else folder_name
 
     all_urls_from_site = set([])
 
@@ -19,7 +17,7 @@ async def validate_url(session, queue, links_to_pdf, base_url, folder_name=None,
         all_urls_from_site.add(link.get("href"))
 
     for i in range(20):
-        path = os.path.join(header_name, "Woche {}".format(i))
+        path = os.path.join(base_path, "Woche {}".format(i))
         for name, url in links_to_pdf.items():
             real_url = url(i)
             if real_url not in all_urls_from_site:

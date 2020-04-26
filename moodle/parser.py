@@ -1,6 +1,4 @@
 import asyncio
-import logging
-import copy
 import re
 
 from aiohttp.client_exceptions import ClientResponseError
@@ -14,30 +12,28 @@ from .constants import *
 logger = logging.getLogger(__name__)
 
 
-async def parse_main_page(session, queue, html):
+async def parse_main_page(session, queue, html, base_path, moodle_id):
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
-
-    header = soup.find("div", class_="page-header-headings")
-    header_name = str(header.h1.string)
 
     sections = soup.find_all("li", id=re.compile("section-([0-9]+)"))
 
-    coroutines = [parse_sections(session, queue, section, header_name) for section in sections]
+    coroutines = [parse_sections(session, queue, section, base_path, moodle_id) for section in sections]
     await asyncio.gather(*coroutines)
 
 
-async def parse_sections(session, queue, section, header_name):
+async def parse_sections(session, queue, section, base_path, moodle_id):
     section_name = str(section["aria-label"])
-    base_path = safe_path_join(header_name, section_name)
+    base_path = safe_path_join(base_path, section_name)
 
     instances = section.find_all("div", class_="activityinstance")
 
     for instance in reversed(instances):
-
         try:
-            mtype = str(instance.a.span.span.string).strip()
+            instance.a.span
         except AttributeError:
             continue
+
+        mtype = instance.parent.parent.parent.parent["class"][1]
 
         if mtype == MTYPE_FILE:
             file_name = str(instance.a.span.contents[0])
@@ -60,9 +56,9 @@ async def parse_sections(session, queue, section, header_name):
             elif "polybox" in driver_url:
                 poly_id = driver_url.split("s/")[-1].split("/")[0]
                 try:
-                    await polybox.producer(queue, poly_id, safe_path_join(base_path, name))
+                    await polybox.producer(session, queue, poly_id, safe_path_join(base_path, name))
                 except ClientResponseError:
-                    logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {header_name}")
+                    logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {moodle_id}")
 
     await parse_sub_folders(queue, soup=section, folder_path=base_path)
 
