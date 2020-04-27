@@ -18,6 +18,18 @@ async def user_statistics(session, name):
         pass
 
 
+def debug_logger(function):
+    async def wrapper(session, queue, base_path, *args,  **kwargs):
+        function_name = f"{function.__module__}.{function.__name__} {kwargs}"
+        logger.debug(f"Starting: {function_name}")
+        t = time.time()
+        result = await function(session=session, queue=queue, base_path=base_path, *args, **kwargs)
+        logger.debug(f"Finished: {function_name}, time: {(time.time() - t):.2f}")
+        return result
+
+    return wrapper
+
+
 async def check_url_reference(session, url, url_reference_path):
     url_reference = load_url_reference(url_reference_path)
     new_url = url_reference.get(url, None)

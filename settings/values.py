@@ -1,16 +1,16 @@
 import base64
 
-from .constants import *
+from settings.constants import *
 
 
 class String(object):
-    def __init__(self, name, value="", active_func=lambda: True, depends_on=None):
+    def __init__(self, default="", active_func=lambda: True, depends_on=None):
         if depends_on is None:
             depends_on = []
         self.depends_on = depends_on
-        self._value = value
-        self.name = name
+        self._value = self.set_value(None, default)
         self.active_func = active_func
+        self.name = None
 
     def get_value(self, obj=None):
         return self._value
@@ -72,13 +72,7 @@ class Bool(String):
         return "y" in self._value and self.is_active()
 
     def set_value(self, obj, value):
-        self._value = "yes" if "y" in value else "no"
-
-    def load_value(self, value):
-        self.set_value(None, value.lower())
-
-    def is_set(self):
-        return True
+        self._value = "yes" if value else "no"
 
     def get_user_prompt(self):
         string_value = "yes" if self.get_value() else "no"
@@ -88,11 +82,10 @@ class Bool(String):
 
 
 class Option(String):
-    def __init__(self, name, options, **kwargs):
-        value = kwargs.pop("value", "")
-        if value and value not in options:
-            raise ValueError("value not in options")
-        super().__init__(name, value=value, **kwargs)
+    def __init__(self, options, default="", **kwargs):
+        if default and default not in options:
+            raise ValueError("default not in options")
+        super().__init__(default=default, **kwargs)
         self.options = options
 
     def test_value(self, value):

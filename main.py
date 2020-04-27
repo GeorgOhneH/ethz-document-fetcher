@@ -18,7 +18,7 @@ import model_parser
 import moodle
 from settings import settings
 from downloader import download_files
-from utils import user_statistics
+from utils import user_statistics, debug_logger
 
 
 async def main():
@@ -39,12 +39,13 @@ async def main():
 
         queue = asyncio.Queue()
 
-        logger.debug("Starting producers")
-        producers = [asyncio.create_task(function(session=session, queue=queue, base_path=base_path, **kwargs))
-                     for function, kwargs, base_path in producers]
-
         logger.debug("Starting consumers")
         consumers = [asyncio.create_task(download_files(session, queue)) for _ in range(20)]
+
+        logger.debug("Starting producers")
+        producers = [asyncio.create_task(debug_logger(function)(session=session, queue=queue,
+                                                                base_path=base_path, **kwargs))
+                     for function, kwargs, base_path in producers]
 
         logger.debug("Gathering producers")
         await asyncio.gather(*producers)

@@ -10,7 +10,7 @@ BAT_FILE_PATH = os.path.join(BASE_PATH, "run.bat")
 
 def setup():
     print("To skip a value enter nothing")
-    for value in settings.values:
+    for value in settings:
         if not value.is_active():
             continue
 
@@ -27,13 +27,13 @@ def setup():
                 break
 
             if isinstance(value, setting_values.Bool):
-                value._value = i
-            else:
-                valid, msg = value.test_value(i)
-                if not valid:
-                    print(msg)
-                    continue
-                value.set_value(None, i)
+                i = "y" in i
+
+            valid, msg = value.test_value(i)
+            if not valid:
+                print(msg)
+                continue
+            value.set_value(None, i)
             break
 
     settings.save()

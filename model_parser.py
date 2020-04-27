@@ -112,12 +112,12 @@ def get_folder_name_cache(md5):
     if md5 not in folder_name_cache:
         return {}
 
-    logger.debug(f"Loading cache for folder names")
+    logger.debug(f"Loading cache")
     return folder_name_cache[md5]
 
 
 def save_folder_name_cache(md5, folder_name_cache):
-    logger.debug("Saving cache for folder names")
+    logger.debug("Saving cache")
     path = os.path.join(CACHE_PATH, "folder_name.json")
     with open(path, "w+") as f:
         json.dump({md5: folder_name_cache}, f)
@@ -127,7 +127,7 @@ async def get_folder_name(session, function, folder_name_cache, kwargs):
     unique_string = function.__module__ + function.__name__ + str(kwargs)
     if unique_string in folder_name_cache:
         return folder_name_cache[unique_string]
-    logger.debug("using function to get folder_name")
+    logger.debug(f"Calling folder function: {unique_string}")
     folder_name = await function(session=session, **kwargs)
     folder_name_cache[unique_string] = folder_name
     return folder_name
