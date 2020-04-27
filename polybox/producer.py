@@ -110,11 +110,3 @@ def go_down_tree(tree, *args, to_text=False):
     if to_text:
         return tree.text
     return tree
-
-
-if __name__ == "__main__":
-    async def main():
-        async with aiohttp.ClientSession(raise_for_status=True) as session:
-            print(await get_folder_name(None, "SU2lkCtdoLH3X1w", password="NUS2020"))
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())

@@ -32,3 +32,16 @@ folder:
   - custom:
       function: FS2020.informatik.parse_main_page
       folder_name: Computer Science  D-ITET  SS 20
+  - folder:
+      name: Video Portal
+      producers:
+      - video_portal:
+          department: d-math
+          year: 2020
+          semester: spring
+          course_id: 401-0232-10L
+      - video_portal:
+          department: d-math
+          year: 2020
+          semester: spring
+          course_id: 401-0302-10L

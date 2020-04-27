@@ -3,17 +3,29 @@ from video_portal.constants import *
 from video_portal.login import login
 
 
-async def producer(session, queue, department, year, semester, course_id, pwd_username=None, pwd_password=None):
-    course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
-
+async def get_meta_data(session, course_url):
     meta_url = course_url + ".series-metadata.json"
 
     async with session.get(meta_url) as response:
         meta_data = await response.json()
 
-    course_name = meta_data["title"]
+    return meta_data
 
-    base_path = safe_path_join(settings.video_portal_path, course_name)
+
+async def get_folder_name(session, department, year, semester, course_id, **kwargs):
+    course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
+
+    meta_data = await get_meta_data(session, course_url)
+
+    return meta_data["title"]
+
+
+async def producer(session, queue, base_path, department, year, semester,
+                   course_id, pwd_username=None, pwd_password=None):
+    base_path = os.path.join(settings.base_path, base_path)
+    course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
+
+    meta_data = await get_meta_data(session, course_url)
 
     downloaded_episodes = os.listdir(base_path)
 

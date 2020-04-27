@@ -38,11 +38,24 @@ class String(object):
 
 
 class Path(String):
+    def __init__(self, absolute=True, *args, **kwargs):
+        self.absolute = absolute
+        super().__init__(*args, **kwargs)
+
     def test_value(self, value):
-        if value and not os.path.exists(value):
+        if not value:
+            return True, ""
+
+        if self.absolute:
+            if not os.path.isabs(value):
+                return False, "please enter an absolute path"
+            path = value
+        else:
+            base_path = os.path.dirname(os.path.dirname(__file__))
+            path = os.path.join(base_path, value)
+
+        if not os.path.exists(path):
             return False, "please enter a valid path, which exists"
-        if value and not os.path.isabs(value):
-            return False, "please enter an absolute path"
         return True, ""
 
     def is_set(self):
