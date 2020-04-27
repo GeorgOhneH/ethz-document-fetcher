@@ -52,6 +52,6 @@ class AppSettings(Settings):
     username = String()
     password = Password()
     base_path = Path()
-    model_path = Path(absolute=False)
+    model_path = Path(absolute=False, default=os.path.join("models", "FS2020", "itet.yml"))
     download_videos = Bool(default=True)
     loglevel = Option(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])

@@ -8,7 +8,8 @@ class String(object):
         if depends_on is None:
             depends_on = []
         self.depends_on = depends_on
-        self._value = self.set_value(None, default)
+        self._value = None
+        self.set_value(None, default)
         self.active_func = active_func
         self.name = None
 
@@ -39,8 +40,8 @@ class String(object):
 
 class Path(String):
     def __init__(self, absolute=True, *args, **kwargs):
-        self.absolute = absolute
         super().__init__(*args, **kwargs)
+        self.absolute = absolute
 
     def test_value(self, value):
         if not value:
