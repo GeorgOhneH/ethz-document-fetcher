@@ -1,32 +1,40 @@
 import re
+import time
+import html
+import asyncio
 
 from aiohttp import ClientSession
 
 from .constants import *
 
+lock = asyncio.Lock()
 
-async def login(session: ClientSession, text: str, sam_url):
-    if "you must press the Continue button once to proceed" not in text:
 
-        jsessionid = re.search("jsessionid=.*=e1s1", text).group()
-
-        async with session.post(f"{SSO_URL};{jsessionid}", data=SSO_DATA) as resp:
+async def login(session: ClientSession, url, data):
+    async with lock:
+        async with session.post(url, data=data) as resp:
             text = await resp.text()
 
-    try:
-        match = re.search("""name="RelayState" value="ss&#x3a;mem&#x3a;(.*)"/>""", text)
-        ssm = match.group(1)
+        if "you must press the Continue button once to proceed" not in text:
+            action_url = re.search("""<form action="(.+)" method="post">""", text)[1]
+            action_url = html.unescape(action_url)
 
-        match = re.search("""name="SAMLResponse" value="(.*)"/>""", text)
-        sam = match.group(1)
-    except AttributeError:
-        raise EnvironmentError("Wasn't able to log in. Please check that your username and password are correct")
+            async with session.post(BASE_URL + action_url, data=SSO_DATA) as resp:
+                text = await resp.text()
+        try:
+            sam_url = re.search("""<form action="(.+)" method="post">""", text)[1]
+            sam_url = html.unescape(sam_url)
+            ssm = re.search("""name="RelayState" value="(.+)"/>""", text)[1]
+            ssm = html.unescape(ssm)
+            sam = re.search("""name="SAMLResponse" value="(.+)"/>""", text)[1]
+            sam = html.unescape(sam)
+        except TypeError:
+            raise EnvironmentError("Wasn't able to log in. Please check that your username and password are correct")
 
-    saml_data = {
-        "RelayState": f"ss:mem:{ssm}",
-        "SAMLResponse": sam,
-    }
+        saml_data = {
+            "RelayState": ssm,
+            "SAMLResponse": sam,
+        }
 
-    async with session.post(f"{sam_url}", data=saml_data) as resp:
-        resp.raise_for_status()
-        await resp.text()
+        async with session.post(f"{sam_url}", data=saml_data) as resp:
+            await resp.text()

@@ -2,23 +2,19 @@ import asyncio
 import logging.config
 import os
 
+import aiohttp
 from colorama import init
+
+import model_parser
+from settings import settings
+from downloader import download_files
+from utils import user_statistics
+from settings.logger import LOGGER_CONFIG
 
 init()
 
-from settings.logger import LOGGER_CONFIG
-
 logging.config.dictConfig(LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
-
-import aiohttp
-
-import ilias
-import model_parser
-import moodle
-from settings import settings
-from downloader import download_files
-from utils import user_statistics, debug_logger
 
 
 async def main():
@@ -28,21 +24,11 @@ async def main():
     async with aiohttp.ClientSession(raise_for_status=True) as session:
         await user_statistics(session, settings.username)
 
-        logger.debug("Logging in")
-        await moodle.login(session)
-        await ilias.login(session)
-
         logger.debug(f"Loading model: {settings.model_path}")
+        queue = asyncio.Queue()
         producers = []
         model_file = os.path.join(os.path.dirname(__file__), settings.model_path)
-        await model_parser.parse(session, producers, model_file)
-
-        queue = asyncio.Queue()
-
-        logger.debug("Starting producers")
-        producers = [asyncio.create_task(debug_logger(function)(session=session, queue=queue,
-                                                                base_path=base_path, **kwargs))
-                     for function, kwargs, base_path in producers]
+        await model_parser.parse(session, queue, producers, model_file)
 
         logger.debug("Starting consumers")
         consumers = [asyncio.create_task(download_files(session, queue)) for _ in range(20)]

@@ -1,5 +1,6 @@
 import hashlib
 import json
+import html
 import os
 from pathlib import Path
 import time
@@ -71,4 +72,4 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    return string.replace("/", "-")
+    return html.unescape(string.replace("/", "-"))

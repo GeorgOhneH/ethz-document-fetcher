@@ -1,6 +1,6 @@
 from utils import safe_path_join
 from video_portal.constants import *
-from video_portal.login import login
+from video_portal.login import login_and_data
 
 
 async def get_meta_data(session, course_url):
@@ -44,8 +44,8 @@ async def producer(session, queue, base_path, department, year, semester,
 
         meta_video_url = video_url + ".series-metadata.json"
 
-        meta_video_data = await login(session, department, year, semester, course_id,
-                                      meta_video_url, pwd_username, pwd_password)
+        meta_video_data = await login_and_data(session, department, year, semester, course_id,
+                                               meta_video_url, pwd_username, pwd_password)
 
         url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
         await queue.put({"path": safe_path_join(base_path, file_name), "url": url})

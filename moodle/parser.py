@@ -72,6 +72,7 @@ async def parse_folder(session, queue, instance, base_path):
     async with session.get(href) as response:
         text = await response.text()
 
+    await asyncio.sleep(0)
     folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER)
     folder_path = safe_path_join(base_path, folder_name)
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)

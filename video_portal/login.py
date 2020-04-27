@@ -1,8 +1,8 @@
 from video_portal.constants import *
 
 
-async def login(session, department, year, semester, course_id, meta_video_url,
-                pwd_username=None, pwd_password=None, depth=0):
+async def login_and_data(session, department, year, semester, course_id, meta_video_url,
+                         pwd_username=None, pwd_password=None, depth=0):
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 
     async with session.get(meta_video_url) as response:
@@ -33,5 +33,5 @@ async def login(session, department, year, semester, course_id, meta_video_url,
         async with session.post(series_url, data=pwd_data) as response:
             await response.text()
 
-    return await login(session, department, year, semester, course_id, meta_video_url,
-                       pwd_username=pwd_username, pwd_password=pwd_password, depth=depth + 1)
+    return await login_and_data(session, department, year, semester, course_id, meta_video_url,
+                                pwd_username=pwd_username, pwd_password=pwd_password, depth=depth + 1)

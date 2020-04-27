@@ -6,7 +6,4 @@ async def login(session):
     async with session.get(LOGIN_URL) as response:
         response_url = response.url
 
-    async with session.post(response_url, data=IDP_DATA) as response:
-        text = await response.text()
-
-    await aai_logon.login(session, text, aai_logon.ILIAS_URL)
+    await aai_logon.login(session, response_url, IDP_DATA)

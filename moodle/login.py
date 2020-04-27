@@ -3,9 +3,7 @@ from .constants import *
 
 
 async def login(session):
-    async with session.post(AUTH_URL, data=IDP_DATA) as response:
-        text = await response.text()
-    await aai_logon.login(session, text, aai_logon.MOODLE_URL)
+    await aai_logon.login(session, AUTH_URL, IDP_DATA)
 
 
 async def test_connection(session):

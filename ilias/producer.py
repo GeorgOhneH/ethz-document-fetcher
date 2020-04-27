@@ -14,7 +14,7 @@ async def get_folder_name(session, id):
     async with session.get(url) as response:
         html = await response.text()
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
     ol = soup.find("ol", class_="breadcrumb")
     return str(ol.find_all("li")[2].string)
@@ -30,6 +30,7 @@ async def search_tree(session, queue, base_path, fold_id):
     async with session.get(url) as response:
         html = await response.text()
 
+    await asyncio.sleep(0)
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
     rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})
     for row in rows:
