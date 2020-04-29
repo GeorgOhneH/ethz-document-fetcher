@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
-    if not settings.check_if_set():
+    if not settings.check_if_valid():
         logger.critical("Settings are not correctly configured. Please run 'python setup.py'. Exiting...")
         return
 

@@ -35,8 +35,10 @@ async def download_files(session: aiohttp.ClientSession, queue):
 async def download_if_not_exist(session, path, url, extension=True, kwargs=None, allowed_extensions=None):
     if kwargs is None:
         kwargs = {}
-    if allowed_extensions is not None:
-        allowed_extensions = [item.lower() for item in allowed_extensions]
+    if allowed_extensions is None:
+        allowed_extensions = []
+
+    allowed_extensions = [item.lower() for item in allowed_extensions + settings.allowed_extensions]
 
     timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
@@ -53,7 +55,7 @@ async def download_if_not_exist(session, path, url, extension=True, kwargs=None,
     file_name = os.path.basename(absolute_path)
     if extension:
         file_extension = get_extension(file_name)
-        if allowed_extensions is not None and file_extension.lower() not in allowed_extensions:
+        if allowed_extensions and file_extension.lower() not in allowed_extensions:
             return
         if file_extension.lower() in ["mp4", "webm", "avi", "mkv", "mov", "m4v"]:
             if not settings.download_videos:

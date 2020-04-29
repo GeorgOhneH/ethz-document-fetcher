@@ -12,9 +12,9 @@ class SettingBase(type):
     def __new__(mcs, name, bases, attrs, **kwargs):
         values = []
         for key, value in attrs.items():
-            if isinstance(value, String):
+            if isinstance(value, ConfigString):
                 value.name = key
-                attrs[key] = property(value.get_value, value.set_value)
+                attrs[key] = property(value.get, value.set)
                 values.append(value)
         attrs["_values"] = values
         return super().__new__(mcs, name, bases, attrs)
@@ -31,27 +31,28 @@ class Settings(metaclass=SettingBase):
         for value in self._values:
             file_value = current_settings.get(value.name, None)
             if file_value is not None:
-                value.load_value(file_value)
+                value.load(file_value)
 
     def __iter__(self):
         return iter(self._values)
 
-    def check_if_set(self):
+    def check_if_valid(self):
         for value in self._values:
-            if value.is_active() and not value.is_set():
+            if not value.is_valid() or value.error_on_load:
                 return False
         return True
 
     def save(self):
         with open(SETTINGS_PATH, "w+") as f:
             for value in self._values:
-                f.write(f"{value.name}{SEPARATOR}{value._value}\n")
+                f.write(f"{value.name}{SEPARATOR}{value.save()}\n")
 
 
 class AppSettings(Settings):
-    username = String()
-    password = Password()
-    base_path = Path()
-    model_path = Path(absolute=False, default=os.path.join("models", "FS2020", "itet.yml"))
-    download_videos = Bool(default=True)
-    loglevel = Option(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])
+    username = ConfigString()
+    password = ConfigPassword()
+    base_path = ConfigPath()
+    model_path = ConfigPath(absolute=False, default=os.path.join("models", "FS2020", "itet.yml"))
+    download_videos = ConfigBool(default=True)
+    loglevel = ConfigOption(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])
+    allowed_extensions = ConfigList(optional=True)

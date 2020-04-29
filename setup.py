@@ -17,23 +17,25 @@ def setup():
         while True:
             user_prompt = value.get_user_prompt()
 
-            if isinstance(value, setting_values.Password):
+            if isinstance(value, setting_values.ConfigPassword):
                 i = getpass.getpass(user_prompt)
             else:
                 print(user_prompt, end="")
                 i = input().strip()
 
-            if i == "":
+            if i == "" and value.is_valid():
                 break
 
-            if isinstance(value, setting_values.Bool):
-                i = "y" in i
-
-            valid, msg = value.test_value(i)
-            if not valid:
-                print(msg)
+            i = value.convert_from_prompt(i)
+            if i is None:
+                print(value.msg)
                 continue
-            value.set_value(None, i)
+
+            if not value.test(i):
+                print(value.msg)
+                continue
+
+            value.set(None, i)
             break
 
     settings.save()
