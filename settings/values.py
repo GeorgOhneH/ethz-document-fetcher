@@ -177,7 +177,7 @@ class ConfigList(ConfigString):
 
     def convert_from_prompt(self, value):
         value = value.strip()
-        if value[0] != "[" or value[-1] != "]":
+        if value and (value[0] != "[" or value[-1] != "]"):
             self.msg = "Not valid format"
             return None
         return self._load(value)
@@ -190,4 +190,4 @@ class ConfigList(ConfigString):
         return True
 
     def _middle_prompt(self):
-        return " (format: [value1,value2,etc..] (empty: []))"
+        return " (format: [value1,value2,etc..] (empty is []))"
