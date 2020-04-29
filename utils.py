@@ -25,7 +25,7 @@ def debug_logger(function):
         logger.debug(f"Starting: {function_name}")
         t = time.time()
         result = await function(session=session, queue=queue, base_path=base_path, *args, **kwargs)
-        logger.debug(f"Finished: {function_name}, time: {(time.time() - t):.2f}")
+        logger.debug(f"Finished: {function_name}: time active: {(time.time() - t):.2f}")
         return result
 
     return wrapper

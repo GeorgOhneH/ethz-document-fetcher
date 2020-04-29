@@ -4,6 +4,9 @@ import logging
 import os
 import re
 import shutil
+import traceback
+import asyncio
+import sys
 from pathlib import Path
 
 import aiohttp
@@ -17,30 +20,32 @@ logger = logging.getLogger(__name__)
 async def download_files(session: aiohttp.ClientSession, queue):
     while True:
         item = await queue.get()
-        kwargs = item.get("kwargs", {})
-        file_path = item.get("path")
-        url = item.get("url")
-        extension = item.get("extension", True)
-
-        await download_if_not_exist(session, file_path, url, extension, kwargs)
+        try:
+            await download_if_not_exist(session, **item)
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            if settings.loglevel == "DEBUG":
+                traceback.print_exc()
+            logger.error(f"Consumer got an error: {type(e).__name__}: {e}")
 
         queue.task_done()
 
 
-async def download_if_not_exist(session, file_path, url, extension=True, kwargs=None):
+async def download_if_not_exist(session, path, url, extension=True, kwargs=None, allowed_extensions=None):
     if kwargs is None:
         kwargs = {}
+    if allowed_extensions is not None:
+        allowed_extensions = [item.lower() for item in allowed_extensions]
 
     timeout = aiohttp.ClientTimeout(total=0)
-    if os.path.isabs(file_path):
-        absolute_path = file_path
+    if os.path.isabs(path):
+        absolute_path = path
     else:
-        absolute_path = os.path.join(settings.base_path, file_path)
+        absolute_path = os.path.join(settings.base_path, path)
 
-    drive, path = os.path.splitdrive(absolute_path)
-    absolute_path = os.path.join(drive, path.replace(":", ";").replace("|", ""))
-
-    Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+    drive, nd_path = os.path.splitdrive(absolute_path)
+    absolute_path = os.path.join(drive, nd_path.replace(":", ";").replace("|", ""))
 
     if file_exists(absolute_path, extension):
         return
@@ -48,6 +53,8 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
     file_name = os.path.basename(absolute_path)
     if extension:
         file_extension = get_extension(file_name)
+        if allowed_extensions is not None and file_extension.lower() not in allowed_extensions:
+            return
         if file_extension.lower() in ["mp4", "webm", "avi", "mkv", "mov", "m4v"]:
             if not settings.download_videos:
                 return
@@ -61,6 +68,8 @@ async def download_if_not_exist(session, file_path, url, extension=True, kwargs=
             resp_file_name = re.findall("""filename="(.+).""", disposition)[0]
             absolute_path += "." + get_extension(resp_file_name)
             file_name = os.path.basename(absolute_path)
+
+        Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
         with open(absolute_path, 'wb') as f:
             while True:

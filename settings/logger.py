@@ -20,7 +20,7 @@ LOGGER_CONFIG = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": settings.loglevel,
+            "level": settings.loglevel if settings.loglevel in ["ERROR", "WARNING", "INFO", "DEBUG"] else "INFO",
             "formatter": "debug_fmt" if settings.loglevel == "DEBUG" else "info_fmt",
             "stream": "ext://sys.stdout",
         },
@@ -36,6 +36,7 @@ LOGGER_CONFIG = {
 
 class ColouredFormatter(logging.Formatter):
     COLOURS = {
+        "CRITICAL": Fore.RED,
         "ERROR": Fore.RED,
         "WARNING": Fore.LIGHTYELLOW_EX,
         "INFO": Fore.LIGHTBLUE_EX,
