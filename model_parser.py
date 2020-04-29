@@ -85,7 +85,7 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
     folder = p_kwargs.pop("folder", None)
     folder_name = p_kwargs.pop("folder_name", None)
     use_folder = p_kwargs.pop("use_folder", True)
-    possible_consumer_kwargs = ["allowed_extensions"]
+    possible_consumer_kwargs = ["allowed_extensions", "forbidden_extensions"]
     consumer_kwargs = {name: p_kwargs.pop(name, None) for name in possible_consumer_kwargs}
     consumer_kwargs = {name: value for name, value in consumer_kwargs.items() if value is not None}
 

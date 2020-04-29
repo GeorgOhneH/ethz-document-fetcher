@@ -11,6 +11,7 @@ from pathlib import Path
 
 import aiohttp
 from colorama import Fore, Style
+from constants import *
 
 from settings import settings
 
@@ -32,13 +33,31 @@ async def download_files(session: aiohttp.ClientSession, queue):
         queue.task_done()
 
 
-async def download_if_not_exist(session, path, url, extension=True, kwargs=None, allowed_extensions=None):
+async def download_if_not_exist(
+        session,
+        path,
+        url,
+        extension=True,
+        kwargs=None,
+        allowed_extensions=None,
+        forbidden_extensions=None,
+):
     if kwargs is None:
         kwargs = {}
+
     if allowed_extensions is None:
         allowed_extensions = []
 
     allowed_extensions = [item.lower() for item in allowed_extensions + settings.allowed_extensions]
+    if "movie" in allowed_extensions:
+        allowed_extensions += MOVIE_EXTENSIONS
+
+    if forbidden_extensions is None:
+        forbidden_extensions = []
+
+    forbidden_extensions = [item.lower() for item in forbidden_extensions + settings.forbidden_extensions]
+    if "movie" in forbidden_extensions:
+        forbidden_extensions += MOVIE_EXTENSIONS
 
     timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
@@ -57,9 +76,9 @@ async def download_if_not_exist(session, path, url, extension=True, kwargs=None,
         file_extension = get_extension(file_name)
         if allowed_extensions and file_extension.lower() not in allowed_extensions:
             return
-        if file_extension.lower() in ["mp4", "webm", "avi", "mkv", "mov", "m4v"]:
-            if not settings.download_videos:
-                return
+        if forbidden_extensions and file_extension.lower() in forbidden_extensions:
+            return
+        if file_extension.lower() in MOVIE_EXTENSIONS:
             logger.info(f"Starting to download {file_name}")
 
     async with session.get(url, timeout=timeout, **kwargs) as response:
