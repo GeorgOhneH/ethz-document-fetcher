@@ -5,7 +5,6 @@ from video_portal.login import login_and_data
 
 async def get_meta_data(session, course_url):
     meta_url = course_url + ".series-metadata.json"
-
     async with session.get(meta_url) as response:
         meta_data = await response.json()
 

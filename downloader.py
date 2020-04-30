@@ -28,7 +28,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
         except Exception as e:
             if settings.loglevel == "DEBUG":
                 traceback.print_exc()
-            logger.error(f"Consumer got an error: {type(e).__name__}: {e}")
+            logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}")
 
         queue.task_done()
 
@@ -49,14 +49,14 @@ async def download_if_not_exist(
         allowed_extensions = []
 
     allowed_extensions = [item.lower() for item in allowed_extensions + settings.allowed_extensions]
-    if "movie" in allowed_extensions:
+    if "video" in allowed_extensions:
         allowed_extensions += MOVIE_EXTENSIONS
 
     if forbidden_extensions is None:
         forbidden_extensions = []
 
     forbidden_extensions = [item.lower() for item in forbidden_extensions + settings.forbidden_extensions]
-    if "movie" in forbidden_extensions:
+    if "video" in forbidden_extensions:
         forbidden_extensions += MOVIE_EXTENSIONS
 
     timeout = aiohttp.ClientTimeout(total=0)

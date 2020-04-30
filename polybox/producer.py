@@ -59,19 +59,16 @@ async def get_folder_name(session, id, password=None):
         data_info = soup.body.header.div
         author = " ".join(data_info["data-owner-display-name"].split(" ")[:2])
         name = data_info["data-name"]
-
         return f"Polybox - {author}"
 
 
 async def producer(session, queue, id, base_path, password=None):
     poly_id = id
+    tasks = []
     # We create a new session, because polybox doesn't work
     # when you jump around with the same session
     async with aiohttp.ClientSession(raise_for_status=True) as session:
         headers = await authenticate(session, poly_id, password)
-
-        if password is not None:
-            await login(session, poly_id, password)
 
         async with session.request("PROPFIND", url=WEBDAV_URL, data=PROPFIND_DATA, headers=headers) as response:
             xml = await response.text()
@@ -83,18 +80,23 @@ async def producer(session, queue, id, base_path, password=None):
             prop = go_down_tree(response, "d:propstat", "d:prop")
             checksum = go_down_tree(prop, "oc:checksums", "oc:checksum", to_text=True)
             contenttype = go_down_tree(prop, "d:getcontenttype", to_text=True)
-            if contenttype is not None:
-                path = PurePath(unquote(href))
-                path = os.path.join(*path.parts[3:])
-                absolute_path = os.path.join(base_path, path)
-                files = os.path.basename(href)
-                url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
+            if contenttype is None:
+                continue
 
-                url = f"{INDEX_URL}{poly_id}/download?files={files}&path={url_path}"
-                if password is not None:
-                    await download_if_not_exist(session, file_path=absolute_path, url=url)
-                else:
-                    await queue.put({"url": url, "path": absolute_path})
+            path = PurePath(unquote(href))
+            path = os.path.join(*path.parts[3:])
+            absolute_path = os.path.join(base_path, path)
+            files = os.path.basename(href)
+            url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
+
+            url = f"{INDEX_URL}{poly_id}/download?files={files}&path={url_path}"
+            if password is not None:
+                coroutine = download_if_not_exist(session, path=absolute_path, url=url, **queue.consumer_kwargs)
+                tasks.append(asyncio.create_task(coroutine))
+            else:
+                await queue.put({"url": url, "path": absolute_path})
+
+        await asyncio.gather(*tasks)
 
 
 def go_down_tree(tree, *args, to_text=False):

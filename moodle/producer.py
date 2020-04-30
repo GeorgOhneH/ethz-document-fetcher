@@ -1,22 +1,22 @@
 from bs4 import BeautifulSoup
 
 from constants import BEAUTIFUL_SOUP_PARSER
+from .constants import AUTH_URL
+from exceptions import LoginError
 from moodle.parser import parse_main_page
 
 
-async def get_html(session, id):
+async def producer(session, queue, base_path, id):
     async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={id}") as response:
         html = await response.read()
-    return html
-
-
-async def producer(session, queue, base_path, id):
-    html = await get_html(session, id)
+        if str(response.url) == AUTH_URL:
+            raise LoginError("Module moodle isn't logged in")
     return await parse_main_page(session, queue, html, base_path, id)
 
 
 async def get_folder_name(session, id):
-    html = await get_html(session, id)
+    async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={id}") as response:
+        html = await response.read()
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
     header = soup.find("div", class_="page-header-headings")

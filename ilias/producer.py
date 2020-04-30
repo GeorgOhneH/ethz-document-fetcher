@@ -4,6 +4,7 @@ import re
 import aiohttp
 
 from constants import *
+from exceptions import LoginError
 from ilias.constants import *
 from ilias.login import login
 from utils import *
@@ -26,9 +27,10 @@ async def producer(session, queue, base_path, id):
 
 async def search_tree(session, queue, base_path, fold_id):
     url = GOTO_URL + str(fold_id)
-
     async with session.get(url) as response:
         html = await response.text()
+        if str(response.url) != url:
+            raise LoginError("Module ilias isn't logged in")
 
     await asyncio.sleep(0)
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
@@ -44,7 +46,7 @@ async def search_tree(session, queue, base_path, fold_id):
             await queue.put({"url": href, "path": f"{path}.{extension}"})
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
-            await search_tree(session, queue, ref_id, path)
+            await search_tree(session, queue, path, ref_id)
 
 
 if __name__ == "__main__":

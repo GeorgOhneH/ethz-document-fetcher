@@ -1,0 +1,79 @@
+folder:
+  name: semester2
+  producers:
+  - moodle:
+      id: 11838
+      producers:
+      - polybox:
+          id: 4YGUCHIXorTsvVL
+  - moodle:
+      id: 12228
+      producers:
+      - polybox:
+          id: iSYMs1nnDAzDWtU
+  - moodle:
+      id: 12301
+      producers:
+      - nethz:
+          url: https://n.ethz.ch/~tiagos/download/2020/
+  - moodle:
+      id: 12611
+      producers:
+      - ilias:
+          id: 187834
+          folder_name: Notizen
+      - nethz:
+          url: https://n.ethz.ch/~cdirren/downloads/Analysis_2/
+      - polybox:
+          id: C8LWUyvLRUbh3zX
+      - custom:
+          function: FS2020.analysis.parse_main_page
+          use_folder: false
+  - custom:
+      function: FS2020.informatik.parse_main_page
+      folder_name: Computer Science  D-ITET  SS 20
+  - folder:
+      name: Video Portal
+      producers:
+      - video_portal:
+          department: d-math
+          year: 2020
+          semester: spring
+          course_id: 401-0232-10L
+      - video_portal:
+          department: d-math
+          year: 2020
+          semester: spring
+          course_id: 401-0302-10L
+      - video_portal:
+            department: d-itet
+            year: 2020
+            semester: spring
+            course_id: 227-0002-00L
+            pwd_username: bie-20s
+            pwd_password: null
+      - video_portal:
+          department: d-itet
+          year: 2019
+          semester: spring
+          course_id: 227-0002-00L
+          pwd_username: bie-19s
+          pwd_password: null
+      - video_portal:
+            department: d-infk
+            year: 2020
+            semester: spring
+            course_id: 252-0848-00L
+            pwd_username: scw-20s
+            pwd_password: null
+      - video_portal:
+            department: d-infk
+            year: 2019
+            semester: autumn
+            course_id: 252-0847-00L
+            pwd_username: scw-19s
+            pwd_password: null
+      - polybox:
+          folder_name: NuS2 Podcast
+          id: SU2lkCtdoLH3X1w
+          password: null
