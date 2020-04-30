@@ -1,4 +1,5 @@
 import re
+import asyncio
 
 from bs4 import BeautifulSoup
 
@@ -27,6 +28,7 @@ async def producer(session, queue, url, base_path):
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
     links = soup.find_all("a")
+    tasks = []
     for link in links:
         href = link.get("href")
         if href != str(link.string).strip():
@@ -40,4 +42,7 @@ async def producer(session, queue, url, base_path):
         if "." in href:
             await queue.put({"url": url + href, "path": path})
         else:
-            await producer(session, queue, url + href, path)
+            coroutine = producer(session, queue, url + href, path)
+            tasks.append(asyncio.create_task(coroutine))
+
+    await asyncio.gather(*tasks)

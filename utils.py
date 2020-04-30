@@ -4,8 +4,12 @@ import html
 import os
 from pathlib import Path
 import time
+import atexit
 
 import logging
+
+from constants import CACHE_PATH
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +24,7 @@ async def user_statistics(session, name):
 
 
 def debug_logger(function):
-    async def wrapper(session, queue, base_path, *args,  **kwargs):
+    async def wrapper(session, queue, base_path, *args, **kwargs):
         function_name = f"{function.__module__}.{function.__name__} {kwargs}"
         logger.debug(f"Starting: {function_name}")
         t = time.time()
@@ -31,15 +35,36 @@ def debug_logger(function):
     return wrapper
 
 
-async def check_url_reference(session, url, url_reference_path):
-    url_reference = load_url_reference(url_reference_path)
+def load_url_reference(path):
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r") as f:
+        return json.load(f)
+
+
+def save_url_reference(path):
+    with open(path, "w+") as f:
+        return json.dump(url_reference, f)
+
+
+def clean_up_url_reference():
+    logger.debug("Cleaning up url reference")
+    path = os.path.join(CACHE_PATH, "url_reference.json")
+    save_url_reference(path)
+
+
+url_reference = load_url_reference(os.path.join(CACHE_PATH, "url_reference.json"))
+atexit.register(clean_up_url_reference)
+
+
+async def check_url_reference(session, url):
     new_url = url_reference.get(url, None)
 
     if new_url is None:
         async with session.get(url, raise_for_status=False) as response:
             new_url = str(response.url)
         url_reference[url] = new_url
-        save_url_reference(url_reference, url_reference_path)
+        logger.debug(f"Called url_reference, url: {url}, new url: {new_url}")
 
     return new_url
 
@@ -53,18 +78,6 @@ def save_txt(section, path):
 def load_txt(path):
     with open(path, "r") as f:
         return f.read()
-
-
-def load_url_reference(path):
-    if not os.path.exists(path):
-        return {}
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-def save_url_reference(url_reference, path):
-    with open(path, "w+") as f:
-        return json.dump(url_reference, f)
 
 
 def safe_path_join(path, *paths):

@@ -1,3 +1,5 @@
+import asyncio
+
 from utils import safe_path_join
 from video_portal.constants import *
 from video_portal.login import login_and_data
@@ -28,6 +30,7 @@ async def producer(session, queue, base_path, department, year, semester,
 
     downloaded_episodes = os.listdir(base_path)
 
+    tasks = []
     for episode in meta_data["episodes"]:
         ep_id = episode['id']
         name = episode["title"]
@@ -43,8 +46,35 @@ async def producer(session, queue, base_path, department, year, semester,
 
         meta_video_url = video_url + ".series-metadata.json"
 
-        meta_video_data = await login_and_data(session, department, year, semester, course_id,
-                                               meta_video_url, pwd_username, pwd_password)
+        coroutine = put_in_queue(session,
+                                 queue,
+                                 safe_path_join(base_path, file_name),
+                                 department,
+                                 year,
+                                 semester,
+                                 course_id,
+                                 meta_video_url,
+                                 pwd_username,
+                                 pwd_password)
 
-        url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
-        await queue.put({"path": safe_path_join(base_path, file_name), "url": url})
+        tasks.append(asyncio.create_task(coroutine))
+
+    await asyncio.gather(*tasks)
+
+
+async def put_in_queue(session,
+                       queue,
+                       base_path,
+                       department,
+                       year,
+                       semester,
+                       course_id,
+                       meta_video_url,
+                       pwd_username,
+                       pwd_password):
+
+    meta_video_data = await login_and_data(session, department, year, semester, course_id,
+                                           meta_video_url, pwd_username, pwd_password)
+
+    url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
+    await queue.put({"path": base_path, "url": url})

@@ -29,6 +29,7 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
 
     instances = section.find_all("div", class_="activityinstance")
 
+    tasks = []
     for instance in reversed(instances):
         try:
             instance.a.span
@@ -49,20 +50,21 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
             url = instance.a["href"] + "&redirect=1"
             name = str(instance.a.span.contents[0])
 
-            url_reference_path = os.path.join(CACHE_PATH, "moodle_url.json")
-            driver_url = await check_url_reference(session, url, url_reference_path)
+            driver_url = await check_url_reference(session, url)
 
+            coroutine = None
             if "onedrive.live.com" in driver_url:
-                await one_drive.producer(session, queue, driver_url, base_path + f"; {safe_path(name)}")
+                coroutine = one_drive.producer(session, queue, base_path + f"; {safe_path(name)}", driver_url)
 
             elif "polybox" in driver_url:
                 poly_id = driver_url.split("s/")[-1].split("/")[0]
-                try:
-                    await polybox.producer(session, queue, poly_id, safe_path_join(base_path, name))
-                except ClientResponseError:
-                    logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {moodle_id}")
+                coroutine = poly_box_wrapper(polybox.producer, moodle_id)(session, queue, poly_id,
+                                                                          safe_path_join(base_path, name))
 
-    await parse_sub_folders(queue, soup=section, folder_path=base_path)
+            if coroutine is not None:
+                tasks.append(asyncio.create_task(coroutine))
+
+    await asyncio.gather(parse_sub_folders(queue, soup=section, folder_path=base_path), *tasks)
 
 
 async def parse_folder(session, queue, instance, base_path):
@@ -99,3 +101,16 @@ async def parse_folder_tree(queue, soup, folder_path):
             url = child.span.a["href"]
             name = child.span.a.find("span", recursive=False, class_="fp-filename").get_text(strip=True)
             await queue.put({"path": safe_path_join(sub_folder_path, name), "url": url})
+
+
+def poly_box_wrapper(func, moodle_id):
+    async def wrapper(*args, **kwargs):
+        try:
+            await func(*args, **kwargs)
+        except ClientResponseError:
+            if "id" in kwargs:
+                poly_id = kwargs["id"]
+            else:
+                poly_id = args[2]
+            logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {moodle_id}")
+    return wrapper

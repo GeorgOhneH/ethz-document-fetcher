@@ -24,7 +24,7 @@ async def main():
         return
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
-        await user_statistics(session, settings.username)
+        user_statistic = asyncio.create_task(user_statistics(session, settings.username))
 
         logger.debug(f"Loading model: {settings.model_path}")
         queue = asyncio.Queue()
@@ -48,6 +48,8 @@ async def main():
         logger.debug("Cancel consumers")
         for c in consumers:
             c.cancel()
+
+        await user_statistic
 
 
 if __name__ == '__main__':

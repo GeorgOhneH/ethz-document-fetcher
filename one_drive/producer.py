@@ -31,31 +31,31 @@ async def get_folder_name(session, url):
     return item_data["name"]
 
 
-async def producer(session, queue, driver_url, base_path):
+async def producer(session, queue, base_path, driver_url):
     parameters = parse_qs(urlparse(driver_url).query)
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
-
     async with session.get(api_url) as response:
         item_data = await response.json()
 
+    tasks = []
     for item in item_data["value"]:
         path = safe_path_join(base_path, item["name"])
         if "@content.downloadUrl" in item:
             await queue.put({"path": path, "url": item["@content.downloadUrl"]})
 
         elif "folder" in item:
-            url_reference_path = os.path.join(CACHE_PATH, "one_drive_url.json")
-            folder_url = await check_url_reference(session, item['webUrl'], url_reference_path)
-            await producer(session, queue, f"{folder_url}?authkey={authkey}", path)
+            folder_url = await check_url_reference(session, item['webUrl'])
+            coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}")
+            tasks.append(asyncio.create_task(coroutine))
+
+    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
     async def main():
         async with aiohttp.ClientSession(raise_for_status=True) as session:
-            await producer(session, None,
-                           "https://onedrive.live.com/?cid=b8180e91f886ea8a&id=B8180E91F886EA8A%21155601&authkey=!APFF5FVBjgYLHK8",
-                           None)
+            pass
 
 
     loop = asyncio.get_event_loop()

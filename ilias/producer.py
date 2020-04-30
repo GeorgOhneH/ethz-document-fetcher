@@ -35,6 +35,7 @@ async def search_tree(session, queue, base_path, fold_id):
     await asyncio.sleep(0)
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
     rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})
+    tasks = []
     for row in rows:
         content = row.find("div", attrs={"class": "ilContainerListItemContent"})
         link = content.find("a")
@@ -46,7 +47,10 @@ async def search_tree(session, queue, base_path, fold_id):
             await queue.put({"url": href, "path": f"{path}.{extension}"})
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
-            await search_tree(session, queue, path, ref_id)
+            coroutine = search_tree(session, queue, path, ref_id)
+            tasks.append(asyncio.create_task(coroutine))
+
+    await asyncio.gather(*tasks)
 
 
 if __name__ == "__main__":
