@@ -31,10 +31,9 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
 ## Model
 The model file is where you specify your folder structure and the websites you want to scrape.
 
-See examples in the models folder.
+See examples in the models folder. Note that in some examples 
 
-### Structure
-#### Beginning
+### Start
 You need to start with a `folder` or/and `producers`
 
 ```yaml
@@ -44,7 +43,7 @@ producers:
     ...
 ```
 
-#### folder
+### folder
 
 ```yaml
 folder:
@@ -53,7 +52,7 @@ folder:
       ...
 ```
 
-#### producers
+### producers
 
 ```yaml
 producers:
@@ -66,8 +65,10 @@ producers:
     ...
 ```
 
-#### producer
+### producer
 Global parameters, all optional
+
+if no folder name is giving, it takes the title of the website
 
 ```yaml
 <producer>:
@@ -82,37 +83,37 @@ Global parameters, all optional
       
 ```
 
-##### moodle
+#### moodle
 
 ```yaml
 moodle:
     id: moodle_id
 ```
-##### ilias
+#### ilias
 
 ```yaml
 ilias:
     id: ilias_id
 ```
-##### nethz
+#### nethz
 
 ```yaml
 nethz:
     url: nethz_url
 ```
-##### one_drive
+#### one_drive
 
 ```yaml
 one_drive:
     url: one_drive_url
 ```
-##### polybox
+#### polybox
 
 ```yaml
 polybox:
     id: polybox_id
 ```
-##### video portal
+#### video portal
 
 ```yaml
 video_portal:
