@@ -9,10 +9,11 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
 1. make sure at least python 3.7 is installed
 2. cd in the directory
 3. run `pip install -r requirements.txt`
-4. run `python setup.py` (This will ask you to input your settings and create a `settings.config`)
+4. run `python setup.py` (This will ask you to input your
+ settings and create a `settings.config` file)
     
     You can also edit the settings directly in the `settings.config` file
-5. run `python main.py` or execute the `run.bat` file (Windows only)
+5. run `python main.py` (All users) or execute the `run.bat` file (Windows only)
 
     Note: You can use the `run.bat` file from anywhere
     
@@ -26,8 +27,8 @@ The settings in your `settings.config` file
 | base_path |  Absolute path to the directory where the files will be stored      |
 | template_path | path to your template |
 | loglevel | ERROR or WARNING or INFO or DEBUG |
-| allowed_extensions | Is a list. Add 'video' for all video types extensions|
-| forbidden_extensions | Is a list. Add 'video' for all video types extensions|
+| allowed_extensions | A list of extension which are allowed to be downloaded. Add 'video' for all video types extensions|
+| forbidden_extensions | A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
 
 ## Template
 The template file is where you specify your folder structure and the websites you want to scrape.
@@ -70,7 +71,7 @@ producers:
 ### Producer
 Global parameters, all optional
 
-if no folder name is giving, it takes the title of the website
+if no folder name is given, it takes the title of the website
 
 ```yaml
 <producer>:
@@ -114,7 +115,7 @@ one_drive:
 ```yaml
 polybox:
     id: polybox_id
-    password: NUS2020
+    password: password
 ```
 #### Video Portal
 
