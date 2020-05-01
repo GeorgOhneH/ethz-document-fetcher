@@ -1,6 +1,7 @@
 import asyncio
 import logging.config
 import os
+import time
 
 import aiohttp
 from colorama import init
@@ -24,8 +25,6 @@ async def main():
         return
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
-        user_statistic = asyncio.create_task(user_statistics(session, settings.username))
-
         logger.debug(f"Loading model: {settings.model_path}")
         queue = asyncio.Queue()
         producers = []
@@ -33,8 +32,12 @@ async def main():
         try:
             await model_parser.parse(session, queue, producers, model_file)
         except ParseModelError as e:
-            logger.critical(f"An error occurred while passing the model: {e}. Exiting...")
+            logger.critical(f"A critical error occurred while passing the model: {e}. Exiting...")
+            for p in producers:
+                p.cancel()
             return
+
+        user_statistic = asyncio.create_task(user_statistics(session, settings.username))
 
         logger.debug("Starting consumers")
         consumers = [asyncio.create_task(download_files(session, queue)) for _ in range(20)]
@@ -53,11 +56,9 @@ async def main():
 
 
 if __name__ == '__main__':
-    import time
-
     start_t = time.time()
     startup_time = time.process_time()
-    asyncio.run(main())
+    asyncio.run(main(), debug=False)
     logger.debug(f"Startup time: {startup_time:.2f} seconds")
     logger.debug(f"Total process time: {(time.process_time()):.2f} seconds")
     logger.info(f"Finished in {(time.time() - start_t + startup_time):.2f} seconds")

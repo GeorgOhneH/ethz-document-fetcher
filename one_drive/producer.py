@@ -31,8 +31,8 @@ async def get_folder_name(session, url):
     return item_data["name"]
 
 
-async def producer(session, queue, base_path, driver_url):
-    parameters = parse_qs(urlparse(driver_url).query)
+async def producer(session, queue, base_path, url):
+    parameters = parse_qs(urlparse(url).query)
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
     async with session.get(api_url) as response:

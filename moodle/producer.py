@@ -14,7 +14,7 @@ async def producer(session, queue, base_path, id):
     return await parse_main_page(session, queue, html, base_path, id)
 
 
-async def get_folder_name(session, id):
+async def get_folder_name(session, id, **kwargs):
     async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={id}") as response:
         html = await response.read()
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)

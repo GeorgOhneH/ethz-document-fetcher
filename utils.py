@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import time
 import atexit
+import re
 
 import logging
 
@@ -23,50 +24,60 @@ async def user_statistics(session, name):
         pass
 
 
-def debug_logger(function):
-    async def wrapper(session, queue, base_path, *args, **kwargs):
-        function_name = f"{function.__module__}.{function.__name__} {kwargs}"
-        logger.debug(f"Starting: {function_name}")
-        t = time.time()
-        result = await function(session=session, queue=queue, base_path=base_path, *args, **kwargs)
-        logger.debug(f"Finished: {function_name}: time active: {(time.time() - t):.2f}")
-        return result
-
-    return wrapper
-
-
-def load_url_reference(path):
+def load_lockup_table(path):
     if not os.path.exists(path):
         return {}
     with open(path, "r") as f:
         return json.load(f)
 
 
-def save_url_reference(path):
+def save_lockup_table(path):
     with open(path, "w+") as f:
-        return json.dump(url_reference, f)
+        return json.dump(lockup_table, f)
 
 
-def clean_up_url_reference():
-    logger.debug("Cleaning up url reference")
-    path = os.path.join(CACHE_PATH, "url_reference.json")
-    save_url_reference(path)
+def clean_lockup_table():
+    logger.debug("Cleaning up lockup table")
+    path = os.path.join(CACHE_PATH, "lockup_table.json")
+    save_lockup_table(path)
 
 
-url_reference = load_url_reference(os.path.join(CACHE_PATH, "url_reference.json"))
-atexit.register(clean_up_url_reference)
+lockup_table = load_lockup_table(os.path.join(CACHE_PATH, "lockup_table.json"))
+atexit.register(clean_lockup_table)
 
 
 async def check_url_reference(session, url):
-    new_url = url_reference.get(url, None)
+    new_url = lockup_table.get(url, None)
 
     if new_url is None:
         async with session.get(url, raise_for_status=False) as response:
             new_url = str(response.url)
-        url_reference[url] = new_url
+        lockup_table[url] = new_url
         logger.debug(f"Called url_reference, url: {url}, new url: {new_url}")
 
     return new_url
+
+
+async def check_extension_cache(session, path, url):
+    extension = lockup_table.get(path+url, None)
+
+    if extension is None:
+        async with session.get(url, raise_for_status=True) as response:
+            extension = get_extension_from_response(response)
+        lockup_table[path+url] = extension
+        logger.debug(f"Called extension_cache, path+url: {path+url}, new url: {extension}")
+
+    return path + "." + extension
+
+
+def get_extension_from_response(response):
+    disposition = response.headers['content-disposition']
+    resp_file_name = re.search("""filename="(.+).""", disposition)[1]
+    return get_extension(resp_file_name)
+
+
+def get_extension(file):
+    return file.split(".")[-1]
 
 
 def save_txt(section, path):

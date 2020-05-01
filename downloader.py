@@ -12,6 +12,7 @@ from pathlib import Path
 import aiohttp
 from colorama import Fore, Style
 from constants import *
+from utils import get_extension, check_extension_cache
 
 from settings import settings
 
@@ -68,27 +69,23 @@ async def download_if_not_exist(
     drive, nd_path = os.path.splitdrive(absolute_path)
     absolute_path = os.path.join(drive, nd_path.replace(":", ";").replace("|", ""))
 
-    if file_exists(absolute_path, extension):
+    if not extension:
+        absolute_path = await check_extension_cache(session, absolute_path, url)
+
+    if os.path.exists(absolute_path):
         return
 
     file_name = os.path.basename(absolute_path)
-    if extension:
-        file_extension = get_extension(file_name)
-        if allowed_extensions and file_extension.lower() not in allowed_extensions:
-            return
-        if forbidden_extensions and file_extension.lower() in forbidden_extensions:
-            return
-        if file_extension.lower() in MOVIE_EXTENSIONS:
-            logger.info(f"Starting to download {file_name}")
+    file_extension = get_extension(file_name)
+    if allowed_extensions and file_extension.lower() not in allowed_extensions:
+        return
+    if forbidden_extensions and file_extension.lower() in forbidden_extensions:
+        return
+    if file_extension.lower() in MOVIE_EXTENSIONS:
+        logger.info(f"Starting to download {file_name}")
 
     async with session.get(url, timeout=timeout, **kwargs) as response:
         response.raise_for_status()
-
-        if not extension:
-            disposition = response.headers['content-disposition']
-            resp_file_name = re.findall("""filename="(.+).""", disposition)[0]
-            absolute_path += "." + get_extension(resp_file_name)
-            file_name = os.path.basename(absolute_path)
 
         Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
@@ -145,16 +142,3 @@ def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
     return "".join([x["name"].format(x["var"]) for x in orig_sections])
 
 
-def get_extension(file):
-    return file.split(".")[-1]
-
-
-def file_exists(path, extension):
-    if not extension:
-        valid_paths = glob.glob(f"{path}.*")
-        if len(valid_paths) > 2:
-            logger.warning("Found file with same filename, but different extension, could cause problems")
-
-        return len(valid_paths) >= 1
-
-    return os.path.exists(path)

@@ -1,10 +1,12 @@
 import asyncio
 import re
 import logging
+import traceback
 
 from aiohttp.client_exceptions import ClientResponseError
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, SoupStrainer
 
+from settings import settings
 import one_drive
 import polybox
 from constants import BEAUTIFUL_SOUP_PARSER, CACHE_PATH
@@ -15,9 +17,10 @@ logger = logging.getLogger(__name__)
 
 
 async def parse_main_page(session, queue, html, base_path, moodle_id):
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    only_sections = SoupStrainer("li", id=re.compile("section-([0-9]+)"))
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER, parse_only=only_sections)
 
-    sections = soup.find_all("li", id=re.compile("section-([0-9]+)"))
+    sections = soup.find_all("li", id=re.compile("section-([0-9]+)"), recursive=False)
 
     coroutines = [parse_sections(session, queue, section, base_path, moodle_id) for section in sections]
     await asyncio.gather(*coroutines)
@@ -44,7 +47,8 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
             await queue.put({"path": safe_path_join(base_path, file_name), "url": url, "extension": False})
 
         elif mtype == MTYPE_DIRECTORY:
-            await parse_folder(session, queue, instance, base_path)
+            coroutine = parse_folder(session, queue, instance, base_path)
+            tasks.append(asyncio.create_task(coroutine))
 
         elif mtype == MTYPE_EXTERNAL_LINK:
             url = instance.a["href"] + "&redirect=1"
@@ -54,15 +58,17 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
 
             coroutine = None
             if "onedrive.live.com" in driver_url:
+                logger.debug(f"Starting one drive from moodle: {moodle_id}")
                 coroutine = one_drive.producer(session, queue, base_path + f"; {safe_path(name)}", driver_url)
 
             elif "polybox" in driver_url:
+                logger.debug(f"Starting polybox from moodle: {moodle_id}")
                 poly_id = driver_url.split("s/")[-1].split("/")[0]
                 coroutine = poly_box_wrapper(polybox.producer, moodle_id)(session, queue, poly_id,
                                                                           safe_path_join(base_path, name))
 
             if coroutine is not None:
-                tasks.append(asyncio.create_task(coroutine))
+                tasks.append(asyncio.create_task(exception_handler(coroutine, moodle_id, url)))
 
     await asyncio.gather(parse_sub_folders(queue, soup=section, folder_path=base_path), *tasks)
 
@@ -75,7 +81,8 @@ async def parse_folder(session, queue, instance, base_path):
         text = await response.text()
 
     await asyncio.sleep(0)
-    folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER)
+    only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
+    folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
     folder_path = safe_path_join(base_path, folder_name)
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path)
 
@@ -114,3 +121,15 @@ def poly_box_wrapper(func, moodle_id):
                 poly_id = args[2]
             logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {moodle_id}")
     return wrapper
+
+
+async def exception_handler(coroutine, moodle_id, url):
+    try:
+        await coroutine
+    except asyncio.CancelledError:
+        raise asyncio.CancelledError()
+    except Exception as e:
+        if settings.loglevel == "DEBUG":
+            traceback.print_exc()
+        logger.error(f"Got an unexpected error from moodle: {moodle_id} "
+                     f"while trying to access {url}, Error: {type(e).__name__}: {e}")

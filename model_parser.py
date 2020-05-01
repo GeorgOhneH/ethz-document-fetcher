@@ -6,11 +6,15 @@ import json
 import copy
 import types
 import inspect
+import time
+import traceback
+import re
 
 import yaml
 
+from settings import settings
 from exceptions import ParseModelError
-from utils import safe_path_join, debug_logger
+from utils import safe_path_join
 from constants import CACHE_PATH
 
 import logging
@@ -20,14 +24,14 @@ logger = logging.getLogger(__name__)
 locks = {}
 
 
-def wrapper(obj, attr):
+def queue_wrapper(obj, attr):
     def inside(*args, **kwargs):
         getattr(obj, attr)(*args, **kwargs)
 
     return inside
 
 
-def wrapper_async(obj, attr, **consumer_kwargs):
+def queue_wrapper_async(obj, attr, **consumer_kwargs):
     async def inside(*args, **kwargs):
         if attr == "put":
             if kwargs.get("item"):
@@ -46,9 +50,9 @@ class QueueWrapper:
         for attr, method in obj.__class__.__dict__.items():
             if callable(method):
                 if inspect.iscoroutinefunction(method):
-                    setattr(self, attr, wrapper_async(obj, attr, **kwargs))
+                    setattr(self, attr, queue_wrapper_async(obj, attr, **kwargs))
                 else:
-                    setattr(self, attr, wrapper(obj, attr))
+                    setattr(self, attr, queue_wrapper(obj, attr))
 
 
 async def parse_folder(data, base_path, **kwargs):
@@ -112,9 +116,13 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
     try:
         producer_module = importlib.import_module(module_name)
     except ModuleNotFoundError:
-        raise ParseModelError(f"Producer with name: {module_name} does not exist")
+        raise ParseModelError(f"Producer module with name: {module_name} does not exist")
 
-    producer_function = getattr(producer_module, function_name)
+    try:
+        producer_function = getattr(producer_module, function_name)
+    except AttributeError:
+        raise ParseModelError(f"Function: {function_name} in module: {module_name} does not exist")
+
     await call_if_never_called(session, producer_module, "login")
 
     if use_folder:
@@ -130,7 +138,7 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
 
     queue_wrapper = QueueWrapper(queue, **consumer_kwargs)
 
-    coroutine = debug_logger(producer_function)(session=session, queue=queue_wrapper, base_path=base_path, **p_kwargs)
+    coroutine = exception_handler(producer_function)(session=session, queue=queue_wrapper, base_path=base_path, **p_kwargs)
     producers.append(asyncio.create_task(coroutine))
 
     if sub_producer is not None:
@@ -244,6 +252,67 @@ async def get_folder_name(session, function, folder_name_cache, p_kwargs):
     if unique_string in folder_name_cache:
         return folder_name_cache[unique_string]
     logger.debug(f"Calling folder function: {unique_string}")
-    folder_name = await function(session=session, **p_kwargs)
+    folder_name = await exception_handler_folder_name(function)(session=session, **p_kwargs)
     folder_name_cache[unique_string] = folder_name
     return folder_name
+
+
+def exception_handler(function):
+    async def wrapper(session, queue, base_path, *args, **kwargs):
+        function_name = f"{function.__module__}.{function.__name__}"
+        function_name_kwargs = f"{function_name}<{dict_to_string(kwargs)}>"
+        try:
+            logger.debug(f"Starting: {function_name_kwargs}")
+            t = time.time()
+            result = await function(session=session, queue=queue, base_path=base_path, *args, **kwargs)
+            logger.debug(f"Finished: {function_name_kwargs}, time: {(time.time() - t):.2f}")
+            return result
+        except asyncio.CancelledError:
+            raise asyncio.CancelledError()
+        except TypeError as e:
+            if settings.loglevel == "DEBUG":
+                traceback.print_exc()
+            keyword = re.findall("'(.+)'", e.args[0])
+            logger.error(f"The producer {function_name_kwargs} got an unexpected keyword: {keyword}."
+                         f" Stopping the producer..")
+            return None
+        except Exception as e:
+            if settings.loglevel == "DEBUG":
+                traceback.print_exc()
+            logger.error(f"Got an unexpected error from producer: {function_name_kwargs}, "
+                         f"Error: {type(e).__name__}: {e}")
+
+    return wrapper
+
+
+def exception_handler_folder_name(function):
+    async def wrapper(session, *args, **kwargs):
+        function_name = f"{function.__module__}.{function.__name__}"
+        function_name_kwargs = f"{function_name}<{dict_to_string(kwargs)}>"
+        try:
+            return await function(session=session, *args, **kwargs)
+        except asyncio.CancelledError:
+            raise asyncio.CancelledError()
+        except TypeError as e:
+            if settings.loglevel == "DEBUG":
+                traceback.print_exc()
+            keyword = re.findall("'(.+)'", e.args[0])
+            logger.error(f"The producer got an unexpected keyword: {keyword}")
+            raise ParseModelError() from e
+        except Exception as e:
+            if settings.loglevel == "DEBUG":
+                traceback.print_exc()
+            logger.error(f"Got an unexpected error from get_folder_name: {function_name_kwargs}, "
+                         f"Error: {type(e).__name__}: {e}")
+            raise ParseModelError() from e
+
+    return wrapper
+
+
+def dict_to_string(d):
+    result = ""
+    for key, value in d.items():
+        result += str(key) + "=" + str(value) + " "
+    if d:
+        result = result[:-1]
+    return result

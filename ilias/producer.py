@@ -2,6 +2,7 @@ import asyncio
 import re
 
 import aiohttp
+from bs4 import BeautifulSoup, SoupStrainer
 
 from constants import *
 from exceptions import LoginError
@@ -33,7 +34,8 @@ async def search_tree(session, queue, base_path, fold_id):
             raise LoginError("Module ilias isn't logged in")
 
     await asyncio.sleep(0)
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    strainer = SoupStrainer("div", attrs={"class": "ilCLI ilObjListRow row"})
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER, parse_only=strainer)
     rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})
     tasks = []
     for row in rows:
