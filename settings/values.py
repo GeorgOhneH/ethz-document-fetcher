@@ -77,7 +77,7 @@ class ConfigPath(ConfigString):
         self.absolute = absolute
 
     def _test(self, value):
-        if self.absolute:
+        if self.absolute or os.path.isabs(value):
             if not os.path.isabs(value):
                 self.msg = "please enter an absolute path"
                 return False

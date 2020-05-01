@@ -55,4 +55,4 @@ class AppSettings(Settings):
     model_path = ConfigPath(absolute=False, default=os.path.join("models", "FS2020", "itet.yml"))
     loglevel = ConfigOption(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])
     allowed_extensions = ConfigList(optional=True)
-    forbidden_extensions = ConfigList(optional=True)
+    forbidden_extensions = ConfigList(optional=True, default=["video"])
