@@ -31,7 +31,8 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
 ## Model
 The model file is where you specify your folder structure and the websites you want to scrape.
 
-See examples in the models folder. Note that in some examples 
+See examples in the models folder. Note that in some examples some values are `null`.
+These must be replaced with there actual value.
 
 ### Start
 You need to start with a `folder` or/and `producers`
@@ -43,7 +44,7 @@ producers:
     ...
 ```
 
-### folder
+### Folder
 
 ```yaml
 folder:
@@ -52,7 +53,7 @@ folder:
       ...
 ```
 
-### producers
+### Producers
 
 ```yaml
 producers:
@@ -65,7 +66,7 @@ producers:
     ...
 ```
 
-### producer
+### Producer
 Global parameters, all optional
 
 if no folder name is giving, it takes the title of the website
@@ -83,13 +84,13 @@ if no folder name is giving, it takes the title of the website
       
 ```
 
-#### moodle
+#### Moodle
 
 ```yaml
 moodle:
     id: moodle_id
 ```
-#### ilias
+#### Ilias
 
 ```yaml
 ilias:
@@ -101,19 +102,19 @@ ilias:
 nethz:
     url: nethz_url
 ```
-#### one_drive
+#### One Drive
 
 ```yaml
 one_drive:
     url: one_drive_url
 ```
-#### polybox
+#### Polybox
 
 ```yaml
 polybox:
     id: polybox_id
 ```
-#### video portal
+#### Video Portal
 
 ```yaml
 video_portal:
@@ -124,8 +125,12 @@ video_portal:
     pwd_username: pwd_username (optional)
     pwd_password: pwd_password (optional)
 ```
-##### custom
+##### Custom
 You can write your own functions.
+
+```python
+async def your_function(session, queue, base_path, **kwargs):
+```
 
 The function must be located in the custom folder.
 
@@ -133,8 +138,47 @@ requires `folder_name`, `use_folder: false` or `folder_function`
 
 `folder_function` must also be located in the custom folder
 
+```python
+async def your_folder_name_function(session, queue, base_path, **kwargs):
+```
+
 ```yaml
 custom:
-    function: module.to.function
-    folder_function: module.to.folder_function (optional)
+    function: module.to.your_function
+    folder_function: module.to.your_folder_name_function (optional)
+    kwarg1: kwarg1_value1
+    kwarg2: kwarg1_value2
 ```
+
+## Contribution
+If you made your own model, consider making a pull request so other people can use it.
+Please replace all passwords and sensitive values with `null`.
+
+### Writing your own module
+You will need 2 functions, `producer` and `get_folder_name`.
+If your module needs a one time login then the `login` 
+function should also be implemented.
+
+The rest will be handled internally.
+
+#### producer
+```python
+async def producer(session, queue, base_path, **kwargs):
+```
+The producer function should parse the website and give the queue a dictionary 
+ `queue.put({url: your_url, path: path_to_file})` with the url where
+  the document can be downloaded.
+
+#### get_folder_name
+```python
+async def get_folder_name(session, **kwargs):
+```
+`get_folder_name` should return the name of the folder
+ #### login
+```python
+async def login(session):
+```
+
+
+
+
