@@ -1,4 +1,4 @@
-class ParseModelError(Exception):
+class ParseTemplateError(Exception):
     pass
 
 

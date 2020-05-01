@@ -9,30 +9,31 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
 1. make sure at least python 3.7 is installed
 2. cd in the directory
 3. run `pip install -r requirements.txt`
-4. run `python setup.py`
+4. run `python setup.py` (This will ask you to input your settings and create a `settings.config`)
     
     You can also edit the settings directly in the `settings.config` file
-5. run `python main.py` or execute the `run.bat` file
+5. run `python main.py` or execute the `run.bat` file (Windows only)
 
     Note: You can use the `run.bat` file from anywhere
     
 ## Settings
+The settings in your `settings.config` file 
 
 | Name        | Note           |
 | ------------- |-------------|
 | username      | LDAP ETH username |
 | password      |  LDAP ETH password    |
 | base_path |  Absolute path to the directory where the files will be stored      |
-| model_path | path to your model |
+| template_path | path to your template |
 | loglevel | ERROR or WARNING or INFO or DEBUG |
-| allowed_extensions | extension: 'video' for all video types |
-| forbidden_extensions | extension: 'video' for all video types |
+| allowed_extensions | Is a list. Add 'video' for all video types extensions|
+| forbidden_extensions | Is a list. Add 'video' for all video types extensions|
 
-## Model
-The model file is where you specify your folder structure and the websites you want to scrape.
+## Template
+The template file is where you specify your folder structure and the websites you want to scrape.
 
-See examples in the models folder. Note that in some examples some values are `null`.
-These must be replaced with there actual value.
+See examples in the template folder. Note that in some examples some values are `null`.
+These must be replaced with there actual values if you want them to be used.
 
 ### Start
 You need to start with a `folder` or/and `producers`
@@ -113,6 +114,7 @@ one_drive:
 ```yaml
 polybox:
     id: polybox_id
+    password: NUS2020
 ```
 #### Video Portal
 
@@ -125,7 +127,7 @@ video_portal:
     pwd_username: pwd_username (optional)
     pwd_password: pwd_password (optional)
 ```
-##### Custom
+#### Custom
 You can write your own functions.
 
 ```python
@@ -134,9 +136,16 @@ async def your_function(session, queue, base_path, **kwargs):
 
 The function must be located in the custom folder.
 
-requires `folder_name`, `use_folder: false` or `folder_function`
+The function should parse the website and give the queue a dictionary 
+ `queue.put({url: your_url, path: path_to_file})` with the url where
+  the document can be downloaded.
 
-`folder_function` must also be located in the custom folder
+The producer requires `folder_name`, `use_folder: false`
+ or a `your_folder_name_function`
+
+`your_folder_name_function` should return the name of the folder
+
+Note: the `your_folder_name_function` must also be located in the custom folder
 
 ```python
 async def your_folder_name_function(session, queue, base_path, **kwargs):
@@ -151,7 +160,7 @@ custom:
 ```
 
 ## Contribution
-If you made your own model, consider making a pull request so other people can use it.
+If you made your own template, consider making a pull request so other people can use it.
 Please replace all passwords and sensitive values with `null`.
 
 ### Writing your own module

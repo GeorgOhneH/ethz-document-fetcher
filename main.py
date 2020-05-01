@@ -6,8 +6,8 @@ import time
 import aiohttp
 from colorama import init
 
-import model_parser
-from exceptions import ParseModelError
+import template_parser
+from exceptions import ParseTemplateError
 from settings import settings
 from downloader import download_files
 from utils import user_statistics
@@ -25,14 +25,14 @@ async def main():
         return
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
-        logger.debug(f"Loading model: {settings.model_path}")
+        logger.debug(f"Loading template: {settings.template_path}")
         queue = asyncio.Queue()
         producers = []
-        model_file = os.path.join(os.path.dirname(__file__), settings.model_path)
+        template_file = os.path.join(os.path.dirname(__file__), settings.template_path)
         try:
-            await model_parser.parse(session, queue, producers, model_file)
-        except ParseModelError as e:
-            logger.critical(f"A critical error occurred while passing the model: {e}. Exiting...")
+            await template_parser.parse(session, queue, producers, template_file)
+        except ParseTemplateError as e:
+            logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
             for p in producers:
                 p.cancel()
             return

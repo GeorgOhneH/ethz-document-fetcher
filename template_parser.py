@@ -13,7 +13,7 @@ import re
 import yaml
 
 from settings import settings
-from exceptions import ParseModelError
+from exceptions import ParseTemplateError
 from utils import safe_path_join
 from constants import CACHE_PATH
 
@@ -57,13 +57,13 @@ class QueueWrapper:
 
 async def parse_folder(data, base_path, **kwargs):
     if "name" not in data:
-        raise ParseModelError("Expected a 'name' field in folder")
+        raise ParseTemplateError("Expected a 'name' field in folder")
 
     name = data["name"]
     path = os.path.join(base_path, name)
 
     if "producers" not in data:
-        raise ParseModelError("Expected a 'producers' field in folder")
+        raise ParseTemplateError("Expected a 'producers' field in folder")
 
     await parse_producers(data=data["producers"], base_path=path, **kwargs)
 
@@ -72,7 +72,7 @@ async def parse_producers(data, **kwargs):
     tasks = []
     for producer_dict in data:
         if len(producer_dict) > 1:
-            raise ParseModelError(f"Expected a producer with only one key (not {len(producer_dict)})")
+            raise ParseTemplateError(f"Expected a producer with only one key (not {len(producer_dict)})")
 
         producer_name, sub_data = list(producer_dict.items())[0]
         if producer_name == "folder":
@@ -93,6 +93,10 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
     consumer_kwargs = {name: p_kwargs.pop(name, None) for name in possible_consumer_kwargs}
     consumer_kwargs = {name: value for name, value in consumer_kwargs.items() if value is not None}
 
+    if check_if_null(p_kwargs):
+        logger.warning(f"Found a null field in {producer_name}. Skipping the producer and all sub-producers")
+        return
+
     if producer_name != "custom":
         module_name = producer_name
         folder_module_name = producer_name
@@ -100,28 +104,24 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
         folder_function_name = "get_folder_name"
     else:
         if "function" not in p_kwargs:
-            raise ParseModelError(f"Expected a 'function' field with custom")
+            raise ParseTemplateError(f"Expected a 'function' field with custom")
         module_name, function_name = get_module_function(p_kwargs.pop("function"))
         if folder_name is None and use_folder:
             if "function" not in p_kwargs:
-                raise ParseModelError(f"Expected a 'folder_function' or 'folder_name' field with custom")
+                raise ParseTemplateError(f"Expected a 'folder_function' or 'folder_name' field with custom")
             folder_module_name, folder_function_name = get_module_function(p_kwargs.pop("folder_function"))
         else:
             folder_module_name, folder_function_name = None, None
 
-    for key, value in p_kwargs.items():
-        if value is None:
-            raise ParseModelError(f"{key} is not allowed to be null")
-
     try:
         producer_module = importlib.import_module(module_name)
     except ModuleNotFoundError:
-        raise ParseModelError(f"Producer module with name: {module_name} does not exist")
+        raise ParseTemplateError(f"Producer module with name: {module_name} does not exist")
 
     try:
         producer_function = getattr(producer_module, function_name)
     except AttributeError:
-        raise ParseModelError(f"Function: {function_name} in module: {module_name} does not exist")
+        raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
 
     await call_if_never_called(session, producer_module, "login")
 
@@ -138,7 +138,9 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
 
     queue_wrapper = QueueWrapper(queue, **consumer_kwargs)
 
-    coroutine = exception_handler(producer_function)(session=session, queue=queue_wrapper, base_path=base_path, **p_kwargs)
+    coroutine = exception_handler(producer_function)(session=session, queue=queue_wrapper,
+                                                     base_path=base_path, **p_kwargs)
+
     producers.append(asyncio.create_task(coroutine))
 
     if sub_producer is not None:
@@ -159,6 +161,13 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
             base_path=base_path,
             folder_name_cache=folder_name_cache
         )
+
+
+def check_if_null(p_kwargs):
+    for key, value in p_kwargs.items():
+        if value is None:
+            return True
+    return False
 
 
 async def parse(session, queue, producers, path, base_path=""):
@@ -189,7 +198,7 @@ async def parse(session, queue, producers, path, base_path=""):
                 folder_name_cache=folder_name_cache
             )
         else:
-            raise ParseModelError(f"Expected 'folder' or 'producers' field (not {key})")
+            raise ParseTemplateError(f"Expected 'folder' or 'producers' field (not {key})")
         tasks.append(asyncio.create_task(coroutine))
 
     await asyncio.gather(*tasks)
@@ -298,13 +307,13 @@ def exception_handler_folder_name(function):
                 traceback.print_exc()
             keyword = re.findall("'(.+)'", e.args[0])
             logger.error(f"The producer got an unexpected keyword: {keyword}")
-            raise ParseModelError() from e
+            raise ParseTemplateError() from e
         except Exception as e:
             if settings.loglevel == "DEBUG":
                 traceback.print_exc()
             logger.error(f"Got an unexpected error from get_folder_name: {function_name_kwargs}, "
                          f"Error: {type(e).__name__}: {e}")
-            raise ParseModelError() from e
+            raise ParseTemplateError() from e
 
     return wrapper
 

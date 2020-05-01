@@ -65,7 +65,7 @@ class ConfigString(object):
         return ""
 
     def _get_current(self):
-        return f" (current: {self._save()})" if self.is_valid() else ""
+        return f" ({self._save()})" if self.is_valid() else ""
 
     def get_user_prompt(self):
         return f"Please enter the value for {self.name}{self._middle_prompt()}{self._get_current()}: "
@@ -102,7 +102,7 @@ class ConfigPassword(ConfigString):
     def _get_current(self):
         if self.get():
             censored = self.get()[0] + "*" * (len(self.get()) - 1)
-            return f" (current: {censored})"
+            return f" ({censored})"
         return ""
 
     def get_user_prompt(self):
@@ -133,7 +133,7 @@ class ConfigBool(ConfigString):
 
     def get_user_prompt(self):
         string_value = "yes" if self.get() else "no"
-        current = f" (current: {string_value}) (yes/no)"
+        current = f" ({string_value}) (yes/no)"
 
         return f"Please enter the bool for {self.name}{current}: "
 
