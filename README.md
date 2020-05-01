@@ -117,7 +117,12 @@ polybox:
 
 ```yaml
 video_portal:
-    id: polybox_id
+    department: department
+    year: year
+    semester: semester
+    course_id: course_id
+    pwd_username: pwd_username (optional)
+    pwd_password: pwd_password (optional)
 ```
 ##### custom
 You can write your own functions.
