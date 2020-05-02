@@ -1,0 +1,28 @@
+on:
+  push:
+    branches:
+      - master
+
+name: Create Release
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@master
+      - name: Get Release Info
+        id: release_info
+        run: sh release_info.sh
+      - name: Create Release
+        if: steps.release_info.latest_release != steps.release_info.current_version
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.release_info.current_version }}
+          release_name: ${{ steps.release_info.current_version }}
+          body: 
+          draft: false
+          prerelease: false
