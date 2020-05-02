@@ -4,6 +4,9 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  
  This should allow you to get all documents, exercises and any other file from
  these websites, without having to download and organize them yourself.
+ 
+ **IMPORTANT**: If the website updates their files and didn't rename them,
+then the fetcher will **not** replace them.
 
 ## Installation
 1. make sure at least python 3.7 is installed
@@ -13,12 +16,12 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  settings and create a `settings.config` file)
     
     You can also edit the settings directly in the `settings.config` file
-5. run `python main.py` (All users) or execute the `run.bat` file (Windows only)
+5. run `python main.py` (All) or execute the `run.bat` file (Windows only)
 
     Note: You can use the `run.bat` file from anywhere
     
 ## Settings
-The settings in your `settings.config` file 
+The settings in your `settings.config` file:
 
 | Name        | Note           |
 | ------------- |-------------|
@@ -34,7 +37,7 @@ The settings in your `settings.config` file
 The template file is where you specify your folder structure and the websites you want to scrape.
 
 See examples in the template folder. Note that in some examples some values are `null`.
-These must be replaced with there actual values if you want them to be used.
+These must be replaced with there actual values if you want the producer to be used.
 
 ### Start
 You need to start with a `folder` or/and `producers`
@@ -188,6 +191,7 @@ async def get_folder_name(session, **kwargs):
 ```python
 async def login(session):
 ```
+The login function, which will only be called once.
 
 
 
