@@ -1,22 +1,22 @@
 folder:
   name: semester2
   producers:
-  - moodle:
+  - moodle: # NuS2
       id: 11838
       producers:
       - polybox:
           id: 4YGUCHIXorTsvVL
-  - moodle:
+  - moodle: # Physik1
       id: 12228
       producers:
       - polybox:
           id: iSYMs1nnDAzDWtU
-  - moodle:
+  - moodle: # Koma
       id: 12301
       producers:
       - nethz:
           url: https://n.ethz.ch/~tiagos/download/2020/
-  - moodle:
+  - moodle: # Analysis2
       id: 12611
       producers:
       - ilias:
@@ -29,7 +29,7 @@ folder:
       - custom:
           function: FS2020.analysis.parse_main_page
           use_folder: false
-  - custom:
+  - custom: # Informatik1
       function: FS2020.informatik.parse_main_page
       folder_name: Computer Science  D-ITET  SS 20
   - folder:
