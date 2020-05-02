@@ -6,6 +6,7 @@ import asyncio
 from aiohttp import ClientSession
 
 from .constants import *
+from exceptions import LoginError
 
 lock = asyncio.Lock()
 
@@ -29,7 +30,7 @@ async def login(session: ClientSession, url, data):
             sam = re.search("""name="SAMLResponse" value="(.+)"/>""", text)[1]
             sam = html.unescape(sam)
         except TypeError:
-            raise EnvironmentError("Wasn't able to log in. Please check that your username and password are correct")
+            raise LoginError("Wasn't able to log in. Please check that your username and password are correct")
 
         saml_data = {
             "RelayState": ssm,
