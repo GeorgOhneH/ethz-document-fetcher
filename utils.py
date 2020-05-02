@@ -97,3 +97,24 @@ def safe_path_join(path, *paths):
 
 def safe_path(string):
     return html.unescape(string.replace("/", "-"))
+
+
+async def check_for_new_release(session):
+    path = os.path.join(os.path.dirname(__file__), "version.txt")
+    with open(path) as f:
+        current_version = f.readline().strip()
+
+    async with session.get("https://api.github.com/repos/GeorgOhneH/ethz-document-fetcher/releases/latest") as response:
+        data = await response.json()
+
+    latest_version = data["tag_name"]
+    c_v_i = [int(x) for x in current_version[1:].split(".")]
+    l_v_i = [int(x) for x in latest_version[1:].split(".")]
+    for i, latest_i in enumerate(l_v_i):
+        current_i = c_v_i[i] if i < len(c_v_i) else 0
+        if latest_i > current_i:
+            return True, latest_version, current_version
+        elif latest_i < current_i:
+            return False, latest_version, current_version
+    return False, latest_version, current_version
+

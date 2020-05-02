@@ -10,7 +10,7 @@ import template_parser
 from exceptions import ParseTemplateError
 from settings import settings
 from downloader import download_files
-from utils import user_statistics
+from utils import user_statistics, check_for_new_release
 from settings.logger import LOGGER_CONFIG
 
 init()
@@ -25,6 +25,14 @@ async def main():
         return
 
     async with aiohttp.ClientSession(raise_for_status=True) as session:
+        user_statistic = asyncio.create_task(user_statistics(session, settings.username))
+
+        logger.debug(f"Checking for update")
+        is_new_release, latest_version, current_version = await check_for_new_release(session)
+        if is_new_release:
+            logger.info(f"A new update is available. Update with 'git pull'."
+                        f" New version: {latest_version}. Current version {current_version}")
+
         logger.debug(f"Loading template: {settings.template_path}")
         queue = asyncio.Queue()
         producers = []
@@ -36,8 +44,6 @@ async def main():
             for p in producers:
                 p.cancel()
             return
-
-        user_statistic = asyncio.create_task(user_statistics(session, settings.username))
 
         logger.debug("Starting consumers")
         consumers = [asyncio.create_task(download_files(session, queue)) for _ in range(20)]

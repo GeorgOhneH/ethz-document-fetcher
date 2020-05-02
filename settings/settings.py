@@ -52,7 +52,7 @@ class AppSettings(Settings):
     username = ConfigString()
     password = ConfigPassword()
     base_path = ConfigPath(default=os.getcwd())
-    template_path = ConfigPath(absolute=False, default=os.path.join("templates", "FS2020", "semester2", "itet.yml"))
+    template_path = ConfigPath(absolute=False, default=os.path.join("templates", "FS2020", "itet", "semester2.yml"))
     loglevel = ConfigOption(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])
     allowed_extensions = ConfigList(optional=True)
     forbidden_extensions = ConfigList(optional=True, default=["video"])
