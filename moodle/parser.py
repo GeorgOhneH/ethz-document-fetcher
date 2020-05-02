@@ -11,7 +11,7 @@ import one_drive
 import polybox
 from constants import BEAUTIFUL_SOUP_PARSER, CACHE_PATH
 from utils import *
-from .constants import MTYPE_EXTERNAL_LINK, MTYPE_DIRECTORY, MTYPE_FILE
+from .constants import MTYPE_EXTERNAL_LINK, MTYPE_DIRECTORY, MTYPE_FILE, PDF_IMAGE
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,13 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
 
         if mtype == MTYPE_FILE:
             file_name = str(instance.a.span.contents[0])
+            extension = False
+            if instance.a.img["src"] == PDF_IMAGE:
+                file_name += ".pdf"
+                extension = True
+
             url = instance.a["href"] + "&redirect=1"
-            await queue.put({"path": safe_path_join(base_path, file_name), "url": url, "extension": False})
+            await queue.put({"path": safe_path_join(base_path, file_name), "url": url, "extension": extension})
 
         elif mtype == MTYPE_DIRECTORY:
             coroutine = parse_folder(session, queue, instance, base_path)

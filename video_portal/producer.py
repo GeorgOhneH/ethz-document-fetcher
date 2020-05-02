@@ -28,7 +28,10 @@ async def producer(session, queue, base_path, department, year, semester,
 
     meta_data = await get_meta_data(session, course_url)
 
-    downloaded_episodes = os.listdir(base_path)
+    if os.path.exists(base_path):
+        downloaded_episodes = os.listdir(base_path)
+    else:
+        downloaded_episodes = []
 
     tasks = []
     for episode in meta_data["episodes"]:
