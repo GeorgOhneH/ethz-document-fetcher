@@ -16,13 +16,13 @@ jobs:
         id: release_info
         run: sh release_info.sh
       - name: Create Release
-        if: steps.release_info.latest_release != steps.release_info.current_version
+        if: steps.release_info.outputs.latest_release != steps.release_info.outputs.current_version
         uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.release_info.current_version }}
-          release_name: ${{ steps.release_info.current_version }}
+          tag_name: ${{ steps.release_info.outputs.current_version }}
+          release_name: ${{ steps.release_info.outputs.current_version }}
           body: 
           draft: false
           prerelease: false
