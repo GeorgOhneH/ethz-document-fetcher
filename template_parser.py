@@ -13,7 +13,7 @@ import re
 import yaml
 
 from settings import settings
-from exceptions import ParseTemplateError
+from exceptions import ParseTemplateError, LoginError
 from utils import safe_path_join
 from constants import CACHE_PATH
 
@@ -115,17 +115,21 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
 
     try:
         producer_module = importlib.import_module(module_name)
+
+        producer_function = getattr(producer_module, function_name)
+
+        await call_if_never_called(session, producer_module, "login")
+
+    except asyncio.CancelledError as e:
+        raise asyncio.CancelledError() from e
+
     except ModuleNotFoundError:
         raise ParseTemplateError(f"Producer module with name: {module_name} does not exist")
 
-    try:
-        producer_function = getattr(producer_module, function_name)
     except AttributeError:
         raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
 
-    try:
-        await call_if_never_called(session, producer_module, "login")
-    except Exception as e:
+    except LoginError as e:
         raise ParseTemplateError(f"{module_name} login was not successful."
                                  f" Please check that your username and password are correct") from e
 
