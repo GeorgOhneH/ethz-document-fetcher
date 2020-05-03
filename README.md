@@ -5,6 +5,9 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  This should allow you to get all documents, exercises and any other file from
  these websites, without having to download and organize them yourself.
  
+ The main goal of this project is, that you can easily check if
+ new exercises (or any other files) have been released.
+ 
  **IMPORTANT**: The fetcher does **not** replace files,
   which were updated (and kept the same name) on the original website.
 

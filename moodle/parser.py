@@ -73,7 +73,7 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
                                                                           safe_path_join(base_path, name))
 
             if coroutine is not None:
-                tasks.append(asyncio.create_task(exception_handler(coroutine, moodle_id, url)))
+                tasks.append(asyncio.create_task(exception_handler(coroutine, moodle_id, driver_url)))
 
     await asyncio.gather(parse_sub_folders(queue, soup=section, folder_path=base_path), *tasks)
 
