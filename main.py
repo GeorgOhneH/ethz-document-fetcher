@@ -2,6 +2,8 @@ import asyncio
 import logging.config
 import os
 import time
+import ssl
+import certifi
 
 import aiohttp
 from colorama import init
@@ -24,7 +26,10 @@ async def main():
         logger.critical("Settings are not correctly configured. Please run 'python setup.py'. Exiting...")
         return
 
-    async with aiohttp.ClientSession(raise_for_status=True) as session:
+    ssl_context = ssl.create_default_context(cafile=certifi.where())
+    conn = aiohttp.TCPConnector(ssl=ssl_context)
+
+    async with aiohttp.ClientSession(raise_for_status=True, connector=conn) as session:
         logger.debug(f"Loading template: {settings.template_path}")
         queue = asyncio.Queue()
         producers = []

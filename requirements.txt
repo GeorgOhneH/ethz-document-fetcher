@@ -7,3 +7,4 @@ aiodns
 cchardet
 colorama
 pyyaml
+certifi

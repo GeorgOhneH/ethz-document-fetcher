@@ -40,11 +40,16 @@ async def producer(session, queue, base_path, url):
 
     tasks = []
     for item in item_data["value"]:
+        checksum = item["lastModifiedDateTime"]
         path = safe_path_join(base_path, item["name"])
         if "@content.downloadUrl" in item:
-            await queue.put({"path": path, "url": item["@content.downloadUrl"]})
+            await queue.put({"path": path, "url": item["@content.downloadUrl"], "checksum": checksum})
 
         elif "folder" in item:
+            checksum_key = item["id"]
+            if check_checksum_is_same(checksum_key, checksum):
+                continue
+
             folder_url = await check_url_reference(session, item['webUrl'])
             coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}")
             tasks.append(asyncio.create_task(coroutine))

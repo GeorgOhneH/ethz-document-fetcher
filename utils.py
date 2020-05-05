@@ -70,6 +70,22 @@ async def check_extension_cache(session, path, url):
     return path + "." + extension
 
 
+def check_checksum_is_same(key, checksum):
+    old_checksum = lockup_table.get(key, None)
+
+    if old_checksum is None:
+        lockup_table[key] = checksum
+        logger.debug(f"Added new checksum, key: {key}, checksum: {checksum}")
+        return False
+
+    if old_checksum == checksum:
+        return True
+
+    lockup_table[key] = checksum
+    logger.debug(f"Replaced old checksum, key: {key}, new checksum: {checksum}, old checksum {old_checksum}")
+    return False
+
+
 def get_extension_from_response(response):
     disposition = response.headers['content-disposition']
     resp_file_name = re.search("""filename="(.+).""", disposition)[1]

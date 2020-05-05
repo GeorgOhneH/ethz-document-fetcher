@@ -42,6 +42,7 @@ async def download_if_not_exist(
         kwargs=None,
         allowed_extensions=None,
         forbidden_extensions=None,
+        checksum=None,
 ):
     if kwargs is None:
         kwargs = {}
