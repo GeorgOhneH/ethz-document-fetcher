@@ -16,17 +16,18 @@ from .constants import MTYPE_EXTERNAL_LINK, MTYPE_DIRECTORY, MTYPE_FILE, PDF_IMA
 logger = logging.getLogger(__name__)
 
 
-async def parse_main_page(session, queue, html, base_path, moodle_id):
+async def parse_main_page(session, queue, html, base_path, moodle_id, use_external_links):
     only_sections = SoupStrainer("li", id=re.compile("section-([0-9]+)"))
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER, parse_only=only_sections)
 
     sections = soup.find_all("li", id=re.compile("section-([0-9]+)"), recursive=False)
 
-    coroutines = [parse_sections(session, queue, section, base_path, moodle_id) for section in sections]
+    coroutines = [parse_sections(session, queue, section, base_path, moodle_id, use_external_links)
+                  for section in sections]
     await asyncio.gather(*coroutines)
 
 
-async def parse_sections(session, queue, section, base_path, moodle_id):
+async def parse_sections(session, queue, section, base_path, moodle_id, use_external_links):
     section_name = str(section["aria-label"])
     base_path = safe_path_join(base_path, section_name)
 
@@ -56,6 +57,9 @@ async def parse_sections(session, queue, section, base_path, moodle_id):
             tasks.append(asyncio.create_task(coroutine))
 
         elif mtype == MTYPE_EXTERNAL_LINK:
+            if not use_external_links:
+                continue
+
             url = instance.a["href"] + "&redirect=1"
             name = str(instance.a.span.contents[0])
 

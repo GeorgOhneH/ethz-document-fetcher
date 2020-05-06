@@ -6,12 +6,12 @@ from exceptions import LoginError
 from moodle.parser import parse_main_page
 
 
-async def producer(session, queue, base_path, id):
+async def producer(session, queue, base_path, id, use_external_links=True):
     async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={id}") as response:
         html = await response.read()
         if str(response.url) == AUTH_URL:
             raise LoginError("Module moodle isn't logged in")
-    return await parse_main_page(session, queue, html, base_path, id)
+    return await parse_main_page(session, queue, html, base_path, id, use_external_links)
 
 
 async def get_folder_name(session, id, **kwargs):

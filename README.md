@@ -75,7 +75,7 @@ producers:
 ```
 
 ### Producer
-Global parameters, all optional
+Parameters for every producer, all optional
 
 if no folder name is given, it takes the title of the website
 
@@ -84,7 +84,8 @@ if no folder name is given, it takes the title of the website
     allowed_extensions: [extension1, extension2, pdf, ...]
     forbidden_extensions: [extension1, extension2, pdf, ...]
     folder_name: folder_name
-    use_folder: (true or false, default true)
+    use_folder: (true or false, default: true)
+    ...
     producers:
         ...
     folder:
@@ -97,24 +98,29 @@ if no folder name is given, it takes the title of the website
 ```yaml
 moodle:
     id: moodle_id
+    use_external_links: (true or false, default: true) (optional)
+    ...
 ```
 #### Ilias
 
 ```yaml
 ilias:
     id: ilias_id
+    ...
 ```
 #### nethz
 
 ```yaml
 nethz:
     url: nethz_url
+    ...
 ```
 #### One Drive
 
 ```yaml
 one_drive:
     url: one_drive_url
+    ...
 ```
 #### Polybox
 
@@ -122,6 +128,7 @@ one_drive:
 polybox:
     id: polybox_id
     password: password
+    ...
 ```
 #### Video Portal
 
@@ -133,6 +140,7 @@ video_portal:
     course_id: course_id
     pwd_username: pwd_username (optional)
     pwd_password: pwd_password (optional)
+    ...
 ```
 #### Custom
 You can write your own functions.

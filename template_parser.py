@@ -265,7 +265,7 @@ def save_folder_name_cache(md5, folder_name_cache):
 
 
 async def get_folder_name(session, function, folder_name_cache, p_kwargs):
-    unique_string = function.__module__ + "." + function.__name__ + str(p_kwargs)
+    unique_string = function.__module__ + "." + function.__name__ + f"<{dict_to_string(p_kwargs)}>"
     if unique_string in folder_name_cache:
         return folder_name_cache[unique_string]
     logger.debug(f"Calling folder function: {unique_string}")
