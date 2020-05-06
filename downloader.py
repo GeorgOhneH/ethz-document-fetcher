@@ -80,7 +80,7 @@ async def download_if_not_exist(
     file_extension = get_extension(file_name)
     if allowed_extensions and file_extension.lower() not in allowed_extensions:
         return
-    if forbidden_extensions and file_extension.lower() in forbidden_extensions:
+    if file_extension.lower() in forbidden_extensions:
         return
     if file_extension.lower() in MOVIE_EXTENSIONS:
         logger.info(f"Starting to download {file_name}")

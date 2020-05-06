@@ -13,6 +13,7 @@ folder:
           id: iSYMs1nnDAzDWtU
   - moodle: # Koma
       id: 12301
+      forbidden_extensions: [video]
       producers:
       - nethz:
           url: https://n.ethz.ch/~tiagos/download/2020/
