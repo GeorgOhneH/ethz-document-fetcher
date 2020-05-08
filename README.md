@@ -13,16 +13,20 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  <br>Except: Polybox, one drive
 
 ## Installation
-1. make sure at least python 3.7 is installed
-2. cd in the directory
-3. run `pip install -r requirements.txt`
-4. run `python setup.py` (This will ask you to input your
+1. Make sure at least python 3.7 is installed
+2. Install [git](https://git-scm.com/downloads) if you haven't
+3. Open a console in the directory where you want to install the fetcher
+4. run `git clone https://github.com/GeorgOhneH/ethz-document-fetcher.git`
+5. run `cd ethz-document-fetcher`
+6. run `pip install -r requirements.txt`
+7. run `python setup.py` (This will ask you to input your
  settings and create a `settings.config` file)
     
     You can also edit the settings directly in the `settings.config` file
-5. run `python main.py` (All) or execute the `run.bat` file (Windows only)
+8. run `python main.py` (All) or double click the `run.bat` file (Windows only)
+or double click the `run.sh` file (Mac/Linux only)
 
-    Note: You can use the `run.bat` file from anywhere
+    Note: You can use the `run.bat` and `run.sh` files from anywhere
     
 ## Settings
 The settings in your `settings.config` file:

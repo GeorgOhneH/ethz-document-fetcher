@@ -1,11 +1,13 @@
 import getpass
 import os
+import platform
 
 import settings.values as setting_values
 from settings import settings
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 BAT_FILE_PATH = os.path.join(BASE_PATH, "run.bat")
+SH_FILE_PATH = os.path.join(BASE_PATH, "run.sh")
 
 
 def setup():
@@ -40,9 +42,15 @@ def setup():
 
     settings.save()
 
-    with open(BAT_FILE_PATH, "w+") as f:
-        f.write(f"python {os.path.join(BASE_PATH, 'main.py')}\n")
-        f.write("pause")
+    if platform.system() == "Windows":
+        with open(BAT_FILE_PATH, "w+") as f:
+            f.write(f"python {os.path.join(BASE_PATH, 'main.py')}\n")
+            f.write("pause")
+    else:
+        with open(SH_FILE_PATH, "w+") as f:
+            f.write(f"#!/bin/bash\n")
+            f.write(f"python {os.path.join(BASE_PATH, 'main.py')}\n")
+        os.chmod(SH_FILE_PATH, 0o755)
 
 
 if __name__ == "__main__":
