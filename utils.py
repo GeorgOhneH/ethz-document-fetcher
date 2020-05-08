@@ -70,7 +70,10 @@ async def check_extension_cache(session, path, url):
     return path + "." + extension
 
 
-def check_checksum_is_same(key, checksum):
+def is_checksum_same(key, checksum):
+    if checksum is None:
+        return True
+
     old_checksum = lockup_table.get(key, None)
 
     if old_checksum is None:

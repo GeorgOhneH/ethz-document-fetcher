@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 try:
-    t = time.time()
     BeautifulSoup("", "lxml")
     BEAUTIFUL_SOUP_PARSER = "lxml"
 except bs4.FeatureNotFound:

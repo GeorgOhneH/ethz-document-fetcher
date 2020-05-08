@@ -12,7 +12,7 @@ from pathlib import Path
 import aiohttp
 from colorama import Fore, Style
 from constants import *
-from utils import get_extension, check_extension_cache
+from utils import get_extension, check_extension_cache, is_checksum_same
 
 from settings import settings
 
@@ -34,16 +34,14 @@ async def download_files(session: aiohttp.ClientSession, queue):
         queue.task_done()
 
 
-async def download_if_not_exist(
-        session,
-        path,
-        url,
-        extension=True,
-        kwargs=None,
-        allowed_extensions=None,
-        forbidden_extensions=None,
-        checksum=None,
-):
+async def download_if_not_exist(session,
+                                path,
+                                url,
+                                extension=True,
+                                kwargs=None,
+                                allowed_extensions=None,
+                                forbidden_extensions=None,
+                                checksum=None):
     if kwargs is None:
         kwargs = {}
 
@@ -74,7 +72,11 @@ async def download_if_not_exist(
         absolute_path = await check_extension_cache(session, absolute_path, url)
 
     if os.path.exists(absolute_path):
-        return
+        if is_checksum_same(absolute_path, checksum):
+            return
+        method_msg = "Replaced"
+    else:
+        method_msg = "Added new"
 
     file_name = os.path.basename(absolute_path)
     file_extension = get_extension(file_name)
@@ -98,7 +100,7 @@ async def download_if_not_exist(
                 f.write(chunk)
 
     start = {
-        "name": f"Added new file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",
+        "name": f"{method_msg} file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",
         "var": file_name,
         "priority": 100,
         "cut": "back",
@@ -121,7 +123,7 @@ def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
     sections = copy.copy(orig_sections)
     sections.sort(key=lambda s: -s["priority"])
 
-    free = c - sum([len(x["name"])-2 for x in sections]) - margin - 6
+    free = c - sum([len(x["name"]) - 2 for x in sections]) - margin - 6
     length_vars = []
     count = 0
     for section in reversed(sections):
@@ -134,12 +136,10 @@ def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
             if c_free < len(section["var"]) and len(section["var"]) > min_length:
                 cut_length = max(c_free, min_length)
                 if section["cut"] == "front":
-                    section["var"] = (filler + section["var"][-cut_length+len(filler):])
+                    section["var"] = (filler + section["var"][-cut_length + len(filler):])
                 elif section["cut"] == "back":
-                    section["var"] = (section["var"][:cut_length-len(filler)] + filler)
+                    section["var"] = (section["var"][:cut_length - len(filler)] + filler)
 
             free -= len(section["var"])
 
     return "".join([x["name"].format(x["var"]) for x in orig_sections])
-
-
