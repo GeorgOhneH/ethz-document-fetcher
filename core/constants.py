@@ -1,8 +1,6 @@
+import logging
 import os
 from pathlib import Path
-import time
-
-import logging
 
 import bs4
 from bs4 import BeautifulSoup
@@ -18,5 +16,5 @@ except bs4.FeatureNotFound:
 
 MOVIE_EXTENSIONS = ["mp4", "webm", "avi", "mkv", "mov", "m4v"]
 
-CACHE_PATH = os.path.join(os.path.dirname(__file__), "cache")
+CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache")
 Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)

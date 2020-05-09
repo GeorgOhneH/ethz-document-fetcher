@@ -1,15 +1,13 @@
-import hashlib
-import json
-import html
-import os
-from pathlib import Path
-import time
 import atexit
-import re
-
+import hashlib
+import html
+import json
 import logging
+import os
+import re
+from pathlib import Path
 
-from constants import CACHE_PATH
+from core.constants import CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +117,8 @@ def safe_path(string):
 
 
 async def check_for_new_release(session):
-    path = os.path.join(os.path.dirname(__file__), "version.txt")
+    main_path = os.path.dirname(os.path.dirname(__file__))
+    path = os.path.join(main_path, "version.txt")
     with open(path) as f:
         current_version = f.readline().strip()
 

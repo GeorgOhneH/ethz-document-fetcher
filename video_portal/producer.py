@@ -1,6 +1,6 @@
 import asyncio
 
-from utils import safe_path_join
+from core.utils import safe_path_join
 from video_portal.constants import *
 from video_portal.login import login_and_data
 

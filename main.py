@@ -1,18 +1,17 @@
 import asyncio
 import logging.config
 import os
-import time
 import ssl
-import certifi
+import time
 
 import aiohttp
+import certifi
 from colorama import init
 
-import template_parser
-from exceptions import ParseTemplateError
+from core import download_files, parse_template
+from core.exceptions import ParseTemplateError
+from core.utils import user_statistics, check_for_new_release
 from settings import settings
-from downloader import download_files
-from utils import user_statistics, check_for_new_release
 from settings.logger import LOGGER_CONFIG
 
 init()
@@ -35,7 +34,7 @@ async def main():
         producers = []
         template_file = os.path.join(os.path.dirname(__file__), settings.template_path)
         try:
-            await template_parser.parse(session, queue, producers, template_file)
+            await parse_template(session, queue, producers, template_file)
         except ParseTemplateError as e:
             logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
             for p in producers:

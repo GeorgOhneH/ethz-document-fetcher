@@ -1,9 +1,9 @@
 from bs4 import BeautifulSoup
 
-from constants import BEAUTIFUL_SOUP_PARSER
-from .constants import AUTH_URL
-from exceptions import LoginError
+from core.constants import BEAUTIFUL_SOUP_PARSER
+from core.exceptions import LoginError
 from moodle.parser import parse_main_page
+from .constants import AUTH_URL
 
 
 async def producer(session, queue, base_path, id, use_external_links=True):

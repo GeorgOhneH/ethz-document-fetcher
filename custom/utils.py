@@ -1,7 +1,5 @@
-import os
-
-from constants import *
-from utils import safe_path_join
+from core.constants import *
+from core.utils import safe_path_join
 
 
 async def validate_url(session, queue, links_to_pdf, base_url, base_path, **kwargs):

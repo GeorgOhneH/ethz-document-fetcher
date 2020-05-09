@@ -1,19 +1,13 @@
+import asyncio
 import copy
-import glob
-import logging
-import os
-import re
 import shutil
 import traceback
-import asyncio
-import sys
-from pathlib import Path
 
 import aiohttp
 from colorama import Fore, Style
-from constants import *
-from utils import get_extension, check_extension_cache, is_checksum_same
 
+from core.constants import *
+from core.utils import get_extension, check_extension_cache, is_checksum_same
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -71,12 +65,10 @@ async def download_if_not_exist(session,
     if not extension:
         absolute_path = await check_extension_cache(session, absolute_path, url)
 
-    if os.path.exists(absolute_path):
-        if is_checksum_same(absolute_path, checksum):
-            return
-        method_msg = "Replaced"
-    else:
-        method_msg = "Added new"
+    checksum_valid = is_checksum_same(absolute_path, checksum)
+
+    if os.path.exists(absolute_path) and checksum_valid:
+        return
 
     file_name = os.path.basename(absolute_path)
     file_extension = get_extension(file_name)
@@ -98,6 +90,11 @@ async def download_if_not_exist(session,
                 if not chunk:
                     break
                 f.write(chunk)
+
+    if checksum is not None and os.path.exists(absolute_path):
+        method_msg = "Replaced"
+    else:
+        method_msg = "Added new"
 
     start = {
         "name": f"{method_msg} file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",

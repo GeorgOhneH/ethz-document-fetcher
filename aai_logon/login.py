@@ -1,12 +1,11 @@
-import re
-import time
-import html
 import asyncio
+import html
+import re
 
 from aiohttp import ClientSession
 
+from core.exceptions import LoginError
 from .constants import *
-from exceptions import LoginError
 
 lock = asyncio.Lock()
 

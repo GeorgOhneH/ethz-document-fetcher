@@ -3,8 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
-from constants import CACHE_PATH
-from utils import *
+from core.utils import *
 
 
 def get_api_url(parameters, children=True):

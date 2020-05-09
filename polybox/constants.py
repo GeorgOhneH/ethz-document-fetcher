@@ -1,6 +1,3 @@
-import os
-from pathlib import Path
-
 PROPFIND_DATA = """<?xml version="1.0"?>
 <a:propfind xmlns:a="DAV:">
     <a:prop xmlns:oc="http://owncloud.org/ns">

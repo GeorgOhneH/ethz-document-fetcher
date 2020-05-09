@@ -8,8 +8,8 @@ from urllib.parse import unquote, quote
 
 import aiohttp
 
-from constants import *
-from downloader import download_if_not_exist
+from core.constants import *
+from core.downloader import download_if_not_exist
 from polybox.constants import *
 
 logger = logging.getLogger(__name__)

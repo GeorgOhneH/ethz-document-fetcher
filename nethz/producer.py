@@ -1,10 +1,10 @@
-import re
 import asyncio
+import re
 
 from bs4 import BeautifulSoup
 
-from constants import BEAUTIFUL_SOUP_PARSER
-from utils import safe_path_join
+from core.constants import BEAUTIFUL_SOUP_PARSER
+from core.utils import safe_path_join
 
 
 async def get_folder_name(session, url):

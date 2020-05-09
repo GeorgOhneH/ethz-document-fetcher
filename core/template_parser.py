@@ -1,23 +1,20 @@
 import asyncio
-import importlib
 import hashlib
-import os
-import json
-import copy
-import types
+import importlib
 import inspect
+import json
+import logging
+import os
+import re
 import time
 import traceback
-import re
 
 import yaml
 
+from core.constants import CACHE_PATH
+from core.exceptions import ParseTemplateError, LoginError
+from core.utils import safe_path_join
 from settings import settings
-from exceptions import ParseTemplateError, LoginError
-from utils import safe_path_join
-from constants import CACHE_PATH
-
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +175,7 @@ def check_if_null(p_kwargs):
     return False
 
 
-async def parse(session, queue, producers, path, base_path=""):
+async def parse_template(session, queue, producers, path, base_path=""):
     with open(path) as f:
         data = yaml.load(f, Loader=yaml.Loader)
 

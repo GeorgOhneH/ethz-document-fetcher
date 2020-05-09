@@ -1,14 +1,13 @@
 import asyncio
-import re
 
 import aiohttp
-from bs4 import BeautifulSoup, SoupStrainer
+from bs4 import SoupStrainer
 
-from constants import *
-from exceptions import LoginError
+from core.constants import *
+from core.exceptions import LoginError
+from core.utils import *
 from ilias.constants import *
 from ilias.login import login
-from utils import *
 
 
 async def get_folder_name(session, id):
