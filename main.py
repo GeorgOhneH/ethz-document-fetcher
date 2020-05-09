@@ -6,7 +6,7 @@ import time
 
 import aiohttp
 import certifi
-from colorama import init
+import colorama
 
 from core import download_files, parse_template
 from core.exceptions import ParseTemplateError
@@ -14,7 +14,7 @@ from core.utils import user_statistics, check_for_new_release
 from settings import settings
 from settings.logger import LOGGER_CONFIG
 
-init()
+colorama.init()
 
 logging.config.dictConfig(LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
