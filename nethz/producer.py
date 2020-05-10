@@ -40,7 +40,8 @@ async def producer(session, queue, url, base_path):
         path = safe_path_join(base_path, href)
 
         if "." in href:
-            await queue.put({"url": url + href, "path": path})
+            checksum = str(link.next_sibling.string).strip()
+            await queue.put({"url": url + href, "path": path, "checksum": checksum})
         else:
             coroutine = producer(session, queue, url + href, path)
             tasks.append(asyncio.create_task(coroutine))

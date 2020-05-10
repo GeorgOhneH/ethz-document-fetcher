@@ -31,7 +31,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
 async def download_if_not_exist(session,
                                 path,
                                 url,
-                                extension=True,
+                                with_extension=True,
                                 kwargs=None,
                                 allowed_extensions=None,
                                 forbidden_extensions=None,
@@ -62,13 +62,18 @@ async def download_if_not_exist(session,
     drive, nd_path = os.path.splitdrive(absolute_path)
     absolute_path = os.path.join(drive, nd_path.replace(":", ";").replace("|", ""))
 
-    if not extension:
+    if not with_extension:
         absolute_path = await check_extension_cache(session, absolute_path, url)
 
     checksum_valid = is_checksum_same(absolute_path, checksum)
 
     if os.path.exists(absolute_path) and checksum_valid:
         return
+
+    if checksum is not None and os.path.exists(absolute_path):
+        action = ACTION_REPLACE
+    else:
+        action = ACTION_NEW
 
     file_name = os.path.basename(absolute_path)
     file_extension = get_extension(file_name)
@@ -83,6 +88,12 @@ async def download_if_not_exist(session,
         response.raise_for_status()
 
         Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+
+        if action == ACTION_REPLACE and settings.keep_replaced_files:
+            dir_path = os.path.dirname(absolute_path)
+            pure_name, extension = "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
+            old_file_name = f"{pure_name}-old{extension}"
+            os.rename(absolute_path, os.path.join(dir_path, old_file_name))
 
         with open(absolute_path, 'wb') as f:
             while True:

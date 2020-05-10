@@ -15,6 +15,8 @@ except bs4.FeatureNotFound:
     BEAUTIFUL_SOUP_PARSER = "html.parser"
 
 MOVIE_EXTENSIONS = ["mp4", "webm", "avi", "mkv", "mov", "m4v"]
+ACTION_NEW = 0
+ACTION_REPLACE = 1
 
 CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "cache")
 Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)

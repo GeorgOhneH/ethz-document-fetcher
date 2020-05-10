@@ -10,7 +10,7 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  
  **IMPORTANT**: The fetcher does **not** replace files,
  which were updated (and have kept the same name) on the original website.
- <br>Except: Polybox, one drive
+ <br>Except: Polybox, one drive, nethz
 
 ## Installation
 1. Make sure at least [python](https://www.python.org/downloads/) 3.7 is installed
@@ -31,15 +31,16 @@ or double click the `run.sh` file (Mac/Linux only)
 ## Settings
 The settings in your `settings.config` file:
 
-| Name        | Note           |
-| ------------- |-------------|
-| username      | LDAP ETH username |
-| password      |  LDAP ETH password    |
-| base_path |  Absolute path to the directory where the files will be stored      |
-| template_path | path to your template |
-| loglevel | ERROR or WARNING or INFO or DEBUG |
-| allowed_extensions | A list of extension which are allowed to be downloaded. Add 'video' for all video types extensions|
-| forbidden_extensions | A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
+| Name        | Type      | Note           |
+| ------------- | --------    |-------------|
+| username      | String | LDAP ETH username |
+| password      | String |  LDAP ETH password    |
+| base_path | Path|  Absolute path to the directory where the files will be stored      |
+| template_path | Path| path to your template |
+| loglevel | String| ERROR or WARNING or INFO or DEBUG |
+| allowed_extensions |List | A list of extension which are allowed to be downloaded. Add 'video' for all video types extensions|
+| forbidden_extensions | List| A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
+| keep_replaced_files | Bool| default: false. If a file gets updated, it will be renamed, so it doesn't get overwritten.  |
 
 ## Template
 The template file is where you specify your folder structure and the websites you want to scrape.

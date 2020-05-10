@@ -42,13 +42,14 @@ async def parse_sections(session, queue, section, base_path, moodle_id, use_exte
 
         if mtype == MTYPE_FILE:
             file_name = str(instance.a.span.contents[0])
-            extension = False
+            with_extension = False
             if instance.a.img["src"] == PDF_IMAGE:
                 file_name += ".pdf"
-                extension = True
+                with_extension = True
 
             url = instance.a["href"] + "&redirect=1"
-            await queue.put({"path": safe_path_join(base_path, file_name), "url": url, "extension": extension})
+            await queue.put({"path": safe_path_join(base_path, file_name),
+                             "url": url, "with_extension": with_extension})
 
         elif mtype == MTYPE_DIRECTORY:
             coroutine = parse_folder(session, queue, instance, base_path)

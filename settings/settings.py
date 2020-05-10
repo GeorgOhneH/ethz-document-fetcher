@@ -56,3 +56,4 @@ class AppSettings(Settings):
     loglevel = ConfigOption(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])
     allowed_extensions = ConfigList(optional=True)
     forbidden_extensions = ConfigList(optional=True, default=["video"])
+    keep_replaced_files = ConfigBool(default=False)
