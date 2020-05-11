@@ -39,9 +39,9 @@ async def producer(session, queue, base_path, url):
 
     tasks = []
     for item in item_data["value"]:
-        checksum = item["lastModifiedDateTime"]
         path = safe_path_join(base_path, item["name"])
         if "@content.downloadUrl" in item:
+            checksum = item["file"]["hashes"]["sha256Hash"]
             await queue.put({"path": path, "url": item["@content.downloadUrl"], "checksum": checksum})
 
         elif "folder" in item:

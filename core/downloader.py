@@ -93,7 +93,7 @@ async def download_if_not_exist(session,
             dir_path = os.path.dirname(absolute_path)
             pure_name, extension = "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
             old_file_name = f"{pure_name}-old.{extension}"
-            os.rename(absolute_path, os.path.join(dir_path, old_file_name))
+            os.replace(absolute_path, os.path.join(dir_path, old_file_name))
 
         with open(absolute_path, 'wb') as f:
             while True:
@@ -102,10 +102,12 @@ async def download_if_not_exist(session,
                     break
                 f.write(chunk)
 
-    if checksum is not None and os.path.exists(absolute_path):
+    if action == ACTION_REPLACE:
         method_msg = "Replaced"
-    else:
+    elif action == ACTION_NEW:
         method_msg = "Added new"
+    else:
+        method_msg = "Unexpected action"
 
     start = {
         "name": f"{method_msg} file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",
