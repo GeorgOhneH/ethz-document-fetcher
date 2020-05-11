@@ -92,7 +92,7 @@ async def download_if_not_exist(session,
         if action == ACTION_REPLACE and settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)
             pure_name, extension = "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
-            old_file_name = f"{pure_name}-old{extension}"
+            old_file_name = f"{pure_name}-old.{extension}"
             os.rename(absolute_path, os.path.join(dir_path, old_file_name))
 
         with open(absolute_path, 'wb') as f:
