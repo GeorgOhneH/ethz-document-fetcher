@@ -49,8 +49,8 @@ class Settings(metaclass=SettingBase):
 
 
 class AppSettings(Settings):
-    username = ConfigString()
-    password = ConfigPassword()
+    username = ConfigString(optional=True)
+    password = ConfigPassword(optional=True)
     base_path = ConfigPath(default=os.getcwd())
     template_path = ConfigPath(absolute=False, default=os.path.join("templates", "FS2020", "itet", "semester2.yml"))
     loglevel = ConfigOption(default="INFO", options=["ERROR", "WARNING", "INFO", "DEBUG"])

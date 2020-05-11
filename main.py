@@ -56,6 +56,10 @@ async def main():
         await asyncio.gather(*producers)
 
         logger.debug("Waiting for queue")
+
+        num_unfinished_downloads = queue.qsize() + queue._unfinished_tasks
+        if num_unfinished_downloads:
+            logger.info(f"Waiting for {num_unfinished_downloads} download(s) to finish")
         await queue.join()
 
         logger.debug("Cancel consumers")

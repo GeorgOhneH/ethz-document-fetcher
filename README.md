@@ -33,8 +33,8 @@ The settings in your `settings.config` file:
 
 | Name        | Type      | Note           |
 | ------------- | --------    |-------------|
-| username      | String | LDAP ETH username |
-| password      | String |  LDAP ETH password    |
+| username      | String | LDAP ETH username. Is optional, but all sites, which require your username and password won't work.|
+| password      | String |  LDAP ETH password. Is optional, but all sites, which require your username and password won't work.    |
 | base_path | Path|  Absolute path to the directory where the files will be stored      |
 | template_path | Path| path to your template |
 | loglevel | String| ERROR or WARNING or INFO or DEBUG |

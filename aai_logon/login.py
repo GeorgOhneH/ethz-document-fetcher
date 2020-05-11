@@ -28,8 +28,8 @@ async def login(session: ClientSession, url, data):
             ssm = html.unescape(ssm)
             sam = re.search("""name="SAMLResponse" value="(.+)"/>""", text)[1]
             sam = html.unescape(sam)
-        except TypeError:
-            raise LoginError("Wasn't able to log in. Please check that your username and password are correct")
+        except TypeError as e:
+            raise LoginError("Wasn't able to log in. Please check that your username and password are correct") from e
 
         saml_data = {
             "RelayState": ssm,

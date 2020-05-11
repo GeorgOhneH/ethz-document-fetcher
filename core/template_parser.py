@@ -127,8 +127,11 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
         raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
 
     except LoginError as e:
-        raise ParseTemplateError(f"{module_name} login was not successful."
-                                 f" Please check that your username and password are correct") from e
+        if settings.loglevel == "DEBUG":
+            traceback.print_exc()
+        logger.warning(f"{module_name} login was not successful. Error: {e}."
+                       f" Skipping the producer and all sub-producers")
+        return
 
     if use_folder:
         if folder_name is None:
@@ -226,11 +229,17 @@ async def call_if_never_called(session, module, function_name):
         locks[module.__name__] = lock
 
     async with lock:
-        if not hasattr(func, "called"):
-            func.called = True
+        if not hasattr(func, "error"):
             logger.debug(f"Logging into {module.__name__}")
-            await func(session=session)
-            logger.debug(f"Logged into {module.__name__}")
+            try:
+                await func(session=session)
+                logger.debug(f"Logged into {module.__name__}")
+                func.error = False
+            except LoginError as e:
+                func.error = True
+                raise e
+        if func.error:
+            raise LoginError("Previous login was not successful")
 
 
 def get_module_function(name):
