@@ -57,18 +57,19 @@ async def check_url_reference(session, url):
 
 
 async def check_extension_cache(session, path, url):
-    extension = lockup_table.get(path+url, None)
+    extension = lockup_table.get(path + url, None)
 
     if extension is None:
         async with session.get(url, raise_for_status=True) as response:
             extension = get_extension_from_response(response)
-        lockup_table[path+url] = extension
-        logger.debug(f"Called extension_cache, path+url: {path+url}, new url: {extension}")
+        lockup_table[path + url] = extension
+        logger.debug(f"Called extension_cache, path+url: {path + url}, new url: {extension}")
 
     return path + "." + extension
 
 
 def is_checksum_same(key, checksum):
+    key += "checksum"
     if checksum is None:
         return True
 
@@ -83,8 +84,21 @@ def is_checksum_same(key, checksum):
         return True
 
     lockup_table[key] = checksum
-    logger.debug(f"Replaced old checksum, key: {key}, new checksum: {checksum}, old checksum {old_checksum}")
+    logger.debug(f"Replaced old checksum, key: {key}, new: {checksum}, old: {old_checksum}")
     return False
+
+
+def get_etag(key):
+    key += "etag"
+    return lockup_table.get(key, None)
+
+
+def save_etag(key, etag):
+    etag = etag.replace("-gzip", "")
+    key += "etag"
+    if key in lockup_table:
+        logger.debug(f"Replacing etag. Old: {lockup_table[key]}, New: {etag}")
+    lockup_table[key] = etag
 
 
 def get_extension_from_response(response):
@@ -135,4 +149,3 @@ async def check_for_new_release(session):
         elif latest_i < current_i:
             return False, latest_version, current_version
     return False, latest_version, current_version
-

@@ -133,7 +133,7 @@ one_drive:
 ```yaml
 polybox:
     id: polybox_id
-    password: password
+    password: password (optional)
     ...
 ```
 #### Video Portal

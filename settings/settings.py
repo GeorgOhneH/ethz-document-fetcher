@@ -57,3 +57,4 @@ class AppSettings(Settings):
     allowed_extensions = ConfigList(optional=True)
     forbidden_extensions = ConfigList(optional=True, default=["video"])
     keep_replaced_files = ConfigBool(default=False)
+    force_download = ConfigBool(default=False, active_func=lambda: False)

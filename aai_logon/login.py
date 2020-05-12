@@ -37,4 +37,4 @@ async def login(session: ClientSession, url, data):
         }
 
         async with session.post(f"{sam_url}", data=saml_data) as resp:
-            await resp.text()
+            pass

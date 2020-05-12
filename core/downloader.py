@@ -2,12 +2,13 @@ import asyncio
 import copy
 import shutil
 import traceback
+from urllib.parse import urlparse
 
 import aiohttp
 from colorama import Fore, Style
 
 from core.constants import *
-from core.utils import get_extension, check_extension_cache, is_checksum_same
+from core.utils import *
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -53,6 +54,8 @@ async def download_if_not_exist(session,
     if "video" in forbidden_extensions:
         forbidden_extensions += MOVIE_EXTENSIONS
 
+    domain = urlparse(url).netloc
+
     timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
         absolute_path = path
@@ -65,12 +68,24 @@ async def download_if_not_exist(session,
     if not with_extension:
         absolute_path = await check_extension_cache(session, absolute_path, url)
 
-    checksum_valid = is_checksum_same(absolute_path, checksum)
+    force = False
+    if checksum is not None:
+        force = not is_checksum_same(absolute_path, checksum)
+    elif settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
+        force = True
 
-    if os.path.exists(absolute_path) and checksum_valid:
+    if os.path.exists(absolute_path) and not force:
         return
 
-    if checksum is not None and os.path.exists(absolute_path):
+    if os.path.exists(absolute_path):
+        headers = kwargs.get("headers", {})
+        etag = get_etag(absolute_path)
+        if etag is not None:
+            headers["If-None-Match"] = etag
+        if headers:
+            kwargs["headers"] = headers
+
+    if os.path.exists(absolute_path):
         action = ACTION_REPLACE
     else:
         action = ACTION_NEW
@@ -81,13 +96,25 @@ async def download_if_not_exist(session,
         return
     if file_extension.lower() in forbidden_extensions:
         return
-    if file_extension.lower() in MOVIE_EXTENSIONS:
-        logger.info(f"Starting to download {file_name}")
+
+    Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
     async with session.get(url, timeout=timeout, **kwargs) as response:
         response.raise_for_status()
 
-        Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+        if response.status == 304:
+            logger.debug(f"File '{absolute_path}' not modified")
+            return
+
+        if file_extension.lower() in MOVIE_EXTENSIONS:
+            logger.info(f"Starting to download {file_name}")
+
+        if "ETag" in response.headers:
+            save_etag(absolute_path, response.headers["ETag"])
+        elif checksum is not None:
+            pass
+        elif domain not in FORCE_DOWNLOAD_BLACKLIST:
+            logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
         if action == ACTION_REPLACE and settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)

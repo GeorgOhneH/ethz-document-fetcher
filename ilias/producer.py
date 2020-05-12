@@ -45,7 +45,9 @@ async def search_tree(session, queue, base_path, fold_id):
         path = safe_path_join(base_path, name)
         if "download" in href:
             extension = str(content.find("span", attrs={"class": "il_ItemProperty"}).string).strip()
-            await queue.put({"url": href, "path": f"{path}.{extension}"})
+            checksum = "".join([str(x.string).strip() for x in
+                                content.find_all("span", attrs={"class": "il_ItemProperty"})])
+            await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
             coroutine = search_tree(session, queue, path, ref_id)

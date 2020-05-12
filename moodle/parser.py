@@ -88,7 +88,6 @@ async def parse_folder(session, queue, instance, base_path):
     async with session.get(href) as response:
         text = await response.text()
 
-    await asyncio.sleep(0)
     only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
     folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
     folder_path = safe_path_join(base_path, folder_name)
