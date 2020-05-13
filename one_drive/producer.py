@@ -53,7 +53,7 @@ async def producer(session, queue, base_path, url):
             etag = item["eTag"]
             if etag == etag_cache:
                 if os.path.exists(os.path.join(settings.base_path, path)):
-                    return
+                    continue
 
             save_element_to_cache(cache_key, etag)
             coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}")
