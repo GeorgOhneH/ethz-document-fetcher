@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
+from settings import settings
 from core.utils import *
 
 
@@ -46,6 +47,15 @@ async def producer(session, queue, base_path, url):
 
         elif "folder" in item:
             folder_url = await check_url_reference(session, item['webUrl'])
+
+            cache_key = folder_url + path + "folder_etag"
+            etag_cache = get_element_from_cache(cache_key)
+            etag = item["eTag"]
+            if etag == etag_cache:
+                if os.path.exists(os.path.join(settings.base_path, path)):
+                    return
+
+            save_element_to_cache(cache_key, etag)
             coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}")
             tasks.append(asyncio.create_task(coroutine))
 

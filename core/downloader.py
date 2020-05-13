@@ -71,6 +71,8 @@ async def download_if_not_exist(session,
     elif settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
         force = True
 
+    Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+
     if os.path.exists(absolute_path) and not force:
         return
 
@@ -93,8 +95,6 @@ async def download_if_not_exist(session,
         return
     if file_extension.lower() in forbidden_extensions:
         return
-
-    Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
     async with session.get(url, timeout=timeout, **kwargs) as response:
         response.raise_for_status()
