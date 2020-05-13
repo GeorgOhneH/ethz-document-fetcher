@@ -62,9 +62,6 @@ async def download_if_not_exist(session,
     else:
         absolute_path = os.path.join(settings.base_path, path)
 
-    drive, nd_path = os.path.splitdrive(absolute_path)
-    absolute_path = os.path.join(drive, nd_path.replace(":", ";").replace("|", ""))
-
     if not with_extension:
         absolute_path = await check_extension_cache(session, absolute_path, url)
 

@@ -101,6 +101,14 @@ def save_etag(key, etag):
     lockup_table[key] = etag
 
 
+def get_element_from_cache(key):
+    return lockup_table.get(key, None)
+
+
+def save_element_to_cache(key, value):
+    lockup_table[key] = value
+
+
 def get_extension_from_response(response):
     disposition = response.headers['content-disposition']
     resp_file_name = re.search("""filename="(.+).""", disposition)[1]
@@ -127,7 +135,7 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    return html.unescape(string.replace("/", "-"))
+    return html.unescape(string.replace("/", "-")).replace(":", ";").replace("|", "")
 
 
 async def check_for_new_release(session):

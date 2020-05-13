@@ -72,7 +72,7 @@ async def main():
 if __name__ == '__main__':
     start_t = time.time()
     startup_time = time.process_time()
-    asyncio.run(main(), debug=False)
+    asyncio.run(main())
     logger.debug(f"Startup time: {startup_time:.2f} seconds")
     logger.debug(f"Total process time: {(time.process_time()):.2f} seconds")
     logger.info(f"Finished in {(time.time() - start_t + startup_time):.2f} seconds")

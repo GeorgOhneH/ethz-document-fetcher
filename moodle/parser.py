@@ -99,14 +99,22 @@ async def parse_folder(session, queue, module, base_path, last_updated):
 
     instance = module.find("div", class_="activityinstance")
     folder_name = str(instance.a.span.contents[0])
-    href = instance.a["href"]
+    folder_path = safe_path_join(base_path, folder_name)
 
+    cache_key = folder_path + "last_updated"
+    last_updated_cache = get_element_from_cache(cache_key)
+    if last_updated == last_updated_cache:
+        if os.path.exists(os.path.join(settings.base_path, folder_path)):
+            return
+
+    save_element_to_cache(cache_key, last_updated)
+
+    href = instance.a["href"]
     async with session.get(href) as response:
         text = await response.text()
 
     only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
     folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
-    folder_path = safe_path_join(base_path, folder_name)
     await parse_sub_folders(queue, soup=folder_soup, folder_path=folder_path, last_updated=last_updated)
 
 
