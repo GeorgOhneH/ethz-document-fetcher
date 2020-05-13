@@ -59,7 +59,7 @@ async def main():
 
         num_unfinished_downloads = queue.qsize() + queue._unfinished_tasks
         if num_unfinished_downloads:
-            logger.info(f"Waiting for {num_unfinished_downloads} download(s) to finish")
+            logger.info(f"Waiting for {num_unfinished_downloads} potential download(s) to finish")
         await queue.join()
 
         logger.debug("Cancel consumers")

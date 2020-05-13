@@ -111,7 +111,7 @@ class ConfigPassword(ConfigString):
 
 class ConfigBool(ConfigString):
     def get(self, obj=None):
-        return self._value and self.is_active()
+        return self._value
 
     def test(self, value):
         return True
