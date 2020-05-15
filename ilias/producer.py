@@ -1,4 +1,6 @@
 import asyncio
+import datetime
+import locale
 
 import aiohttp
 from bs4 import SoupStrainer
@@ -47,6 +49,16 @@ async def search_tree(session, queue, base_path, fold_id):
             extension = str(content.find("span", attrs={"class": "il_ItemProperty"}).string).strip()
             checksum = "".join([str(x.string).strip() for x in
                                 content.find_all("span", attrs={"class": "il_ItemProperty"})])
+
+            locale.setlocale(locale.LC_TIME, "en_US")
+            if "Today" in checksum:
+                today_date = datetime.datetime.now()
+                checksum = checksum.replace("Today", today_date.strftime("%d.%b %Y"))
+            elif "Yesterday" in checksum:
+                yesterday_date = datetime.datetime.now() - datetime.timedelta(days=1)
+                yesterday_date.strftime("%d.%b %Y")
+                checksum = checksum.replace("Yesterday", yesterday_date.strftime("%d.%b %Y"))
+
             await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)

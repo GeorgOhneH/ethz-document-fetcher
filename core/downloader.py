@@ -108,8 +108,6 @@ async def download_if_not_exist(session,
 
         if "ETag" in response.headers:
             save_etag(absolute_path, response.headers["ETag"])
-        elif checksum is not None:
-            pass
         elif domain not in FORCE_DOWNLOAD_BLACKLIST:
             logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
@@ -121,7 +119,7 @@ async def download_if_not_exist(session,
 
         with open(absolute_path, 'wb') as f:
             while True:
-                chunk = await response.content.read(256)
+                chunk = await response.content.read(8192)
                 if not chunk:
                     break
                 f.write(chunk)
