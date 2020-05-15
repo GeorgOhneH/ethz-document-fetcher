@@ -31,12 +31,20 @@ async def get_folder_name(session, url):
     return item_data["name"]
 
 
-async def producer(session, queue, base_path, url):
+async def producer(session, queue, base_path, url, etag=None):
     parameters = parse_qs(urlparse(url).query)
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
-    async with session.get(api_url) as response:
-        item_data = await response.json()
+
+    etag_cache = get_element_from_cache(url)
+    item_cache_key = url+"item_one_drive"
+    if etag is not None and etag_cache == etag:
+        item_data = get_element_from_cache(item_cache_key)
+    else:
+        async with session.get(api_url) as response:
+            item_data = await response.json()
+        save_element_to_cache(item_cache_key, item_data)
+        save_element_to_cache(url, etag)
 
     tasks = []
     for item in item_data["value"]:
@@ -46,17 +54,9 @@ async def producer(session, queue, base_path, url):
             await queue.put({"path": path, "url": item["@content.downloadUrl"], "checksum": checksum})
 
         elif "folder" in item:
-            folder_url = await check_url_reference(session, item['webUrl'])
-
-            cache_key = folder_url + path + "folder_etag"
-            etag_cache = get_element_from_cache(cache_key)
-            etag = item["eTag"]
-            if etag == etag_cache:
-                if os.path.exists(os.path.join(settings.base_path, path)):
-                    continue
-
-            save_element_to_cache(cache_key, etag)
-            coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}")
+            folder_url = await check_url_reference(session, item['webUrl']) + f"?authkey={authkey}"
+            item_etag = item["eTag"]
+            coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}", etag=item_etag)
             tasks.append(asyncio.create_task(coroutine))
 
     await asyncio.gather(*tasks)
