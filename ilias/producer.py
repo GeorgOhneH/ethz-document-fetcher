@@ -53,11 +53,11 @@ async def search_tree(session, queue, base_path, fold_id):
             locale.setlocale(locale.LC_TIME, "en_US")
             if "Today" in checksum:
                 today_date = datetime.datetime.now()
-                checksum = checksum.replace("Today", today_date.strftime("%d.%b %Y"))
+                checksum = checksum.replace("Today", today_date.strftime("%d. %b %Y"))
             elif "Yesterday" in checksum:
                 yesterday_date = datetime.datetime.now() - datetime.timedelta(days=1)
                 yesterday_date.strftime("%d.%b %Y")
-                checksum = checksum.replace("Yesterday", yesterday_date.strftime("%d.%b %Y"))
+                checksum = checksum.replace("Yesterday", yesterday_date.strftime("%d. %b %Y"))
 
             await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
         else:
