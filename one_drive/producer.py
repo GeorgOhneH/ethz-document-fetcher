@@ -36,15 +36,15 @@ async def producer(session, queue, base_path, url, etag=None):
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
 
-    etag_cache = get_element_from_cache(url)
-    item_cache_key = url+"item_one_drive"
+    etag_cache = get_element_from_cache(api_url)
+    item_cache_key = api_url+"item_one_drive"
     if etag is not None and etag_cache == etag:
         item_data = get_element_from_cache(item_cache_key)
     else:
         async with session.get(api_url) as response:
             item_data = await response.json()
         save_element_to_cache(item_cache_key, item_data)
-        save_element_to_cache(url, etag)
+        save_element_to_cache(api_url, etag)
 
     tasks = []
     for item in item_data["value"]:
