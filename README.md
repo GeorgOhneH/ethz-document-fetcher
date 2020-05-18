@@ -8,9 +8,9 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  The main goal of this project is, that you can easily check if
  new exercises (or any other files) have been released.
  
- **IMPORTANT**: The fetcher does **not** replace files,
+ **IMPORTANT**: The default behavior of the fetcher does **not** replace files,
  which were updated (and have kept the same name) on the original website.
- <br>Except: Polybox, one drive, nethz
+ <br>Exceptions: Polybox, one drive, nethz, ilias, moodle
 
 ## Installation
 1. Make sure at least [python](https://www.python.org/downloads/) 3.7 is installed
