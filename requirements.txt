@@ -8,3 +8,5 @@ cchardet
 colorama
 pyyaml
 certifi
+PyMuPDF
+PyPDF2

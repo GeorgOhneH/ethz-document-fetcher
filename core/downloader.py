@@ -9,6 +9,7 @@ from colorama import Fore, Style
 
 from core.constants import *
 from core.utils import *
+from core import pdf_highlighter
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -115,7 +116,8 @@ async def download_if_not_exist(session,
             dir_path = os.path.dirname(absolute_path)
             pure_name, extension = "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
             old_file_name = f"{pure_name}-old.{extension}"
-            os.replace(absolute_path, os.path.join(dir_path, old_file_name))
+            old_absolute_path = os.path.join(dir_path, old_file_name)
+            os.replace(absolute_path, old_absolute_path)
 
         with open(absolute_path, 'wb') as f:
             while True:
@@ -123,6 +125,10 @@ async def download_if_not_exist(session,
                 if not chunk:
                     break
                 f.write(chunk)
+
+    if action == ACTION_REPLACE and settings.keep_replaced_files and file_extension.lower() == "pdf":
+        logger.debug("Adding highlights")
+        pdf_highlighter.add_differ_highlight(absolute_path, old_absolute_path)
 
     if action == ACTION_REPLACE:
         method_msg = "Replaced"
