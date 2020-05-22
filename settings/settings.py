@@ -38,14 +38,16 @@ class Settings(metaclass=SettingBase):
 
     def check_if_valid(self):
         for value in self._values:
-            if not value.is_valid() or value.error_on_load:
+            if not value.is_valid():
                 return False
         return True
 
     def save(self):
         with open(SETTINGS_PATH, "w+") as f:
             for value in self._values:
-                f.write(f"{value.name}{SEPARATOR}{value.save()}\n")
+                string = value.save()
+                if string is not None:
+                    f.write(f"{value.name}{SEPARATOR}{value.save()}\n")
 
 
 class AppSettings(Settings):

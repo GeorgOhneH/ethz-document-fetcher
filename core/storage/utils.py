@@ -34,7 +34,7 @@ async def call_function_or_cache(func, identifier, *args, **kwargs):
 
     result = await func(*args, **kwargs)
 
-    if identifier is not None:
+    if cache_identifier is not None:
         logger.debug(f"Called function: {json_name}, func_identifier: {func_identifier}")
     attributes["identifier"] = identifier
 

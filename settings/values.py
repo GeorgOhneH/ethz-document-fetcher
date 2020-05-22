@@ -1,9 +1,14 @@
 import base64
+import logging
 
 from settings.constants import *
 
+logger = logging.getLogger(__name__)
+
 
 class ConfigString(object):
+    TYPE = str
+
     def __init__(self, default=None, active_func=lambda: True, depends_on=None, optional=False):
         if depends_on is None:
             depends_on = []
@@ -11,9 +16,8 @@ class ConfigString(object):
         self._value = None
         self.set(None, default)
         self.active_func = active_func
-        self.name = None
+        self.name = None  # will be set on runtime
         self.optional = optional
-        self.error_on_load = False
         self.msg = ""
 
     def get(self, obj=None):
@@ -26,21 +30,25 @@ class ConfigString(object):
         return value
 
     def test(self, value):
-        if value or self.optional:
-            return self._test(value)
-        self.msg = "Value must be set"
-        return False
+        if value is None:
+            return True
+        return self._test(value)
 
     def _test(self, value):
         return True
 
     def load(self, value):
+        if not value:
+            return
         self._value = self._load(value)
 
     def _load(self, value):
         return value
 
     def save(self):
+        if self._value is None:
+            return None
+
         if self.test(self._value):
             return self._save()
         raise ValueError("Tried to save an invalid ConfigObject")
@@ -49,10 +57,10 @@ class ConfigString(object):
         return self._value
 
     def is_active(self):
-        return self.active_func() and all([x.get_value() for x in self.depends_on])
+        return self.active_func() and all([x.is_set() for x in self.depends_on])
 
     def is_set(self):
-        return self._value or self.optional
+        return self._value is not None or self.optional
 
     def is_valid(self):
         if not self.is_active():
@@ -110,23 +118,13 @@ class ConfigPassword(ConfigString):
 
 
 class ConfigBool(ConfigString):
-    def get(self, obj=None):
-        return self._value
-
-    def test(self, value):
-        return True
-
-    def _test(self, value):
-        return True
+    TYPE = bool
 
     def _load(self, value):
         return "y" in value
 
     def _save(self):
         return "yes" if self._value else "no"
-
-    def is_set(self):
-        return True
 
     def convert_from_prompt(self, value):
         return "y" in value
@@ -139,8 +137,8 @@ class ConfigBool(ConfigString):
 
 
 class ConfigOption(ConfigString):
-    def __init__(self, options, default="", **kwargs):
-        if default and default not in options:
+    def __init__(self, options, default=None, **kwargs):
+        if default is not None and default not in options:
             raise ValueError("default not in options")
         super().__init__(default=default, **kwargs)
         self.options = options
@@ -170,7 +168,7 @@ class ConfigList(ConfigString):
             return []
 
         if value[0] != "[" or value[-1] != "]":
-            self.error_on_load = True
+            logger.warning(f"Could not load value from {self.name}. Using empty list")
             return []
 
         return [x.strip() for x in value[1:-1].split(",") if x.strip()]
@@ -183,8 +181,6 @@ class ConfigList(ConfigString):
         return self._load(value)
 
     def _test(self, value):
-        if value is None:
-            return False
         if not isinstance(value, list):
             raise ValueError("Value must be a list")
         return True
