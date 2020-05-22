@@ -3,7 +3,8 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
-from settings import settings
+from core.storage import check_url_reference
+from core.storage.utils import call_function_or_cache
 from core.utils import *
 
 
@@ -36,15 +37,7 @@ async def producer(session, queue, base_path, url, etag=None):
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
 
-    etag_cache = get_element_from_cache(api_url)
-    item_cache_key = api_url+"item_one_drive"
-    if etag is not None and etag_cache == etag:
-        item_data = get_element_from_cache(item_cache_key)
-    else:
-        async with session.get(api_url) as response:
-            item_data = await response.json()
-        save_element_to_cache(item_cache_key, item_data)
-        save_element_to_cache(api_url, etag)
+    item_data = await call_function_or_cache(get_json_response, etag, session, api_url)
 
     tasks = []
     for item in item_data["value"]:
@@ -55,11 +48,16 @@ async def producer(session, queue, base_path, url, etag=None):
 
         elif "folder" in item:
             folder_url = await check_url_reference(session, item['webUrl']) + f"?authkey={authkey}"
-            item_etag = item["eTag"]
+            item_etag = item["lastModifiedDateTime"]
             coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}", etag=item_etag)
             tasks.append(asyncio.create_task(coroutine))
 
     await asyncio.gather(*tasks)
+
+
+async def get_json_response(session, api_url):
+    async with session.get(api_url) as response:
+        return await response.json()
 
 
 if __name__ == "__main__":

@@ -7,9 +7,10 @@ from urllib.parse import urlparse
 import aiohttp
 from colorama import Fore, Style
 
-from core.constants import *
-from core.utils import *
 from core import pdf_highlighter
+from core.constants import *
+from core.storage.cache import *
+from core.utils import *
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ async def download_if_not_exist(session,
         absolute_path = os.path.join(settings.base_path, path)
 
     if not with_extension:
-        absolute_path = await check_extension_cache(session, absolute_path, url)
+        absolute_path += "." + await check_extension(session, url)
 
     force = False
     if checksum is not None:
@@ -114,7 +115,7 @@ async def download_if_not_exist(session,
 
         if action == ACTION_REPLACE and settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)
-            pure_name, extension = "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
+            pure_name, extension = split_name_extension(file_name)
             old_file_name = f"{pure_name}-old.{extension}"
             old_absolute_path = os.path.join(dir_path, old_file_name)
             os.replace(absolute_path, old_absolute_path)

@@ -1,13 +1,10 @@
-import atexit
 import hashlib
 import html
-import json
 import logging
 import os
 import re
 from pathlib import Path
 
-from core.constants import CACHE_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -22,93 +19,6 @@ async def user_statistics(session, name):
         pass
 
 
-def load_lockup_table(path):
-    if not os.path.exists(path):
-        return {}
-    with open(path, "r") as f:
-        return json.load(f)
-
-
-def save_lockup_table(path):
-    with open(path, "w+") as f:
-        return json.dump(lockup_table, f)
-
-
-def clean_lockup_table():
-    logger.debug("Cleaning up lockup table")
-    path = os.path.join(CACHE_PATH, "lockup_table.json")
-    save_lockup_table(path)
-
-
-lockup_table = load_lockup_table(os.path.join(CACHE_PATH, "lockup_table.json"))
-atexit.register(clean_lockup_table)
-
-
-async def check_url_reference(session, url):
-    new_url = lockup_table.get(url, None)
-
-    if new_url is None:
-        async with session.get(url, raise_for_status=False) as response:
-            new_url = str(response.url)
-        lockup_table[url] = new_url
-        logger.debug(f"Called url_reference, url: {url}, new url: {new_url}")
-
-    return new_url
-
-
-async def check_extension_cache(session, path, url):
-    extension = lockup_table.get(path + url, None)
-
-    if extension is None:
-        async with session.get(url, raise_for_status=True) as response:
-            extension = get_extension_from_response(response)
-        lockup_table[path + url] = extension
-        logger.debug(f"Called extension_cache, path+url: {path + url}, new url: {extension}")
-
-    return path + "." + extension
-
-
-def is_checksum_same(key, checksum):
-    key += "checksum"
-    if checksum is None:
-        return True
-
-    old_checksum = lockup_table.get(key, None)
-
-    if old_checksum is None:
-        lockup_table[key] = checksum
-        logger.debug(f"Added new checksum, key: {key}, checksum: {checksum}")
-        return False
-
-    if old_checksum == checksum:
-        return True
-
-    lockup_table[key] = checksum
-    logger.debug(f"Replaced old checksum, key: {key}, new: {checksum}, old: {old_checksum}")
-    return False
-
-
-def get_etag(key):
-    key += "etag"
-    return lockup_table.get(key, None)
-
-
-def save_etag(key, etag):
-    etag = etag.replace("-gzip", "")
-    key += "etag"
-    if key in lockup_table:
-        logger.debug(f"Replacing etag. Old: {lockup_table[key]}, New: {etag}")
-    lockup_table[key] = etag
-
-
-def get_element_from_cache(key):
-    return lockup_table.get(key, None)
-
-
-def save_element_to_cache(key, value):
-    lockup_table[key] = value
-
-
 def get_extension_from_response(response):
     disposition = response.headers['content-disposition']
     resp_file_name = re.search("""filename="(.+).""", disposition)[1]
@@ -117,6 +27,10 @@ def get_extension_from_response(response):
 
 def get_extension(file):
     return file.split(".")[-1]
+
+
+def split_name_extension(file_name):
+    "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
 
 
 def save_txt(section, path):
@@ -157,3 +71,6 @@ async def check_for_new_release(session):
         elif latest_i < current_i:
             return False, latest_version, current_version
     return False, latest_version, current_version
+
+
+

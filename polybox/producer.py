@@ -2,6 +2,7 @@ import asyncio
 import base64
 import copy
 import re
+import os
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
 from urllib.parse import unquote, quote

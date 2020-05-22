@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup, SoupStrainer
 import one_drive
 import polybox
 from core.constants import BEAUTIFUL_SOUP_PARSER
+from core.storage.cache import check_url_reference
+from core.storage.utils import call_function_or_cache
 from core.utils import *
 from settings import settings
 from .constants import *
@@ -91,6 +93,14 @@ async def parse_sections(session, queue, section, base_path, moodle_id, use_exte
     await asyncio.gather(*tasks)
 
 
+async def get_filemanager(session, href):
+    async with session.get(href) as response:
+        text = await response.text()
+
+    only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
+    return BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
+
+
 async def parse_folder(session, queue, module, base_path, last_updated):
     folder_tree = module.find("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
     if folder_tree is not None:
@@ -101,36 +111,20 @@ async def parse_folder(session, queue, module, base_path, last_updated):
     folder_name = str(instance.a.span.contents[0])
     folder_path = safe_path_join(base_path, folder_name)
 
-    cache_key = folder_path + "last_updated"
-    last_updated_cache = get_element_from_cache(cache_key)
-
-    cache_items_key = folder_path + "item_key"
-    if last_updated == last_updated_cache:
-        items = get_element_from_cache(cache_items_key)
-        if items is not None:
-            for item in items:
-                await queue.put(item)
-            return
-
     href = instance.a["href"]
-    async with session.get(href) as response:
-        text = await response.text()
 
-    only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
-    folder_soup = BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
-    cache_items = []
-    await parse_sub_folders(queue, folder_soup, folder_path, last_updated, cache_items)
-    save_element_to_cache(cache_items_key, cache_items)
-    save_element_to_cache(cache_key, last_updated)
+    folder_soup = await call_function_or_cache(get_filemanager, last_updated, session, href)
+
+    await parse_sub_folders(queue, folder_soup, folder_path, last_updated)
 
 
-async def parse_sub_folders(queue, soup, folder_path, last_updated, cache_items=None):
+async def parse_sub_folders(queue, soup, folder_path, last_updated):
     folder_trees = soup.find_all("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
     for folder_tree in folder_trees:
-        await parse_folder_tree(queue, folder_tree.ul, folder_path, last_updated, cache_items)
+        await parse_folder_tree(queue, folder_tree.ul, folder_path, last_updated)
 
 
-async def parse_folder_tree(queue, soup, folder_path, last_updated, cache_items=None):
+async def parse_folder_tree(queue, soup, folder_path, last_updated):
     children = soup.find_all("li", recursive=False)
     for child in children:
         if child.find("div", recursive=False) is not None:
@@ -139,15 +133,13 @@ async def parse_folder_tree(queue, soup, folder_path, last_updated, cache_items=
             sub_folder_path = folder_path
 
         if child.find("ul", recursive=False) is not None:
-            await parse_folder_tree(queue, child.ul, sub_folder_path, last_updated, cache_items)
+            await parse_folder_tree(queue, child.ul, sub_folder_path, last_updated)
 
         if child.find("span", recursive=False) is not None:
             url = child.span.a["href"]
             name = child.span.a.find("span", recursive=False, class_="fp-filename").get_text(strip=True)
             item = {"path": safe_path_join(sub_folder_path, name), "url": url, "checksum": last_updated}
             await queue.put(item)
-            if cache_items is not None:
-                cache_items.append(item)
 
 
 def poly_box_wrapper(func, moodle_id):

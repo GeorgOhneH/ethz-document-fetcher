@@ -2,7 +2,6 @@ import asyncio
 import hashlib
 import importlib
 import inspect
-import json
 import logging
 import os
 import re
@@ -11,8 +10,8 @@ import traceback
 
 import yaml
 
-from core.constants import CACHE_PATH
 from core.exceptions import ParseTemplateError, LoginError
+from core.storage import cache
 from core.utils import safe_path_join
 from settings import settings
 
@@ -250,24 +249,16 @@ def get_module_function(name):
 
 
 def get_folder_name_cache(md5):
-    path = os.path.join(CACHE_PATH, "folder_name.json")
-    if not os.path.exists(path):
-        return {}
-    with open(path) as f:
-        folder_name_cache = json.load(f)
+    folder_name_cache = cache.get_json("folder_name")
 
     if md5 not in folder_name_cache:
         return {}
 
-    logger.debug(f"Loading cache")
     return folder_name_cache[md5]
 
 
 def save_folder_name_cache(md5, folder_name_cache):
-    logger.debug("Saving cache")
-    path = os.path.join(CACHE_PATH, "folder_name.json")
-    with open(path, "w+") as f:
-        json.dump({md5: folder_name_cache}, f)
+    cache.set_json("folder_name", {md5: folder_name_cache})
 
 
 async def get_folder_name(session, function, folder_name_cache, p_kwargs):

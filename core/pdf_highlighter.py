@@ -1,7 +1,8 @@
-import fitz
 import difflib
 import io
+
 import PyPDF2
+import fitz
 
 COLOUR_PALLET = [
     [1.0, 1.0, 0.0],
@@ -73,12 +74,12 @@ def get_num_sets(chars_new, chars_old):
     set_b_only = set([])
     for block in seq.get_matching_blocks():
         if last_a != block.a and last_b != block.b:
-            set_a.update(set(range(last_a, block.a)))
-            set_b.update(set(range(last_b, block.b)))
+            set_a.update(set(range(last_a+1, block.a+1)))
+            set_b.update(set(range(last_b+1, block.b+1)))
         elif last_a != block.a and last_b == block.b:
-            set_a_only.update(set(range(last_a, block.a)))
+            set_a_only.update(set(range(last_a+1, block.a+1)))
         elif last_a == block.a and last_b != block.b:
-            set_b_only.update(set(range(last_b, block.b)))
+            set_b_only.update(set(range(last_b+1, block.b+1)))
 
         last_b = block.b + block.size
         last_a = block.a + block.size
