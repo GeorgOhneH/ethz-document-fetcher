@@ -1,3 +1,5 @@
+import argparse
+
 from .values import *
 
 
@@ -10,12 +12,12 @@ def get_key_value(f):
 
 class SettingBase(type):
     def __new__(mcs, name, bases, attrs, **kwargs):
-        values = []
+        values = {}
         for key, value in attrs.items():
             if isinstance(value, ConfigString):
                 value.name = key
                 attrs[key] = property(value.get, value.set)
-                values.append(value)
+                values[key] = value
         attrs["_values"] = values
         return super().__new__(mcs, name, bases, attrs)
 
@@ -28,26 +30,38 @@ class Settings(metaclass=SettingBase):
                 for key, file_value in get_key_value(f):
                     current_settings[key] = file_value
 
-        for value in self._values:
+        parser = argparse.ArgumentParser()
+        for value in self:
+            value.set_parser(parser)
             file_value = current_settings.get(value.name, None)
             if file_value is not None:
                 value.load(file_value)
+        args = parser.parse_args()
+        for value in self:
+            arg_value = getattr(args, value.name)
+            if arg_value is not None:
+                if not value.test(arg_value):
+                    parser.error(f"{value.name} was not valid")
+                setattr(self, value.name, arg_value)
 
     def __iter__(self):
-        return iter(self._values)
+        return iter(self._values.values())
 
     def check_if_valid(self):
-        for value in self._values:
+        if not os.path.exists(SETTINGS_PATH):
+            logger.warning("Did not found a settings.config file")
+            return False
+        for value in self:
             if not value.is_valid():
                 return False
         return True
 
     def save(self):
         with open(SETTINGS_PATH, "w+") as f:
-            for value in self._values:
+            for value in self:
                 string = value.save()
                 if string is not None:
-                    f.write(f"{value.name}{SEPARATOR}{value.save()}\n")
+                    f.write(f"{value.name}{SEPARATOR}{string}\n")
 
 
 class AppSettings(Settings):

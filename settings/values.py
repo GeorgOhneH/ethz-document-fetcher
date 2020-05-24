@@ -7,12 +7,11 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigString(object):
-    TYPE = str
-
     def __init__(self, default=None, active_func=lambda: True, depends_on=None, optional=False):
         if depends_on is None:
             depends_on = []
         self.depends_on = depends_on
+        self.default = default
         self._value = None
         self.set(None, default)
         self.active_func = active_func
@@ -69,6 +68,9 @@ class ConfigString(object):
             return True
         return False
 
+    def set_parser(self, parser):
+        parser.add_argument(f"--{self.name}")
+
     def _middle_prompt(self):
         return ""
 
@@ -118,16 +120,20 @@ class ConfigPassword(ConfigString):
 
 
 class ConfigBool(ConfigString):
-    TYPE = bool
-
     def _load(self, value):
-        return "y" in value
+        return value.lower() in ('yes', 'true', 't', 'y', '1')
 
     def _save(self):
         return "yes" if self._value else "no"
 
+    def set_parser(self, parser):
+        feature_parser = parser.add_mutually_exclusive_group(required=False)
+        feature_parser.add_argument(f'--{self.name}', dest=self.name, action='store_true')
+        feature_parser.add_argument(f'--no-{self.name}', dest=self.name, action='store_false')
+        parser.set_defaults(**{self.name: None})
+
     def convert_from_prompt(self, value):
-        return "y" in value
+        return self._load(value)
 
     def get_user_prompt(self):
         string_value = "yes" if self.get() else "no"
@@ -148,6 +154,9 @@ class ConfigOption(ConfigString):
             return True
         self.msg = f"please enter a value from these options: {self.options}"
         return False
+
+    def set_parser(self, parser):
+        parser.add_argument(f"--{self.name}", choices=self.options)
 
     def get_user_prompt(self):
         return f"Please enter the value for the {self.name} (options: {self.options}){self._get_current()}: "
@@ -184,6 +193,9 @@ class ConfigList(ConfigString):
         if not isinstance(value, list):
             raise ValueError("Value must be a list")
         return True
+
+    def set_parser(self, parser):
+        parser.add_argument(f'--{self.name}', nargs='*')
 
     def _middle_prompt(self):
         return " (format: [value1,value2,etc..] (empty is []))"

@@ -73,8 +73,6 @@ async def download_if_not_exist(session,
     elif settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
         force = True
 
-    Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
-
     if os.path.exists(absolute_path) and not force:
         return
 
@@ -113,8 +111,11 @@ async def download_if_not_exist(session,
         elif domain not in FORCE_DOWNLOAD_BLACKLIST:
             logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
+        Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+
         if action == ACTION_REPLACE and settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)
+            print(absolute_path, file_name)
             pure_name, extension = split_name_extension(file_name)
             old_file_name = f"{pure_name}-old.{extension}"
             old_absolute_path = os.path.join(dir_path, old_file_name)

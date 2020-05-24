@@ -42,6 +42,8 @@ The settings in your `settings.config` file:
 | forbidden_extensions | List| A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
 | keep_replaced_files | Bool| default: false. If a file gets updated, it will be renamed, so it doesn't get overwritten.  |
 
+Note: You can also give the settings directly over the command line. Run `python main.py --help` for more infos.
+
 ## Template
 The template file is where you specify your folder structure and the websites you want to scrape.
 
