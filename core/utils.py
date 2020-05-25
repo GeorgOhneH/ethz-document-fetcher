@@ -30,7 +30,7 @@ def get_extension(file):
 
 
 def split_name_extension(file_name):
-    "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
+    return "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
 
 
 def save_txt(section, path):
