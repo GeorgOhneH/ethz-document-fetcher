@@ -16,7 +16,7 @@ class SettingBase(type):
         for key, value in attrs.items():
             if isinstance(value, ConfigString):
                 value.name = key
-                attrs[key] = property(value.get, value.set)
+                attrs[key] = property(value._get, value._set)
                 values[key] = value
         attrs["_values"] = values
         return super().__new__(mcs, name, bases, attrs)

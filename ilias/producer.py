@@ -34,7 +34,6 @@ async def search_tree(session, queue, base_path, fold_id):
         if str(response.url) != url:
             raise LoginError("Module ilias isn't logged in")
 
-    await asyncio.sleep(0)
     strainer = SoupStrainer("div", attrs={"class": "ilCLI ilObjListRow row"})
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER, parse_only=strainer)
     rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})

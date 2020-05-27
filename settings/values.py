@@ -13,16 +13,22 @@ class ConfigString(object):
         self.depends_on = depends_on
         self.default = default
         self._value = None
-        self.set(None, default)
+        self.set(default)
         self.active_func = active_func
         self.name = None  # will be set on runtime
         self.optional = optional
         self.msg = ""
 
-    def get(self, obj=None):
+    def get(self):
+        return self._get()
+
+    def _get(self, obj=None):
         return self._value
 
-    def set(self, obj, value):
+    def set(self, value):
+        self._set(None, value)
+
+    def _set(self, obj, value):
         self._value = value
 
     def convert_from_prompt(self, value):

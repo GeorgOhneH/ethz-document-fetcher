@@ -37,7 +37,7 @@ def setup():
                 print(value.msg)
                 continue
 
-            value.set(None, i)
+            value.set(i)
             break
 
     settings.save()
