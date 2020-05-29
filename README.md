@@ -40,7 +40,7 @@ The settings in your `settings.config` file:
 | loglevel | String| INFO |ERROR or WARNING or INFO or DEBUG |
 | allowed_extensions |List | [] | A list of extension which are allowed to be downloaded. A empty list means that everything is allowed. Add 'video' for all video types extensions|
 | forbidden_extensions | List| [video] | A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
-| keep_replaced_files | Bool| False | If a file gets updated, it will be renamed, so it doesn't get overwritten. If the file is pdf, a new pdf will be created that will highlight the difference between the new and old file.  |
+| keep_replaced_files | Bool| False | If a file gets updated, it will be renamed, so it doesn't get overwritten. If the file is a pdf, a new pdf will be created that will highlight the difference between the new and old file.  |
 
 To change the settings run `python setup.py`
 <br>
