@@ -115,7 +115,6 @@ async def download_if_not_exist(session,
 
         if action == ACTION_REPLACE and settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)
-            print(absolute_path, file_name)
             pure_name, extension = split_name_extension(file_name)
             old_file_name = f"{pure_name}-old.{extension}"
             old_absolute_path = os.path.join(dir_path, old_file_name)

@@ -230,9 +230,10 @@ async def call_if_never_called(session, module, function_name):
     async with lock:
         if not hasattr(func, "error"):
             logger.debug(f"Logging into {module.__name__}")
+            start_time = time.time()
             try:
                 await func(session=session)
-                logger.debug(f"Logged into {module.__name__}")
+                logger.debug(f"Logged into {module.__name__}, time: {(time.time()-start_time):.2f}")
                 func.error = False
             except LoginError as e:
                 func.error = True

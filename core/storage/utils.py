@@ -4,6 +4,8 @@ import os
 import pickle
 import random
 
+
+from settings import settings
 from core.storage.cache import get_json
 from core.storage.constants import FUNCTION_CACHE_PATH
 

@@ -5,6 +5,7 @@ import ssl
 import time
 
 import aiohttp
+import selectors
 import certifi
 import colorama
 
@@ -72,7 +73,7 @@ async def main():
 if __name__ == '__main__':
     start_t = time.time()
     startup_time = time.process_time()
-    asyncio.run(main())
+    asyncio.run(main(), debug=False)
     logger.debug(f"Startup time: {startup_time:.2f} seconds")
     logger.debug(f"Total process time: {(time.process_time()):.2f} seconds")
     logger.info(f"Finished in {(time.time() - start_t):.2f} seconds")

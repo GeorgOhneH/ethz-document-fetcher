@@ -49,7 +49,7 @@ async def search_tree(session, queue, base_path, fold_id):
             checksum = "".join([str(x.string).strip() for x in
                                 content.find_all("span", attrs={"class": "il_ItemProperty"})])
 
-            locale.setlocale(locale.LC_TIME, "en_US")
+            locale.setlocale(locale.LC_TIME, "en_US.utf8")
             if "Today" in checksum:
                 today_date = datetime.datetime.now()
                 checksum = checksum.replace("Today", today_date.strftime("%d. %b %Y"))
