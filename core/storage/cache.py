@@ -96,6 +96,24 @@ def is_checksum_same(path, checksum):
     return False
 
 
+def save_checksum(path, checksum):
+    if checksum is None:
+        return
+
+    meta_data = get_file_meta_data(path)
+
+    old_checksum = meta_data.get("checksum", None)
+
+    if old_checksum == checksum:
+        return
+
+    if old_checksum is None:
+        logger.debug(f"Added new checksum, path: {path}, checksum: {checksum}")
+    else:
+        logger.debug(f"Replaced old checksum, path: {path}, new: {checksum}, old: {old_checksum}")
+    meta_data["checksum"] = checksum
+
+
 def get_etag(path):
     meta_data = get_file_meta_data(path)
     return meta_data.get("etag", None)

@@ -106,11 +106,6 @@ async def download_if_not_exist(session,
         if file_extension.lower() in MOVIE_EXTENSIONS:
             logger.info(f"Starting to download {file_name}")
 
-        if "ETag" in response.headers:
-            save_etag(absolute_path, response.headers["ETag"])
-        elif domain not in FORCE_DOWNLOAD_BLACKLIST:
-            logger.warning(f"url: {url} had not an etag and is not in the blacklist")
-
         Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
         if action == ACTION_REPLACE and settings.keep_replaced_files:
@@ -120,12 +115,22 @@ async def download_if_not_exist(session,
             old_absolute_path = os.path.join(dir_path, old_file_name)
             os.replace(absolute_path, old_absolute_path)
 
-        with open(absolute_path, 'wb') as f:
-            while True:
-                chunk = await response.content.read(8192)
-                if not chunk:
-                    break
-                f.write(chunk)
+        try:
+            with open(absolute_path, 'wb') as f:
+                while True:
+                    chunk = await response.content.read(8192)
+                    if not chunk:
+                        break
+                    f.write(chunk)
+        except BaseException as e:
+            os.remove(absolute_path)
+            logger.debug(f"Removed file {absolute_path}")
+            raise e
+
+        if "ETag" in response.headers:
+            save_etag(absolute_path, response.headers["ETag"])
+        elif domain not in FORCE_DOWNLOAD_BLACKLIST:
+            logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
     if action == ACTION_REPLACE and settings.keep_replaced_files and file_extension.lower() == "pdf":
         logger.debug("Adding highlights")
@@ -153,6 +158,8 @@ async def download_if_not_exist(session,
     }
 
     logger.info(fit_sections_to_console(start, end, margin=-8))
+
+    save_checksum(absolute_path, checksum)
 
 
 def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):

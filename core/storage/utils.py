@@ -3,6 +3,7 @@ import logging
 import os
 import pickle
 import random
+import copy
 
 
 from settings import settings
@@ -26,7 +27,7 @@ async def call_function_or_cache(func, identifier, *args, **kwargs):
 
     func_identifier = get_func_identifier(args, kwargs)
     attributes = table.get(func_identifier, {})
-    cache_identifier = attributes.get("identifier", None)
+    cache_identifier = copy.copy(attributes.get("identifier", None))
     if identifier is not None and identifier == cache_identifier:
         if attributes["pickle"]:
             with open(attributes["value"], "rb") as f:
