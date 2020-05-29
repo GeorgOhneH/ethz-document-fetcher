@@ -31,17 +31,19 @@ or double click the `run.sh` file (Mac/Linux only)
 ## Settings
 The settings in your `settings.config` file:
 
-| Name        | Type      | Note           |
-| ------------- | --------    |-------------|
-| username      | String | LDAP ETH username. Is optional, but all sites, which require your username and password won't work.|
-| password      | String |  LDAP ETH password. Is optional, but all sites, which require your username and password won't work.    |
-| base_path | Path|  Absolute path to the directory where the files will be stored      |
-| template_path | Path| path to your template |
-| loglevel | String| ERROR or WARNING or INFO or DEBUG |
-| allowed_extensions |List | A list of extension which are allowed to be downloaded. Add 'video' for all video types extensions|
-| forbidden_extensions | List| A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
-| keep_replaced_files | Bool| default: false. If a file gets updated, it will be renamed, so it doesn't get overwritten.  |
+| Name        | Type      | Default |  Note           |
+| ------------- | -------- | --------   |-------------|
+| username      | String | None | LDAP ETH username. Is optional, but all sites, which require your username and password won't work.|
+| password      | String | None |LDAP ETH password. Is optional, but all sites, which require your username and password won't work.    |
+| base_path | Path |current working directory |  Absolute path to the directory where the files will be stored      |
+| template_path | Path| path to an example |path to your template |
+| loglevel | String| INFO |ERROR or WARNING or INFO or DEBUG |
+| allowed_extensions |List | [] | A list of extension which are allowed to be downloaded. A empty list means that everything is allowed. Add 'video' for all video types extensions|
+| forbidden_extensions | List| [video] | A list of extension which are prohibited to be downloaded. Add 'video' for all video types extensions|
+| keep_replaced_files | Bool| False | If a file gets updated, it will be renamed, so it doesn't get overwritten. If the file is pdf, a new pdf will be created that will highlight the difference between the new and old file.  |
 
+To change the settings run `python setup.py`
+<br>
 Note: You can also give the settings directly over the command line. Run `python main.py --help` for more infos.
 
 ## Template
