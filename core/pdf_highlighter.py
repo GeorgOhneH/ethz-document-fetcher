@@ -174,14 +174,15 @@ def reduce_boxes(boxes):
             current_box = box
             continue
 
-        if int(box.top) == int(current_box.top) and int(box.bottom) == int(current_box.bottom) and abs(current_box.right - box.left) <= 5:
+        if int(box.top) == int(current_box.top) and\
+                int(box.bottom) == int(current_box.bottom) and\
+                abs(current_box.right - box.left) <= 5:
             current_box = current_box + box
         else:
             reduced_boxes.append(copy.copy(current_box))
             current_box = box
 
-    reduced_boxes.append(copy.copy(current_box))
+    if current_box is not None:
+        reduced_boxes.append(copy.copy(current_box))
 
     return reduced_boxes
-
-
