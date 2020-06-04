@@ -45,7 +45,7 @@ class QueueWrapper:
         self.consumer_kwargs = kwargs
         for attr, method in obj.__class__.__dict__.items():
             if callable(method):
-                if inspect.iscoroutinefunction(method):
+                if inspect.iscoroutinefunction(method) or asyncio.iscoroutinefunction(method):
                     setattr(self, attr, queue_wrapper_async(obj, attr, **kwargs))
                 else:
                     setattr(self, attr, queue_wrapper(obj, attr))
@@ -75,7 +75,7 @@ async def parse_producers(data, **kwargs):
             coroutine = parse_folder(data=sub_data, **kwargs)
         else:
             coroutine = parse_producer(producer_name=producer_name, p_kwargs=sub_data, **kwargs)
-        tasks.append(asyncio.create_task(coroutine))
+        tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)
 
@@ -148,7 +148,7 @@ async def parse_producer(session, queue, producers, producer_name, p_kwargs, bas
     coroutine = exception_handler(producer_function)(session=session, queue=queue_wrapper,
                                                      base_path=base_path, **p_kwargs)
 
-    producers.append(asyncio.create_task(coroutine))
+    producers.append(asyncio.ensure_future(coroutine))
 
     if sub_producer is not None:
         await parse_producers(
@@ -206,7 +206,7 @@ async def parse_template(session, queue, producers, path, base_path=""):
             )
         else:
             raise ParseTemplateError(f"Expected 'folder' or 'producers' field (not {key})")
-        tasks.append(asyncio.create_task(coroutine))
+        tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)
 

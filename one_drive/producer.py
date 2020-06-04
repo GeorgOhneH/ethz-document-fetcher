@@ -50,7 +50,7 @@ async def producer(session, queue, base_path, url, etag=None):
             folder_url = await check_url_reference(session, item['webUrl']) + f"?authkey={authkey}"
             item_etag = item["lastModifiedDateTime"]
             coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}", etag=item_etag)
-            tasks.append(asyncio.create_task(coroutine))
+            tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)
 

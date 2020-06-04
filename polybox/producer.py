@@ -94,7 +94,7 @@ async def producer(session, queue, id, base_path, password=None):
             if password is not None:
                 coroutine = download_if_not_exist(session, path=absolute_path, url=url,
                                                   checksum=checksum, **queue.consumer_kwargs)
-                tasks.append(asyncio.create_task(coroutine))
+                tasks.append(asyncio.ensure_future(coroutine))
             else:
                 await queue.put({"url": url, "path": absolute_path, "checksum": checksum})
 

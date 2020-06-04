@@ -44,6 +44,6 @@ async def producer(session, queue, url, base_path):
             await queue.put({"url": url + href, "path": path, "checksum": checksum})
         else:
             coroutine = producer(session, queue, url + href, path)
-            tasks.append(asyncio.create_task(coroutine))
+            tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

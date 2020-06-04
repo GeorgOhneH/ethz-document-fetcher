@@ -1,7 +1,6 @@
 requests
 aiohttp
 beautifulsoup4
-aiostream
 lxml
 aiodns
 cchardet

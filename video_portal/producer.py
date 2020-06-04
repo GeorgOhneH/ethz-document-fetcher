@@ -61,7 +61,7 @@ async def producer(session, queue, base_path, department, year, semester,
                                  pwd_username,
                                  pwd_password)
 
-        tasks.append(asyncio.create_task(coroutine))
+        tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)
 

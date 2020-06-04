@@ -64,7 +64,7 @@ async def parse_sections(session, queue, section, base_path, moodle_id, use_exte
         elif mtype == MTYPE_DIRECTORY:
             last_updated = last_updated_dict[module_id]
             coroutine = parse_folder(session, queue, module, base_path, last_updated)
-            tasks.append(asyncio.create_task(coroutine))
+            tasks.append(asyncio.ensure_future(coroutine))
 
         elif mtype == MTYPE_EXTERNAL_LINK:
             if not use_external_links:
@@ -88,7 +88,7 @@ async def parse_sections(session, queue, section, base_path, moodle_id, use_exte
                                                                           safe_path_join(base_path, name))
 
             if coroutine is not None:
-                tasks.append(asyncio.create_task(exception_handler(coroutine, moodle_id, driver_url)))
+                tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
 
     await asyncio.gather(*tasks)
 

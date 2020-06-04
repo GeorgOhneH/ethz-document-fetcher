@@ -62,7 +62,7 @@ async def search_tree(session, queue, base_path, fold_id):
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
             coroutine = search_tree(session, queue, path, ref_id)
-            tasks.append(asyncio.create_task(coroutine))
+            tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)
 

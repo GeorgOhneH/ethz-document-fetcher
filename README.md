@@ -13,7 +13,7 @@ ethz-document-fetcher is a script/program which fetches all files from ethz webs
  <br>Exceptions: Polybox, one drive, nethz, ilias, moodle
 
 ## Installation
-1. Make sure at least [python](https://www.python.org/downloads/) 3.7 is installed
+1. Make sure at least [python](https://www.python.org/downloads/) 3.6 is installed
 2. Install [git](https://git-scm.com/downloads) if you haven't
 3. Open a console in the directory where you want to install the fetcher
 4. run `git clone https://github.com/GeorgOhneH/ethz-document-fetcher.git`

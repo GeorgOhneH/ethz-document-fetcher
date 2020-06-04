@@ -42,7 +42,7 @@ async def main():
                 p.cancel()
             return
 
-        user_statistic = asyncio.create_task(user_statistics(session, settings.username))
+        user_statistic = asyncio.ensure_future(user_statistics(session, settings.username))
 
         logger.debug(f"Checking for update")
         is_new_release, latest_version, current_version = await check_for_new_release(session)
@@ -51,7 +51,7 @@ async def main():
                         f" New version: {latest_version}. Current version {current_version}")
 
         logger.debug("Starting consumers")
-        consumers = [asyncio.create_task(download_files(session, queue)) for _ in range(20)]
+        consumers = [asyncio.ensure_future(download_files(session, queue)) for _ in range(20)]
 
         logger.debug("Gathering producers")
         await asyncio.gather(*producers)
@@ -73,7 +73,8 @@ async def main():
 if __name__ == '__main__':
     start_t = time.time()
     startup_time = time.process_time()
-    asyncio.run(main(), debug=False)
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main())
     logger.debug(f"Startup time: {startup_time:.2f} seconds")
     logger.debug(f"Total process time: {(time.process_time()):.2f} seconds")
     logger.info(f"Finished in {(time.time() - start_t):.2f} seconds")
