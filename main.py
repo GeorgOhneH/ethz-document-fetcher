@@ -5,11 +5,10 @@ import ssl
 import time
 
 import aiohttp
-import selectors
 import certifi
 import colorama
 
-from core import download_files, parse_template
+from core import downloader, template_parser, monitor
 from core.exceptions import ParseTemplateError
 from core.utils import user_statistics, check_for_new_release
 from settings import settings
@@ -21,7 +20,7 @@ logging.config.dictConfig(LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
 
 
-async def main():
+async def main(signals=None):
     if not settings.check_if_valid():
         logger.critical("Settings are not correctly configured. Please run 'python setup.py'. Exiting...")
         return
@@ -29,18 +28,20 @@ async def main():
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     conn = aiohttp.TCPConnector(ssl=ssl_context)
 
-    async with aiohttp.ClientSession(raise_for_status=True, connector=conn) as session:
+    async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
+                                      timeout=aiohttp.ClientTimeout(30)) as session:
         logger.debug(f"Loading template: {settings.template_path}")
         queue = asyncio.Queue()
         producers = []
         template_file = os.path.join(os.path.dirname(__file__), settings.template_path)
+        template = template_parser.Template(path=template_file, signals=signals)
         try:
-            await parse_template(session, queue, producers, template_file)
-        except ParseTemplateError as e:
+            template.load()
+        except Exception as e:
             logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
-            for p in producers:
-                p.cancel()
             return
+
+        await template.run_root(producers, session, queue)
 
         user_statistic = asyncio.ensure_future(user_statistics(session, settings.username))
 
@@ -51,7 +52,7 @@ async def main():
                         f" New version: {latest_version}. Current version {current_version}")
 
         logger.debug("Starting consumers")
-        consumers = [asyncio.ensure_future(download_files(session, queue)) for _ in range(20)]
+        consumers = [asyncio.ensure_future(downloader.download_files(session, queue)) for _ in range(20)]
 
         logger.debug("Gathering producers")
         await asyncio.gather(*producers)

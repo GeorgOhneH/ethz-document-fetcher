@@ -2,8 +2,8 @@ import asyncio
 import os
 
 from core.utils import safe_path_join
-from video_portal.constants import *
-from video_portal.login import login_and_data
+from sites.video_portal.constants import *
+from sites.video_portal.login import login_and_data
 
 
 async def get_meta_data(session, course_url):

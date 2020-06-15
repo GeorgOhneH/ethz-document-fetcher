@@ -9,3 +9,6 @@ pyyaml
 certifi
 PyMuPDF
 PyPDF2
+PyInstaller
+PyQt5
+ordered_set

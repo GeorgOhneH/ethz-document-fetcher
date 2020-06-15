@@ -8,8 +8,8 @@ from bs4 import SoupStrainer
 from core.constants import *
 from core.exceptions import LoginError
 from core.utils import *
-from ilias.constants import *
-from ilias.login import login
+from sites.ilias.constants import *
+from sites.ilias import login
 
 
 async def get_folder_name(session, id):

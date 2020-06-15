@@ -1,4 +1,4 @@
-import aai_logon
+from .. import aai_logon
 from .constants import *
 
 

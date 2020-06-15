@@ -1,4 +1,4 @@
-from video_portal.constants import *
+from sites.video_portal.constants import *
 
 
 async def login_and_data(session, department, year, semester, course_id, meta_video_url,

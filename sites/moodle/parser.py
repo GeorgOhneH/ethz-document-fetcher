@@ -4,8 +4,7 @@ import traceback
 from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer
 
-import one_drive
-import polybox
+from sites import polybox, one_drive
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache

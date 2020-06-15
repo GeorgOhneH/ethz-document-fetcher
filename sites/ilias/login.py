@@ -1,7 +1,5 @@
-import aai_logon
-from ilias.constants import *
-
-import time
+from sites import aai_logon
+from sites.ilias.constants import *
 
 
 async def login(session):

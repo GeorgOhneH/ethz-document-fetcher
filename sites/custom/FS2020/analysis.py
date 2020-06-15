@@ -1,4 +1,4 @@
-from custom.utils import validate_url
+from sites.custom.utils import validate_url
 
 BASE_URL = "https://metaphor.ethz.ch/x/2020/fs/401-0232-10L/"
 

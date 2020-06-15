@@ -19,14 +19,18 @@ logger = logging.getLogger(__name__)
 async def download_files(session: aiohttp.ClientSession, queue):
     while True:
         item = await queue.get()
+        unique_key = item["unique_key"]
+        signal_handler = item["signal_handler"]
         try:
             await download_if_not_exist(session, **item)
+            signal_handler.finished_successful(unique_key)
         except asyncio.CancelledError:
             return
         except Exception as e:
             if settings.loglevel == "DEBUG":
                 traceback.print_exc()
             logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}")
+            signal_handler.quit_with_error(unique_key, f"Could not download file from url: {item['url']}. Error: {e}")
 
         queue.task_done()
 
@@ -38,7 +42,9 @@ async def download_if_not_exist(session,
                                 kwargs=None,
                                 allowed_extensions=None,
                                 forbidden_extensions=None,
-                                checksum=None):
+                                checksum=None,
+                                signal_handler=None,
+                                unique_key=None):
     if kwargs is None:
         kwargs = {}
 

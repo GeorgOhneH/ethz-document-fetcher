@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.exceptions import LoginError
-from moodle.parser import parse_main_page
+from sites.moodle.parser import parse_main_page
 from .constants import AUTH_URL
 
 

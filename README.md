@@ -53,12 +53,12 @@ See examples in the template folder. Note that in some examples some values are 
 These must be replaced with there actual values if you want the producer to be used.
 
 ### Start
-You need to start with a `folder` or/and `producers`
+You need to start with a `folder` or/and `sites`
 
 ```yaml
 folder:
     ...
-producers:
+sites:
     ...
 ```
 
@@ -67,90 +67,90 @@ producers:
 ```yaml
 folder:
     name: folder_name
-    producers:
+    sites:
       ...
 ```
 
-### Producers
+### Sites
 
 ```yaml
-producers:
-    - <producer>
+sites:
+    - <site>
         ...
-    - <producer>
+    - <site>
         ...
-    - <producer>
+    - <site>
         ...
     ...
 ```
 
-### Producer
-Parameters for every producer, all optional
+### Site
+Parameters for every producer, all optional except module
 
 if no folder name is given, it takes the title of the website
 
 ```yaml
-<producer>:
-    allowed_extensions: [extension1, extension2, pdf, ...]
-    forbidden_extensions: [extension1, extension2, pdf, ...]
-    folder_name: folder_name
-    use_folder: (true or false, default: true)
+module: site_name (always required)
+allowed_extensions: [extension1, extension2, pdf, ...]
+forbidden_extensions: [extension1, extension2, pdf, ...]
+folder_name: folder_name
+use_folder: (true or false, default: true)
+...
+producers:
     ...
-    producers:
-        ...
-    folder:
-        ...
+folder:
+    ...
       
 ```
 
 #### Moodle
 
 ```yaml
-moodle:
-    id: moodle_id
-    use_external_links: (true or false, default: true) (optional)
-    ...
+module: moodle
+id: moodle_id
+use_external_links: (true or false, default: true) (optional)
+...
 ```
 #### Ilias
 
 ```yaml
-ilias:
-    id: ilias_id
-    ...
+module: ilias
+id: ilias_id
+...
 ```
 #### nethz
 
 ```yaml
-nethz:
-    url: nethz_url
-    ...
+module: nethz
+url: nethz_url
+...
 ```
 #### One Drive
 
 ```yaml
-one_drive:
-    url: one_drive_url
-    ...
+module: one_drive
+url: one_drive_url
+...
 ```
 #### Polybox
 
 ```yaml
-polybox:
-    id: polybox_id
-    password: password (optional)
-    ...
+module: polybox
+id: polybox_id
+password: password (optional)
+...
 ```
 #### Video Portal
 
 ```yaml
-video_portal:
-    department: department
-    year: year
-    semester: semester
-    course_id: course_id
-    pwd_username: pwd_username (optional)
-    pwd_password: pwd_password (optional)
-    ...
+module: video_portal
+department: department
+year: year
+semester: semester
+course_id: course_id
+pwd_username: pwd_username (optional)
+pwd_password: pwd_password (optional)
+...
 ```
 #### Custom
 You can write your own functions.
@@ -177,11 +177,11 @@ async def your_folder_name_function(session, queue, base_path, **kwargs):
 ```
 
 ```yaml
-custom:
-    function: module.to.your_function
-    folder_function: module.to.your_folder_name_function (optional)
-    kwarg1: kwarg1_value1
-    kwarg2: kwarg1_value2
+module: custom
+function: module.to.your_function
+folder_function: module.to.your_folder_name_function (optional)
+kwarg1: kwarg1_value1
+kwarg2: kwarg1_value2
 ```
 
 ## Contribution

@@ -1,6 +1,6 @@
 from aiohttp import BasicAuth
 
-from custom.utils import validate_url
+from sites.custom.utils import validate_url
 from settings import settings
 
 BASE_URL = "https://lec.inf.ethz.ch/itet/informatik1/2020/"

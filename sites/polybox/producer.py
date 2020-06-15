@@ -11,7 +11,8 @@ import aiohttp
 
 from core.constants import *
 from core.downloader import download_if_not_exist
-from polybox.constants import *
+from core.monitor import MonitorSession
+from sites.polybox.constants import *
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +48,7 @@ async def authenticate(session, poly_id, password):
 
 async def get_folder_name(session, id, password=None):
     poly_id = id
-    async with aiohttp.ClientSession(raise_for_status=True) as session:
+    async with MonitorSession(raise_for_status=True, signals=session.signals) as session:
         headers = await authenticate(session, poly_id, password)
 
         url = INDEX_URL + poly_id
@@ -68,7 +69,7 @@ async def producer(session, queue, id, base_path, password=None):
     tasks = []
     # We create a new session, because polybox doesn't work
     # when you jump around with the same session
-    async with aiohttp.ClientSession(raise_for_status=True) as session:
+    async with MonitorSession(raise_for_status=True, signals=session.signals) as session:
         headers = await authenticate(session, poly_id, password)
 
         async with session.request("PROPFIND", url=WEBDAV_URL, data=PROPFIND_DATA, headers=headers) as response:

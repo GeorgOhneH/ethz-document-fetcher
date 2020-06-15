@@ -4,3 +4,7 @@ class ParseTemplateError(Exception):
 
 class LoginError(Exception):
     pass
+
+
+class ParseTemplateRuntimeError(Exception):
+    pass
