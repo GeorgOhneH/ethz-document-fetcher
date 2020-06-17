@@ -43,10 +43,21 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('thread test')
         self.central_widget = CentralWidget(self.actions, parent=self)
         self.setCentralWidget(self.central_widget)
+        self.read_settings()
         self.show()
 
     def closeEvent(self, event):
         self.central_widget.clean_up()
+        settings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        settings.setValue("mainWindow/geometry", self.saveGeometry())
+        settings.setValue("mainWindow/windowState", self.saveState())
         super(MainWindow, self).closeEvent(event)
+
+    def read_settings(self):
+        settings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        if settings.value("mainWindow/geometry") is not None:
+            self.restoreGeometry(settings.value("mainWindow/geometry"))
+        if settings.value("mainWindow/windowState") is not None:
+            self.restoreState(settings.value("mainWindow/windowState"))
 
 

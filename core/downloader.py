@@ -66,7 +66,7 @@ async def download_if_not_exist(session,
 
     timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
-        absolute_path = path
+        raise ValueError("Absolutes paths are not allowed")
     else:
         absolute_path = os.path.join(settings.base_path, path)
 

@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 class Signals(QObject):
     finished = pyqtSignal()
+    stopped = pyqtSignal()
 
     site_started = pyqtSignal([str], [str, str])
     site_finished_successful = pyqtSignal([str], [str, str])
@@ -63,6 +64,7 @@ class Worker(QObject):
     def stop(self):
         if self.tasks is not None:
             self.tasks.cancel()
+            self.signals.stopped.emit()
 
     async def run(self, signals=None):
         if not settings.check_if_valid():

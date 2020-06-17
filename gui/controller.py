@@ -12,7 +12,7 @@ from PyQt5.QtCore import *
 import aiohttp
 import certifi
 
-from gui.template_view import TemplateViewTree
+from gui.template_view import TemplateView
 from gui.worker import Worker
 from core import downloader, template_parser, monitor
 from core.exceptions import ParseTemplateError
@@ -35,6 +35,13 @@ class CentralWidget(QWidget):
         self.monitor_download_widget.setText("0")
         self.status_bar.addPermanentWidget(self.monitor_download_widget)
 
+        self.thread = QThread()
+        self.worker = Worker()
+        self.worker.moveToThread(self.thread)
+        self.worker.signals.finished.connect(self.quit_thread)
+        self.thread.started.connect(self.worker.main)
+        self.worker.signals.downloaded_content_length.connect(self.monitor_download)
+
         grid = QGridLayout()
 
         self.btn_run = QPushButton("Run")
@@ -47,52 +54,19 @@ class CentralWidget(QWidget):
         actions.stop.setEnabled(False)
         self.btn_stop.pressed.connect(self.stop_thread)
 
-        self.view_tree = TemplateViewTree(self)
-        self.view_tree.setHeaderHidden(True)
+        self.template_view = TemplateView(self.worker.signals, self)
 
         grid.addWidget(self.btn_run, 0, 0)
         grid.addWidget(self.btn_stop, 0, 1)
-        grid.addWidget(self.view_tree, 1, 0, 1, 2)
+        grid.addWidget(self.template_view, 1, 0, 1, 2)
         self.setLayout(grid)
 
-        self.thread = QThread()
-        self.worker = self.init_worker()
         self.one_second_timer.start(1000)
-
-    def init_worker(self):
-        worker = Worker()
-
-        worker.moveToThread(self.thread)
-
-        worker.signals.finished.connect(self.quit_thread)
-
-        self.thread.started.connect(worker.main)
-
-        worker.signals.update_folder_name.connect(self.view_tree.update_folder_name)
-
-        worker.signals.update_base_path.connect(self.view_tree.update_base_path)
-
-        worker.signals.site_started[str].connect(self.view_tree.site_started)
-        worker.signals.site_started[str, str].connect(self.view_tree.site_started)
-
-        worker.signals.site_finished_successful[str].connect(self.view_tree.site_finished_successful)
-        worker.signals.site_finished_successful[str, str].connect(self.view_tree.site_finished_successful)
-
-        worker.signals.site_quit_with_warning[str].connect(self.view_tree.site_quit_with_warning)
-        worker.signals.site_quit_with_warning[str, str].connect(self.view_tree.site_quit_with_warning)
-
-        worker.signals.site_quit_with_error[str].connect(self.view_tree.site_quit_with_error)
-        worker.signals.site_quit_with_error[str, str].connect(self.view_tree.site_quit_with_error)
-
-        worker.signals.downloaded_content_length.connect(self.monitor_download)
-
-        return worker
 
     def clean_up(self):
         self.stop_thread()
 
     def start_thread(self, unique_key="root", recursive=True):
-        self.view_tree.reset_widgets()
         self.start_time = time.time()
         self.btn_run.setText("Running...")
         self.btn_run.setEnabled(False)
@@ -106,11 +80,9 @@ class CentralWidget(QWidget):
 
     def stop_thread(self):
         self.worker.stop()
-        self.view_tree.stop_widgets()
 
     def quit_thread(self):
         self.thread.quit()
-        self.view_tree.quit_widgets()
         self.btn_run.setText("Run")
         self.btn_run.setEnabled(True)
         self.actions.run.setEnabled(True)
