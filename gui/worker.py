@@ -12,10 +12,8 @@ from PyQt5.QtCore import *
 import aiohttp
 import certifi
 
-from gui.template_view import TemplateViewTree
 from core import downloader, template_parser, monitor
-from core.exceptions import ParseTemplateError
-from core.utils import user_statistics, check_for_new_release
+from core.utils import user_statistics
 from settings import settings
 
 logger = logging.getLogger(__name__)

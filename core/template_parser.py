@@ -187,6 +187,9 @@ class TemplateNode(object):
     def gui_name(self):
         return str(self)
 
+    def gui_options(self):
+        return []
+
     async def add_producers(self, producers, session, queue, signal_handler):
         pass
 
@@ -199,30 +202,90 @@ class Folder(TemplateNode):
     def __str__(self):
         return self.name
 
+    def gui_name(self):
+        return self.name
+
+    def gui_options(self):
+        return [
+            ("name", self.name),
+        ]
+
 
 class Site(TemplateNode):
     def __init__(self,
-                 site_name,
-                 module_name,
-                 function_name,
-                 folder_module_name,
-                 folder_function_name,
-                 folder_name,
+                 raw_module_name,
+                 cached_folder_name,
                  use_folder,
+                 raw_folder_name,
+                 raw_function,
+                 raw_folder_function,
                  function_kwargs,
                  consumer_kwargs,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
+        self.raw_module_name = raw_module_name
+        self.cached_folder_name = cached_folder_name
         self.function_kwargs = function_kwargs
+        self.consumer_kwargs = consumer_kwargs
+        self.use_folder = use_folder
+        self.raw_folder_name = raw_folder_name
+        self.raw_function = raw_function
+        self.raw_folder_function = raw_folder_function
+
+        self.folder_function_name = None
+        self.folder_module_name = None
+        self.function_name = None
+        self.module_name = None
+        self.folder_name = None
+
+        self.init()
+
+    def init(self):
+        folder_name = self.raw_folder_name
+        if self.raw_folder_name is None and self.cached_folder_name is not None:
+            folder_name = self.cached_folder_name
+
+        if self.raw_module_name != "custom":
+            module_name = self.raw_module_name
+            folder_module_name = self.raw_module_name
+            function_name = "producer"
+            folder_function_name = "get_folder_name"
+        else:
+            if self.raw_function is None:
+                raise ParseTemplateError(f"Expected a 'function' field with custom")
+            module_name, function_name = get_module_function(self.raw_function)
+            if self.raw_folder_name is None and self.use_folder:
+                if self.raw_folder_function is None:
+                    raise ParseTemplateError(f"Expected a 'folder_function' or 'folder_name' field with custom")
+                folder_module_name, folder_function_name = get_module_function(self.raw_folder_function)
+            else:
+                folder_module_name, folder_function_name = None, None
+
+        module_name = "sites." + module_name
+        if folder_module_name is not None:
+            folder_module_name = "sites." + folder_module_name
+
+        try:
+            site_module = importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            raise ParseTemplateError(f"Site module with name: {module_name} does not exist")
+        if not hasattr(site_module, function_name):
+            raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
+
+        if folder_module_name is not None:
+            try:
+                folder_module = importlib.import_module(folder_module_name)
+            except ModuleNotFoundError:
+                raise ParseTemplateError(f"Folder module with name: {folder_module_name} does not exist")
+            if not hasattr(folder_module, folder_function_name):
+                raise ParseTemplateError(f"Function: {folder_function_name} in module: {folder_module} does not exist")
+
         self.folder_function_name = folder_function_name
         self.folder_module_name = folder_module_name
         self.function_name = function_name
         self.module_name = module_name
-        self.consumer_kwargs = consumer_kwargs
-        self.use_folder = use_folder
         self.folder_name = folder_name
-        self.site_name = site_name
 
     def __str__(self):
         return self.module_name
@@ -230,7 +293,35 @@ class Site(TemplateNode):
     def gui_name(self):
         if self.folder_name is not None:
             return self.folder_name
-        return self.site_name
+        return self.raw_module_name
+
+    def gui_options(self):
+        result = [("module", self.raw_module_name)]
+        if self.raw_module_name == "custom":
+            result.append(("function", self.raw_function))
+        result.append(("use_folder", self.use_folder))
+        if self.use_folder:
+            if self.raw_module_name == "custom" and self.raw_folder_function is not None:
+                result.append(("folder_function", self.raw_folder_function))
+            else:
+                result.append(("folder_name", self.raw_folder_name))
+
+        site_module = importlib.import_module(self.module_name)
+        producer_function = getattr(site_module, self.function_name)
+
+        for name, parameter in inspect.signature(producer_function).parameters.items():
+            if name in ["session", "queue", "base_path"]:
+                continue
+            if name in self.function_kwargs:
+                result.append((name, self.function_kwargs[name]))
+                continue
+
+            result.append((name, parameter.default if parameter.default is not parameter.empty else None))
+
+        for key, value in self.consumer_kwargs.items():
+            result.append((key, value))
+
+        return result
 
     async def add_producers(self, producers, session, queue, signal_handler):
         signal_handler.start(self.unique_key)
@@ -238,10 +329,10 @@ class Site(TemplateNode):
         if check_if_null(self.function_kwargs):
             raise ParseTemplateRuntimeError("Found null field")
 
-        producer_module = importlib.import_module(self.module_name)
-        producer_function = getattr(producer_module, self.function_name)
+        site_module = importlib.import_module(self.module_name)
+        producer_function = getattr(site_module, self.function_name)
 
-        await login_module(session, producer_module)
+        await login_module(session, site_module)
 
         if self.base_path is None:
             folder_name = await self.get_folder_name(session, signal_handler)
@@ -401,56 +492,24 @@ class Template(object):
                 raise ParseTemplateError("'module' or 'folder' field required")
 
     def parse_producer(self, p_kwargs, parent):
-        site_name = p_kwargs.pop("module")
+        raw_module_name = p_kwargs.pop("module")
 
         sub_sites = p_kwargs.pop("sites", None)
         folder = p_kwargs.pop("folder", None)
 
         unique_key = p_kwargs.pop("unique_key", None)
         cached_folder_name = p_kwargs.pop("cached_folder_name", None)
-        folder_name = p_kwargs.pop("folder_name", None)
+        raw_folder_name = p_kwargs.pop("folder_name", None)
         use_folder = p_kwargs.pop("use_folder", True)
         possible_consumer_kwargs = ["allowed_extensions", "forbidden_extensions"]
         consumer_kwargs = {name: p_kwargs.pop(name, None) for name in possible_consumer_kwargs}
-        consumer_kwargs = {name: value for name, value in consumer_kwargs.items() if value is not None}
 
-        if folder_name is None and cached_folder_name is not None:
+        raw_function = p_kwargs.pop("function", None)
+        raw_folder_function = p_kwargs.pop("folder_function", None)
+
+        folder_name = raw_folder_name
+        if raw_folder_name is None and cached_folder_name is not None:
             folder_name = cached_folder_name
-
-        if site_name != "custom":
-            module_name = site_name
-            folder_module_name = site_name
-            function_name = "producer"
-            folder_function_name = "get_folder_name"
-        else:
-            if "function" not in p_kwargs:
-                raise ParseTemplateError(f"Expected a 'function' field with custom")
-            module_name, function_name = get_module_function(p_kwargs.pop("function"))
-            if folder_name is None and use_folder:
-                if "function" not in p_kwargs:
-                    raise ParseTemplateError(f"Expected a 'folder_function' or 'folder_name' field with custom")
-                folder_module_name, folder_function_name = get_module_function(p_kwargs.pop("folder_function"))
-            else:
-                folder_module_name, folder_function_name = None, None
-
-        module_name = "sites." + module_name
-        if folder_module_name is not None:
-            folder_module_name = "sites." + folder_module_name
-
-        try:
-            site_module = importlib.import_module(module_name)
-        except ModuleNotFoundError:
-            raise ParseTemplateError(f"Site module with name: {module_name} does not exist")
-        if not hasattr(site_module, function_name):
-            raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
-
-        if folder_module_name is not None:
-            try:
-                folder_module = importlib.import_module(folder_module_name)
-            except ModuleNotFoundError:
-                raise ParseTemplateError(f"Folder module with name: {folder_module_name} does not exist")
-            if not hasattr(folder_module, folder_function_name):
-                raise ParseTemplateError(f"Function: {folder_function_name} in module: {folder_module} does not exist")
 
         base_path = None
         if parent.base_path is not None:
@@ -460,17 +519,16 @@ class Template(object):
                 base_path = safe_path_join(parent.base_path, folder_name)
 
         site = Site(
-            site_name=site_name,
-            module_name=module_name,
-            function_name=function_name,
-            folder_module_name=folder_module_name,
-            folder_function_name=folder_function_name,
-            unique_key=unique_key,
-            folder_name=folder_name,
+            raw_module_name=raw_module_name,
+            cached_folder_name=cached_folder_name,
             use_folder=use_folder,
+            raw_folder_name=raw_folder_name,
+            raw_function=raw_function,
+            raw_folder_function=raw_folder_function,
             function_kwargs=p_kwargs,
-            base_path=base_path,
             consumer_kwargs=consumer_kwargs,
+            unique_key=unique_key,
+            base_path=base_path,
             parent=parent,
         )
 
