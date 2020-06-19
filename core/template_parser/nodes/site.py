@@ -2,9 +2,12 @@ import importlib
 import inspect
 import traceback
 import re
+import os
 import time
 import logging
 import asyncio
+
+from PyQt5.QtGui import *
 
 from core.storage import cache
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
@@ -12,6 +15,7 @@ from core.template_parser.nodes.base import TemplateNode
 from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
+from gui.constants import SITE_ICON_PATH
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -107,10 +111,23 @@ class Site(TemplateNode):
     def __str__(self):
         return self.module_name
 
-    def gui_name(self):
+    def get_gui_name(self):
         if self.folder_name is not None:
             return self.folder_name
         return self.raw_module_name
+
+    def get_gui_icon(self):
+        image_files = os.listdir(SITE_ICON_PATH)
+        file_name = None
+        for image_file in image_files:
+            if self.raw_module_name in image_file:
+                file_name = image_file
+                break
+        if file_name is None:
+            return super(Site, self).get_gui_icon()
+
+        path = os.path.join(SITE_ICON_PATH, file_name)
+        return QIcon(path)
 
     def gui_options(self):
         result = [("module", self.raw_module_name)]

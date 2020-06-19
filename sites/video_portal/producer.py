@@ -24,13 +24,13 @@ async def get_folder_name(session, department, year, semester, course_id, **kwar
 
 async def producer(session, queue, base_path, department, year, semester,
                    course_id, pwd_username=None, pwd_password=None):
-    path = os.path.join(settings.base_path, base_path)
+    absolute_path = os.path.join(settings.base_path, base_path)
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 
     meta_data = await get_meta_data(session, course_url)
 
-    if os.path.exists(path):
-        downloaded_episodes = os.listdir(path)
+    if os.path.exists(absolute_path):
+        downloaded_episodes = os.listdir(absolute_path)
     else:
         downloaded_episodes = []
 
@@ -52,7 +52,7 @@ async def producer(session, queue, base_path, department, year, semester,
 
         coroutine = put_in_queue(session,
                                  queue,
-                                 safe_path_join(path, file_name),
+                                 safe_path_join(base_path, file_name),
                                  department,
                                  year,
                                  semester,

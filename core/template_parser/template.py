@@ -52,13 +52,14 @@ class Template(object):
         if "name" not in data:
             raise ParseTemplateError("Expected a 'name' field in folder")
 
-        if "sites" not in data:
-            raise ParseTemplateError("Expected a 'sites' field in folder")
-
         folder = Folder(name=data["name"],
                         parent=parent)
 
-        self.parse_sites(data=data["sites"], parent=folder)
+        if "sites" in data:
+            self.parse_sites(data=data["sites"], parent=folder)
+
+        if "folder" in data:
+            self.parse_folder(data=data["folder"], parent=folder)
 
     def parse_sites(self, data, parent):
         for producer_dict in data:

@@ -1,10 +1,18 @@
 import hashlib
+import os
+
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from core.storage import cache
 from core.utils import safe_path_join
+from gui.constants import ASSETS_PATH
 
 
 class TemplateNode(object):
+    DEFAULT_ICON_PATH = os.path.join(ASSETS_PATH, "globe.svg")
+
     def __init__(self, parent, folder_name=None, unique_key_args=None, use_folder=True):
         if unique_key_args is None:
             unique_key_args = []
@@ -61,8 +69,11 @@ class TemplateNode(object):
         unique_string = self.position + "".join([f"{value}" for value in args])
         return hashlib.md5(unique_string.encode('utf-8')).hexdigest()
 
-    def gui_name(self):
+    def get_gui_name(self):
         return str(self)
+
+    def get_gui_icon(self):
+        return QIcon(self.DEFAULT_ICON_PATH)
 
     def gui_options(self):
         return []

@@ -47,7 +47,7 @@ class GeneralGroupBox(GroupBox):
 
     def update_content(self, selected_widget):
         attributes = [
-            ("Name", selected_widget.template_node.gui_name()),
+            ("Name", selected_widget.template_node.get_gui_name()),
             ("Type", selected_widget.template_node.__class__.__name__),
             ("State", selected_widget.state_text()),
             ("Path", selected_widget.template_node.base_path),

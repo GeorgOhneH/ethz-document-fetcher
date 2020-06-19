@@ -1,5 +1,6 @@
 import logging
 import time
+import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -7,6 +8,7 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import *
 
 from core.storage import cache
+from gui.constants import ASSETS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -43,11 +45,11 @@ class MovieLabel(QLabel):
 
 
 class TreeWidgetItemName(QWidget):
-    LOADING_GIF_PATH = "gui/images/loading.gif"
-    IDLE_IMAGE_PATH = "gui/images/idle.png"
-    WARNING_SVG_PATH = "gui/images/warning.svg"
-    ERROR_SVG_PATH = "gui/images/error.svg"
-    SUCCESS_SVG_PATH = "gui/images/success.svg"
+    LOADING_GIF_PATH = os.path.join(ASSETS_PATH, "loading.gif")
+    IDLE_IMAGE_PATH = os.path.join(ASSETS_PATH, "idle.png")
+    WARNING_SVG_PATH = os.path.join(ASSETS_PATH, "warning.svg")
+    ERROR_SVG_PATH = os.path.join(ASSETS_PATH, "error.svg")
+    SUCCESS_SVG_PATH = os.path.join(ASSETS_PATH, "success.svg")
 
     def __init__(self, text, parent=None):
         super().__init__(parent=parent)
@@ -130,7 +132,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         super().__init__()
         self.template_node = template_node
         self.signals = TreeWidgetItemSignals()
-        self.name_widget = TreeWidgetItemName(template_node.gui_name())
+        self.name_widget = TreeWidgetItemName(template_node.get_gui_name())
 
         self.added_new_file_count = 0
         self.replaced_file_count = 0
@@ -144,7 +146,7 @@ class TreeWidgetItem(QTreeWidgetItem):
 
     def init_widgets(self):
         self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)
-        self.setIcon(self.COLUMN_NAME, QFileIconProvider().icon(QFileIconProvider.Folder))
+        self.setIcon(self.COLUMN_NAME, self.template_node.get_gui_icon())
         self.setExpanded(True)
         self._set_state(self.STATE_IDLE)
         self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
