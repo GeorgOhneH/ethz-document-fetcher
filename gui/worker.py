@@ -4,13 +4,10 @@ import os
 import ssl
 import time
 import traceback
-import concurrent
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 import aiohttp
 import certifi
+from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
 from core.utils import user_statistics
@@ -31,14 +28,16 @@ class Signals(QObject):
     update_folder_name = pyqtSignal([str, str])
     update_base_path = pyqtSignal([str, str])
 
+    added_new_file = pyqtSignal([str, str])
+    replaced_file = pyqtSignal([str, str], [str, str, str])
+
     downloaded_content_length = pyqtSignal(int)
 
 
 class Worker(QObject):
-    signals = Signals()
-
     def __init__(self):
         super().__init__()
+        self.signals = Signals()
         self.unique_key = "root"
         self.recursive = True
         self.loop = asyncio.new_event_loop()

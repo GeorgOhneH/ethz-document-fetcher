@@ -1,10 +1,12 @@
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtSvg import QSvgWidget
-
-import os
 import logging
+import time
+
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import *
+
+from core.storage import cache
 
 logger = logging.getLogger(__name__)
 
@@ -119,37 +121,70 @@ class TreeWidgetItem(QTreeWidgetItem):
     STATE_WARNING = 3
     STATE_SUCCESS = 4
 
+    COLUMN_NAME = 0
+    COLUMN_ADDED_FILE = 1
+    COLUMN_REPLACED_FILE = 2
+    COLUMN_STATE = 3
+
     def __init__(self, template_node):
         super().__init__()
+        self.template_node = template_node
         self.signals = TreeWidgetItemSignals()
         self.name_widget = TreeWidgetItemName(template_node.gui_name())
 
+        self.added_new_file_count = 0
+        self.replaced_file_count = 0
+
+        self.added_files = self.load_from_cache("added_files")
+
         self.active_item_count = 0
         self.state = None
-        self.template_node = template_node
         self.children = []
         self.custom_parent = None
 
     def init_widgets(self):
-        self.treeWidget().setItemWidget(self, 0, self.name_widget)
+        self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)
+        self.setIcon(self.COLUMN_NAME, QFileIconProvider().icon(QFileIconProvider.Folder))
         self.setExpanded(True)
         self._set_state(self.STATE_IDLE)
+        self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
+        self.setTextAlignment(self.COLUMN_ADDED_FILE, Qt.AlignRight)
+        self.setText(self.COLUMN_REPLACED_FILE, str(self.replaced_file_count))
+        self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight)
+
+    def load_from_cache(self, name):
+        json = cache.get_json(name)
+        if self.template_node.unique_key not in json:
+            result = []
+            json[self.template_node.unique_key] = result
+            return result
+
+        return json[self.template_node.unique_key]
 
     def emit_data_changed(self):
         self.signals.data_changed.emit(self)
 
+    @staticmethod
+    def state_to_string(state):
+        if state == TreeWidgetItem.STATE_IDLE:
+            return "Idle"
+        elif state == TreeWidgetItem.STATE_LOADING:
+            return "Loading"
+        elif state == TreeWidgetItem.STATE_SUCCESS:
+            return "Finished"
+        elif state == TreeWidgetItem.STATE_ERROR:
+            return "Error"
+        elif state == TreeWidgetItem.STATE_WARNING:
+            return "Warning"
+        else:
+            raise ValueError("Not valid state")
+
+    def state_text(self):
+        return self.state_to_string(self.state)
+
     def _set_state(self, state):
         self.state = state
-        if self.state == self.STATE_IDLE:
-            self.setText(1, "Idle")
-        elif self.state == self.STATE_LOADING:
-            self.setText(1, "Loading")
-        elif self.state == self.STATE_SUCCESS:
-            self.setText(1, "Finished")
-        elif self.state == self.STATE_ERROR:
-            self.setText(1, "Error")
-        elif self.state == self.STATE_WARNING:
-            self.setText(1, "Warning")
+        self.setText(self.COLUMN_STATE, self.state_to_string(state))
         self.emit_data_changed()
 
     def set_idle(self):
@@ -187,4 +222,23 @@ class TreeWidgetItem(QTreeWidgetItem):
 
     def set_base_path(self, base_path):
         self.template_node.base_path = base_path
+        self.emit_data_changed()
+
+    def added_new_file(self, path):
+        self.added_new_file_count += 1
+        self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
+        self.added_files.append({
+            "path": path,
+            "timestamp": int(time.time()),
+        })
+        self.emit_data_changed()
+
+    def replaced_file(self, path, old_path=None):
+        self.replaced_file_count += 1
+        self.setText(self.COLUMN_REPLACED_FILE, str(self.replaced_file_count))
+        self.added_files.append({
+            "path": path,
+            "old_path": old_path,
+            "timestamp": int(time.time()),
+        })
         self.emit_data_changed()

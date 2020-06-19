@@ -1,15 +1,8 @@
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-
-import traceback
-import time
-import yaml
-import asyncio
-from pprint import pprint
 import logging
-import traceback
-import sys
+
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+
 from gui.controller import CentralWidget
 
 logger = logging.getLogger(__name__)

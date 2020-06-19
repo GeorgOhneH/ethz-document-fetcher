@@ -1,8 +1,8 @@
+import logging.config
 import sys
 
-from PyQt5.QtWidgets import QApplication
-import logging.config
 import colorama
+from PyQt5.QtWidgets import QApplication
 
 import gui.main_window
 from settings.logger import LOGGER_CONFIG

@@ -1,11 +1,10 @@
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-
-import os
 import logging
 
-from gui.template_view.info_view import InfoFolderView, InfoGeneralView
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+from gui.template_view.info_view import FolderInfoView, GeneralInfoView, HistoryInfoView
 from gui.template_view.view_tree import TemplateViewTree
 
 logger = logging.getLogger(__name__)
@@ -32,6 +31,19 @@ class Splitter(QSplitter):
         super().__init__()
         self.setChildrenCollapsible(False)
         self.setOrientation(Qt.Vertical)
+        qApp.aboutToQuit.connect(self.save_state)
+
+    def save_state(self):
+        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        qsettings.setValue("mainSplitter/geometry", self.saveGeometry())
+        qsettings.setValue("mainSplitter/windowState", self.saveState())
+
+    def read_settings(self):
+        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        if qsettings.value("mainSplitter/geometry") is not None:
+            self.restoreGeometry(qsettings.value("mainSplitter/geometry"))
+        if qsettings.value("mainSplitter/windowState") is not None:
+            self.restoreState(qsettings.value("mainSplitter/windowState"))
 
 
 class StackedWidgetView(QStackedWidget):
@@ -45,8 +57,9 @@ class StackedWidgetView(QStackedWidget):
         self.button_widget.setLayout(self.layout_button)
 
         self.views = [
-            InfoGeneralView(),
-            InfoFolderView(),
+            GeneralInfoView(),
+            FolderInfoView(),
+            HistoryInfoView(),
         ]
 
         self.init_views()
@@ -84,9 +97,9 @@ class StackedWidgetView(QStackedWidget):
 
 
 class TemplateView(QWidget):
-    def __init__(self, signals, parent=None):
+    def __init__(self, signals, controller, parent=None):
         super().__init__(parent=parent)
-        self.template_view_tree = TemplateViewTree(signals, self)
+        self.template_view_tree = TemplateViewTree(signals, controller, self)
 
         self.layout = QVBoxLayout()
 
@@ -95,6 +108,7 @@ class TemplateView(QWidget):
 
         self.splitter.addWidget(self.template_view_tree)
         self.splitter.addWidget(self.state_widget)
+        self.splitter.read_settings()
 
         self.layout.addWidget(self.splitter)
 

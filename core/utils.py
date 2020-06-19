@@ -3,8 +3,8 @@ import html
 import logging
 import os
 import re
-from pathlib import Path
-
+import shutil
+import copy
 
 logger = logging.getLogger(__name__)
 
@@ -31,17 +31,6 @@ def get_extension(file):
 
 def split_name_extension(file_name):
     return "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
-
-
-def save_txt(section, path):
-    Path(os.path.dirname(path)).mkdir(parents=True, exist_ok=True)
-    with open(path, "w+") as f:
-        f.write(str(section))
-
-
-def load_txt(path):
-    with open(path, "r") as f:
-        return f.read()
 
 
 def safe_path_join(path, *paths):
@@ -73,4 +62,30 @@ async def check_for_new_release(session):
     return False, latest_version, current_version
 
 
+def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
+    min_length = len(filler) + min_length
+    c, _ = shutil.get_terminal_size(fallback=(0, 0))
+    orig_sections = list(args)
+    sections = copy.copy(orig_sections)
+    sections.sort(key=lambda s: -s["priority"])
 
+    free = c - sum([len(x["name"]) - 2 for x in sections]) - margin - 6
+    length_vars = []
+    count = 0
+    for section in reversed(sections):
+        length_vars.append(count)
+        count += min(len(section["var"]), min_length)
+    length_vars.reverse()
+    if c:
+        for length_var, section in zip(length_vars, sections):
+            c_free = free - length_var
+            if c_free < len(section["var"]) and len(section["var"]) > min_length:
+                cut_length = max(c_free, min_length)
+                if section["cut"] == "front":
+                    section["var"] = (filler + section["var"][-cut_length + len(filler):])
+                elif section["cut"] == "back":
+                    section["var"] = (section["var"][:cut_length - len(filler)] + filler)
+
+            free -= len(section["var"])
+
+    return "".join([x["name"].format(x["var"]) for x in orig_sections])

@@ -1,29 +1,34 @@
+import logging
+import os
+import traceback
+
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtSvg import QSvgWidget
 
-import os
-import logging
-
-from gui.template_view.view_tree_item import TreeWidgetItem
 from core import template_parser
+from gui.template_view.view_tree_item import TreeWidgetItem
 from settings import settings
 
 logger = logging.getLogger(__name__)
 
 
 class TemplateViewTree(QTreeWidget):
-    def __init__(self, signals, parent):
+    def __init__(self, signals, controller, parent):
         super().__init__(parent=parent)
         self.widgets = {}
-        self.setColumnCount(3)
+        self.controller = controller
+        self.thread_is_running = False
+        self.setColumnCount(4)
+        self.setHeaderLabels(["Name", "New Files Added", "Replaced Files", "Status"])
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.template = template_parser.Template(settings.template_path)
         try:
             self.template.load()
         except Exception as e:
+            if settings.loglevel == "DEBUG":
+                traceback.print_exc()
             error_dialog = QErrorMessage(self)
             error_dialog.showMessage(f"Error while loading the file. Error: {e}")
         self.init_view_tree()
@@ -37,8 +42,11 @@ class TemplateViewTree(QTreeWidget):
         signals.finished.connect(self.quit_widgets)
 
         signals.update_folder_name.connect(self.update_folder_name)
-
         signals.update_base_path.connect(self.update_base_path)
+
+        signals.added_new_file[str, str].connect(self.added_new_file)
+        signals.replaced_file[str, str].connect(self.replaced_file)
+        signals.replaced_file[str, str, str].connect(self.replaced_file)
 
         signals.site_started[str].connect(self.site_started)
         signals.site_started[str, str].connect(self.site_started)
@@ -73,6 +81,15 @@ class TemplateViewTree(QTreeWidget):
     def update_base_path(self, unique_key, base_path):
         logger.debug(f"{unique_key} base_path got updated to {base_path}")
         self.widgets[unique_key].set_base_path(base_path)
+
+    @pyqtSlot(str, str)
+    def added_new_file(self, unique_key, path):
+        self.widgets[unique_key].added_new_file(path)
+
+    @pyqtSlot(str, str)
+    @pyqtSlot(str, str, str)
+    def replaced_file(self, unique_key, path, old_path=None):
+        self.widgets[unique_key].replaced_file(path, old_path)
 
     @pyqtSlot(str)
     @pyqtSlot(str, str)
@@ -131,17 +148,17 @@ class TemplateViewTree(QTreeWidget):
 
         menu = QMenu(self)
 
-        run_action = menu.addAction("Run recursive")
-        run_action.setEnabled(not self.parent().thread.isRunning())
-        if self.parent().thread.isRunning():
-            self.parent().thread.finished.connect(lambda: run_action.setEnabled(True))
-        run_action.triggered.connect(lambda: self.parent().start_thread(widget.template_node.unique_key, True))
+        run_action_recursive = menu.addAction("Run recursive")
+        run_action_recursive.setEnabled(not self.controller.thread.isRunning())
+        if self.controller.thread.isRunning():
+            self.controller.thread.finished.connect(lambda: run_action_recursive.setEnabled(True))
+        run_action_recursive.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, True))
 
         run_action = menu.addAction("Run")
-        run_action.setEnabled(not self.parent().thread.isRunning())
-        if self.parent().thread.isRunning():
-            self.parent().thread.finished.connect(lambda: run_action.setEnabled(True))
-        run_action.triggered.connect(lambda: self.parent().start_thread(widget.template_node.unique_key, False))
+        run_action.setEnabled(not self.controller.thread.isRunning())
+        if self.controller.thread.isRunning():
+            self.controller.thread.finished.connect(lambda: run_action.setEnabled(True))
+        run_action.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, False))
 
         menu.addSeparator()
 

@@ -1,13 +1,11 @@
 import asyncio
 import base64
 import copy
-import re
 import os
+import re
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
 from urllib.parse import unquote, quote
-
-import aiohttp
 
 from core.constants import *
 from core.downloader import download_if_not_exist

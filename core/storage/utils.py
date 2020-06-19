@@ -1,12 +1,10 @@
+import copy
 import json
 import logging
 import os
 import pickle
 import random
-import copy
 
-
-from settings import settings
 from core.storage.cache import get_json
 from core.storage.constants import FUNCTION_CACHE_PATH
 

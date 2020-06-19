@@ -1,7 +1,6 @@
+import copy
 import difflib
 import io
-import copy
-from pprint import pprint
 
 import PyPDF2
 import fitz

@@ -1,23 +1,11 @@
-import asyncio
 import logging.config
-import os
-import ssl
 import time
-import traceback
-import concurrent
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import aiohttp
-import certifi
+from PyQt5.QtWidgets import *
 
 from gui.template_view import TemplateView
 from gui.worker import Worker
-from core import downloader, template_parser, monitor
-from core.exceptions import ParseTemplateError
-from core.utils import user_statistics, check_for_new_release
-from settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +20,7 @@ class CentralWidget(QWidget):
         self.one_second_timer.timeout.connect(self.monitor_download_show)
         self.status_bar = self.parent().statusBar()
         self.monitor_download_widget = QLabel()
-        self.monitor_download_widget.setText("0")
+        self.monitor_download_widget.setText(self.format_bytes(self.downloaded_bytes))
         self.status_bar.addPermanentWidget(self.monitor_download_widget)
 
         self.thread = QThread()
@@ -54,7 +42,7 @@ class CentralWidget(QWidget):
         actions.stop.setEnabled(False)
         self.btn_stop.pressed.connect(self.stop_thread)
 
-        self.template_view = TemplateView(self.worker.signals, self)
+        self.template_view = TemplateView(self.worker.signals, self, self)
 
         grid.addWidget(self.btn_run, 0, 0)
         grid.addWidget(self.btn_stop, 0, 1)
@@ -94,6 +82,17 @@ class CentralWidget(QWidget):
     def monitor_download(self, size):
         self.downloaded_bytes += size
 
+    @staticmethod
+    def format_bytes(size):
+        # 2**10 = 1024
+        power = 2**10
+        n = 0
+        power_labels = {0 : '', 1: 'K', 2: 'M', 3: 'G', 4: 'T'}
+        while size > power:
+            size /= power
+            n += 1
+        return f"{size:.1f} {power_labels[n]+'B/s'}"
+
     def monitor_download_show(self):
-        self.monitor_download_widget.setText(str(self.downloaded_bytes))
+        self.monitor_download_widget.setText(self.format_bytes(self.downloaded_bytes))
         self.downloaded_bytes = 0

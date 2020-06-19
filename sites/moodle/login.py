@@ -1,5 +1,5 @@
-from .. import aai_logon
 from .constants import *
+from .. import aai_logon
 
 
 async def login(session):

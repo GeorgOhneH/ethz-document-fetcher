@@ -9,7 +9,6 @@ import certifi
 import colorama
 
 from core import downloader, template_parser, monitor
-from core.exceptions import ParseTemplateError
 from core.utils import user_statistics, check_for_new_release
 from settings import settings
 from settings.logger import LOGGER_CONFIG

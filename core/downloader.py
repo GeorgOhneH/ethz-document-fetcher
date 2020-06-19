@@ -1,7 +1,7 @@
 import asyncio
-import copy
-import shutil
 import traceback
+import pathlib
+import os
 from urllib.parse import urlparse
 
 import aiohttp
@@ -9,8 +9,8 @@ from colorama import Fore, Style
 
 from core import pdf_highlighter
 from core.constants import *
-from core.storage.cache import *
-from core.utils import *
+from core.storage import cache
+from core.utils import get_extension, fit_sections_to_console, split_name_extension
 from settings import settings
 
 logger = logging.getLogger(__name__)
@@ -71,11 +71,11 @@ async def download_if_not_exist(session,
         absolute_path = os.path.join(settings.base_path, path)
 
     if not with_extension:
-        absolute_path += "." + await check_extension(session, url)
+        absolute_path += "." + await cache.check_extension(session, url)
 
     force = False
     if checksum is not None:
-        force = not is_checksum_same(absolute_path, checksum)
+        force = not cache.is_checksum_same(absolute_path, checksum)
     elif settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
         force = True
 
@@ -84,7 +84,7 @@ async def download_if_not_exist(session,
 
     if os.path.exists(absolute_path):
         headers = kwargs.get("headers", {})
-        etag = get_etag(absolute_path)
+        etag = cache.get_etag(absolute_path)
         if etag is not None:
             headers["If-None-Match"] = etag
         if headers:
@@ -112,7 +112,7 @@ async def download_if_not_exist(session,
         if file_extension.lower() in MOVIE_EXTENSIONS:
             logger.info(f"Starting to download {file_name}")
 
-        Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
         if action == ACTION_REPLACE and settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)
@@ -134,7 +134,7 @@ async def download_if_not_exist(session,
             raise e
 
         if "ETag" in response.headers:
-            save_etag(absolute_path, response.headers["ETag"])
+            cache.save_etag(absolute_path, response.headers["ETag"])
         elif domain not in FORCE_DOWNLOAD_BLACKLIST:
             logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
@@ -143,8 +143,13 @@ async def download_if_not_exist(session,
         pdf_highlighter.add_differ_highlight(absolute_path, old_absolute_path)
 
     if action == ACTION_REPLACE:
+        if settings.keep_replaced_files:
+            signal_handler.replaced_file(unique_key, absolute_path, old_absolute_path)
+        else:
+            signal_handler.replaced_file(unique_key, absolute_path)
         method_msg = "Replaced"
     elif action == ACTION_NEW:
+        signal_handler.added_new_file(unique_key, absolute_path)
         method_msg = "Added new"
     else:
         method_msg = "Unexpected action"
@@ -165,33 +170,4 @@ async def download_if_not_exist(session,
 
     logger.info(fit_sections_to_console(start, end, margin=-8))
 
-    save_checksum(absolute_path, checksum)
-
-
-def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
-    min_length = len(filler) + min_length
-    c, _ = shutil.get_terminal_size(fallback=(0, 0))
-    orig_sections = list(args)
-    sections = copy.copy(orig_sections)
-    sections.sort(key=lambda s: -s["priority"])
-
-    free = c - sum([len(x["name"]) - 2 for x in sections]) - margin - 6
-    length_vars = []
-    count = 0
-    for section in reversed(sections):
-        length_vars.append(count)
-        count += min(len(section["var"]), min_length)
-    length_vars.reverse()
-    if c:
-        for length_var, section in zip(length_vars, sections):
-            c_free = free - length_var
-            if c_free < len(section["var"]) and len(section["var"]) > min_length:
-                cut_length = max(c_free, min_length)
-                if section["cut"] == "front":
-                    section["var"] = (filler + section["var"][-cut_length + len(filler):])
-                elif section["cut"] == "back":
-                    section["var"] = (section["var"][:cut_length - len(filler)] + filler)
-
-            free -= len(section["var"])
-
-    return "".join([x["name"].format(x["var"]) for x in orig_sections])
+    cache.save_checksum(absolute_path, checksum)
