@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.constants import *
+from settings.values.constants import NotSet
 
 logger = logging.getLogger(__name__)
 
@@ -16,12 +16,8 @@ class LineEdit(QWidget):
         super().__init__()
         self.config_obj = config_obj
 
-        self.error_label = QLabel()
-        self.error_label.setStyleSheet("QLabel { color : red; }")
-        self.error_label.hide()
-
         self.line_edit = QLineEdit()
-        self.line_edit.textChanged.connect(self.data_changed)
+        self.data_changed_signal = self.line_edit.textChanged
         if config_obj.get() is not None:
             self.set_value(config_obj.get())
 
@@ -29,30 +25,17 @@ class LineEdit(QWidget):
         self.layout.setContentsMargins(1, 1, 1, 1)
         self.layout.addWidget(QLabel(f"{config_obj.get_gui_name()}: "))
         self.layout.addWidget(self.line_edit)
-
-        self.inner_widget = QWidget()
-        self.inner_widget.setLayout(self.layout)
-
-        self.outer_layout = QVBoxLayout()
-        self.outer_layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(self.outer_layout)
-        self.outer_layout.addWidget(self.inner_widget)
-        self.outer_layout.addWidget(self.error_label)
+        self.setLayout(self.layout)
 
     def get_value(self):
-        return self.line_edit.text().strip()
+        value = self.line_edit.text().strip()
+        if value == "":
+            return None
+        return value
 
     def set_value(self, value):
-        self.line_edit.setText(str(value))
-
-    def data_changed(self, text):
-        value = self.get_value()
-        if not self.config_obj.is_valid(value):
-            msg = self.config_obj.msg
-            self.error_label.show()
-            self.error_label.setText(msg)
-        else:
-            self.error_label.hide()
+        if value is not None:
+            self.line_edit.setText(str(value))
 
 
 class ConfigString(object):
@@ -138,20 +121,20 @@ class ConfigString(object):
     def _save(self):
         return self._value
 
-    def is_active(self, value=None):
-        if value is None:
+    def is_active(self, value=NotSet):
+        if value is NotSet:
             value = self._value
         return self.active_func() and all([x.is_set(value) for x in self.depends_on])
 
-    def is_set(self, value=None):
-        if value is None:
+    def is_set(self, value=NotSet):
+        if value is NotSet:
             value = self._value
-        if isinstance(value, str):
-            return value or self.optional
+        if isinstance(value, str) and value == "":
+            value = None
         return value is not None or self.optional
 
-    def is_valid(self, value=None):
-        if value is None:
+    def is_valid(self, value=NotSet):
+        if value is NotSet:
             value = self._value
         if not self.is_active(value):
             return True

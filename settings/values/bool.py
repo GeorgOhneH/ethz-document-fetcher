@@ -11,16 +11,22 @@ logger = logging.getLogger(__name__)
 
 
 class CheckBox(QCheckBox):
+    def __init__(self, config_obj):
+        super().__init__(config_obj.name)
+        self.config_obj = config_obj
+        self.data_changed_signal = self.stateChanged
+
     def get_value(self):
         return self.isChecked()
 
     def set_value(self, value):
-        self.setChecked(value)
+        if value is not None:
+            self.setChecked(value)
 
 
 class ConfigBool(ConfigString):
     def init_widget(self):
-        widget = CheckBox(self.name)
+        widget = CheckBox(self)
         widget.set_value(self.get())
         return widget
 

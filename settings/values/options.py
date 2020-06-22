@@ -11,22 +11,29 @@ logger = logging.getLogger(__name__)
 
 
 class ComboBox(QWidget):
-    def __init__(self, name, options, default):
+    PLACE_HOLDER_TEXT = "------"
+
+    def __init__(self, config_obj):
         super().__init__()
+        self.config_obj = config_obj
         self.combo_box = QComboBox()
-        self.combo_box.setPlaceholderText("------")
-        self.combo_box.addItems(options)
-        if default is not None:
-            self.set_value(default)
+        self.data_changed_signal = self.combo_box.currentTextChanged
+        self.combo_box.setPlaceholderText(self.PLACE_HOLDER_TEXT)
+        self.combo_box.addItems(config_obj.options)
+        if config_obj.get() is not None:
+            self.set_value(config_obj.get())
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(4, 4, 4, 4)
         self.layout.setAlignment(Qt.AlignLeft)
         self.setLayout(self.layout)
-        self.layout.addWidget(QLabel(f"{name}: "))
+        self.layout.addWidget(QLabel(f"{config_obj.name}: "))
         self.layout.addWidget(self.combo_box)
 
     def get_value(self):
-        self.combo_box.currentText()
+        text = self.combo_box.currentText()
+        if text == self.PLACE_HOLDER_TEXT:
+            return None
+        return self.combo_box.currentText()
 
     def set_value(self, value):
         self.combo_box.setCurrentText(value)
@@ -40,12 +47,12 @@ class ConfigOptions(ConfigString):
         self.options = options
 
     def init_widget(self):
-        return ComboBox(self.name, self.options, self.get())
+        return ComboBox(self)
 
     def _test(self, value):
         if value in self.options:
             return True
-        self.msg = f"please enter a value from these options: {self.options}"
+        self.msg = f"Not one of the options: {self.options}"
         return False
 
     def set_parser(self, parser):
@@ -53,4 +60,3 @@ class ConfigOptions(ConfigString):
 
     def get_user_prompt(self):
         return f"Please enter the value for the {self.name} (options: {self.options}){self._get_current()}: "
-

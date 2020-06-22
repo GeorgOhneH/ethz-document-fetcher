@@ -25,7 +25,6 @@ class PathLineEdit(LineEdit):
 
     def open_file_picker(self):
         file_dialog = QFileDialog(self)
-        file_dialog.setDirectory(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation))
         if self.only_folder:
             file_dialog.setFileMode(QFileDialog.Directory)
             file_dialog.setOption(QFileDialog.ShowDirsOnly)
@@ -33,6 +32,12 @@ class PathLineEdit(LineEdit):
             file_dialog.setFileMode(QFileDialog.ExistingFile)
             file_dialog.setNameFilter(" ".join([f"*.{extension}" for extension in self.file_extensions]))
         file_dialog.setViewMode(QFileDialog.Detail)
+
+        current_path = self.get_value()
+        if os.path.exists(current_path):
+            file_dialog.setDirectory(current_path)
+        else:
+            file_dialog.setDirectory(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation))
 
         file_name = None
         if file_dialog.exec():

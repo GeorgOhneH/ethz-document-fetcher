@@ -20,7 +20,7 @@ class TemplateViewTree(QTreeWidget):
         self.controller = controller
         self.thread_is_running = False
         self.setColumnCount(4)
-        self.setHeaderLabels(["Name", "New Files Added", "Replaced Files", "Status"])
+        self.setHeaderLabels(["Name", "New Files Added", "Replaced Files", "State"])
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.template = template_parser.Template(path=controller.template_path,

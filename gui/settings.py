@@ -1,6 +1,42 @@
+import logging
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+
+logger = logging.getLogger(__name__)
+
+
+class ErrorLabel(QWidget):
+    def __init__(self, config_widget, parent=None):
+        super().__init__(parent=parent)
+        self.config_widget = config_widget
+        self.config_widget.data_changed_signal.connect(self.data_changed)
+
+        self.error_label = QLabel()
+        self.error_label.setStyleSheet("QLabel { color : red; }")
+        if not self.set_error_msg():
+            self.error_label.hide()
+
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.layout)
+        self.layout.addWidget(config_widget)
+        self.layout.addWidget(self.error_label)
+
+    def set_error_msg(self):
+        value = self.config_widget.get_value()
+        if self.config_widget.config_obj.is_valid(value):
+            return False
+        msg = self.config_widget.config_obj.msg
+        self.error_label.setText(msg)
+        return True
+
+    def data_changed(self, *args, **kwargs):
+        if self.set_error_msg():
+            self.error_label.show()
+        else:
+            self.error_label.hide()
 
 
 class SettingsWidget(QDialog):
@@ -38,9 +74,9 @@ class SettingsWidget(QDialog):
         for value in self.site_settings:
             widget = value.get_widget()
             if value.optional:
-                self.optional.layout().addWidget(widget)
+                self.optional.layout().addWidget(ErrorLabel(widget, parent=self))
             else:
-                self.required.layout().addWidget(widget)
+                self.required.layout().addWidget(ErrorLabel(widget, parent=self))
 
     def update_widgets(self):
         for value in self.site_settings:
@@ -49,6 +85,7 @@ class SettingsWidget(QDialog):
     def save_and_exit(self):
         for value in self.site_settings:
             if not value.is_valid_from_widget():
+                logger.debug(f" Value: {value.name} is not valid. Msg: {value.msg}")
                 return
 
         for value in self.site_settings:
@@ -58,4 +95,3 @@ class SettingsWidget(QDialog):
 
     def exit(self):
         self.reject()
-

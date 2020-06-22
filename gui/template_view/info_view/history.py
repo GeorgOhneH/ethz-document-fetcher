@@ -40,8 +40,10 @@ class HistoryInfoView(QTreeWidget, InfoView):
             self.addTopLevelItem(item_widget)
             self.setup_widget(widget, item_widget, file["path"], file["timestamp"])
             item_widget.setText(self.COLUMN_NOTE, "Added New File")
-            if "old_path" in file and file["old_path"] is not None:
+            if "old_path" in file:
                 item_widget.setText(self.COLUMN_NOTE, "Replaced File")
+                if file["old_path"] is None:
+                    continue
                 child = QTreeWidgetItem()
                 self.setup_widget(widget, child, file["old_path"])
                 item_widget.addChild(child)

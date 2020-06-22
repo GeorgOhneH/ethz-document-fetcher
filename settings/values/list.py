@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class ListLineEdit(LineEdit):
     def get_value(self):
         raw = super().get_value()
+        if raw is None:
+            return []
         return [x.strip() for x in raw.split(",") if x.strip()]
 
     def set_value(self, value):
