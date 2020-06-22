@@ -2,7 +2,7 @@ import copy
 import difflib
 import io
 
-import PyPDF2
+import PyPDF3
 import fitz
 
 
@@ -72,10 +72,10 @@ def add_differ_highlight(new_path, old_path):
 
             f_a = doc_new.write()
             f_b = doc_old.write()
-            pdf_a = PyPDF2.PdfFileReader(io.BytesIO(f_a))
-            pdf_b = PyPDF2.PdfFileReader(io.BytesIO(f_b))
+            pdf_a = PyPDF3.PdfFileReader(io.BytesIO(f_a))
+            pdf_b = PyPDF3.PdfFileReader(io.BytesIO(f_b))
 
-    output_pdf = PyPDF2.PdfFileWriter()
+    output_pdf = PyPDF3.PdfFileWriter()
     for i in range(max(pdf_a.getNumPages(), pdf_b.getNumPages())):
         try:
             page_b = pdf_b.getPage(i)

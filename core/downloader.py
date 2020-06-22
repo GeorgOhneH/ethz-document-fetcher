@@ -3,6 +3,8 @@ import traceback
 import pathlib
 import os
 from urllib.parse import urlparse
+import functools
+from concurrent.futures import ProcessPoolExecutor
 
 import aiohttp
 from colorama import Fore, Style
@@ -35,6 +37,9 @@ async def download_files(session: aiohttp.ClientSession, queue):
         queue.task_done()
 
 
+default_executor = ProcessPoolExecutor()
+
+
 async def download_if_not_exist(session,
                                 path,
                                 url,
@@ -46,6 +51,7 @@ async def download_if_not_exist(session,
                                 checksum=None,
                                 signal_handler=None,
                                 unique_key=None):
+    loop = asyncio.get_event_loop()
     if kwargs is None:
         kwargs = {}
 
@@ -139,9 +145,15 @@ async def download_if_not_exist(session,
         elif domain not in FORCE_DOWNLOAD_BLACKLIST:
             logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
+    cache.save_checksum(absolute_path, checksum)
+
     if action == ACTION_REPLACE and site_settings.keep_replaced_files and file_extension.lower() == "pdf":
         logger.debug("Adding highlights")
-        pdf_highlighter.add_differ_highlight(absolute_path, old_absolute_path)
+        await loop.run_in_executor(default_executor,
+                                   functools.partial(pdf_highlighter.add_differ_highlight,
+                                                     new_path=absolute_path,
+                                                     old_path=old_absolute_path)
+                                   )
 
     if action == ACTION_REPLACE:
         if site_settings.keep_replaced_files:
@@ -171,4 +183,3 @@ async def download_if_not_exist(session,
 
     logger.info(fit_sections_to_console(start, end, margin=-8))
 
-    cache.save_checksum(absolute_path, checksum)
