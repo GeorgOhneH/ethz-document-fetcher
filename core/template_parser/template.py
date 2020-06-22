@@ -7,16 +7,17 @@ import yaml
 from core.exceptions import ParseTemplateError, LoginError
 from core.template_parser.nodes import Root, Folder, Site
 from core.template_parser.signal_handler import SignalHandler
-from settings import settings
+from settings import global_settings
 
 logger = logging.getLogger(__name__)
 
 
 class Template(object):
-    def __init__(self, path, signals=None):
+    def __init__(self, path, site_settings, signals=None):
         self.path = path
+        self.site_settings = site_settings
         self.signal_handler = SignalHandler(signals=signals)
-        self.root = Root()
+        self.root = Root(site_settings=site_settings)
         self.data = None
         self.nodes = {}
 
@@ -53,7 +54,8 @@ class Template(object):
             raise ParseTemplateError("Expected a 'name' field in folder")
 
         folder = Folder(name=data["name"],
-                        parent=parent)
+                        parent=parent,
+                        site_settings=self.site_settings)
 
         if "sites" in data:
             self.parse_sites(data=data["sites"], parent=folder)
@@ -97,6 +99,7 @@ class Template(object):
             function_kwargs=p_kwargs,
             consumer_kwargs=consumer_kwargs,
             parent=parent,
+            site_settings=self.site_settings
         )
 
         if sub_sites is not None:
@@ -108,7 +111,11 @@ class Template(object):
         await self.run(self.root, producers=producers, session=session, queue=queue)
 
     async def run_from_unique_key(self, unique_key, producers, session, queue, recursive):
-        await self.run(self.nodes[unique_key], producers=producers, session=session, queue=queue, recursive=recursive)
+        await self.run(node=self.nodes[unique_key],
+                       producers=producers,
+                       session=session,
+                       queue=queue,
+                       recursive=recursive)
 
     async def run(self, node, producers, session, queue, recursive=True):
         tasks = []
@@ -138,13 +145,13 @@ class Template(object):
                 raise e
 
             except LoginError as e:
-                if settings.loglevel == "DEBUG":
+                if global_settings.loglevel == "DEBUG":
                     traceback.print_exc()
                 error_msg = f"{node} login was not successful. Error: {e}."
                 logger.error(error_msg)
                 self.signal_handler.quit_with_error(node.unique_key, error_msg)
             except Exception as e:
-                if settings.loglevel == "DEBUG":
+                if global_settings.loglevel == "DEBUG":
                     traceback.print_exc()
                 error_msg = f"Got error while trying to fetch the folder name. Error: {e}."
                 logger.error(error_msg)

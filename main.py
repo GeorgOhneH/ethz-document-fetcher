@@ -3,6 +3,7 @@ import logging.config
 import os
 import ssl
 import time
+import traceback
 
 import aiohttp
 import certifi
@@ -10,8 +11,10 @@ import colorama
 
 from core import downloader, template_parser, monitor
 from core.utils import user_statistics, check_for_new_release
-from settings import settings
+from core.storage import cache
 from settings.logger import LOGGER_CONFIG
+from settings.settings import SiteSettings
+from settings import global_settings
 
 colorama.init()
 
@@ -19,8 +22,11 @@ logging.config.dictConfig(LOGGER_CONFIG)
 logger = logging.getLogger(__name__)
 
 
-async def main(signals=None):
-    if not settings.check_if_valid():
+async def main(signals=None, site_settings=None):
+    template_path = "template.yml"
+    if site_settings is None:
+        site_settings = SiteSettings()
+    if not site_settings.check_if_valid():
         logger.critical("Settings are not correctly configured. Please run 'python setup.py'. Exiting...")
         return
 
@@ -29,20 +35,22 @@ async def main(signals=None):
 
     async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
                                       timeout=aiohttp.ClientTimeout(30)) as session:
-        logger.debug(f"Loading template: {settings.template_path}")
+        logger.debug(f"Loading template: {template_path}")
         queue = asyncio.Queue()
         producers = []
-        template_file = os.path.join(os.path.dirname(__file__), settings.template_path)
-        template = template_parser.Template(path=template_file, signals=signals)
+        template_file = os.path.join(os.path.dirname(__file__), template_path)
+        template = template_parser.Template(path=template_file, signals=signals, site_settings=site_settings)
         try:
             template.load()
         except Exception as e:
+            if global_settings.loglevel == "DEBUG":
+                traceback.print_exc()
             logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
             return
 
         await template.run_root(producers, session, queue)
 
-        user_statistic = asyncio.ensure_future(user_statistics(session, settings.username))
+        user_statistic = asyncio.ensure_future(user_statistics(session, site_settings.username))
 
         logger.debug(f"Checking for update")
         is_new_release, latest_version, current_version = await check_for_new_release(session)

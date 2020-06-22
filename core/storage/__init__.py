@@ -1,5 +1,5 @@
 import atexit
 
-from core.storage.cache import *
+from core.storage import cache
 
-atexit.register(save_jsons)
+atexit.register(cache.save_jsons)

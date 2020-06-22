@@ -16,13 +16,14 @@ from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
-from settings import settings
+from settings import global_settings
 
 logger = logging.getLogger(__name__)
 
 
 class Site(TemplateNode):
     def __init__(self,
+                 site_settings,
                  raw_module_name,
                  use_folder,
                  raw_folder_name,
@@ -32,6 +33,7 @@ class Site(TemplateNode):
                  consumer_kwargs,
                  parent):
         super().__init__(parent=parent,
+                         site_settings=site_settings,
                          folder_name=raw_folder_name,
                          unique_key_args=[
                              raw_module_name,
@@ -42,7 +44,8 @@ class Site(TemplateNode):
                              raw_folder_function,
                              function_kwargs,
                          ],
-                         use_folder=use_folder)
+                         use_folder=use_folder,
+                         is_producer=True)
         self.raw_module_name = raw_module_name
         self.function_kwargs = function_kwargs
         self.consumer_kwargs = consumer_kwargs
@@ -166,7 +169,7 @@ class Site(TemplateNode):
         site_module = importlib.import_module(self.module_name)
         producer_function = getattr(site_module, self.function_name)
 
-        await login_module(session, site_module)
+        await login_module(session, self.site_settings, site_module)
 
         if self.base_path is None:
             folder_name = await self.get_folder_name(session, signal_handler)
@@ -177,11 +180,13 @@ class Site(TemplateNode):
         queue_wrapper = QueueWrapper(queue,
                                      signal_handler=signal_handler,
                                      unique_key=self.unique_key,
+                                     site_settings=self.site_settings,
                                      **self.consumer_kwargs)
 
         coroutine = self.exception_handler(producer_function, signal_handler)(session=session,
                                                                               queue=queue_wrapper,
                                                                               base_path=self.base_path,
+                                                                              site_settings=self.site_settings,
                                                                               **self.function_kwargs)
         producers.append(asyncio.ensure_future(coroutine))
 
@@ -202,20 +207,21 @@ class Site(TemplateNode):
         return folder_name
 
     def exception_handler(self, function, signal_handler):
-        async def wrapper(session, queue, base_path, *args, **kwargs):
+        async def wrapper(session, queue, base_path, site_settings, *args, **kwargs):
             function_name = f"{function.__module__}.{function.__name__}"
             function_name_kwargs = f"{function_name}<{dict_to_string(kwargs)}>"
             try:
                 logger.debug(f"Starting: {function_name_kwargs}")
                 t = time.time()
-                result = await function(session=session, queue=queue, base_path=base_path, *args, **kwargs)
+                result = await function(session=session, queue=queue, base_path=base_path,
+                                        site_settings=site_settings, *args, **kwargs)
                 signal_handler.finished_successful(self.unique_key, f"Finished in {(time.time() - t):.2f} seconds")
                 logger.debug(f"Finished: {function_name_kwargs}, time: {(time.time() - t):.2f}")
                 return result
             except asyncio.CancelledError as e:
                 raise e
             except TypeError as e:
-                if settings.loglevel == "DEBUG":
+                if global_settings.loglevel == "DEBUG":
                     traceback.print_exc()
                 keyword = re.findall("'(.+)'", e.args[0])
                 logger.error(f"The producer {function_name_kwargs} got an unexpected keyword: {keyword}."
@@ -223,7 +229,7 @@ class Site(TemplateNode):
                 signal_handler.quit_with_error(self.unique_key, f"Unexpected keyword: {keyword}.")
                 return
             except Exception as e:
-                if settings.loglevel == "DEBUG":
+                if global_settings.loglevel == "DEBUG":
                     traceback.print_exc()
                 logger.error(
                     f"Got an unexpected error from producer: {function_name_kwargs}, Error: {type(e).__name__}: {e}")

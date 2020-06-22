@@ -12,7 +12,7 @@ from sites.ilias import login
 from sites.ilias.constants import *
 
 
-async def get_folder_name(session, id):
+async def get_folder_name(session, id, **kwargs):
     url = GOTO_URL + str(id)
     async with session.get(url) as response:
         html = await response.text()
@@ -23,11 +23,11 @@ async def get_folder_name(session, id):
     return str(ol.find_all("li")[2].string)
 
 
-async def producer(session, queue, base_path, id):
-    await search_tree(session, queue, base_path, id)
+async def producer(session, queue, base_path, site_settings, id):
+    await search_tree(session, queue, base_path, site_settings, id)
 
 
-async def search_tree(session, queue, base_path, fold_id):
+async def search_tree(session, queue, base_path, site_settings, fold_id):
     url = GOTO_URL + str(fold_id)
     async with session.get(url) as response:
         html = await response.text()
@@ -61,7 +61,7 @@ async def search_tree(session, queue, base_path, fold_id):
             await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
-            coroutine = search_tree(session, queue, path, ref_id)
+            coroutine = search_tree(session, queue, path, site_settings, ref_id)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

@@ -3,9 +3,9 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
-from core.storage import check_url_reference
+from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
-from core.utils import *
+from core.utils import safe_path_join
 
 
 def get_api_url(parameters, children=True):
@@ -22,7 +22,7 @@ def get_api_url(parameters, children=True):
     return api_url
 
 
-async def get_folder_name(session, url):
+async def get_folder_name(session, url, **kwargs):
     parameters = parse_qs(urlparse(url).query)
     api_url = get_api_url(parameters, children=False)
 
@@ -32,7 +32,7 @@ async def get_folder_name(session, url):
     return item_data["name"]
 
 
-async def producer(session, queue, base_path, url, etag=None):
+async def producer(session, queue, base_path, site_settings, url, etag=None):
     parameters = parse_qs(urlparse(url).query)
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
@@ -49,7 +49,7 @@ async def producer(session, queue, base_path, url, etag=None):
         elif "folder" in item:
             folder_url = await check_url_reference(session, item['webUrl']) + f"?authkey={authkey}"
             item_etag = item["lastModifiedDateTime"]
-            coroutine = producer(session, queue, path, f"{folder_url}?authkey={authkey}", etag=item_etag)
+            coroutine = producer(session, queue, path, site_settings, f"{folder_url}?authkey={authkey}", etag=item_etag)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

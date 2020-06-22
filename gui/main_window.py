@@ -21,6 +21,9 @@ class Actions(object):
         self.stop = QAction("&Stop")
         self.stop.setShortcut("Ctrl+C")
 
+        self.settings = QAction("&Settings")
+        self.settings.setShortcut("Ctrl+Alt+S")
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -29,6 +32,8 @@ class MainWindow(QMainWindow):
         self.statusBar()
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("&File")
+        file_menu.addAction(self.actions.settings)
+        file_menu.addSeparator()
         file_menu.addAction(self.actions.exit_app)
         run_menu = menu_bar.addMenu("&Run")
         run_menu.addAction(self.actions.run)

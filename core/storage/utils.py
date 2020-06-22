@@ -4,8 +4,9 @@ import logging
 import os
 import pickle
 import random
+from pathlib import Path
 
-from core.storage.cache import get_json
+from core.storage import cache
 from core.storage.constants import FUNCTION_CACHE_PATH
 
 logger = logging.getLogger(__name__)
@@ -21,17 +22,21 @@ def is_jsonable(x):
 
 async def call_function_or_cache(func, identifier, *args, **kwargs):
     json_name = func.__module__ + "." + func.__name__
-    table = get_json(json_name)
+    table = cache.get_json(json_name)
 
     func_identifier = get_func_identifier(args, kwargs)
     attributes = table.get(func_identifier, {})
     cache_identifier = copy.copy(attributes.get("identifier", None))
-    if identifier is not None and identifier == cache_identifier:
-        if attributes["pickle"]:
-            with open(attributes["value"], "rb") as f:
-                return pickle.load(f)
+    try:
+        if identifier is not None and identifier == cache_identifier:
+            if attributes["pickle"]:
+                with open(attributes["value"], "rb") as f:
+                    return pickle.load(f)
 
-        return attributes["value"]
+            return attributes["value"]
+    except FileNotFoundError:
+        logger.warning("Pickle file could not be found")
+        pass
 
     result = await func(*args, **kwargs)
 
@@ -43,7 +48,7 @@ async def call_function_or_cache(func, identifier, *args, **kwargs):
         attributes["value"] = result
         attributes["pickle"] = False
     else:
-        file_name = str(random.randint(1e8, 1e9)) + ".pickle"
+        file_name = str(random.randint(1e18, 1e19)) + ".pickle"
         path = os.path.join(FUNCTION_CACHE_PATH, file_name)
         attributes["value"] = path
         attributes["pickle"] = True
@@ -69,4 +74,3 @@ def item_to_string(item):
     if isinstance(item, (str, int)):
         return str(item)
     return ""
-

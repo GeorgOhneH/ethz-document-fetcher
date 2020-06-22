@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 
 from core import template_parser
 from gui.template_view.view_tree_item import TreeWidgetItem
-from settings import settings
+from settings import global_settings
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +23,12 @@ class TemplateViewTree(QTreeWidget):
         self.setHeaderLabels(["Name", "New Files Added", "Replaced Files", "Status"])
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
-        self.template = template_parser.Template(settings.template_path)
+        self.template = template_parser.Template(path=controller.template_path,
+                                                 site_settings=controller.site_settings)
         try:
             self.template.load()
         except Exception as e:
-            if settings.loglevel == "DEBUG":
+            if global_settings.loglevel == "DEBUG":
                 traceback.print_exc()
             error_dialog = QErrorMessage(self)
             error_dialog.showMessage(f"Error while loading the file. Error: {e}")
@@ -132,7 +133,7 @@ class TemplateViewTree(QTreeWidget):
                 widget.set_error("Site did not give a finish Signal. (You should never see this message)")
 
     def add_item_widget(self, template_node, unique_key, widget_parent=None):
-        widget = TreeWidgetItem(template_node)
+        widget = TreeWidgetItem(template_node, self.controller)
         if widget_parent is None:
             self.addTopLevelItem(widget)
         else:
@@ -164,7 +165,7 @@ class TemplateViewTree(QTreeWidget):
 
         open_folder_action = menu.addAction("Open Folder")
         if widget.template_node.base_path is not None:
-            base_path = os.path.join(settings.base_path, widget.template_node.base_path)
+            base_path = os.path.join(self.controller.site_settings.base_path, widget.template_node.base_path)
             if not os.path.exists(base_path):
                 open_folder_action.setEnabled(False)
             url = QUrl.fromLocalFile(base_path)

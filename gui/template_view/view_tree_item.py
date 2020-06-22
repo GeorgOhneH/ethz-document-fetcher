@@ -117,45 +117,50 @@ class TreeWidgetItemSignals(QObject):
 
 
 class TreeWidgetItem(QTreeWidgetItem):
-    STATE_IDLE = 0
-    STATE_LOADING = 1
-    STATE_ERROR = 2
-    STATE_WARNING = 3
-    STATE_SUCCESS = 4
+    STATE_NOTHING = 0
+    STATE_IDLE = 1
+    STATE_LOADING = 2
+    STATE_ERROR = 3
+    STATE_WARNING = 4
+    STATE_SUCCESS = 5
 
     COLUMN_NAME = 0
     COLUMN_ADDED_FILE = 1
     COLUMN_REPLACED_FILE = 2
     COLUMN_STATE = 3
 
-    def __init__(self, template_node):
+    def __init__(self, template_node, controller):
         super().__init__()
         self.template_node = template_node
+        self.controller = controller
         self.signals = TreeWidgetItemSignals()
         self.name_widget = TreeWidgetItemName(template_node.get_gui_name())
 
         self.added_new_file_count = 0
         self.replaced_file_count = 0
 
-        self.added_files = self.load_from_cache("added_files")
-
         self.active_item_count = 0
-        self.state = None
+        self.state = self.STATE_NOTHING
         self.children = []
         self.custom_parent = None
+
+        self.controller.settings_widget.accepted.connect(self.emit_data_changed)
 
     def init_widgets(self):
         self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)
         self.setIcon(self.COLUMN_NAME, self.template_node.get_gui_icon())
         self.setExpanded(True)
+        if not self.template_node.is_producer:
+            return
         self._set_state(self.STATE_IDLE)
         self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
-        self.setTextAlignment(self.COLUMN_ADDED_FILE, Qt.AlignRight)
+        self.setTextAlignment(self.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.setText(self.COLUMN_REPLACED_FILE, str(self.replaced_file_count))
-        self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight)
+        self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
 
     def load_from_cache(self, name):
-        json = cache.get_json(name)
+        path_name = self.controller.site_settings.base_path.replace("\\", "").replace("/", "").replace(":", "").replace(".", "")
+        json = cache.get_json(name+path_name)
         if self.template_node.unique_key not in json:
             result = []
             json[self.template_node.unique_key] = result
@@ -178,6 +183,8 @@ class TreeWidgetItem(QTreeWidgetItem):
             return "Error"
         elif state == TreeWidgetItem.STATE_WARNING:
             return "Warning"
+        elif state == TreeWidgetItem.STATE_NOTHING:
+            return None
         else:
             raise ValueError("Not valid state")
 
@@ -229,7 +236,8 @@ class TreeWidgetItem(QTreeWidgetItem):
     def added_new_file(self, path):
         self.added_new_file_count += 1
         self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
-        self.added_files.append({
+        added_files = self.load_from_cache("added_files")
+        added_files.append({
             "path": path,
             "timestamp": int(time.time()),
         })
@@ -238,7 +246,8 @@ class TreeWidgetItem(QTreeWidgetItem):
     def replaced_file(self, path, old_path=None):
         self.replaced_file_count += 1
         self.setText(self.COLUMN_REPLACED_FILE, str(self.replaced_file_count))
-        self.added_files.append({
+        added_files = self.load_from_cache("added_files")
+        added_files.append({
             "path": path,
             "old_path": old_path,
             "timestamp": int(time.time()),

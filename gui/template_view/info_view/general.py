@@ -23,6 +23,8 @@ class GroupBox(QGroupBox):
     def key_value_to_string(key, value):
         if value is None:
             return f"{key}: "
+        if isinstance(value, (list, set)):
+            value = "[" + " ".join(value) + "]"
         return f"{key}: {value}"
 
 
@@ -87,8 +89,8 @@ class OptionsGroupBox(GroupBox):
 
 
 class GeneralInfoView(QScrollArea, InfoView):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent, name="General")
+    def __init__(self, controller, parent=None):
+        super().__init__(parent=parent, name="General", controller=controller)
         self.setWidgetResizable(True)
         self.main_widget = QWidget()
         self.main_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)

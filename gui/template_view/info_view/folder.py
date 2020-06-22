@@ -7,14 +7,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView
-from settings import settings
+from gui.constants import EMPTY_FOLDER_PATH
 
 logger = logging.getLogger(__name__)
 
 
 class FolderInfoView(QTreeView, InfoView):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent, name="Folder")
+    def __init__(self, controller, parent=None):
+        super().__init__(parent=parent, name="Folder", controller=controller)
         self.model = QFileSystemModel()
         self.setModel(self.model)
         self.read_settings()
@@ -24,13 +24,16 @@ class FolderInfoView(QTreeView, InfoView):
         qApp.aboutToQuit.connect(self.save_state)
 
     def change_root(self, path):
-        index = self.model.setRootPath(path)
+        if not os.path.exists(path):
+            index = self.model.setRootPath(EMPTY_FOLDER_PATH)
+        else:
+            index = self.model.setRootPath(path)
         self.setRootIndex(index)
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path
         if path is not None:
-            absolute_path = os.path.join(settings.base_path, path)
+            absolute_path = os.path.join(self.controller.site_settings.base_path, path)
             self.change_root(absolute_path)
 
     def open_file_with_index(self, index):

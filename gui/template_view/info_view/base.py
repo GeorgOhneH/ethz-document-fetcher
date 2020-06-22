@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class InfoView(object):
-    def __init__(self, name):
+    def __init__(self, name, controller):
+        self.controller = controller
         self.name = name
         self.button = QPushButton(name)
         self.button.setCheckable(True)

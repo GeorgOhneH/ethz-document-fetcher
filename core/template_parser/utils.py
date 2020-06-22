@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 locks = {}
 
 
-async def login_module(session, module):
+async def login_module(session, site_settings, module):
     if not hasattr(module, "login"):
         return
 
@@ -32,7 +32,7 @@ async def login_module(session, module):
             logger.debug(f"Logging into {module.__name__}")
             start_time = time.time()
             try:
-                await func(session=session)
+                await func(session=session, site_settings=site_settings)
                 logger.debug(f"Logged into {module.__name__}, time: {(time.time() - start_time):.2f}")
                 func.errors[id(session)] = False
             except LoginError as e:

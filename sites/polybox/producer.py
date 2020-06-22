@@ -3,11 +3,14 @@ import base64
 import copy
 import os
 import re
+import logging
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
 from urllib.parse import unquote, quote
 
-from core.constants import *
+from bs4 import BeautifulSoup
+
+from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.downloader import download_if_not_exist
 from core.monitor import MonitorSession
 from sites.polybox.constants import *
@@ -15,7 +18,7 @@ from sites.polybox.constants import *
 logger = logging.getLogger(__name__)
 
 
-async def login(session, poly_id, password):
+async def login(session, poly_id, password, **kwargs):
     auth_url = INDEX_URL + f"{poly_id}/authenticate"
 
     async with session.get(auth_url) as response:
@@ -62,7 +65,7 @@ async def get_folder_name(session, id, password=None):
         return f"Polybox - {author}"
 
 
-async def producer(session, queue, id, base_path, password=None):
+async def producer(session, queue, base_path, site_settings, id, password=None):
     poly_id = id
     tasks = []
     # We create a new session, because polybox doesn't work

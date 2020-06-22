@@ -1,10 +1,7 @@
 import os
 from pathlib import Path
 
-from settings import settings
-
-CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache",
-                          settings.base_path.replace("/", "").replace("\\", "").replace(":", ""))
+CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache")
 Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)
 
 JSON_CACHE_PATH = os.path.join(CACHE_PATH, "json")

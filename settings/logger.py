@@ -2,7 +2,7 @@ import logging
 
 from colorama import Fore, Style
 
-from settings import settings
+from settings import global_settings
 
 LOGGER_CONFIG = {
     'version': 1,
@@ -20,8 +20,9 @@ LOGGER_CONFIG = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "level": settings.loglevel if settings.loglevel in ["ERROR", "WARNING", "INFO", "DEBUG"] else "INFO",
-            "formatter": "debug_fmt" if settings.loglevel == "DEBUG" else "info_fmt",
+            "level": global_settings.loglevel if global_settings.loglevel in ["ERROR", "WARNING", "INFO",
+                                                                              "DEBUG"] else "INFO",
+            "formatter": "debug_fmt" if global_settings.loglevel == "DEBUG" else "info_fmt",
             "stream": "ext://sys.stdout",
         },
     },

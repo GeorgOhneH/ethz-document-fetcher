@@ -38,8 +38,12 @@ class Worker(QObject):
     def __init__(self):
         super().__init__()
         self.signals = Signals()
+
         self.unique_key = "root"
         self.recursive = True
+        self.site_settings = None
+        self.template_path = None
+
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
         self.tasks = None
@@ -64,7 +68,7 @@ class Worker(QObject):
             self.signals.stopped.emit()
 
     async def run(self, signals=None):
-        if not settings.check_if_valid():
+        if not self.site_settings.check_if_valid():
             logger.critical("Settings are not correctly configured.")
             return
 
@@ -75,11 +79,13 @@ class Worker(QObject):
                                           timeout=aiohttp.ClientTimeout(30)) as session:
 
             try:
-                logger.debug(f"Loading template: {settings.template_path}")
+                logger.debug(f"Loading template: {self.template_path}")
                 queue = asyncio.Queue()
                 producers = []
-                template_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), settings.template_path)
-                template = template_parser.Template(path=template_file, signals=signals)
+                template_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), self.template_path)
+                template = template_parser.Template(path=template_file,
+                                                    site_settings=self.site_settings,
+                                                    signals=signals)
                 try:
                     template.load()
                 except asyncio.CancelledError as e:
@@ -93,7 +99,7 @@ class Worker(QObject):
 
                 await template.run_from_unique_key(self.unique_key, producers, session, queue, self.recursive)
 
-                await user_statistics(session, settings.username)
+                await user_statistics(session, self.site_settings.username)
 
                 logger.debug("Gathering producers")
                 await asyncio.gather(*producers)

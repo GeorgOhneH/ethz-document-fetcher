@@ -47,7 +47,7 @@ class Splitter(QSplitter):
 
 
 class StackedWidgetView(QStackedWidget):
-    def __init__(self, view_tree):
+    def __init__(self, view_tree, controller):
         super().__init__()
         self.view_tree = view_tree
         self.old_selected_widget = None
@@ -57,9 +57,9 @@ class StackedWidgetView(QStackedWidget):
         self.button_widget.setLayout(self.layout_button)
 
         self.views = [
-            GeneralInfoView(),
-            FolderInfoView(),
-            HistoryInfoView(),
+            GeneralInfoView(controller=controller),
+            FolderInfoView(controller=controller),
+            HistoryInfoView(controller=controller),
         ]
 
         self.init_views()
@@ -104,7 +104,7 @@ class TemplateView(QWidget):
         self.layout = QVBoxLayout()
 
         self.splitter = Splitter()
-        self.state_widget = StackedWidgetView(self.template_view_tree)
+        self.state_widget = StackedWidgetView(self.template_view_tree, controller)
 
         self.splitter.addWidget(self.template_view_tree)
         self.splitter.addWidget(self.state_widget)

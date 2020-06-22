@@ -2,7 +2,7 @@ import asyncio
 import os
 
 from core.utils import safe_path_join
-from sites.video_portal.constants import *
+from sites.video_portal.constants import BASE_URL
 from sites.video_portal.login import login_and_data
 
 
@@ -22,9 +22,9 @@ async def get_folder_name(session, department, year, semester, course_id, **kwar
     return meta_data["title"]
 
 
-async def producer(session, queue, base_path, department, year, semester,
+async def producer(session, queue, base_path, site_settings, department, year, semester,
                    course_id, pwd_username=None, pwd_password=None):
-    absolute_path = os.path.join(settings.base_path, base_path)
+    absolute_path = os.path.join(site_settings.base_path, base_path)
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 
     meta_data = await get_meta_data(session, course_url)
@@ -53,6 +53,7 @@ async def producer(session, queue, base_path, department, year, semester,
         coroutine = put_in_queue(session,
                                  queue,
                                  safe_path_join(base_path, file_name),
+                                 site_settings,
                                  department,
                                  year,
                                  semester,
@@ -69,6 +70,7 @@ async def producer(session, queue, base_path, department, year, semester,
 async def put_in_queue(session,
                        queue,
                        base_path,
+                       site_settings,
                        department,
                        year,
                        semester,
@@ -76,8 +78,7 @@ async def put_in_queue(session,
                        meta_video_url,
                        pwd_username,
                        pwd_password):
-
-    meta_video_data = await login_and_data(session, department, year, semester, course_id,
+    meta_video_data = await login_and_data(session, site_settings, department, year, semester, course_id,
                                            meta_video_url, pwd_username, pwd_password)
 
     url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]

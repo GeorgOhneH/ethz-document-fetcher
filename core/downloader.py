@@ -11,7 +11,7 @@ from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
 from core.utils import get_extension, fit_sections_to_console, split_name_extension
-from settings import settings
+from settings import global_settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
         except asyncio.CancelledError:
             return
         except Exception as e:
-            if settings.loglevel == "DEBUG":
+            if global_settings.loglevel == "DEBUG":
                 traceback.print_exc()
             logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}")
             signal_handler.quit_with_error(unique_key, f"Could not download file from url: {item['url']}. Error: {e}")
@@ -38,6 +38,7 @@ async def download_files(session: aiohttp.ClientSession, queue):
 async def download_if_not_exist(session,
                                 path,
                                 url,
+                                site_settings,
                                 with_extension=True,
                                 kwargs=None,
                                 allowed_extensions=None,
@@ -51,14 +52,14 @@ async def download_if_not_exist(session,
     if allowed_extensions is None:
         allowed_extensions = []
 
-    allowed_extensions = [item.lower() for item in allowed_extensions + settings.allowed_extensions]
+    allowed_extensions = [item.lower() for item in allowed_extensions + site_settings.allowed_extensions]
     if "video" in allowed_extensions:
         allowed_extensions += MOVIE_EXTENSIONS
 
     if forbidden_extensions is None:
         forbidden_extensions = []
 
-    forbidden_extensions = [item.lower() for item in forbidden_extensions + settings.forbidden_extensions]
+    forbidden_extensions = [item.lower() for item in forbidden_extensions + site_settings.forbidden_extensions]
     if "video" in forbidden_extensions:
         forbidden_extensions += MOVIE_EXTENSIONS
 
@@ -67,8 +68,8 @@ async def download_if_not_exist(session,
     timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
         raise ValueError("Absolutes paths are not allowed")
-    else:
-        absolute_path = os.path.join(settings.base_path, path)
+
+    absolute_path = os.path.join(site_settings.base_path, path)
 
     if not with_extension:
         absolute_path += "." + await cache.check_extension(session, url)
@@ -76,7 +77,7 @@ async def download_if_not_exist(session,
     force = False
     if checksum is not None:
         force = not cache.is_checksum_same(absolute_path, checksum)
-    elif settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
+    elif site_settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
         force = True
 
     if os.path.exists(absolute_path) and not force:
@@ -114,7 +115,7 @@ async def download_if_not_exist(session,
 
         pathlib.Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
-        if action == ACTION_REPLACE and settings.keep_replaced_files:
+        if action == ACTION_REPLACE and site_settings.keep_replaced_files:
             dir_path = os.path.dirname(absolute_path)
             pure_name, extension = split_name_extension(file_name)
             old_file_name = f"{pure_name}-old.{extension}"
@@ -134,16 +135,16 @@ async def download_if_not_exist(session,
             raise e
 
         if "ETag" in response.headers:
-            cache.save_etag(absolute_path, response.headers["ETag"])
+            cache.save_etag(absolute_path, response.headers["ETag"], site_settings)
         elif domain not in FORCE_DOWNLOAD_BLACKLIST:
             logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
-    if action == ACTION_REPLACE and settings.keep_replaced_files and file_extension.lower() == "pdf":
+    if action == ACTION_REPLACE and site_settings.keep_replaced_files and file_extension.lower() == "pdf":
         logger.debug("Adding highlights")
         pdf_highlighter.add_differ_highlight(absolute_path, old_absolute_path)
 
     if action == ACTION_REPLACE:
-        if settings.keep_replaced_files:
+        if site_settings.keep_replaced_files:
             signal_handler.replaced_file(unique_key, absolute_path, old_absolute_path)
         else:
             signal_handler.replaced_file(unique_key, absolute_path)

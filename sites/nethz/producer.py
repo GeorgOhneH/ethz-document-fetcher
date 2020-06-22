@@ -7,7 +7,7 @@ from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
 
 
-async def get_folder_name(session, url):
+async def get_folder_name(session, url, **kwargs):
     async with session.get(url) as response:
         html = await response.text()
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
@@ -18,7 +18,7 @@ async def get_folder_name(session, url):
     return name
 
 
-async def producer(session, queue, url, base_path):
+async def producer(session, queue, url, base_path, site_settings):
     if url[-1] != "/":
         url += "/"
 
@@ -43,7 +43,7 @@ async def producer(session, queue, url, base_path):
             checksum = str(link.next_sibling.string).strip()
             await queue.put({"url": url + href, "path": path, "checksum": checksum})
         else:
-            coroutine = producer(session, queue, url + href, path)
+            coroutine = producer(session, queue, url + href, path, site_settings)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

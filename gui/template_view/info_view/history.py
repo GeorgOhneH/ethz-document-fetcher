@@ -7,18 +7,23 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView
-from settings import settings
+from gui.utils import format_bytes
 
 logger = logging.getLogger(__name__)
 
 
-
 class HistoryInfoView(QTreeWidget, InfoView):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent, name="History")
+    COLUMN_NAME = 0
+    COLUMN_DATE = 2
+    COLUMN_PATH = 3
+    COLUMN_NOTE = 4
+    COLUMN_SIZE = 1
+
+    def __init__(self, controller, parent=None):
+        super().__init__(parent=parent, name="History", controller=controller)
         self.setExpandsOnDoubleClick(False)
-        self.setColumnCount(4)
-        self.setHeaderLabels(["Name", "Date Added", "Path", "Note"])
+        self.setColumnCount(5)
+        self.setHeaderLabels(["Name", "Size", "Date Added", "Path", "Note"])
         self.read_settings()
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
@@ -28,33 +33,35 @@ class HistoryInfoView(QTreeWidget, InfoView):
     def init(self, widget):
         max_items = 50
         self.clear()
-        for i, file in enumerate(reversed(widget.added_files)):
+        for i, file in enumerate(reversed(widget.load_from_cache("added_files"))):
             if i == max_items:
                 break
             item_widget = QTreeWidgetItem()
             self.addTopLevelItem(item_widget)
             self.setup_widget(widget, item_widget, file["path"], file["timestamp"])
-            item_widget.setText(3, "Added New File")
-            if "old_path" in file:
-                item_widget.setText(3, "Replaced File")
+            item_widget.setText(self.COLUMN_NOTE, "Added New File")
+            if "old_path" in file and file["old_path"] is not None:
+                item_widget.setText(self.COLUMN_NOTE, "Replaced File")
                 child = QTreeWidgetItem()
                 self.setup_widget(widget, child, file["old_path"])
                 item_widget.addChild(child)
-                child.setText(3, "Old File")
+                child.setText(self.COLUMN_NOTE, "Old File")
 
     def setup_widget(self, widget, item, path, timestamp=None):
         file_info = QFileInfo(path)
         item.path = path
         item.setExpanded(False)
-        item.setText(0, file_info.fileName())
-        item.setIcon(0, QFileIconProvider().icon(file_info))
+        item.setText(self.COLUMN_NAME, file_info.fileName())
+        item.setIcon(self.COLUMN_NAME, QFileIconProvider().icon(file_info))
+        item.setText(self.COLUMN_SIZE, format_bytes(file_info.size()))
+        item.setTextAlignment(self.COLUMN_SIZE, Qt.AlignRight | Qt.AlignVCenter)
         if timestamp is not None:
-            item.setText(1, str(datetime.datetime.fromtimestamp(timestamp)))
+            item.setText(self.COLUMN_DATE, str(datetime.datetime.fromtimestamp(timestamp)))
 
         read_path = path
         if widget.template_node.base_path is not None:
             read_path = path.split(widget.template_node.base_path)[-1]
-        item.setText(2, os.path.dirname(read_path))
+        item.setText(self.COLUMN_PATH, os.path.dirname(read_path))
 
     def update_view(self, selected_widget):
         self.init(selected_widget)
