@@ -144,7 +144,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.children = []
         self.custom_parent = None
 
-        self.controller.settings_widget.accepted.connect(self.emit_data_changed)
+        self.controller.settings_dialog.accepted.connect(self.emit_data_changed)
 
     def init_widgets(self):
         self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)

@@ -11,7 +11,6 @@ from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
 from core.utils import user_statistics
-from settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +81,7 @@ class Worker(QObject):
                 logger.debug(f"Loading template: {self.template_path}")
                 queue = asyncio.Queue()
                 producers = []
-                template_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), self.template_path)
+                template_file = self.template_path
                 template = template_parser.Template(path=template_file,
                                                     site_settings=self.site_settings,
                                                     signals=signals)

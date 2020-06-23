@@ -4,7 +4,7 @@ import logging
 import copy
 
 from settings.values import ConfigPath, ConfigList, ConfigBool, ConfigPassword, ConfigOptions, ConfigString
-from settings.constants import SEPARATOR, ROOT_PATH
+from settings.constants import SEPARATOR, CONFIG_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,10 @@ class Settings(metaclass=SettingBase):
                 setattr(self, value.name, arg_value)
 
     def get_file_path(self):
-        return os.path.join(ROOT_PATH, self.__class__.__name__.lower() + ".config")
+        return os.path.join(CONFIG_PATH, self.__class__.__name__.lower() + ".config")
+
+    def get_value(self, name):
+        return self._values[name]
 
     def __iter__(self):
         return iter(self._values.values())
@@ -117,15 +120,22 @@ class Settings(metaclass=SettingBase):
 
 
 class GlobalSettings(Settings):
+    NAME = "Global"
     loglevel = ConfigOptions(default="DEBUG", options=["ERROR", "WARNING", "INFO", "DEBUG"])
 
 
+class TemplatePathSettings(Settings):
+    template_path = ConfigPath(absolute=False,
+                               default=os.path.join("templates", "example.yml"),
+                               file_extensions=["yml"])
+
+
 class SiteSettings(Settings):
+    NAME = "Site"
     username = ConfigString(optional=True)
     password = ConfigPassword(optional=True)
     base_path = ConfigPath(ony_folder=True)
-    # template_path = ConfigPath(absolute=False, default=os.path.join("templates", "FS2020", "itet", "semester2.yml"), file_extensions=["yml"])
     allowed_extensions = ConfigList(default=[], optional=True, hint_text="Add 'video' for all video types.")
     forbidden_extensions = ConfigList(default=["video"], optional=True, hint_text="Add 'video' for all video types.")
-    keep_replaced_files = ConfigBool(default=False)
+    keep_replaced_files = ConfigBool(default=True)
     force_download = ConfigBool(default=False, active_func=lambda: False)

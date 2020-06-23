@@ -1,80 +1,80 @@
 folder:
   name: semester2
-  producers:
-  - moodle: # NuS2
-      id: 11838
-      producers:
-      - polybox:
-          id: 4YGUCHIXorTsvVL
-  - moodle: # Physik1
-      id: 12228
-      producers:
-      - polybox:
-          id: iSYMs1nnDAzDWtU
-  - moodle: # Koma
-      id: 12301
-      forbidden_extensions: [video]
-      producers:
-      - nethz:
-          url: https://n.ethz.ch/~tiagos/download/2020/
-  - moodle: # Analysis2
-      id: 12611
-      producers:
-      - ilias:
-          id: 187834
-          folder_name: Notizen
-      - nethz:
-          url: https://n.ethz.ch/~cdirren/downloads/Analysis_2/
-      - polybox:
-          id: C8LWUyvLRUbh3zX
-      - custom:
-          function: FS2020.analysis.parse_main_page
-          use_folder: false
-  - custom: # Informatik1
-      function: FS2020.informatik.parse_main_page
-      folder_name: Computer Science  D-ITET  SS 20
+  sites:
+  - module: custom
+    function: FS2020.analysis.parse_main_page
+    use_folder: false
+  - module: moodle # NuS2
+    id: 11838
+    sites:
+    - module: polybox
+      id: 4YGUCHIXorTsvVL
+  - module: moodle # Physik1
+    id: 12228
+    sites:
+    - module: polybox
+      id: iSYMs1nnDAzDWtU
+  - module: moodle # Koma
+    id: 12301
+    forbidden_extensions: [video]
+    sites:
+    - module: nethz
+      url: https://n.ethz.ch/~tiagos/download/2020/
+  - module: moodle # Analysis2
+    id: 12611
+    sites:
+    - module: ilias
+      id: 187834
+      folder_name: Notizen
+    - module: nethz
+      url: https://n.ethz.ch/~cdirren/downloads/Analysis_2/
+    - module: polybox
+      id: C8LWUyvLRUbh3zX
+  - module: custom # Informatik1
+    function: FS2020.informatik.parse_main_page
+    folder_name: Computer Science  D-ITET  SS 20
   - folder:
       name: Video Portal
-      producers:
-      - video_portal:
-          department: d-math
-          year: 2020
-          semester: spring
-          course_id: 401-0232-10L
-      - video_portal:
-          department: d-math
-          year: 2020
-          semester: spring
-          course_id: 401-0302-10L
-      - video_portal:
-            department: d-itet
-            year: 2020
-            semester: spring
-            course_id: 227-0002-00L
-            pwd_username: bie-20s
-            pwd_password: null
-      - video_portal:
-          department: d-itet
-          year: 2019
-          semester: spring
-          course_id: 227-0002-00L
-          pwd_username: bie-19s
-          pwd_password: null
-      - video_portal:
-            department: d-infk
-            year: 2020
-            semester: spring
-            course_id: 252-0848-00L
-            pwd_username: scw-20s
-            pwd_password: null
-      - video_portal:
-            department: d-infk
-            year: 2019
-            semester: autumn
-            course_id: 252-0847-00L
-            pwd_username: scw-19s
-            pwd_password: null
-      - polybox:
-          folder_name: NuS2 Podcast
-          id: SU2lkCtdoLH3X1w
-          password: null
+      sites:
+      - module: video_portal
+        department: d-math
+        year: 2020
+        semester: spring
+        course_id: 401-0232-10L
+      - module: video_portal
+        department: d-math
+        year: 2020
+        semester: spring
+        course_id: 401-0302-10L
+      - module: video_portal
+        department: d-itet
+        year: 2020
+        semester: spring
+        course_id: 227-0002-00L
+        pwd_username: bie-20s
+        pwd_password: null
+      - module: video_portal
+        department: d-itet
+        year: 2019
+        semester: spring
+        course_id: 227-0002-00L
+        pwd_username: bie-19s
+        pwd_password: null
+      - module: video_portal
+        department: d-infk
+        year: 2020
+        semester: spring
+        course_id: 252-0848-00L
+        pwd_username: scw-20s
+        pwd_password: null
+      - module: video_portal
+        department: d-infk
+        year: 2019
+        semester: autumn
+        course_id: 252-0847-00L
+        pwd_username: scw-19s
+        pwd_password: null
+      - module: polybox
+        folder_name: NuS2 Podcast
+        id: SU2lkCtdoLH3X1w
+        password: null

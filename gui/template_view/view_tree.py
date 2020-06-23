@@ -13,7 +13,6 @@ from settings import global_settings
 logger = logging.getLogger(__name__)
 
 
-
 class HeaderItem(QTreeWidgetItem):
     def __init__(self):
         super().__init__()
@@ -25,7 +24,7 @@ class HeaderItem(QTreeWidgetItem):
         self.set_text_added()
 
     def set_text_added(self):
-        self.setText(TreeWidgetItem.COLUMN_ADDED_FILE, f"Added New Files ({self.added_new_count})")
+        self.setText(TreeWidgetItem.COLUMN_ADDED_FILE, f"New Files Added ({self.added_new_count})")
 
     def set_text_replaced(self):
         self.setText(TreeWidgetItem.COLUMN_REPLACED_FILE, f"Replaced Files ({self.replaced_count})")
@@ -39,7 +38,6 @@ class HeaderItem(QTreeWidgetItem):
         self.set_text_replaced()
 
 
-
 class TemplateViewTree(QTreeWidget):
     def __init__(self, signals, controller, parent):
         super().__init__(parent=parent)
@@ -50,7 +48,7 @@ class TemplateViewTree(QTreeWidget):
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
-        self.template = template_parser.Template(path=controller.template_path,
+        self.template = template_parser.Template(path=controller.get_template_path(),
                                                  site_settings=controller.site_settings)
         try:
             self.template.load()
@@ -58,6 +56,7 @@ class TemplateViewTree(QTreeWidget):
             if global_settings.loglevel == "DEBUG":
                 traceback.print_exc()
             error_dialog = QErrorMessage(self)
+            error_dialog.setWindowTitle("Error")
             error_dialog.showMessage(f"Error while loading the file. Error: {e}")
         self.init_view_tree()
         self.read_settings()

@@ -1,6 +1,7 @@
 import base64
 import logging
 import copy
+from functools import lru_cache
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -53,7 +54,9 @@ class ConfigString(object):
         self._buffer = None
         self.widget = None
         self.observers = []
-        self.set(default)
+        self.last_value = NotSet
+        self.last_result = NotSet
+        self._set(default)
 
     def get_widget(self):
         if self.widget is None:
@@ -75,13 +78,12 @@ class ConfigString(object):
         return self.name
 
     def set(self, value):
+        if not self.is_valid(value):
+            raise ValueError("Can not set invalid value")
         self._set(value)
 
     def _set(self, value):
         self._value = value
-
-    def add_observer(self, func):
-        self.observers.append(func)
 
     def set_from_widget(self):
         value = self.widget.get_value()
@@ -136,6 +138,16 @@ class ConfigString(object):
     def is_valid(self, value=NotSet):
         if value is NotSet:
             value = self._value
+
+        if self.last_value is not NotSet:
+            if self.last_value == value:
+                return self.last_result
+        result = self._is_valid(value)
+        self.last_value = value
+        self.last_result = result
+        return result
+
+    def _is_valid(self, value):
         if not self.is_active(value):
             return True
         if not self.is_set(value):

@@ -32,7 +32,14 @@ class Template(object):
         return gen(self.root)
 
     def load(self):
-        self.data = self.load_data(self.path)
+        if self.path is None:
+            self.data = {}
+        else:
+            self.data = self.load_data(self.path)
+
+        if self.data is None:
+            self.data = {}
+
         self.parse_template()
 
         self.nodes = {node.unique_key: node for node in iter(self)}

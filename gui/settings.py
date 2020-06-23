@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class ErrorLabel(QWidget):
+    data_changed_signal = pyqtSignal()
+
     def __init__(self, config_widget, parent=None):
         super().__init__(parent=parent)
         self.config_widget = config_widget
@@ -40,6 +42,7 @@ class ErrorLabel(QWidget):
             self.error_label.show()
         else:
             self.error_label.hide()
+        self.data_changed_signal.emit()
 
 
 class SettingsDialog(QDialog):
@@ -51,15 +54,16 @@ class SettingsDialog(QDialog):
         self.finished.connect(self.save_geometry)
 
         self.settings_areas = [
-            SettingScrollArea(site_settings),
-            SettingScrollArea(global_settings),
+            SettingScrollArea(site_settings, parent=self),
+            SettingScrollArea(global_settings, save_changes=False, parent=self),
         ]
 
         self.tab_widget = QTabWidget()
         self.tab_widget.setStyleSheet("QTabWidget::pane { border: none; }")
 
         for settings_area in self.settings_areas:
-            self.tab_widget.addTab(settings_area, "test")
+            settings_area.data_changed_signal.connect(self.data_changed)
+            self.tab_widget.addTab(settings_area, settings_area.settings.NAME)
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
@@ -86,9 +90,8 @@ class SettingsDialog(QDialog):
             settings_area.update_widgets()
 
     def save_and_exit(self):
-        for settings_area in self.settings_areas:
-            if not settings_area.is_valid():
-                return
+        if not self.settings_are_valid():
+            return
         for settings_area in self.settings_areas:
             settings_area.apply_value()
         self.accept()
@@ -96,9 +99,23 @@ class SettingsDialog(QDialog):
     def exit(self):
         self.reject()
 
+    def settings_are_valid(self):
+        for settings_area in self.settings_areas:
+            if not settings_area.is_valid():
+                return False
+        return True
+
     def closeEvent(self, event):
         self.save_geometry()
         super(QDialog, self).closeEvent(event)
+
+    def data_changed(self):
+        ok_button = self.button_box.button(QDialogButtonBox.Ok)
+        cancel_button = self.button_box.button(QDialogButtonBox.Cancel)
+        valid_settings = self.settings_are_valid()
+        ok_button.setEnabled(valid_settings)
+        cancel_button.setDefault(not valid_settings)
+        ok_button.setDefault(valid_settings)
 
     def save_geometry(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
@@ -111,7 +128,9 @@ class SettingsDialog(QDialog):
 
 
 class SettingScrollArea(QScrollArea):
-    def __init__(self, settings, parent=None):
+    data_changed_signal = pyqtSignal()
+
+    def __init__(self, settings, save_changes=True, parent=None):
         super().__init__(parent)
         self.setWidgetResizable(True)
 
@@ -119,12 +138,13 @@ class SettingScrollArea(QScrollArea):
         self.main_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         self.settings = settings
+        self.save_changes = save_changes
 
         self.required = QGroupBox()
-        self.required.setTitle("General")
+        self.required.setTitle("General" + (" (Requires Restart)" if not save_changes else ""))
         self.required.setLayout(QVBoxLayout())
         self.optional = QGroupBox()
-        self.optional.setTitle("Optional")
+        self.optional.setTitle("Optional" + (" (Requires Restart)" if not save_changes else ""))
         self.optional.setLayout(QVBoxLayout())
 
         self.layout = QVBoxLayout()
@@ -137,23 +157,36 @@ class SettingScrollArea(QScrollArea):
     def init_widgets(self):
         for value in self.settings:
             widget = value.get_widget()
+            label = ErrorLabel(widget, parent=self)
+            label.data_changed_signal.connect(self.data_changed)
             if value.optional:
-                self.optional.layout().addWidget(ErrorLabel(widget, parent=self))
+                self.optional.layout().addWidget(label)
             else:
-                self.required.layout().addWidget(ErrorLabel(widget, parent=self))
+                self.required.layout().addWidget(label)
+
+        if self.optional.layout().count() == 0:
+            self.optional.hide()
+        if self.required.layout().count() == 0:
+            self.required.hide()
 
     def update_widgets(self):
+        if not self.save_changes:
+            return
         for value in self.settings:
             value.update_widget()
 
     def is_valid(self):
         for value in self.settings:
             if not value.is_valid_from_widget():
-                logger.debug(f" Value: {value.name} is not valid. Msg: {value.msg}")
                 return False
         return True
 
     def apply_value(self):
+        if not self.save_changes:
+            return
         for value in self.settings:
             value.set_from_widget()
         self.settings.save()
+
+    def data_changed(self):
+        self.data_changed_signal.emit()

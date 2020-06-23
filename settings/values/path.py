@@ -13,6 +13,32 @@ from settings.values.string import ConfigString, LineEdit
 logger = logging.getLogger(__name__)
 
 
+def open_file_picker(only_folder=False, file_extensions=None, current_path=None):
+    file_dialog = QFileDialog()
+    if only_folder:
+        file_dialog.setFileMode(QFileDialog.Directory)
+        file_dialog.setOption(QFileDialog.ShowDirsOnly)
+    elif file_extensions is not None:
+        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setNameFilter(" ".join([f"*.{extension}" for extension in file_extensions]))
+    file_dialog.setViewMode(QFileDialog.Detail)
+
+    if current_path is not None and os.path.exists(current_path):
+        file_dialog.setDirectory(current_path)
+    else:
+        file_dialog.setDirectory(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation))
+
+    file_name = None
+    if file_dialog.exec():
+        file_names = file_dialog.selectedFiles()
+        if file_names is not None:
+            file_name = file_names[0]
+    if file_name is not None:
+        return QDir.toNativeSeparators(file_name)
+    else:
+        return None
+
+
 class PathLineEdit(LineEdit):
     def __init__(self, config_obj, only_folder, file_extensions):
         super().__init__(config_obj)
@@ -24,26 +50,7 @@ class PathLineEdit(LineEdit):
         self.layout.addWidget(self.file_button)
 
     def open_file_picker(self):
-        file_dialog = QFileDialog(self)
-        if self.only_folder:
-            file_dialog.setFileMode(QFileDialog.Directory)
-            file_dialog.setOption(QFileDialog.ShowDirsOnly)
-        elif self.file_extensions is not None:
-            file_dialog.setFileMode(QFileDialog.ExistingFile)
-            file_dialog.setNameFilter(" ".join([f"*.{extension}" for extension in self.file_extensions]))
-        file_dialog.setViewMode(QFileDialog.Detail)
-
-        current_path = self.get_value()
-        if os.path.exists(current_path):
-            file_dialog.setDirectory(current_path)
-        else:
-            file_dialog.setDirectory(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation))
-
-        file_name = None
-        if file_dialog.exec():
-            file_names = file_dialog.selectedFiles()
-            if file_names is not None:
-                file_name = file_names[0]
+        file_name = open_file_picker(self.only_folder, self.file_extensions, self.get_value())
         if file_name is not None:
             self.line_edit.setText(QDir.toNativeSeparators(file_name))
 
