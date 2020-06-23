@@ -10,18 +10,40 @@ from settings.values.string import ConfigString, LineEdit
 logger = logging.getLogger(__name__)
 
 
-class ListLineEdit(LineEdit):
+class ListLineEdit(QWidget):
+    def __init__(self, config_obj):
+        super().__init__()
+        self.config_obj = config_obj
+
+        self.string_line_edit = LineEdit(config_obj)
+        self.data_changed_signal = self.string_line_edit.line_edit.textChanged
+        self.layout = QVBoxLayout()
+        self.layout.setSpacing(2)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self.layout)
+
+        self.hint = QLabel()
+        self.hint.setText("Separate by comma. " + config_obj.hint_text)
+        self.hint.setStyleSheet("QLabel { color : gray; }")
+
+        self.layout.addWidget(self.string_line_edit)
+        self.layout.addWidget(self.hint)
+
     def get_value(self):
-        raw = super().get_value()
+        raw = self.string_line_edit.get_value()
         if raw is None:
             return []
         return [x.strip() for x in raw.split(",") if x.strip()]
 
     def set_value(self, value):
-        super(ListLineEdit, self).set_value(", ".join(value))
+        self.string_line_edit.set_value(", ".join(value))
 
 
 class ConfigList(ConfigString):
+    def __init__(self, hint_text="", *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.hint_text = hint_text
+
     def init_widget(self):
         return ListLineEdit(self)
 

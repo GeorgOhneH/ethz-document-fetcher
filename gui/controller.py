@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 
 from gui.template_view import TemplateView
 from gui.worker import Worker
-from gui.settings import SettingsWidget
+from gui.settings import SettingsDialog
 from gui.constants import ROOT_PATH
 from gui.utils import format_bytes
 from settings.settings import SiteSettings
@@ -52,7 +52,7 @@ class CentralWidget(QWidget):
 
         actions.settings.triggered.connect(self.open_settings)
 
-        self.settings_widget = SettingsWidget(parent=self, site_settings=self.site_settings)
+        self.settings_widget = SettingsDialog(parent=self, site_settings=self.site_settings)
         self.template_view = TemplateView(self.worker.signals, self, self)
 
         grid.addWidget(self.btn_run, 0, 0)

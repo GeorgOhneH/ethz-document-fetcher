@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.downloader import download_if_not_exist
 from core.monitor import MonitorSession
+from core.utils import safe_path_join
 from sites.polybox.constants import *
 
 logger = logging.getLogger(__name__)
@@ -87,8 +88,9 @@ async def producer(session, queue, base_path, site_settings, id, password=None):
                 continue
 
             path = PurePath(unquote(href))
-            path = os.path.join(*path.parts[3:])
+            path = safe_path_join(*path.parts[3:])
             absolute_path = os.path.join(base_path, path)
+
             files = os.path.basename(href)
             url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
 

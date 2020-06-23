@@ -13,14 +13,41 @@ from settings import global_settings
 logger = logging.getLogger(__name__)
 
 
+
+class HeaderItem(QTreeWidgetItem):
+    def __init__(self):
+        super().__init__()
+        self.added_new_count = 0
+        self.replaced_count = 0
+        self.setText(TreeWidgetItem.COLUMN_NAME, "Name")
+        self.setText(TreeWidgetItem.COLUMN_STATE, "State")
+        self.set_text_replaced()
+        self.set_text_added()
+
+    def set_text_added(self):
+        self.setText(TreeWidgetItem.COLUMN_ADDED_FILE, f"Added New Files ({self.added_new_count})")
+
+    def set_text_replaced(self):
+        self.setText(TreeWidgetItem.COLUMN_REPLACED_FILE, f"Replaced Files ({self.replaced_count})")
+
+    def added_new_file(self):
+        self.added_new_count += 1
+        self.set_text_added()
+
+    def replaced_file(self):
+        self.replaced_count += 1
+        self.set_text_replaced()
+
+
+
 class TemplateViewTree(QTreeWidget):
     def __init__(self, signals, controller, parent):
         super().__init__(parent=parent)
         self.widgets = {}
         self.controller = controller
-        self.thread_is_running = False
         self.setColumnCount(4)
-        self.setHeaderLabels(["Name", "New Files Added", "Replaced Files", "State"])
+        self.header_item = HeaderItem()
+        self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.template = template_parser.Template(path=controller.template_path,
@@ -86,11 +113,13 @@ class TemplateViewTree(QTreeWidget):
     @pyqtSlot(str, str)
     def added_new_file(self, unique_key, path):
         self.widgets[unique_key].added_new_file(path)
+        self.header_item.added_new_file()
 
     @pyqtSlot(str, str)
     @pyqtSlot(str, str, str)
     def replaced_file(self, unique_key, path, old_path=None):
         self.widgets[unique_key].replaced_file(path, old_path)
+        self.header_item.replaced_file()
 
     @pyqtSlot(str)
     @pyqtSlot(str, str)
@@ -153,7 +182,8 @@ class TemplateViewTree(QTreeWidget):
         run_action_recursive.setEnabled(not self.controller.thread.isRunning())
         if self.controller.thread.isRunning():
             self.controller.thread.finished.connect(lambda: run_action_recursive.setEnabled(True))
-        run_action_recursive.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, True))
+        run_action_recursive.triggered.connect(
+            lambda: self.controller.start_thread(widget.template_node.unique_key, True))
 
         run_action = menu.addAction("Run")
         run_action.setEnabled(not self.controller.thread.isRunning())

@@ -38,7 +38,9 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    return html.unescape(string.replace("/", "-")).replace(":", ";").replace("|", "")
+    return html.unescape(string.replace("/", "-").replace("\\", "-")).\
+        replace(":", ";").replace("|", "").replace("?", "").\
+        replace("<", "").replace(">", "").replace("*", "")
 
 
 async def check_for_new_release(session):
