@@ -54,6 +54,8 @@ class StackedWidgetView(QStackedWidget):
         self.button_group = ButtonGroup()
         self.button_widget = QWidget()
         self.layout_button = QHBoxLayout()
+        self.layout_button.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.layout_button.setContentsMargins(0, 0, 0, 0)
         self.button_widget.setLayout(self.layout_button)
 
         self.views = [
@@ -102,6 +104,7 @@ class TemplateView(QWidget):
         self.template_view_tree = TemplateViewTree(template_path, signals, controller, self)
 
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 6, 0, 6)
 
         self.splitter = Splitter()
         self.state_widget = StackedWidgetView(self.template_view_tree, controller)

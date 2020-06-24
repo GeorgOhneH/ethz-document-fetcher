@@ -42,6 +42,12 @@ class CentralWidget(QWidget):
         self.worker.signals.downloaded_content_length.connect(self.monitor_download)
 
         self.grid = QGridLayout()
+        self.grid.setContentsMargins(17, 0, 17, 0)
+
+        self.button_container = QWidget()
+        self.button_container.setLayout(QHBoxLayout())
+        self.button_container.layout().setContentsMargins(0, 11, 0, 0)
+        self.button_container.layout().setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.btn_run = QPushButton("Run")
         actions.run.triggered.connect(lambda: self.start_thread())
@@ -53,6 +59,9 @@ class CentralWidget(QWidget):
         actions.stop.setEnabled(False)
         self.btn_stop.pressed.connect(self.stop_thread)
 
+        self.button_container.layout().addWidget(self.btn_run)
+        self.button_container.layout().addWidget(self.btn_stop)
+
         actions.settings.triggered.connect(self.open_settings)
         actions.edit_file.triggered.connect(self.open_edit)
         actions.open_file.triggered.connect(self.open_file)
@@ -60,9 +69,8 @@ class CentralWidget(QWidget):
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
         self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
 
-        self.grid.addWidget(self.btn_run, 0, 0)
-        self.grid.addWidget(self.btn_stop, 0, 1)
-        self.grid.addWidget(self.template_view, 1, 0, 1, 2)
+        self.grid.addWidget(self.button_container)
+        self.grid.addWidget(self.template_view)
         self.setLayout(self.grid)
 
         self.one_second_timer.start(1000)

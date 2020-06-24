@@ -206,6 +206,8 @@ class Site(TemplateNode):
         return folder_name
 
     def exception_handler(self, function, signal_handler):
+        unique_key = self.unique_key
+
         async def wrapper(session, queue, base_path, site_settings, *args, **kwargs):
             function_name = f"{function.__module__}.{function.__name__}"
             function_name_kwargs = f"{function_name}<{dict_to_string(kwargs)}>"
@@ -214,7 +216,7 @@ class Site(TemplateNode):
                 t = time.time()
                 result = await function(session=session, queue=queue, base_path=base_path,
                                         site_settings=site_settings, *args, **kwargs)
-                signal_handler.finished_successful(self.unique_key, f"Finished in {(time.time() - t):.2f} seconds")
+                signal_handler.finished_successful(unique_key, f"Finished in {(time.time() - t):.2f} seconds")
                 logger.debug(f"Finished: {function_name_kwargs}, time: {(time.time() - t):.2f}")
                 return result
             except asyncio.CancelledError as e:
@@ -225,7 +227,7 @@ class Site(TemplateNode):
                 keyword = re.findall("'(.+)'", e.args[0])
                 logger.error(f"The producer {function_name_kwargs} got an unexpected keyword: {keyword}."
                              f" Stopping the producer..")
-                signal_handler.quit_with_error(self.unique_key, f"Unexpected keyword: {keyword}.")
+                signal_handler.quit_with_error(unique_key, f"Unexpected keyword: {keyword}.")
                 return
             except Exception as e:
                 if global_settings.loglevel == "DEBUG":

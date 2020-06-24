@@ -186,7 +186,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         elif state == TreeWidgetItem.STATE_WARNING:
             return "Warning"
         elif state == TreeWidgetItem.STATE_NOTHING:
-            return None
+            return ""
         else:
             raise ValueError("Not valid state")
 
@@ -209,12 +209,10 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.name_widget.set_loading(msg)
 
     def set_error(self, msg=None):
-        self.active_item_count = 0
         self._set_state(self.STATE_ERROR)
         self.name_widget.set_error(msg)
 
     def set_warning(self, msg=None):
-        self.active_item_count = 0
         self._set_state(self.STATE_WARNING)
         self.name_widget.set_warning(msg)
 
@@ -222,7 +220,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.active_item_count -= 1
         if self.active_item_count < 0:
             logger.warning("Active count is negative")
-        if self.active_item_count == 0:
+        if self.active_item_count == 0 and self.state not in [self.STATE_ERROR, self.STATE_WARNING]:
             self._set_state(self.STATE_SUCCESS)
             self.name_widget.set_success(msg)
 

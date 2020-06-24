@@ -91,7 +91,7 @@ class ConfigString(object):
 
     def is_valid_from_widget(self):
         if self.widget is None:
-            return
+            return None
         value = self.widget.get_value()
         return self.is_valid(value)
 
