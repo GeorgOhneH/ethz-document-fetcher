@@ -13,14 +13,13 @@ from gui.constants import ASSETS_PATH
 class TemplateNode(object):
     DEFAULT_ICON_PATH = os.path.join(ASSETS_PATH, "globe.svg")
 
-    def __init__(self, parent, site_settings, folder_name=None, unique_key_args=None, use_folder=True, is_producer=False):
+    def __init__(self, parent, folder_name=None, unique_key_args=None, use_folder=True, is_producer=False):
         self.is_producer = is_producer
         if unique_key_args is None:
             unique_key_args = []
         self.position = None
         self.use_folder = use_folder
         self.parent = parent
-        self.site_settings = site_settings
         self.folder = None
         self.sites = []
         child_position = self._init_parent()
@@ -80,5 +79,5 @@ class TemplateNode(object):
     def gui_options(self):
         return []
 
-    async def add_producers(self, producers, session, queue, signal_handler):
+    async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         pass

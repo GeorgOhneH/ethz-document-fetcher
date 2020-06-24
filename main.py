@@ -11,7 +11,7 @@ import colorama
 
 from core import downloader, template_parser, monitor
 from core.utils import user_statistics, check_for_new_release
-from core.storage import cache
+from core.cancellable_pool import CancellablePool
 from settings.logger import LOGGER_CONFIG
 from settings.settings import SiteSettings
 from settings import global_settings
@@ -38,8 +38,9 @@ async def main(signals=None, site_settings=None):
         logger.debug(f"Loading template: {template_path}")
         queue = asyncio.Queue()
         producers = []
+        cancellable_pool = CancellablePool()
         template_file = os.path.join(os.path.dirname(__file__), template_path)
-        template = template_parser.Template(path=template_file, signals=signals, site_settings=site_settings)
+        template = template_parser.Template(path=template_file, signals=signals)
         try:
             template.load()
         except Exception as e:
@@ -48,7 +49,11 @@ async def main(signals=None, site_settings=None):
             logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
             return
 
-        await template.run_root(producers, session, queue)
+        await template.run_root(producers,
+                                session,
+                                queue,
+                                site_settings=site_settings,
+                                cancellable_pool=cancellable_pool)
 
         user_statistic = asyncio.ensure_future(user_statistics(session, site_settings.username))
 
@@ -74,6 +79,8 @@ async def main(signals=None, site_settings=None):
         logger.debug("Cancel consumers")
         for c in consumers:
             c.cancel()
+
+        cancellable_pool.shutdown()
 
         await user_statistic
 

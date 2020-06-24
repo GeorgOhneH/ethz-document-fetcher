@@ -1,8 +1,10 @@
 import copy
 import difflib
 import io
+import time
 
-import PyPDF3
+from core.constants import EMPTY_TWO_COLUMN_LEFT_PDF_PATH
+
 import fitz
 
 
@@ -58,9 +60,10 @@ class Box(object):
         return True
 
 
-def add_differ_highlight(new_path, old_path):
+def add_differ_highlight(new_path, old_path, out_path):
     with fitz.open(new_path) as doc_new:
         with fitz.open(old_path) as doc_old:
+
             boxes_new = get_all_boxes(doc_new)
             boxes_old = get_all_boxes(doc_old)
             get_num_sets(boxes_new, boxes_old)
@@ -70,28 +73,36 @@ def add_differ_highlight(new_path, old_path):
             make_annotations(doc_new, boxes_new, boxes_old)
             make_annotations(doc_old, boxes_old, boxes_new)
 
-            f_a = doc_new.write()
-            f_b = doc_old.write()
-            pdf_a = PyPDF3.PdfFileReader(io.BytesIO(f_a))
-            pdf_b = PyPDF3.PdfFileReader(io.BytesIO(f_b))
+            with open(EMPTY_TWO_COLUMN_LEFT_PDF_PATH, "rb") as f:
+                doc_preset = fitz.Document(stream=f.read(), filetype="pdf")
 
-    output_pdf = PyPDF3.PdfFileWriter()
-    for i in range(max(pdf_a.getNumPages(), pdf_b.getNumPages())):
-        try:
-            page_b = pdf_b.getPage(i)
-            output_pdf.addPage(page_b)
-        except IndexError:
-            output_pdf.addBlankPage()
+            for i in range(max(doc_new.pageCount, doc_old.pageCount)):
 
-        try:
-            page_a = pdf_a.getPage(i)
-            output_pdf.addPage(page_a)
-        except IndexError:
-            output_pdf.addBlankPage()
+                if i >= doc_old.pageCount:
+                    bound = doc_new[i].bound()
+                    doc_preset.newPage(width=bound.x1, height=bound.y1)
 
-    output_pdf.setPageLayout("/TwoColumnLeft")
-    with open(old_path, "wb") as f:
-        output_pdf.write(f)
+                else:
+                    doc_preset.insertPDF(doc_old,
+                                         from_page=i,
+                                         to_page=i,
+                                         annots=True)
+
+                if i >= doc_new.pageCount:
+                    bound = doc_old[i].bound()
+                    doc_preset.newPage(width=bound.x1, height=bound.y1)
+                else:
+                    doc_preset.insertPDF(doc_new,
+                                         from_page=i,
+                                         to_page=i,
+                                         annots=True)
+
+            doc_preset.save(out_path,
+                            garbage=4,
+                            clean=True,
+                            deflate=True,
+                            pretty=True,
+                            ascii=False)
 
 
 def get_all_boxes(doc):

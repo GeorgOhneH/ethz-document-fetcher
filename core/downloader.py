@@ -12,6 +12,7 @@ from colorama import Fore, Style
 from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
+from core.cancellable_pool import CancellablePool
 from core.utils import get_extension, fit_sections_to_console, split_name_extension
 from settings import global_settings
 
@@ -37,13 +38,11 @@ async def download_files(session: aiohttp.ClientSession, queue):
         queue.task_done()
 
 
-default_executor = ProcessPoolExecutor()
-
-
 async def download_if_not_exist(session,
                                 path,
                                 url,
                                 site_settings,
+                                cancellable_pool,
                                 with_extension=True,
                                 kwargs=None,
                                 allowed_extensions=None,
@@ -89,13 +88,13 @@ async def download_if_not_exist(session,
     if os.path.exists(absolute_path) and not force:
         return
 
-    if os.path.exists(absolute_path):
-        headers = kwargs.get("headers", {})
-        etag = cache.get_etag(absolute_path)
-        if etag is not None:
-            headers["If-None-Match"] = etag
-        if headers:
-            kwargs["headers"] = headers
+    # if os.path.exists(absolute_path):
+    #     headers = kwargs.get("headers", {})
+    #     etag = cache.get_etag(absolute_path)
+    #     if etag is not None:
+    #         headers["If-None-Match"] = etag
+    #     if headers:
+    #         kwargs["headers"] = headers
 
     if os.path.exists(absolute_path):
         action = ACTION_REPLACE
@@ -111,6 +110,7 @@ async def download_if_not_exist(session,
 
     async with session.get(url, timeout=timeout, **kwargs) as response:
         response.raise_for_status()
+        response_headers = response.headers
 
         if response.status == 304:
             logger.debug(f"File '{absolute_path}' not modified")
@@ -140,20 +140,36 @@ async def download_if_not_exist(session,
             logger.debug(f"Removed file {absolute_path}")
             raise e
 
-        if "ETag" in response.headers:
-            cache.save_etag(absolute_path, response.headers["ETag"], site_settings)
-        elif domain not in FORCE_DOWNLOAD_BLACKLIST:
-            logger.warning(f"url: {url} had not an etag and is not in the blacklist")
-
-    cache.save_checksum(absolute_path, checksum)
-
     if action == ACTION_REPLACE and site_settings.keep_replaced_files and file_extension.lower() == "pdf":
         logger.debug("Adding highlights")
-        await loop.run_in_executor(default_executor,
-                                   functools.partial(pdf_highlighter.add_differ_highlight,
-                                                     new_path=absolute_path,
-                                                     old_path=old_absolute_path)
-                                   )
+
+        temp_file_name = f"{pure_name}-temp.{extension}"
+        temp_absolute_path = os.path.join(dir_path, temp_file_name)
+
+        future = cancellable_pool.apply(
+            functools.partial(pdf_highlighter.add_differ_highlight,
+                              new_path=absolute_path,
+                              old_path=old_absolute_path,
+                              out_path=temp_absolute_path)
+        )
+        try:
+            await future
+            os.replace(temp_absolute_path, old_absolute_path)
+        except asyncio.CancelledError as e:
+            os.replace(old_absolute_path, absolute_path)
+            logger.debug(f"Reverted old file {absolute_path}")
+            raise e
+        finally:
+            if os.path.exists(temp_absolute_path):
+                logger.debug(f"Removed temp file {temp_absolute_path}")
+                os.remove(temp_absolute_path)
+
+    if "ETag" in response_headers:
+        cache.save_etag(absolute_path, response.headers["ETag"])
+    elif domain not in FORCE_DOWNLOAD_BLACKLIST:
+        logger.warning(f"url: {url} had not an etag and is not in the blacklist")
+
+    cache.save_checksum(absolute_path, checksum)
 
     if action == ACTION_REPLACE:
         if site_settings.keep_replaced_files:
@@ -182,4 +198,3 @@ async def download_if_not_exist(session,
     }
 
     logger.info(fit_sections_to_console(start, end, margin=-8))
-

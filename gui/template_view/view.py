@@ -97,9 +97,9 @@ class StackedWidgetView(QStackedWidget):
 
 
 class TemplateView(QWidget):
-    def __init__(self, signals, controller, parent=None):
+    def __init__(self, template_path, signals, controller, parent=None):
         super().__init__(parent=parent)
-        self.template_view_tree = TemplateViewTree(signals, controller, self)
+        self.template_view_tree = TemplateViewTree(template_path, signals, controller, self)
 
         self.layout = QVBoxLayout()
 
@@ -115,3 +115,6 @@ class TemplateView(QWidget):
         self.layout.addWidget(self.state_widget.button_widget)
 
         self.setLayout(self.layout)
+
+    def disconnect_connections(self):
+        self.template_view_tree.disconnect_connections()

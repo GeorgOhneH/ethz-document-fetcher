@@ -58,7 +58,7 @@ class CentralWidget(QWidget):
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
-        self.template_view = TemplateView(self.worker.signals, self, self)
+        self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
 
         self.grid.addWidget(self.btn_run, 0, 0)
         self.grid.addWidget(self.btn_stop, 0, 1)
@@ -126,7 +126,8 @@ class CentralWidget(QWidget):
             return
         self.template_path_settings.save()
 
-        new_template_view = TemplateView(self.worker.signals, self, self)
+        self.template_view.disconnect_connections()
+        new_template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
         self.grid.replaceWidget(self.template_view, new_template_view)
         self.template_view = new_template_view
 

@@ -9,8 +9,8 @@ from gui.constants import ASSETS_PATH
 class Folder(TemplateNode):
     FOLDER_ICON_PATH = os.path.join(ASSETS_PATH, "folder.svg")
 
-    def __init__(self, name, parent, site_settings):
-        super().__init__(parent=parent, site_settings=site_settings, folder_name=name, unique_key_args=[name])
+    def __init__(self, name, parent):
+        super().__init__(parent=parent, folder_name=name, unique_key_args=[name])
         self.name = name
 
     def __str__(self):

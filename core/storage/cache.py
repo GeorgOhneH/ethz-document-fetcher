@@ -126,7 +126,7 @@ def get_etag(path):
     return meta_data.get("etag", None)
 
 
-def save_etag(path, etag, site_settings):
+def save_etag(path, etag):
     etag = etag.replace("-gzip", "")
     meta_data = get_file_meta_data(path)
     if "etag" in meta_data:

@@ -10,6 +10,7 @@ import certifi
 from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
+from core.cancellable_pool import CancellablePool
 from core.utils import user_statistics
 
 logger = logging.getLogger(__name__)
@@ -81,9 +82,8 @@ class Worker(QObject):
                 logger.debug(f"Loading template: {self.template_path}")
                 queue = asyncio.Queue()
                 producers = []
-                template_file = self.template_path
-                template = template_parser.Template(path=template_file,
-                                                    site_settings=self.site_settings,
+                cancellable_pool = CancellablePool()
+                template = template_parser.Template(path=self.template_path,
                                                     signals=signals)
                 try:
                     template.load()
@@ -96,7 +96,13 @@ class Worker(QObject):
                 logger.debug("Starting consumers")
                 consumers = [asyncio.ensure_future(downloader.download_files(session, queue)) for _ in range(20)]
 
-                await template.run_from_unique_key(self.unique_key, producers, session, queue, self.recursive)
+                await template.run_from_unique_key(self.unique_key,
+                                                   producers=producers,
+                                                   session=session,
+                                                   queue=queue,
+                                                   site_settings=self.site_settings,
+                                                   cancellable_pool=cancellable_pool,
+                                                   recursive=self.recursive)
 
                 await user_statistics(session, self.site_settings.username)
 
@@ -126,3 +132,6 @@ class Worker(QObject):
                 while not queue.empty():
                     queue.get_nowait()
                     queue.task_done()
+
+                logger.debug("Shutting down worker pool")
+                cancellable_pool.shutdown()

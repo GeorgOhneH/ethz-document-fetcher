@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 class Site(TemplateNode):
     def __init__(self,
-                 site_settings,
                  raw_module_name,
                  use_folder,
                  raw_folder_name,
@@ -33,7 +32,6 @@ class Site(TemplateNode):
                  consumer_kwargs,
                  parent):
         super().__init__(parent=parent,
-                         site_settings=site_settings,
                          folder_name=raw_folder_name,
                          unique_key_args=[
                              raw_module_name,
@@ -160,7 +158,7 @@ class Site(TemplateNode):
 
         return result
 
-    async def add_producers(self, producers, session, queue, signal_handler):
+    async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         signal_handler.start(self.unique_key)
 
         if check_if_null(self.function_kwargs):
@@ -169,7 +167,7 @@ class Site(TemplateNode):
         site_module = importlib.import_module(self.module_name)
         producer_function = getattr(site_module, self.function_name)
 
-        await login_module(session, self.site_settings, site_module)
+        await login_module(session, site_settings, site_module)
 
         if self.base_path is None:
             folder_name = await self.get_folder_name(session, signal_handler)
@@ -180,13 +178,14 @@ class Site(TemplateNode):
         queue_wrapper = QueueWrapper(queue,
                                      signal_handler=signal_handler,
                                      unique_key=self.unique_key,
-                                     site_settings=self.site_settings,
+                                     site_settings=site_settings,
+                                     cancellable_pool=cancellable_pool,
                                      **self.consumer_kwargs)
 
         coroutine = self.exception_handler(producer_function, signal_handler)(session=session,
                                                                               queue=queue_wrapper,
                                                                               base_path=self.base_path,
-                                                                              site_settings=self.site_settings,
+                                                                              site_settings=site_settings,
                                                                               **self.function_kwargs)
         producers.append(asyncio.ensure_future(coroutine))
 

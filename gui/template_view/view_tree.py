@@ -20,6 +20,8 @@ class HeaderItem(QTreeWidgetItem):
         self.replaced_count = 0
         self.setText(TreeWidgetItem.COLUMN_NAME, "Name")
         self.setText(TreeWidgetItem.COLUMN_STATE, "State")
+        self.setTextAlignment(TreeWidgetItem.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
+        self.setTextAlignment(TreeWidgetItem.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.set_text_replaced()
         self.set_text_added()
 
@@ -39,7 +41,7 @@ class HeaderItem(QTreeWidgetItem):
 
 
 class TemplateViewTree(QTreeWidget):
-    def __init__(self, signals, controller, parent):
+    def __init__(self, template_path, signals, controller, parent):
         super().__init__(parent=parent)
         self.widgets = {}
         self.controller = controller
@@ -48,8 +50,7 @@ class TemplateViewTree(QTreeWidget):
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
-        self.template = template_parser.Template(path=controller.get_template_path(),
-                                                 site_settings=controller.site_settings)
+        self.template = template_parser.Template(path=template_path)
         try:
             self.template.load()
         except Exception as e:
@@ -61,31 +62,34 @@ class TemplateViewTree(QTreeWidget):
         self.init_view_tree()
         self.read_settings()
 
-        self.setup_connections(signals)
-        qApp.aboutToQuit.connect(self.save_state)
+        self.connection_map = [
+            (signals.stopped, self.stop_widgets),
+            (signals.finished, self.quit_widgets),
+            (signals.update_folder_name, self.update_folder_name),
+            (signals.update_base_path, self.update_base_path),
+            (signals.added_new_file[str, str], self.added_new_file),
+            (signals.replaced_file[str, str], self.replaced_file),
+            (signals.replaced_file[str, str, str], self.replaced_file),
+            (signals.site_started[str], self.site_started),
+            (signals.site_started[str, str], self.site_started),
+            (signals.site_finished_successful[str], self.site_finished_successful),
+            (signals.site_finished_successful[str, str], self.site_finished_successful),
+            (signals.site_quit_with_warning[str], self.site_quit_with_warning),
+            (signals.site_quit_with_warning[str, str], self.site_quit_with_warning),
+            (signals.site_quit_with_error[str], self.site_quit_with_error),
+            (signals.site_quit_with_error[str, str], self.site_quit_with_error),
+            (qApp.aboutToQuit, self.save_state),
+        ]
 
-    def setup_connections(self, signals):
-        signals.stopped.connect(self.stop_widgets)
-        signals.finished.connect(self.quit_widgets)
+        self.setup_connections()
 
-        signals.update_folder_name.connect(self.update_folder_name)
-        signals.update_base_path.connect(self.update_base_path)
+    def setup_connections(self):
+        for signal, func in self.connection_map:
+            signal.connect(func)
 
-        signals.added_new_file[str, str].connect(self.added_new_file)
-        signals.replaced_file[str, str].connect(self.replaced_file)
-        signals.replaced_file[str, str, str].connect(self.replaced_file)
-
-        signals.site_started[str].connect(self.site_started)
-        signals.site_started[str, str].connect(self.site_started)
-
-        signals.site_finished_successful[str].connect(self.site_finished_successful)
-        signals.site_finished_successful[str, str].connect(self.site_finished_successful)
-
-        signals.site_quit_with_warning[str].connect(self.site_quit_with_warning)
-        signals.site_quit_with_warning[str, str].connect(self.site_quit_with_warning)
-
-        signals.site_quit_with_error[str].connect(self.site_quit_with_error)
-        signals.site_quit_with_error[str, str].connect(self.site_quit_with_error)
+    def disconnect_connections(self):
+        for signal, func in self.connection_map:
+            signal.disconnect(func)
 
     def save_state(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")

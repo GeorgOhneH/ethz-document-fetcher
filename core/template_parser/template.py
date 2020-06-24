@@ -13,11 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class Template(object):
-    def __init__(self, path, site_settings, signals=None):
+    def __init__(self, path, signals=None):
         self.path = path
-        self.site_settings = site_settings
         self.signal_handler = SignalHandler(signals=signals)
-        self.root = Root(site_settings=site_settings)
+        self.root = Root()
         self.data = None
         self.nodes = {}
 
@@ -61,8 +60,7 @@ class Template(object):
             raise ParseTemplateError("Expected a 'name' field in folder")
 
         folder = Folder(name=data["name"],
-                        parent=parent,
-                        site_settings=self.site_settings)
+                        parent=parent)
 
         if "sites" in data:
             self.parse_sites(data=data["sites"], parent=folder)
@@ -105,8 +103,7 @@ class Template(object):
             raw_folder_function=raw_folder_function,
             function_kwargs=p_kwargs,
             consumer_kwargs=consumer_kwargs,
-            parent=parent,
-            site_settings=self.site_settings
+            parent=parent
         )
 
         if sub_sites is not None:
@@ -114,22 +111,32 @@ class Template(object):
         if folder is not None:
             self.parse_folder(data=folder, parent=site)
 
-    async def run_root(self, producers, session, queue):
-        await self.run(self.root, producers=producers, session=session, queue=queue)
+    async def run_root(self, producers, session, queue, site_settings, cancellable_pool):
+        await self.run(self.root,
+                       producers=producers,
+                       session=session,
+                       queue=queue,
+                       site_settings=site_settings,
+                       cancellable_pool=cancellable_pool)
 
-    async def run_from_unique_key(self, unique_key, producers, session, queue, recursive):
+    async def run_from_unique_key(self, unique_key, producers, session, queue,
+                                  site_settings, cancellable_pool, recursive):
         await self.run(node=self.nodes[unique_key],
                        producers=producers,
                        session=session,
                        queue=queue,
+                       site_settings=site_settings,
+                       cancellable_pool=cancellable_pool,
                        recursive=recursive)
 
-    async def run(self, node, producers, session, queue, recursive=True):
+    async def run(self, node, producers, session, queue, site_settings, cancellable_pool, recursive=True):
         tasks = []
 
         coroutine = self.add_producer_exception_handler(node.add_producers, node)(producers,
                                                                                   session,
                                                                                   queue,
+                                                                                  site_settings,
+                                                                                  cancellable_pool,
                                                                                   self.signal_handler)
         if node.base_path is None:
             await coroutine
@@ -138,9 +145,9 @@ class Template(object):
 
         if recursive and node.base_path is not None:
             if node.folder is not None:
-                tasks.append(self.run(node.folder, producers, session, queue))
+                tasks.append(self.run(node.folder, producers, session, queue, site_settings, cancellable_pool))
             for site in node.sites:
-                tasks.append(self.run(site, producers, session, queue))
+                tasks.append(self.run(site, producers, session, queue, site_settings, cancellable_pool))
         await asyncio.gather(*tasks)
 
     def add_producer_exception_handler(self, coroutine, node):

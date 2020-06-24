@@ -3,6 +3,6 @@ test.py
 test2.py
 __pycache__/
 cache/
-settings.config
+config/
 run.bat
 template.yml
