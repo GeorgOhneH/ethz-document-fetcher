@@ -8,7 +8,6 @@ class CancellablePool(object):
         if max_workers is None:
             max_workers = multiprocessing.cpu_count()
         self.max_workers = max_workers
-        self.is_shutdown = False
         self._free = set()
         self._working = set()
         self._change = asyncio.Event()
@@ -34,11 +33,21 @@ class CancellablePool(object):
         loop = asyncio.get_event_loop()
         fut = loop.create_future()
 
+        def save_fut_set_result(future, obj):
+            if future.cancelled():
+                return
+            future.set_result(obj)
+
+        def save_fut_set_exception(future, err):
+            if future.cancelled():
+                return
+            future.set_exception(err)
+
         def _on_done(obj):
-            loop.call_soon_threadsafe(partial(self.save_fut_set_result, fut=fut, obj=obj))
+            loop.call_soon_threadsafe(partial(save_fut_set_result, future=fut, obj=obj))
 
         def _on_err(err):
-            loop.call_soon_threadsafe(partial(self.save_fut_set_result, fut=fut, err=err))
+            loop.call_soon_threadsafe(partial(save_fut_set_exception, future=fut, err=err))
 
         pool.apply_async(fn, args, callback=_on_done, error_callback=_on_err)
 
@@ -53,18 +62,7 @@ class CancellablePool(object):
             self._working.remove(pool)
             raise e
 
-    def save_fut_set_result(self, fut, obj):
-        if self.is_shutdown:
-            return
-        fut.set_result(obj)
-
-    def save_fut_set_exception(self, fut, err):
-        if self.is_shutdown:
-            return
-        fut.set_exception(err)
-
     def shutdown(self):
-        self.is_shutdown = True
         for p in self._working | self._free:
             p.terminate()
         self._free.clear()

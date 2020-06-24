@@ -182,22 +182,26 @@ class TemplateViewTree(QTreeWidget):
         menu = QMenu(self)
 
         run_action_recursive = menu.addAction("Run recursive")
-        run_action_recursive.setEnabled(not self.controller.thread.isRunning())
+        run_action_recursive.setEnabled(not self.controller.thread.isRunning() and
+                                        widget.template_node.base_path is not None)
         if self.controller.thread.isRunning():
-            self.controller.thread.finished.connect(lambda: run_action_recursive.setEnabled(True))
+            self.controller.thread.finished.connect(lambda template_node=widget.template_node:
+                                                    run_action_recursive.setEnabled(template_node.base_path is not None))
         run_action_recursive.triggered.connect(
             lambda: self.controller.start_thread(widget.template_node.unique_key, True))
 
         run_action = menu.addAction("Run")
-        run_action.setEnabled(not self.controller.thread.isRunning())
+        run_action.setEnabled(not self.controller.thread.isRunning()
+                              and widget.template_node.base_path is not None)
         if self.controller.thread.isRunning():
-            self.controller.thread.finished.connect(lambda: run_action.setEnabled(True))
+            self.controller.thread.finished.connect(lambda template_node=widget.template_node:
+                                                    run_action_recursive.setEnabled(template_node.base_path is not None))
         run_action.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, False))
 
         menu.addSeparator()
 
         open_folder_action = menu.addAction("Open Folder")
-        if widget.template_node.base_path is not None:
+        if widget.template_node.base_path is not None and self.controller.site_settings.base_path is not None:
             base_path = os.path.join(self.controller.site_settings.base_path, widget.template_node.base_path)
             if not os.path.exists(base_path):
                 open_folder_action.setEnabled(False)

@@ -24,7 +24,7 @@ class FolderInfoView(QTreeView, InfoView):
         qApp.aboutToQuit.connect(self.save_state)
 
     def change_root(self, path):
-        if not os.path.exists(path):
+        if path is None or not os.path.exists(path):
             index = self.model.setRootPath(EMPTY_FOLDER_PATH)
         else:
             index = self.model.setRootPath(path)
@@ -32,9 +32,11 @@ class FolderInfoView(QTreeView, InfoView):
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path
-        if path is not None:
+        if path is not None and self.controller.site_settings.base_path is not None:
             absolute_path = os.path.join(self.controller.site_settings.base_path, path)
             self.change_root(absolute_path)
+        else:
+            self.change_root(None)
 
     def open_file_with_index(self, index):
         if not index.isValid():

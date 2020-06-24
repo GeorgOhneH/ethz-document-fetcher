@@ -1,0 +1,6 @@
+folder:
+  name: Minimal Example
+  sites:
+  - module: polybox
+    id: YrFA3IT7FhemOAs
+    folder_name: Polybox Folder

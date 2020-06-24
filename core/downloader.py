@@ -4,7 +4,6 @@ import pathlib
 import os
 from urllib.parse import urlparse
 import functools
-from concurrent.futures import ProcessPoolExecutor
 
 import aiohttp
 from colorama import Fore, Style
@@ -12,7 +11,6 @@ from colorama import Fore, Style
 from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
-from core.cancellable_pool import CancellablePool
 from core.utils import get_extension, fit_sections_to_console, split_name_extension
 from settings import global_settings
 
@@ -88,13 +86,13 @@ async def download_if_not_exist(session,
     if os.path.exists(absolute_path) and not force:
         return
 
-    # if os.path.exists(absolute_path):
-    #     headers = kwargs.get("headers", {})
-    #     etag = cache.get_etag(absolute_path)
-    #     if etag is not None:
-    #         headers["If-None-Match"] = etag
-    #     if headers:
-    #         kwargs["headers"] = headers
+    if os.path.exists(absolute_path):
+        headers = kwargs.get("headers", {})
+        etag = cache.get_etag(absolute_path)
+        if etag is not None:
+            headers["If-None-Match"] = etag
+        if headers:
+            kwargs["headers"] = headers
 
     if os.path.exists(absolute_path):
         action = ACTION_REPLACE

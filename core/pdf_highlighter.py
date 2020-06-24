@@ -61,8 +61,8 @@ class Box(object):
 
 
 def add_differ_highlight(new_path, old_path, out_path):
-    with fitz.open(new_path) as doc_new:
-        with fitz.open(old_path) as doc_old:
+    with fitz.open(new_path, filetype="pdf") as doc_new:
+        with fitz.open(old_path, filetype="pdf") as doc_old:
 
             boxes_new = get_all_boxes(doc_new)
             boxes_old = get_all_boxes(doc_old)

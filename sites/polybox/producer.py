@@ -88,7 +88,11 @@ async def producer(session, queue, base_path, site_settings, id, password=None):
                 continue
 
             path = PurePath(unquote(href))
-            path = safe_path_join(*path.parts[3:])
+            path = safe_path_join("", *path.parts[3:])
+
+            if not path:
+                raise ValueError("Can not download single file")
+
             absolute_path = os.path.join(base_path, path)
 
             files = os.path.basename(href)

@@ -159,6 +159,8 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
 
     def load_from_cache(self, name):
+        if self.controller.site_settings.base_path is None:
+            return []
         path_name = self.controller.site_settings.base_path.replace("\\", "").replace("/", "").replace(":", "").replace(".", "")
         json = cache.get_json(name+path_name)
         if self.template_node.unique_key not in json:
