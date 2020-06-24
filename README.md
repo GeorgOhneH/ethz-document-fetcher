@@ -1,4 +1,4 @@
-# ethz-document-fetcher
+# ethz-document-fetcher [WIP]
 ethz-document-fetcher is a script/program which fetches all files from ethz websites like
  moodle, ilias, polybox and others.
  
