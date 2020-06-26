@@ -51,16 +51,21 @@ class CancellablePool(object):
 
         pool.apply_async(fn, args, callback=_on_done, error_callback=_on_err)
 
+        cancel = False
         try:
-            result = await fut
-            self._working.remove(pool)
-            self._free.add(usable_pool)
-            self._change.set()
-            return result
+            return await fut
         except asyncio.CancelledError as e:
-            pool.terminate()
-            self._working.remove(pool)
+            cancel = True
             raise e
+        finally:
+            if cancel:
+                pool.terminate()
+                self._working.remove(pool)
+                self._change.set()
+            else:
+                self._working.remove(pool)
+                self._free.add(usable_pool)
+                self._change.set()
 
     def shutdown(self):
         for p in self._working | self._free:
