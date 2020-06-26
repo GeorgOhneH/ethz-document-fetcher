@@ -1,9 +1,6 @@
 folder:
   name: semester2
   sites:
-  - module: custom
-    function: FS2020.analysis.parse_main_page
-    use_folder: false
   - module: moodle # NuS2
     id: 11838
     sites:
@@ -23,6 +20,9 @@ folder:
   - module: moodle # Analysis2
     id: 12611
     sites:
+    - module: custom
+      function: FS2020.analysis.parse_main_page
+      use_folder: false
     - module: ilias
       id: 187834
       folder_name: Notizen

@@ -7,6 +7,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view import TemplateView
+from gui.template_edit import TemplateEditDialog
 from gui.worker import Worker
 from gui.settings import SettingsDialog
 from gui.constants import ROOT_PATH
@@ -67,6 +68,7 @@ class CentralWidget(QWidget):
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
+        self.template_edit_dialog = TemplateEditDialog(parent=self, template_path=self.get_template_path())
         self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
 
         self.grid.addWidget(self.button_container)
@@ -114,7 +116,7 @@ class CentralWidget(QWidget):
         self.settings_dialog.open()
 
     def open_edit(self):
-        pass
+        self.template_edit_dialog.open()
 
     def open_file(self, checked=None, file_path=None):
         if file_path is None:

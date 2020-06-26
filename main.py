@@ -13,7 +13,7 @@ from core import downloader, template_parser, monitor
 from core.utils import user_statistics, check_for_new_release
 from core.cancellable_pool import CancellablePool
 from settings.logger import LOGGER_CONFIG
-from settings.settings import SiteSettings
+from settings.settings import SiteSettings, TemplatePathSettings
 from settings import global_settings
 
 colorama.init()
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 async def main(signals=None, site_settings=None):
-    template_path = "template.yml"
+    template_path = TemplatePathSettings().template_path
     if site_settings is None:
         site_settings = SiteSettings()
     if not site_settings.check_if_valid():

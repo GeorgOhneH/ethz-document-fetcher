@@ -22,9 +22,9 @@ class TemplateNode(object):
         self.parent = parent
         self.folder = None
         self.sites = []
-        child_position = self._init_parent()
+        self.child_index = self._init_parent()
 
-        self.unique_key = self._init_unique_key(child_position, *unique_key_args)
+        self.unique_key = self._init_unique_key(self.child_index, *unique_key_args)
         self.base_path = self._init_base_path(folder_name, use_folder)
 
     def __str__(self):
@@ -63,10 +63,10 @@ class TemplateNode(object):
 
         return safe_path_join(self.parent.base_path, folder_name)
 
-    def _init_unique_key(self, child_position, *args):
+    def _init_unique_key(self, child_index, *args):
         if self.parent.position is None:
             raise ValueError("parents position must be set")
-        self.position = self.parent.position + child_position
+        self.position = self.parent.position + child_index
         unique_string = self.position + "".join([f"{value}" for value in args])
         return hashlib.md5(unique_string.encode('utf-8')).hexdigest()
 
