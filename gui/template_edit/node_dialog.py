@@ -11,15 +11,14 @@ from settings import global_settings
 logger = logging.getLogger(__name__)
 
 
-class SettingsDialog(ConfigsDialog):
-    def __init__(self, parent, site_settings):
+class NodeDialog(ConfigsDialog):
+    def __init__(self, parent, node_configs):
         super(QDialog, self).__init__(parent=parent)
         settings_areas = [
-            SettingScrollArea(site_settings, parent=self),
-            SettingScrollArea(global_settings, save_changes=False, parent=self),
+            ConfigsScrollArea(node_configs, parent=self),
         ]
         super().__init__(*settings_areas, parent=parent)
-        self.setWindowTitle("Settings")
+        self.setWindowTitle("WDW")
 
 
 class SettingScrollArea(ConfigsScrollArea):
@@ -28,14 +27,3 @@ class SettingScrollArea(ConfigsScrollArea):
         self.save_changes = save_changes
         self.required.setTitle("General" + (" (Requires Restart)" if not save_changes else ""))
         self.optional.setTitle("Optional" + (" (Requires Restart)" if not save_changes else ""))
-
-    def update_widgets(self):
-        if not self.save_changes:
-            return
-        super(SettingScrollArea, self).update_widgets()
-
-    def apply_value(self):
-        if not self.save_changes:
-            return
-        super(SettingScrollArea, self).apply_value()
-        self.configs.save()

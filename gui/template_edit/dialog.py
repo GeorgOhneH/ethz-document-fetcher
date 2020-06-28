@@ -16,7 +16,7 @@ class TemplateEditDialog(QDialog):
         super().__init__(parent=parent)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setModal(True)
-        self.setWindowTitle("Settings")
+        self.setWindowTitle("Edit")
         self.finished.connect(self.save_geometry)
 
         self.layout = QHBoxLayout()

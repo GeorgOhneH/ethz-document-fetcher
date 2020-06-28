@@ -2,7 +2,7 @@ import getpass
 import os
 import platform
 
-import settings.values as setting_values
+import settings.config_objs as setting_values
 from settings import settings
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))

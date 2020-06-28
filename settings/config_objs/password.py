@@ -5,7 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.values.string import ConfigString, LineEdit
+from settings.config_objs.string import ConfigString, LineEdit
 
 logger = logging.getLogger(__name__)
 

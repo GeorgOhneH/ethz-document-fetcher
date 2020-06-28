@@ -130,6 +130,9 @@ class Template(object):
                        recursive=recursive)
 
     async def run(self, node, producers, session, queue, site_settings, cancellable_pool, recursive=True):
+        if node.parent is not None and node.parent.base_path is None:
+            return
+
         tasks = []
 
         coroutine = self.add_producer_exception_handler(node.add_producers, node)(producers,

@@ -5,12 +5,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.values.string import ConfigString
+from settings.config_objs.string import ConfigString, AbstractConfigWidget
 
 logger = logging.getLogger(__name__)
 
 
-class ComboBox(QWidget):
+class ComboBox(QWidget, AbstractConfigWidget):
     PLACE_HOLDER_TEXT = "------"
 
     def __init__(self, config_obj):

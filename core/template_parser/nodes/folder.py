@@ -2,8 +2,20 @@ import os
 
 from PyQt5.QtGui import *
 
-from core.template_parser.nodes.base import TemplateNode
+from core.template_parser.nodes.base import TemplateNode, NodeConfigs
 from gui.constants import ASSETS_PATH
+from settings.config import Configs
+
+from settings.config_objs import ConfigString
+
+
+class FolderConfigs(NodeConfigs):
+    name = ConfigString()
+
+    def get_name(self):
+        if self.name is not None:
+            return self.name
+        return "+ Add Folder"
 
 
 class Folder(TemplateNode):
@@ -29,3 +41,8 @@ class Folder(TemplateNode):
         return [
             ("name", self.name),
         ]
+
+    def get_configs(self):
+        folder_configs = FolderConfigs()
+        folder_configs.name = self.name
+        return folder_configs

@@ -8,6 +8,12 @@ from PyQt5.QtWidgets import *
 from core.storage import cache
 from core.utils import safe_path_join
 from gui.constants import ASSETS_PATH
+from settings.config import Configs
+
+
+class NodeConfigs(Configs):
+    def get_name(self):
+        raise NotImplementedError
 
 
 class TemplateNode(object):
@@ -78,6 +84,9 @@ class TemplateNode(object):
 
     def gui_options(self):
         return []
+
+    def get_configs(self):
+        return EmptyConfigs()
 
     async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         pass

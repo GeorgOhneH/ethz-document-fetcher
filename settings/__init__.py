@@ -1,7 +1,7 @@
 import atexit
 
 from settings.settings import GlobalSettings
-from settings.values import ConfigPath
+from settings.config_objs import ConfigPath
 from settings import utils
 
 global_settings = GlobalSettings()

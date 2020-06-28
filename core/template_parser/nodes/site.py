@@ -6,19 +6,68 @@ import os
 import time
 import logging
 import asyncio
+from functools import partial
 
 from PyQt5.QtGui import *
 
 from core.storage import cache
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
-from core.template_parser.nodes.base import TemplateNode
+from core.template_parser.nodes.base import TemplateNode, NodeConfigs
 from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
+from settings.config_objs import ConfigString, ConfigBool, ConfigOptions
 from settings import global_settings
 
 logger = logging.getLogger(__name__)
+
+
+def raw_folder_name_active(instance: NodeConfigs):
+    try:
+        use_folder = instance.get_config_obj("use_folder").get_from_widget()
+        folder_function = instance.get_config_obj("raw_folder_function").get_from_widget()
+        return use_folder and folder_function is None
+    except ValueError:
+        return False
+
+
+def raw_function_active(instance):
+    try:
+        return instance.get_config_obj("raw_module_name").get_from_widget() == "custom"
+    except ValueError:
+        return False
+
+
+def folder_function_active(instance):
+    try:
+        raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
+        use_folder = instance.get_config_obj("use_folder").get_from_widget()
+        raw_folder_name = instance.get_config_obj("raw_folder_name").get_from_widget()
+        return raw_module_name == "custom" and use_folder and raw_folder_name is None
+    except ValueError:
+        return False
+
+
+class SiteConfigs(NodeConfigs):
+    raw_module_name = ConfigOptions(optional=False, options=["moodle",
+                                                             "nethz",
+                                                             "custom",
+                                                             "video_portal",
+                                                             "ilias",
+                                                             "polybox"])
+    use_folder = ConfigBool(default=True)
+    raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active)
+    raw_function = ConfigString(active_func=raw_function_active)
+    raw_folder_function = ConfigString(active_func=folder_function_active)
+
+    def get_name(self):
+        if self.raw_module_name is not None:
+            return self.raw_module_name
+        return "+ Add Site"
+
+    def raw_folder_name_active(self):
+        return self.use_folder
 
 
 class Site(TemplateNode):
@@ -157,6 +206,15 @@ class Site(TemplateNode):
             result.append((key, value))
 
         return result
+
+    def get_configs(self):
+        site_configs = SiteConfigs()
+        site_configs.raw_module_name = self.raw_module_name
+        site_configs.use_folder = self.use_folder
+        site_configs.raw_folder_name = self.raw_folder_name
+        site_configs.raw_function = self.raw_function
+        site_configs.raw_folder_function = self.raw_folder_function
+        return site_configs
 
     async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         signal_handler.start(self.unique_key)

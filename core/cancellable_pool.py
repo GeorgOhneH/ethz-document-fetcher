@@ -61,11 +61,10 @@ class CancellablePool(object):
             if cancel:
                 pool.terminate()
                 self._working.remove(pool)
-                self._change.set()
             else:
                 self._working.remove(pool)
                 self._free.add(usable_pool)
-                self._change.set()
+            self._change.set()
 
     def shutdown(self):
         for p in self._working | self._free:

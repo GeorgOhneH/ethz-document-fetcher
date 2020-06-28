@@ -13,7 +13,7 @@ from gui.settings import SettingsDialog
 from gui.constants import ROOT_PATH
 from gui.utils import format_bytes
 from settings.settings import SiteSettings, TemplatePathSettings
-from settings.values.path import open_file_picker
+from settings.config_objs.path import open_file_picker
 
 logger = logging.getLogger(__name__)
 
@@ -120,10 +120,10 @@ class CentralWidget(QWidget):
 
     def open_file(self, checked=None, file_path=None):
         if file_path is None:
-            config_value = self.template_path_settings.get_value("template_path")
+            config_obj = self.template_path_settings.get_config_obj("template_path")
             current_template_path = self.get_template_path()
-            file_path = open_file_picker(config_value.only_folder,
-                                         config_value.file_extensions,
+            file_path = open_file_picker(config_obj.only_folder,
+                                         config_obj.file_extensions,
                                          os.path.dirname(current_template_path))
         if file_path is None:
             return

@@ -5,12 +5,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.values.string import ConfigString
+from settings.config_objs.string import ConfigString, AbstractConfigWidget
 
 logger = logging.getLogger(__name__)
 
 
-class CheckBox(QCheckBox):
+class CheckBox(QCheckBox, AbstractConfigWidget):
     def __init__(self, config_obj):
         super().__init__(config_obj.name)
         self.config_obj = config_obj

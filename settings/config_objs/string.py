@@ -7,12 +7,23 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.values.constants import NotSet
+from settings.config_objs.constants import NotSet
 
 logger = logging.getLogger(__name__)
 
 
-class LineEdit(QWidget):
+class AbstractConfigWidget:
+    def get_value(self):
+        raise NotImplementedError()
+
+    def set_value(self, value):
+        raise NotImplementedError()
+
+    def update_widget(self):
+        pass
+
+
+class LineEdit(QWidget, AbstractConfigWidget):
     def __init__(self, config_obj):
         super().__init__()
         self.config_obj = config_obj
@@ -39,28 +50,84 @@ class LineEdit(QWidget):
             self.line_edit.setText(str(value))
 
 
+class WidgetWrapper(QWidget):
+    data_changed_signal = pyqtSignal()
+
+    def __init__(self, config_widget, hint_text=None, parent=None):
+        super().__init__(parent=parent)
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
+        self.setLayout(self.layout)
+
+        self.config_widget = config_widget
+        self.config_widget.data_changed_signal.connect(self.data_changed_emit)
+        self.layout.addWidget(self.config_widget)
+
+        if hint_text is not None:
+            hint = QLabel()
+            hint.setText(hint_text)
+            hint.setStyleSheet("QLabel { color : gray; }")
+            self.layout.addWidget(hint)
+
+        self.error_label = QLabel()
+        self.error_label.setStyleSheet("QLabel { color : red; }")
+        if not self.set_error_msg():
+            self.error_label.hide()
+        self.layout.addWidget(self.error_label)
+
+    def get_value(self):
+        return self.config_widget.get_value()
+
+    def set_value(self, value):
+        self.config_widget.set_value(value)
+
+    def set_error_msg(self):
+        value = self.config_widget.get_value()
+        if self.config_widget.config_obj.is_valid(value):
+            return False
+        msg = self.config_widget.config_obj.msg
+        self.error_label.setText(msg)
+        return True
+
+    def update_widget(self):
+        if self.set_error_msg():
+            self.error_label.show()
+        else:
+            self.error_label.hide()
+
+    def data_changed_emit(self, *args, **kwargs):
+        self.data_changed_signal.emit()
+
+
 class ConfigString(object):
-    def __init__(self, default=None, active_func=lambda: True, depends_on=None, optional=False, gui_name=None):
+    def __init__(self,
+                 default=None,
+                 active_func=lambda instance: True,
+                 depends_on=None,
+                 optional=False,
+                 gui_name=None,
+                 hint_text=None):
         if depends_on is None:
             depends_on = []
         self.depends_on = depends_on
         self.default = default
         self.gui_name = gui_name
+        self.hint_text = hint_text
         self._value = None
         self.active_func = active_func
         self.name = None  # will be set on runtime
+        self.instance = None  # will be set on runtime
         self.optional = optional
         self.msg = ""
         self._buffer = None
         self.widget = None
         self.observers = []
-        self.last_value = NotSet
-        self.last_result = NotSet
         self._set(default)
 
     def get_widget(self):
         if self.widget is None:
-            self.widget = self.init_widget()
+            self.widget = WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
         return self.widget
 
     def init_widget(self):
@@ -72,6 +139,11 @@ class ConfigString(object):
     def _get(self):
         return self._value
 
+    def get_from_widget(self):
+        if self.widget is None:
+            raise ValueError("Widget not active")
+        return self.widget.get_value()
+
     def get_gui_name(self):
         if self.gui_name is not None:
             return self.gui_name
@@ -79,7 +151,7 @@ class ConfigString(object):
 
     def set(self, value):
         if not self.is_valid(value):
-            raise ValueError("Can not set invalid value")
+            raise ValueError(f"Can not set invalid value. msg: {self.msg}")
         self._set(value)
 
     def _set(self, value):
@@ -128,7 +200,7 @@ class ConfigString(object):
     def is_active(self, value=NotSet):
         if value is NotSet:
             value = self._value
-        return self.active_func() and all([x.is_set(value) for x in self.depends_on])
+        return self.active_func(self.instance) and all([x.is_set(value) for x in self.depends_on])
 
     def is_set(self, value=NotSet):
         if value is NotSet:
@@ -141,12 +213,7 @@ class ConfigString(object):
         if value is NotSet:
             value = self._value
 
-        if self.last_value is not NotSet:
-            if self.last_value == value:
-                return self.last_result
         result = self._is_valid(value)
-        self.last_value = value
-        self.last_result = result
         return result
 
     def _is_valid(self, value):
@@ -171,8 +238,24 @@ class ConfigString(object):
     def get_user_prompt(self):
         return f"Please enter the value for {self.name}{self._middle_prompt()}{self._get_current()}: "
 
-    def update_widget(self):
+    def reset_widget(self):
+        if self.widget is None:
+            return
         self.widget.set_value(self.get())
+
+    def update_widget(self):
+        if self.widget is None:
+            return
+        self.widget.update_widget()
+
+
+    def update_visibility(self):
+        if self.widget is None:
+            return
+        if self.is_active():
+            self.widget.show()
+        else:
+            self.widget.hide()
 
     def __deepcopy__(self, memo):
         cls = self.__class__
