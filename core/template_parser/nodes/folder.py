@@ -10,12 +10,16 @@ from settings.config_objs import ConfigString
 
 
 class FolderConfigs(NodeConfigs):
+    TITLE_NAME = "Folder"
     name = ConfigString()
 
     def get_name(self):
         if self.name is not None:
             return self.name
         return "+ Add Folder"
+
+    def get_icon(self):
+        return QIcon(Folder.FOLDER_ICON_PATH)
 
 
 class Folder(TemplateNode):

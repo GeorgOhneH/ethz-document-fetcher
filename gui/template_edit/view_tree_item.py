@@ -20,12 +20,17 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         super().__init__()
         self.node_configs = node_configs
         self.dialog = NodeDialog(node_configs=node_configs, parent=None)
+        self.dialog.accepted.connect(self.update)
 
     def init_widgets(self):
         if self.childCount() > 2:
             self.setExpanded(True)
-        self.setText(0, self.node_configs.get_name())
+        self.update()
 
     def open_dialog(self):
-        self.dialog.open()
+        self.dialog.show()
+
+    def update(self):
+        self.setText(0, self.node_configs.get_name())
+        self.setIcon(0, self.node_configs.get_icon())
 

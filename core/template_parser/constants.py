@@ -1,0 +1,1 @@
+POSSIBLE_CONSUMER_KWARGS = ["allowed_extensions", "forbidden_extensions"]

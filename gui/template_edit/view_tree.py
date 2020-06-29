@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 
 from core import template_parser
 from settings.config import Configs
-from core.template_parser.nodes.site import SiteConfigs
+from core.template_parser.nodes.site_configs import SiteConfigs
 from core.template_parser.nodes.folder import FolderConfigs
 from gui.template_edit.view_tree_item import TreeEditWidgetItem
 from settings import global_settings
@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class TemplateEditViewTree(QTreeWidget):
     def __init__(self, template_path, parent):
         super().__init__(parent=parent)
+        self.setExpandsOnDoubleClick(False)
         self.widgets = []
         self.template = template_parser.Template(path=template_path)
         try:

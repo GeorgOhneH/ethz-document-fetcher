@@ -7,6 +7,7 @@ import yaml
 from core.exceptions import ParseTemplateError, LoginError
 from core.template_parser.nodes import Root, Folder, Site
 from core.template_parser.signal_handler import SignalHandler
+from core.template_parser.constants import POSSIBLE_CONSUMER_KWARGS
 from settings import global_settings
 
 logger = logging.getLogger(__name__)
@@ -89,8 +90,7 @@ class Template(object):
 
         raw_folder_name = p_kwargs.pop("folder_name", None)
         use_folder = p_kwargs.pop("use_folder", True)
-        possible_consumer_kwargs = ["allowed_extensions", "forbidden_extensions"]
-        consumer_kwargs = {name: p_kwargs.pop(name, None) for name in possible_consumer_kwargs}
+        consumer_kwargs = {name: p_kwargs.pop(name, None) for name in POSSIBLE_CONSUMER_KWARGS}
 
         raw_function = p_kwargs.pop("function", None)
         raw_folder_function = p_kwargs.pop("folder_function", None)

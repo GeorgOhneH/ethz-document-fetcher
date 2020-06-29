@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 class SettingsDialog(ConfigsDialog):
     def __init__(self, parent, site_settings):
-        super(QDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         settings_areas = [
             SettingScrollArea(site_settings, parent=self),
             SettingScrollArea(global_settings, save_changes=False, parent=self),
         ]
-        super().__init__(*settings_areas, parent=parent)
+        self.init(settings_areas)
         self.setWindowTitle("Settings")
 
 

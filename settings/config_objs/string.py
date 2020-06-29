@@ -95,6 +95,7 @@ class WidgetWrapper(QWidget):
             self.error_label.show()
         else:
             self.error_label.hide()
+        self.config_widget.update_widget()
 
     def data_changed_emit(self, *args, **kwargs):
         self.data_changed_signal.emit()
@@ -123,9 +124,13 @@ class ConfigString(object):
         self._buffer = None
         self.widget = None
         self.observers = []
-        self._set(default)
+        if default is not None:
+            self.set(default)
 
-    def get_widget(self):
+    def instance_created(self):
+        pass
+
+    def get_widget(self) -> WidgetWrapper:
         if self.widget is None:
             self.widget = WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
         return self.widget
@@ -157,6 +162,10 @@ class ConfigString(object):
     def _set(self, value):
         self._value = value
 
+    def set_to_widget(self, value):
+        if self.widget is not None:
+            self.widget.set_value(value)
+
     def set_from_widget(self):
         value = self.widget.get_value()
         self.set(value)
@@ -167,13 +176,15 @@ class ConfigString(object):
         value = self.widget.get_value()
         return self.is_valid(value)
 
-    def convert_from_prompt(self, value):
-        return value
-
     def test(self, value):
         if value is None:
             return True
-        return self._test(value)
+        try:
+            self._test(value)
+            return True
+        except ValueError as e:
+            self.msg = str(e)
+            return False
 
     def _test(self, value):
         return True
@@ -229,25 +240,13 @@ class ConfigString(object):
     def set_parser(self, parser):
         parser.add_argument(f"--{self.name}")
 
-    def _middle_prompt(self):
-        return ""
-
-    def _get_current(self):
-        return f" ({self._save()})" if self.is_valid() else ""
-
-    def get_user_prompt(self):
-        return f"Please enter the value for {self.name}{self._middle_prompt()}{self._get_current()}: "
-
     def reset_widget(self):
-        if self.widget is None:
-            return
-        self.widget.set_value(self.get())
+        self.set_to_widget(self.get())
 
     def update_widget(self):
         if self.widget is None:
             return
         self.widget.update_widget()
-
 
     def update_visibility(self):
         if self.widget is None:
@@ -256,6 +255,9 @@ class ConfigString(object):
             self.widget.show()
         else:
             self.widget.hide()
+
+    def cancel(self):
+        pass
 
     def __deepcopy__(self, memo):
         cls = self.__class__

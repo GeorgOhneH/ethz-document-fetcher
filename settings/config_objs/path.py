@@ -57,10 +57,10 @@ class PathLineEdit(LineEdit):
 
 class ConfigPath(ConfigString):
     def __init__(self, absolute=True, ony_folder=False, file_extensions=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         self.absolute = absolute
         self.file_extensions = file_extensions
         self.only_folder = ony_folder
+        super().__init__(*args, **kwargs)
 
     def init_widget(self):
         return PathLineEdit(self, self.only_folder, self.file_extensions)
@@ -68,27 +68,24 @@ class ConfigPath(ConfigString):
     def _test(self, value):
         if self.absolute or os.path.isabs(value):
             if not os.path.isabs(value):
-                self.msg = "Not an absolute path"
-                return False
+                raise ValueError("Not an absolute path")
             path = value
         else:
             path = os.path.join(ROOT_PATH, value)
 
         if not os.path.exists(path):
-            self.msg = "Path does not exist or is not valid"
-            return False
+            raise ValueError("Path does not exist or is not valid")
+
         if self.only_folder and not os.path.isdir(path):
-            self.msg = "Must be a folder"
-            return False
+            raise ValueError("Must be a folder")
+
         if self.file_extensions is not None:
             if not os.path.isfile(path):
-                self.msg = "Path must be a file"
-                return False
-            if "." not in path:
-                self.msg = "File must have a extension"
-                return False
-            if path.split(".")[-1] not in self.file_extensions:
-                self.msg = f"File extension must be one of these: ({' '.join(self.file_extensions)})"
-                return False
+                raise ValueError("Path must be a file")
 
-        return True
+            if "." not in path:
+                raise ValueError("File must have a extension")
+
+            if path.split(".")[-1] not in self.file_extensions:
+                raise ValueError(f"File extension must be one of these: ({' '.join(self.file_extensions)})")
+

@@ -18,7 +18,10 @@ class ListLineEdit(LineEdit):
         return [x.strip() for x in raw.split(",") if x.strip()]
 
     def set_value(self, value):
-        super(ListLineEdit, self).set_value(", ".join(value))
+        if value is None:
+            super(ListLineEdit, self).set_value("")
+        else:
+            super(ListLineEdit, self).set_value(", ".join(value))
 
 
 class ConfigList(ConfigString):
@@ -47,20 +50,9 @@ class ConfigList(ConfigString):
 
         return [x.strip() for x in value[1:-1].split(",") if x.strip()]
 
-    def convert_from_prompt(self, value):
-        value = value.strip()
-        if value and (value[0] != "[" or value[-1] != "]"):
-            self.msg = "Not valid format"
-            return None
-        return self._load(value)
-
     def _test(self, value):
         if not isinstance(value, list):
             raise ValueError("Value must be a list")
-        return True
 
     def set_parser(self, parser):
         parser.add_argument(f'--{self.name}', nargs='*')
-
-    def _middle_prompt(self):
-        return " (format: [value1,value2,etc..] (empty is []))"

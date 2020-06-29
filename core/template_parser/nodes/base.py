@@ -12,8 +12,13 @@ from settings.config import Configs
 
 
 class NodeConfigs(Configs):
+    TITLE_NAME = "Node"
+
     def get_name(self):
         raise NotImplementedError
+
+    def get_icon(self):
+        return QIcon(TemplateNode.DEFAULT_ICON_PATH)
 
 
 class TemplateNode(object):
@@ -86,7 +91,7 @@ class TemplateNode(object):
         return []
 
     def get_configs(self):
-        return EmptyConfigs()
+        return NodeConfigs()
 
     async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         pass

@@ -36,27 +36,30 @@ class ComboBox(QWidget, AbstractConfigWidget):
         return self.combo_box.currentText()
 
     def set_value(self, value):
-        self.combo_box.setCurrentText(value)
+        print(value)
+        if value is None:
+            self.combo_box.setCurrentIndex(-1)
+        else:
+            self.combo_box.setCurrentText(value)
 
 
 class ConfigOptions(ConfigString):
     def __init__(self, options, default=None, **kwargs):
         if default is not None and default not in options:
             raise ValueError("default not in options")
-        super().__init__(default=default, **kwargs)
         self.options = options
+        super().__init__(default=default, **kwargs)
 
     def init_widget(self):
         return ComboBox(self)
 
     def _test(self, value):
-        if value in self.options:
-            return True
-        self.msg = f"Not one of the options: {self.options}"
-        return False
+        if value not in self.options:
+            raise ValueError(f"Not one of the options: {self.options}")
+
+    def reset_widget(self):
+        print("RESET")
+        super(ConfigOptions, self).reset_widget()
 
     def set_parser(self, parser):
         parser.add_argument(f"--{self.name}", choices=self.options)
-
-    def get_user_prompt(self):
-        return f"Please enter the value for the {self.name} (options: {self.options}){self._get_current()}: "

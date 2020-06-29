@@ -41,12 +41,3 @@ class ConfigBool(ConfigString):
         feature_parser.add_argument(f'--{self.name}', dest=self.name, action='store_true')
         feature_parser.add_argument(f'--no-{self.name}', dest=self.name, action='store_false')
         parser.set_defaults(**{self.name: None})
-
-    def convert_from_prompt(self, value):
-        return self._load(value)
-
-    def get_user_prompt(self):
-        string_value = "yes" if self.get() else "no"
-        current = f" ({string_value}) (yes/no)"
-
-        return f"Please enter the bool for {self.name}{current}: "

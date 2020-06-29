@@ -14,60 +14,15 @@ from core.storage import cache
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
 from core.template_parser.nodes.base import TemplateNode, NodeConfigs
 from core.template_parser.queue_wrapper import QueueWrapper
+from core.template_parser.nodes import site_configs
+from core.template_parser.constants import POSSIBLE_CONSUMER_KWARGS
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
-from settings.config_objs import ConfigString, ConfigBool, ConfigOptions
+from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigList
 from settings import global_settings
 
 logger = logging.getLogger(__name__)
-
-
-def raw_folder_name_active(instance: NodeConfigs):
-    try:
-        use_folder = instance.get_config_obj("use_folder").get_from_widget()
-        folder_function = instance.get_config_obj("raw_folder_function").get_from_widget()
-        return use_folder and folder_function is None
-    except ValueError:
-        return False
-
-
-def raw_function_active(instance):
-    try:
-        return instance.get_config_obj("raw_module_name").get_from_widget() == "custom"
-    except ValueError:
-        return False
-
-
-def folder_function_active(instance):
-    try:
-        raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
-        use_folder = instance.get_config_obj("use_folder").get_from_widget()
-        raw_folder_name = instance.get_config_obj("raw_folder_name").get_from_widget()
-        return raw_module_name == "custom" and use_folder and raw_folder_name is None
-    except ValueError:
-        return False
-
-
-class SiteConfigs(NodeConfigs):
-    raw_module_name = ConfigOptions(optional=False, options=["moodle",
-                                                             "nethz",
-                                                             "custom",
-                                                             "video_portal",
-                                                             "ilias",
-                                                             "polybox"])
-    use_folder = ConfigBool(default=True)
-    raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active)
-    raw_function = ConfigString(active_func=raw_function_active)
-    raw_folder_function = ConfigString(active_func=folder_function_active)
-
-    def get_name(self):
-        if self.raw_module_name is not None:
-            return self.raw_module_name
-        return "+ Add Site"
-
-    def raw_folder_name_active(self):
-        return self.use_folder
 
 
 class Site(TemplateNode):
@@ -100,42 +55,37 @@ class Site(TemplateNode):
         self.raw_function = raw_function
         self.raw_folder_function = raw_folder_function
 
-        self.folder_function_name = None
-        self.folder_module_name = None
-        self.function_name = None
-        self.module_name = None
-        self.folder_name = None
-
-        self.init()
+        self.folder_module_name, self.folder_function_name = self.get_folder_module_func_name(raw_module_name,
+                                                                                              raw_folder_function,
+                                                                                              raw_folder_name,
+                                                                                              use_folder)
+        self.module_name, self.function_name = self.get_module_func_name(raw_module_name,
+                                                                         raw_function)
+        self.folder_name = self.get_folder_name(raw_folder_name, self.unique_key)
 
     def _init_parent(self):
         return self.parent.add_site(self)
 
-    def init(self):
-        folder_name = self.raw_folder_name
-        if self.raw_folder_name is None:
+    @staticmethod
+    def get_folder_name(raw_folder_name, unique_key):
+        folder_name = raw_folder_name
+        if raw_folder_name is None:
             folder_name_cache = cache.get_json("folder_name")
-            folder_name = folder_name_cache.get(self.unique_key, None)
+            folder_name = folder_name_cache.get(unique_key, None)
 
-        if self.raw_module_name != "custom":
-            module_name = self.raw_module_name
-            folder_module_name = self.raw_module_name
+        return folder_name
+
+    @staticmethod
+    def get_module_func_name(raw_module_name, raw_function):
+        if raw_module_name != "custom":
+            module_name = raw_module_name
             function_name = "producer"
-            folder_function_name = "get_folder_name"
         else:
-            if self.raw_function is None:
+            if raw_function is None:
                 raise ParseTemplateError(f"Expected a 'function' field with custom")
-            module_name, function_name = get_module_function(self.raw_function)
-            if self.raw_folder_name is None and self.use_folder:
-                if self.raw_folder_function is None:
-                    raise ParseTemplateError(f"Expected a 'folder_function' or 'folder_name' field with custom")
-                folder_module_name, folder_function_name = get_module_function(self.raw_folder_function)
-            else:
-                folder_module_name, folder_function_name = None, None
+            module_name, function_name = get_module_function(raw_function)
 
         module_name = "sites." + module_name
-        if folder_module_name is not None:
-            folder_module_name = "sites." + folder_module_name
 
         try:
             site_module = importlib.import_module(module_name)
@@ -144,7 +94,22 @@ class Site(TemplateNode):
         if not hasattr(site_module, function_name):
             raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
 
+        return module_name, function_name
+
+    @staticmethod
+    def get_folder_module_func_name(raw_module_name, raw_folder_function, raw_folder_name, use_folder):
+        if raw_module_name != "custom":
+            folder_module_name = raw_module_name
+            folder_function_name = "get_folder_name"
+        else:
+            folder_module_name, folder_function_name = None, None
+            if raw_folder_name is None and use_folder:
+                if raw_folder_function is None:
+                    raise ParseTemplateError(f"Expected a 'folder_function' or 'folder_name' field with custom")
+                folder_module_name, folder_function_name = get_module_function(raw_folder_function)
+
         if folder_module_name is not None:
+            folder_module_name = "sites." + folder_module_name
             try:
                 folder_module = importlib.import_module(folder_module_name)
             except ModuleNotFoundError:
@@ -152,11 +117,7 @@ class Site(TemplateNode):
             if not hasattr(folder_module, folder_function_name):
                 raise ParseTemplateError(f"Function: {folder_function_name} in module: {folder_module} does not exist")
 
-        self.folder_function_name = folder_function_name
-        self.folder_module_name = folder_module_name
-        self.function_name = function_name
-        self.module_name = module_name
-        self.folder_name = folder_name
+        return folder_module_name, folder_function_name
 
     def __str__(self):
         return self.module_name
@@ -194,7 +155,7 @@ class Site(TemplateNode):
         producer_function = getattr(site_module, self.function_name)
 
         for name, parameter in inspect.signature(producer_function).parameters.items():
-            if name in ["session", "queue", "base_path"]:
+            if name in ["session", "queue", "base_path", "site_settings"]:
                 continue
             if name in self.function_kwargs:
                 result.append((name, self.function_kwargs[name]))
@@ -208,13 +169,16 @@ class Site(TemplateNode):
         return result
 
     def get_configs(self):
-        site_configs = SiteConfigs()
-        site_configs.raw_module_name = self.raw_module_name
-        site_configs.use_folder = self.use_folder
-        site_configs.raw_folder_name = self.raw_folder_name
-        site_configs.raw_function = self.raw_function
-        site_configs.raw_folder_function = self.raw_folder_function
-        return site_configs
+        configs = site_configs.SiteConfigs()
+        configs.raw_module_name = self.raw_module_name
+        configs.use_folder = self.use_folder
+        configs.raw_folder_name = self.raw_folder_name
+        configs.raw_function = self.raw_function
+        configs.raw_folder_function = self.raw_folder_function
+        configs.consumer_kwargs = self.consumer_kwargs
+        configs.function_kwargs = self.function_kwargs
+
+        return configs
 
     async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         signal_handler.start(self.unique_key)
@@ -228,7 +192,7 @@ class Site(TemplateNode):
         await login_module(session, site_settings, site_module)
 
         if self.base_path is None:
-            folder_name = await self.get_folder_name(session, signal_handler)
+            folder_name = await self.retrieve_folder_name(session, signal_handler)
 
             self.base_path = safe_path_join(self.parent.base_path, folder_name)
             signal_handler.update_base_path(self.unique_key, self.base_path)
@@ -247,7 +211,7 @@ class Site(TemplateNode):
                                                                               **self.function_kwargs)
         producers.append(asyncio.ensure_future(coroutine))
 
-    async def get_folder_name(self, session, signal_handler):
+    async def retrieve_folder_name(self, session, signal_handler):
         if self.folder_name is not None or self.folder_module_name is None:
             return self.folder_name
 

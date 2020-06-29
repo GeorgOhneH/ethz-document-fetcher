@@ -13,12 +13,12 @@ logger = logging.getLogger(__name__)
 
 class NodeDialog(ConfigsDialog):
     def __init__(self, parent, node_configs):
-        super(QDialog, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         settings_areas = [
             ConfigsScrollArea(node_configs, parent=self),
         ]
-        super().__init__(*settings_areas, parent=parent)
-        self.setWindowTitle("WDW")
+        self.init(settings_areas)
+        self.setWindowTitle(node_configs.TITLE_NAME)
 
 
 class SettingScrollArea(ConfigsScrollArea):

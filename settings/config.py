@@ -3,6 +3,7 @@ import os
 import logging
 import copy
 from typing import Iterator
+from collections.abc import Mapping
 
 from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, ConfigOptions, ConfigString
 from settings.constants import SEPARATOR, CONFIG_PATH
@@ -46,12 +47,20 @@ class Configs(metaclass=ConfigBase):
         self.__dict__ = copy.deepcopy(self.__dict__)
         for config_obj in self:
             config_obj.instance = self
+        for config_obj in self:
+            config_obj.instance_created()
 
     def get_config_obj(self, name: str) -> ConfigString:
         return self._config_objs[name]
 
+    def __getitem__(self, key):
+        return self.get_config_obj(key)
+
     def __iter__(self) -> Iterator[ConfigString]:
         return iter(self._config_objs.values())
+
+    def __len__(self):
+        return len(self._config_objs)
 
     def check_if_valid(self):
         for config_obj in self:

@@ -21,12 +21,3 @@ class ConfigPassword(ConfigString):
 
     def _save(self):
         return base64.b64encode(self._value.encode("utf-8")).decode("utf-8")
-
-    def _get_current(self):
-        if self.get():
-            censored = self.get()[0] + "*" * (len(self.get()) - 1)
-            return f" ({censored})"
-        return ""
-
-    def get_user_prompt(self):
-        return f"Please enter your password{self._get_current()} (password is not shown): "

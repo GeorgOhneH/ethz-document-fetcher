@@ -15,7 +15,6 @@ class TemplateEditDialog(QDialog):
     def __init__(self, parent, template_path):
         super().__init__(parent=parent)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setModal(True)
         self.setWindowTitle("Edit")
         self.finished.connect(self.save_geometry)
 
@@ -28,11 +27,11 @@ class TemplateEditDialog(QDialog):
 
     def open(self):
         self.read_settings()
-        super(TemplateEditDialog, self).open()
+        super().open()
 
     def closeEvent(self, event):
         self.save_geometry()
-        super(QDialog, self).closeEvent(event)
+        super().closeEvent(event)
 
     def save_geometry(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")

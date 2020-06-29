@@ -10,11 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigsDialog(QDialog):
-    def __init__(self, *configs_areas, parent):
+    def __init__(self, parent):
         super().__init__(parent=parent)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setModal(True)
         self.finished.connect(self.save_geometry)
+        self.rejected.connect(self.cancel)
+
+    def init(self, configs_areas):
 
         self.configs_areas = configs_areas
 
@@ -40,12 +43,24 @@ class ConfigsDialog(QDialog):
         self.button_box.rejected.connect(self.exit)
         self.layout.addWidget(self.button_box)
         self.init_widgets()
+        self.data_changed()
 
-    def open(self):
+    def _show_or_open_or_exec(self):
         self.reset_widgets()
         self.update_visibility()
         self.read_settings()
-        super(ConfigsDialog, self).open()
+
+    def open(self):
+        self._show_or_open_or_exec()
+        super().open()
+
+    def exec(self):
+        self._show_or_open_or_exec()
+        super().exec()
+
+    def show(self):
+        self._show_or_open_or_exec()
+        super().show()
 
     def init_widgets(self):
         for configs_area in self.configs_areas:
@@ -58,6 +73,10 @@ class ConfigsDialog(QDialog):
     def update_visibility(self):
         for configs_area in self.configs_areas:
             configs_area.update_visibility()
+
+    def cancel(self):
+        for configs_area in self.configs_areas:
+            configs_area.cancel()
 
     def save_and_exit(self):
         if not self.settings_are_valid():
@@ -148,6 +167,10 @@ class ConfigsScrollArea(QScrollArea):
     def update_visibility(self):
         for config_obj in self.configs:
             config_obj.update_visibility()
+
+    def cancel(self):
+        for config_obj in self.configs:
+            config_obj.cancel()
 
     def is_valid(self):
         for config_obj in self.configs:
