@@ -50,6 +50,9 @@ class Template(object):
 
         return data
 
+    def convert_to_dict(self):
+        return self.root.convert_to_dict()
+
     def parse_template(self):
         if "folder" in self.data:
             self.parse_folder(data=self.data["folder"], parent=self.root)

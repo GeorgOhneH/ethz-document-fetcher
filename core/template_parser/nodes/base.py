@@ -12,6 +12,7 @@ from settings.config import Configs
 
 
 class NodeConfigs(Configs):
+    TYPE = "base"
     TITLE_NAME = "Node"
 
     def get_name(self):
@@ -80,6 +81,21 @@ class TemplateNode(object):
         self.position = self.parent.position + child_index
         unique_string = self.position + "".join([f"{value}" for value in args])
         return hashlib.md5(unique_string.encode('utf-8')).hexdigest()
+
+    def convert_to_dict(self, result=None):
+        if result is None:
+            result = {}
+        result["sites"] = []
+
+        if self.folder is not None:
+            result["folder"] = self.folder.convert_to_dict()
+        for site in self.sites:
+            result["sites"].append(site.convert_to_dict())
+
+        if len(result["sites"]) == 0:
+            del result["sites"]
+
+        return result
 
     def get_gui_name(self):
         return str(self)

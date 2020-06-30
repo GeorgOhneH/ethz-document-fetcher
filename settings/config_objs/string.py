@@ -72,8 +72,6 @@ class WidgetWrapper(QWidget):
 
         self.error_label = QLabel()
         self.error_label.setStyleSheet("QLabel { color : red; }")
-        if not self.set_error_msg():
-            self.error_label.hide()
         self.layout.addWidget(self.error_label)
 
     def get_value(self):
@@ -83,8 +81,7 @@ class WidgetWrapper(QWidget):
         self.config_widget.set_value(value)
 
     def set_error_msg(self):
-        value = self.config_widget.get_value()
-        if self.config_widget.config_obj.is_valid(value):
+        if self.config_widget.config_obj.is_valid_from_widget():
             return False
         msg = self.config_widget.config_obj.msg
         self.error_label.setText(msg)
@@ -133,6 +130,7 @@ class ConfigString(object):
     def get_widget(self) -> WidgetWrapper:
         if self.widget is None:
             self.widget = WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
+            self.widget.update_widget()
         return self.widget
 
     def init_widget(self):
@@ -174,19 +172,19 @@ class ConfigString(object):
         if self.widget is None:
             return None
         value = self.widget.get_value()
-        return self.is_valid(value)
+        return self.is_valid(value, from_widget=True)
 
-    def test(self, value):
+    def test(self, value, from_widget=False):
         if value is None:
             return True
         try:
-            self._test(value)
+            self._test(value, from_widget)
             return True
         except ValueError as e:
             self.msg = str(e)
             return False
 
-    def _test(self, value):
+    def _test(self, value, from_widget):
         return True
 
     def load(self, value):
@@ -220,20 +218,20 @@ class ConfigString(object):
             value = None
         return value is not None or self.optional
 
-    def is_valid(self, value=NotSet):
+    def is_valid(self, value=NotSet, from_widget=False):
         if value is NotSet:
             value = self._value
 
-        result = self._is_valid(value)
+        result = self._is_valid(value, from_widget)
         return result
 
-    def _is_valid(self, value):
+    def _is_valid(self, value, from_widget):
         if not self.is_active(value):
             return True
         if not self.is_set(value):
             self.msg = "Can not be empty"
             return False
-        if not self.test(value):
+        if not self.test(value, from_widget):
             return False
         return True
 

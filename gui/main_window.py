@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
 
         open_presets = file_menu.addMenu("Open &Presets")
 
-        self.init_menu(open_presets, os.path.join(ROOT_PATH, "templates"))
+        self.init_menu(open_presets, "templates")
 
         file_menu.addSeparator()
         file_menu.addAction(self.actions.settings)

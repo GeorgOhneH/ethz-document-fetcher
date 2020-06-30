@@ -115,12 +115,29 @@ class Site(TemplateNode):
             except ModuleNotFoundError:
                 raise ParseTemplateError(f"Folder module with name: {folder_module_name} does not exist")
             if not hasattr(folder_module, folder_function_name):
-                raise ParseTemplateError(f"Function: {folder_function_name} in module: {folder_module} does not exist")
+                raise ParseTemplateError(f"Function: {folder_function_name} in module:"
+                                         f" {folder_module_name} does not exist")
 
         return folder_module_name, folder_function_name
 
     def __str__(self):
         return self.module_name
+
+    def convert_to_dict(self, result=None):
+        attributes = {
+            "module": self.raw_module_name,
+            "folder_name": self.raw_folder_name,
+            "use_folder": self.use_folder,
+            "function": self.raw_function,
+            "folder_function": self.raw_folder_function,
+            **self.function_kwargs,
+            **self.consumer_kwargs,
+        }
+        result = {}
+        for key, value in attributes.items():
+            if value is not None:
+                result[key] = value
+        return super().convert_to_dict(result=result)
 
     def get_gui_name(self):
         if self.folder_name is not None:
@@ -170,13 +187,20 @@ class Site(TemplateNode):
 
     def get_configs(self):
         configs = site_configs.SiteConfigs()
-        configs.raw_module_name = self.raw_module_name
-        configs.use_folder = self.use_folder
-        configs.raw_folder_name = self.raw_folder_name
-        configs.raw_function = self.raw_function
-        configs.raw_folder_function = self.raw_folder_function
-        configs.consumer_kwargs = self.consumer_kwargs
-        configs.function_kwargs = self.function_kwargs
+        attributes = [
+            "raw_module_name",
+            "use_folder",
+            "raw_folder_name",
+            "raw_function",
+            "raw_folder_function",
+            "consumer_kwargs",
+            "function_kwargs",
+        ]
+        for attribute in attributes:
+            try:
+                setattr(configs, attribute, getattr(self, attribute))
+            except ValueError as e:
+                logger.debug(f"Tried to set wrong value {attribute}. Error: {str(e)}")
 
         return configs
 

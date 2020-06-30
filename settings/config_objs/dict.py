@@ -84,11 +84,14 @@ class ConfigDict(ConfigString):
                 continue
             config_obj.set(value[name])
 
-    def _test(self, value):
+    def _test(self, value, from_widget):
         for name, config_obj in self._layout.items():
             if name not in value:
+                if config_obj.optional:
+                    continue
                 raise ValueError(f"Field '{name}' must exist")
-            if not config_obj.is_valid(value[name]):
+
+            if not config_obj.is_valid(value[name], from_widget=from_widget):
                 raise ValueError(config_obj.msg)
 
     def update_widget(self):
@@ -101,9 +104,14 @@ class ConfigDict(ConfigString):
             config_obj.update_visibility()
         super().update_visibility()
 
+    def set_to_widget(self, value):
+        for name, config_obj in self._layout.items():
+            config_obj.set_to_widget(value[name])
+
     def reset_widget(self):
         for name, config_obj in self._layout.items():
             config_obj.reset_widget()
+        super().reset_widget()
 
     def set_parser(self, parser):
         raise NotImplemented

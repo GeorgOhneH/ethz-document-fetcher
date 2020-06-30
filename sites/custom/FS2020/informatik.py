@@ -5,7 +5,7 @@ from sites.custom.utils import validate_url
 BASE_URL = "https://lec.inf.ethz.ch/itet/informatik1/2020/"
 
 
-async def parse_main_page(session, queue, base_path, site_settings, test=None):
+async def parse_main_page(session, queue, base_path, site_settings):
     links_to_pdf = {
         "Overlays": lambda x: "slides/lecture{}.pdf".format(x + 1),
         "Handout": lambda x: "slides/lecture{}.handout.pdf".format(x + 1),

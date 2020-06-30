@@ -50,7 +50,7 @@ class ConfigList(ConfigString):
 
         return [x.strip() for x in value[1:-1].split(",") if x.strip()]
 
-    def _test(self, value):
+    def _test(self, value, from_widget):
         if not isinstance(value, list):
             raise ValueError("Value must be a list")
 

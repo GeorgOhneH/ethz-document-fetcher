@@ -65,7 +65,7 @@ class ConfigPath(ConfigString):
     def init_widget(self):
         return PathLineEdit(self, self.only_folder, self.file_extensions)
 
-    def _test(self, value):
+    def _test(self, value, from_widget):
         if self.absolute or os.path.isabs(value):
             if not os.path.isabs(value):
                 raise ValueError("Not an absolute path")

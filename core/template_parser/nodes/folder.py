@@ -10,6 +10,7 @@ from settings.config_objs import ConfigString
 
 
 class FolderConfigs(NodeConfigs):
+    TYPE = "folder"
     TITLE_NAME = "Folder"
     name = ConfigString()
 
@@ -35,6 +36,10 @@ class Folder(TemplateNode):
     def _init_parent(self):
         return self.parent.add_folder(self)
 
+    def convert_to_dict(self, result=None):
+        result = {"name": self.name}
+        return super().convert_to_dict(result=result)
+
     def get_gui_name(self):
         return self.name
 
@@ -48,5 +53,8 @@ class Folder(TemplateNode):
 
     def get_configs(self):
         folder_configs = FolderConfigs()
-        folder_configs.name = self.name
+        try:
+            folder_configs.name = self.name
+        except ValueError:
+            pass
         return folder_configs

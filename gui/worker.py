@@ -93,6 +93,8 @@ class Worker(QObject):
                     logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
                     return
 
+                user_statistics_future = asyncio.ensure_future(user_statistics(session, self.site_settings.username))
+
                 logger.debug("Starting consumers")
                 consumers = [asyncio.ensure_future(downloader.download_files(session, queue)) for _ in range(20)]
 
@@ -104,7 +106,7 @@ class Worker(QObject):
                                                    cancellable_pool=cancellable_pool,
                                                    recursive=self.recursive)
 
-                await user_statistics(session, self.site_settings.username)
+                await user_statistics_future
 
                 logger.debug("Gathering producers")
                 await asyncio.gather(*producers)

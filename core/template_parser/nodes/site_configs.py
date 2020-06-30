@@ -33,11 +33,11 @@ class FunctionKwargsConfigDict(ConfigDict):
         self.widget_layouts = {}
         self.layouts = {}
 
-    def _set(self, value):
+    def set(self, value):
         raw_module_name = self.instance["raw_module_name"].get()
         raw_function = self.instance["raw_function"].get()
         self.change_layout(raw_module_name, raw_function)
-        super()._set(value)
+        super().set(value)
 
     def cancel(self):
         raw_module_name = self.instance["raw_module_name"].get()
@@ -45,7 +45,7 @@ class FunctionKwargsConfigDict(ConfigDict):
         self.change_layout(raw_module_name, raw_function)
 
     def change_layout(self, current_module, current_function):
-        key = str(current_module)+str(current_function)
+        key = str(current_module) + (str(current_function) if current_module == "custom" else "")
         if key in self.layouts:
             if self.layouts[key] is self.layout:
                 return
@@ -81,8 +81,10 @@ class FunctionKwargsConfigDict(ConfigDict):
                     continue
                 default_value = parameter.default if parameter.default is not parameter.empty else None
                 optional = parameter.default != parameter.empty
-                if isinstance(default_value, bool):
+                if parameter.annotation is bool or isinstance(default_value, bool):
                     config_obj = ConfigBool(default=default_value, optional=optional)
+                elif parameter.annotation is list or isinstance(default_value, list):
+                    config_obj = ConfigList(default=default_value, optional=optional)
                 else:
                     config_obj = ConfigString(default=default_value, optional=optional)
                 result[name] = config_obj
@@ -102,6 +104,41 @@ class FunctionKwargsConfigDict(ConfigDict):
         raw_function = self.instance["raw_function"].get_from_widget()
         self.change_layout(raw_module_name, raw_function)
         super().update_widget()
+
+
+class FunctionConfigString(ConfigString):
+    def _test(self, value, from_widget):
+        if from_widget:
+            raw_module_name = self.instance["raw_module_name"].get_from_widget()
+        else:
+            raw_module_name = self.instance["raw_module_name"].get()
+
+        try:
+            nodes.Site.get_module_func_name(raw_module_name, value)
+        except ParseTemplateError as e:
+            raise ValueError(str(e))
+
+
+class FunctionFolderConfigString(ConfigString):
+    def _test(self, value, from_widget):
+        if from_widget:
+            raw_module_name = self.instance["raw_module_name"].get_from_widget()
+            raw_folder_function = self.instance["raw_folder_function"].get_from_widget()
+            raw_folder_name = self.instance["raw_folder_name"].get_from_widget()
+            use_folder = self.instance["use_folder"].get_from_widget()
+        else:
+            raw_module_name = self.instance["raw_module_name"].get()
+            raw_folder_function = self.instance["raw_folder_function"].get()
+            raw_folder_name = self.instance["raw_folder_name"].get()
+            use_folder = self.instance["use_folder"].get()
+
+        try:
+            nodes.Site.get_folder_module_func_name(raw_module_name,
+                                                   raw_folder_function,
+                                                   raw_folder_name,
+                                                   use_folder)
+        except ParseTemplateError as e:
+            raise ValueError(str(e))
 
 
 def raw_folder_name_active(instance: NodeConfigs):
@@ -131,6 +168,7 @@ def folder_function_active(instance):
 
 
 class SiteConfigs(NodeConfigs):
+    TYPE = "site"
     TITLE_NAME = "Site"
 
     raw_module_name = ConfigOptions(optional=False, options=["moodle",
@@ -141,8 +179,8 @@ class SiteConfigs(NodeConfigs):
                                                              "polybox"])
     use_folder = ConfigBool(default=True)
     raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active)
-    raw_function = ConfigString(active_func=raw_function_active)
-    raw_folder_function = ConfigString(active_func=folder_function_active)
+    raw_function = FunctionConfigString(active_func=raw_function_active)
+    raw_folder_function = FunctionFolderConfigString(active_func=folder_function_active)
 
     consumer_kwargs = ConfigDict(layout={name: ConfigList(optional=True, hint_text="Add 'video' for all video types")
                                          for name in POSSIBLE_CONSUMER_KWARGS})

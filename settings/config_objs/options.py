@@ -36,7 +36,6 @@ class ComboBox(QWidget, AbstractConfigWidget):
         return self.combo_box.currentText()
 
     def set_value(self, value):
-        print(value)
         if value is None:
             self.combo_box.setCurrentIndex(-1)
         else:
@@ -53,13 +52,9 @@ class ConfigOptions(ConfigString):
     def init_widget(self):
         return ComboBox(self)
 
-    def _test(self, value):
+    def _test(self, value, from_widget):
         if value not in self.options:
             raise ValueError(f"Not one of the options: {self.options}")
-
-    def reset_widget(self):
-        print("RESET")
-        super(ConfigOptions, self).reset_widget()
 
     def set_parser(self, parser):
         parser.add_argument(f"--{self.name}", choices=self.options)

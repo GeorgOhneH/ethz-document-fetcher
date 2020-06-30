@@ -24,14 +24,14 @@ class CentralWidget(QWidget):
         self.actions = actions
         self.start_time = time.time()
         self.downloaded_bytes = 0
+        self.template_path_settings = TemplatePathSettings()
+
         self.one_second_timer = QTimer()
         self.one_second_timer.timeout.connect(self.monitor_download_show)
         self.status_bar = self.parent().statusBar()
         self.monitor_download_widget = QLabel()
         self.monitor_download_widget.setText(format_bytes(self.downloaded_bytes) + "/s")
         self.status_bar.addPermanentWidget(self.monitor_download_widget)
-
-        self.template_path_settings = TemplatePathSettings()
 
         self.site_settings = SiteSettings()
 
@@ -68,8 +68,9 @@ class CentralWidget(QWidget):
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
-        self.template_edit_dialog = TemplateEditDialog(parent=self, template_path=self.get_template_path())
+        self.template_edit_dialog = None
         self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
+        self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
 
         self.grid.addWidget(self.button_container)
         self.grid.addWidget(self.template_view)
@@ -116,7 +117,14 @@ class CentralWidget(QWidget):
         self.settings_dialog.open()
 
     def open_edit(self):
+        self.template_edit_dialog = TemplateEditDialog(parent=self,
+                                                       template_path=self.get_template_path(),
+                                                       template_path_settings=self.template_path_settings)
+        self.template_edit_dialog.accepted.connect(self.apply_edit)
         self.template_edit_dialog.open()
+
+    def apply_edit(self):
+        self.open_file(file_path=self.get_template_path())
 
     def open_file(self, checked=None, file_path=None):
         if file_path is None:
@@ -140,6 +148,8 @@ class CentralWidget(QWidget):
         new_template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
         self.grid.replaceWidget(self.template_view, new_template_view)
         self.template_view = new_template_view
+
+        self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
 
     def get_template_path(self):
         if os.path.isabs(self.template_path_settings.template_path):
