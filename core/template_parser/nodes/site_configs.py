@@ -195,16 +195,20 @@ class SiteConfigs(NodeConfigs):
     TYPE = "site"
     TITLE_NAME = "Site"
 
-    raw_module_name = ConfigOptions(optional=False, options=get_module_names())
-    use_folder = ConfigBool(default=True)
-    raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active)
-    raw_function = FunctionConfigString(active_func=raw_function_active)
-    raw_folder_function = FunctionFolderConfigString(active_func=folder_function_active)
+    raw_module_name = ConfigOptions(optional=False, options=get_module_names(), gui_name="Module")
+    use_folder = ConfigBool(default=True, gui_name="Use Folder")
+    raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active, gui_name="Folder Name")
+    raw_function = FunctionConfigString(active_func=raw_function_active, gui_name="Function")
+    raw_folder_function = FunctionFolderConfigString(active_func=folder_function_active, gui_name="Function for Folder")
 
-    consumer_kwargs = ConfigDict(layout={name: ConfigList(optional=True, hint_text="Add 'video' for all video types")
-                                         for name in POSSIBLE_CONSUMER_KWARGS})
+    consumer_kwargs = ConfigDict(layout={
+        "allowed_extensions": ConfigList(optional=True, gui_name="Allowed Extensions",
+                                         hint_text="Add 'video' for all video types"),
+        "forbidden_extensions": ConfigList(optional=True, gui_name="Forbidden Extensions",
+                                           hint_text="Add 'video' for all video types"),
+    }, gui_name="Download Arguments")
 
-    function_kwargs = FunctionKwargsConfigDict()
+    function_kwargs = FunctionKwargsConfigDict(gui_name="Function Specific Arguments")
 
     def get_name(self):
         if self.raw_module_name is not None:

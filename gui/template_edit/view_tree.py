@@ -24,6 +24,8 @@ class TemplateEditViewTree(QTreeWidget):
         self.setDragEnabled(True)
         self.setDropIndicatorShown(True)
         self.viewport().setAcceptDrops(True)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.prepare_menu)
         self.setDragDropMode(QAbstractItemView.InternalMove)
         self.widgets = []
         self.template = template_parser.Template(path=template_path)
@@ -124,3 +126,15 @@ class TemplateEditViewTree(QTreeWidget):
         else:
             raise ValueError("Not valid type")
 
+    def prepare_menu(self, point):
+        item = self.itemAt(point)
+        if item is None:
+            return
+
+        menu = QMenu(self)
+        edit_action = menu.addAction("Edit")
+        edit_action.triggered.connect(lambda: self.edit_item(item))
+        delete_action = menu.addAction("Delete")
+        delete_action.triggered.connect(lambda: self.delete_item(item))
+        delete_action.setEnabled(item.item_status != item.STATUS_NEW)
+        menu.exec_(self.mapToGlobal(point))

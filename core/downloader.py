@@ -138,7 +138,9 @@ async def download_if_not_exist(session,
             logger.debug(f"Removed file {absolute_path}")
             raise e
 
-    if action == ACTION_REPLACE and site_settings.keep_replaced_files and file_extension.lower() == "pdf":
+    if site_settings.highlight_difference and\
+            action == ACTION_REPLACE and site_settings.keep_replaced_files and\
+            file_extension.lower() == "pdf":
         logger.debug("Adding highlights")
 
         temp_file_name = f"{pure_name}-temp.{extension}"

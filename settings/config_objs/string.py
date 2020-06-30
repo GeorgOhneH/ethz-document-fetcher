@@ -189,7 +189,10 @@ class ConfigString(object):
     def load(self, value):
         if not value:
             return
-        self._value = self._load(value)
+        result = self._load(value)
+        if not self.test(result):
+            return
+        self._value = result
 
     def _load(self, value):
         return value

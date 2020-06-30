@@ -17,7 +17,7 @@ from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTE
 logger = logging.getLogger(__name__)
 
 
-async def parse_main_page(session, queue, html, base_path, site_settings, moodle_id, use_external_links):
+async def parse_main_page(session, queue, html, base_path, site_settings, moodle_id, process_external_links):
     sesskey = re.search(b"""sesskey":"([^"]+)""", html)[1].decode("utf-8")
     async with session.post(AJAX_SERVICE_URL, json=get_update_payload(moodle_id),
                             params={"sesskey": sesskey}) as response:
@@ -36,14 +36,14 @@ async def parse_main_page(session, queue, html, base_path, site_settings, moodle
                                  base_path=base_path,
                                  site_settings=site_settings,
                                  moodle_id=moodle_id,
-                                 use_external_links=use_external_links,
+                                 process_external_links=process_external_links,
                                  last_updated_dict=last_updated_dict)
                   for section in sections]
     await asyncio.gather(*coroutines)
 
 
 async def parse_sections(session, queue, section, base_path, site_settings, moodle_id,
-                         use_external_links, last_updated_dict):
+                         process_external_links, last_updated_dict):
     section_name = str(section["aria-label"])
     base_path = safe_path_join(base_path, section_name)
 
@@ -76,7 +76,7 @@ async def parse_sections(session, queue, section, base_path, site_settings, mood
             tasks.append(asyncio.ensure_future(coroutine))
 
         elif mtype == MTYPE_EXTERNAL_LINK:
-            if not use_external_links:
+            if not process_external_links:
                 continue
 
             instance = module.find("div", class_="activityinstance")

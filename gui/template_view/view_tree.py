@@ -183,19 +183,19 @@ class TemplateViewTree(QTreeWidget):
 
         run_action_recursive = menu.addAction("Run recursive")
         run_action_recursive.setEnabled(not self.controller.thread.isRunning() and
-                                        widget.template_node.base_path is not None)
+                                        widget.template_node.parent.base_path is not None)
         if self.controller.thread.isRunning():
             self.controller.thread.finished.connect(lambda template_node=widget.template_node:
-                                                    run_action_recursive.setEnabled(template_node.base_path is not None))
+                                                    run_action_recursive.setEnabled(template_node.parent.base_path is not None))
         run_action_recursive.triggered.connect(
             lambda: self.controller.start_thread(widget.template_node.unique_key, True))
 
         run_action = menu.addAction("Run")
         run_action.setEnabled(not self.controller.thread.isRunning()
-                              and widget.template_node.base_path is not None)
+                              and widget.template_node.parent.base_path is not None)
         if self.controller.thread.isRunning():
             self.controller.thread.finished.connect(lambda template_node=widget.template_node:
-                                                    run_action_recursive.setEnabled(template_node.base_path is not None))
+                                                    run_action_recursive.setEnabled(template_node.parent.base_path is not None))
         run_action.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, False))
 
         menu.addSeparator()

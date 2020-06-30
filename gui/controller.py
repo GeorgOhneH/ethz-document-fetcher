@@ -65,6 +65,7 @@ class CentralWidget(QWidget):
         self.button_container.layout().addWidget(self.btn_stop)
 
         actions.settings.triggered.connect(self.open_settings)
+        actions.new_file.triggered.connect(lambda: self.open_edit(new=True))
         actions.edit_file.triggered.connect(self.open_edit)
         actions.open_file.triggered.connect(self.open_file)
 
@@ -117,9 +118,13 @@ class CentralWidget(QWidget):
     def open_settings(self):
         self.settings_dialog.open()
 
-    def open_edit(self):
+    def open_edit(self, checked=None, new=False):
+        if new:
+            template_path = None
+        else:
+            template_path = self.get_template_path()
         self.template_edit_dialog = TemplateEditDialog(parent=self,
-                                                       template_path=self.get_template_path(),
+                                                       template_path=template_path,
                                                        template_path_settings=self.template_path_settings)
         self.template_edit_dialog.accepted.connect(self.apply_edit)
         self.template_edit_dialog.open()

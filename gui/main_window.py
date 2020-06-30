@@ -32,6 +32,9 @@ class Actions(object):
         self.edit_file = QAction("&Edit")
         self.edit_file.setShortcut("Ctrl+E")
 
+        self.new_file = QAction("&New")
+        self.new_file.setShortcut("Ctrl+N")
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -42,6 +45,8 @@ class MainWindow(QMainWindow):
         self.statusBar()
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("&File")
+
+        file_menu.addAction(self.actions.new_file)
 
         file_menu.addAction(self.actions.edit_file)
 

@@ -12,7 +12,7 @@ from settings.config_objs import ConfigString
 class FolderConfigs(NodeConfigs):
     TYPE = "folder"
     TITLE_NAME = "Folder"
-    name = ConfigString()
+    name = ConfigString(gui_name="Name")
 
     def get_name(self):
         if self.name is not None:

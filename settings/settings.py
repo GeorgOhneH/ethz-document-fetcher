@@ -66,7 +66,7 @@ class Settings(Configs, metaclass=SettingBase):
 
 class GlobalSettings(Settings):
     NAME = "Global"
-    loglevel = ConfigOptions(default="DEBUG", options=["ERROR", "WARNING", "INFO", "DEBUG"])
+    loglevel = ConfigOptions(default="DEBUG", options=["ERROR", "WARNING", "INFO", "DEBUG"], gui_name="Loglevel")
 
 
 class TemplatePathSettings(Settings):
@@ -77,10 +77,13 @@ class TemplatePathSettings(Settings):
 
 class SiteSettings(Settings):
     NAME = "Site"
-    username = ConfigString(optional=True)
-    password = ConfigPassword(optional=True)
-    base_path = ConfigPath(ony_folder=True)
-    allowed_extensions = ConfigList(default=[], optional=True, hint_text="Add 'video' for all video types.")
-    forbidden_extensions = ConfigList(default=["video"], optional=True, hint_text="Add 'video' for all video types.")
-    keep_replaced_files = ConfigBool(default=True)
-    force_download = ConfigBool(default=False)
+    username = ConfigString(optional=True, gui_name="Username")
+    password = ConfigPassword(optional=True, gui_name="Password")
+    base_path = ConfigPath(ony_folder=True, gui_name="Save Path")
+    allowed_extensions = ConfigList(default=[], optional=True, gui_name="Allowed Extensions",
+                                    hint_text="Add 'video' for all video types.")
+    forbidden_extensions = ConfigList(default=["video"], optional=True, gui_name="Forbidden Extensions",
+                                      hint_text="Add 'video' for all video types.")
+    keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
+    highlight_difference = ConfigBool(default=True, gui_name="Add Highlight Difference to Replaced Files (pdf only)")
+    force_download = ConfigBool(default=False, gui_name="Force Download")

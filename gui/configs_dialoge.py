@@ -155,10 +155,17 @@ class ConfigsScrollArea(QScrollArea):
             config_obj.update_visibility()
             config_obj.update_widget()
 
-        if self.optional.layout().count() == 0:
-            self.optional.hide()
-        if self.required.layout().count() == 0:
-            self.required.hide()
+        self.update_group_box_visibility(self.optional)
+        self.update_group_box_visibility(self.required)
+
+    @staticmethod
+    def update_group_box_visibility(widget):
+        for i in range(widget.layout().count()):
+            config_widget = widget.layout().itemAt(i).widget()
+            if not config_widget.isHidden():
+                widget.show()
+                return
+        widget.hide()
 
     def reset_widgets(self):
         for config_obj in self.configs:
@@ -189,4 +196,6 @@ class ConfigsScrollArea(QScrollArea):
     def data_changed(self):
         self.update_visibility()
         self.update_widgets()
+        self.update_group_box_visibility(self.optional)
+        self.update_group_box_visibility(self.required)
         self.data_changed_signal.emit()

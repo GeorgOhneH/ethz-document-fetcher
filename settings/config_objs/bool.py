@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class CheckBox(QCheckBox, AbstractConfigWidget):
     def __init__(self, config_obj):
-        super().__init__(config_obj.name)
+        super().__init__(config_obj.get_gui_name())
         self.config_obj = config_obj
         self.data_changed_signal = self.stateChanged
 

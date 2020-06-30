@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.config_objs.string import ConfigString, LineEdit, AbstractConfigWidget
+from settings.config_objs.string import ConfigString, WidgetWrapper, AbstractConfigWidget
 
 logger = logging.getLogger(__name__)
 
@@ -46,8 +46,23 @@ class GroupBox(QGroupBox, AbstractConfigWidget):
         for name, config_obj in self.config_obj.layout.items():
             config_obj.set_to_widget(value.get(name, None))
 
+    def update_widget(self):
+        if self.layout.count() > 0:
+            self.show()
+        else:
+            self.hide()
+
     def data_changed_emit(self):
         self.data_changed_signal.emit()
+
+
+class DictWidgetWrapper(WidgetWrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.error_label.hide()
+
+    def update_widget(self):
+        self.config_widget.update_widget()
 
 
 class ConfigDict(ConfigString):
@@ -58,6 +73,11 @@ class ConfigDict(ConfigString):
 
     def init_widget(self):
         return GroupBox(self)
+
+    def get_widget(self) -> WidgetWrapper:
+        if self.widget is None:
+            self.widget = DictWidgetWrapper(self.init_widget(), hint_text=self.hint_text)
+        return self.widget
 
     @property
     def layout(self):

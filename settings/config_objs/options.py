@@ -26,7 +26,7 @@ class ComboBox(QWidget, AbstractConfigWidget):
         self.layout.setContentsMargins(4, 4, 4, 4)
         self.layout.setAlignment(Qt.AlignLeft)
         self.setLayout(self.layout)
-        self.layout.addWidget(QLabel(f"{config_obj.name}: "))
+        self.layout.addWidget(QLabel(f"{config_obj.get_gui_name()}: "))
         self.layout.addWidget(self.combo_box)
 
     def get_value(self):
