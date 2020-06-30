@@ -24,6 +24,7 @@ class CentralWidget(QWidget):
         self.actions = actions
         self.start_time = time.time()
         self.downloaded_bytes = 0
+        self.thread_finished_open_file_func = None
         self.template_path_settings = TemplatePathSettings()
 
         self.one_second_timer = QTimer()
@@ -144,12 +145,27 @@ class CentralWidget(QWidget):
             return
         self.template_path_settings.save()
 
+        if self.thread.isRunning():
+            self.thread_finished_open_file_func = lambda: self._open_file(self.get_template_path())
+            self.thread.finished.connect(self.thread_finished_open_file_func)
+            self.stop_thread()
+            return
+
+        self._open_file(self.get_template_path())
+
+    def _open_file(self, template_path):
+        if self.thread_finished_open_file_func is not None:
+            try:
+                self.thread.finished.disconnect(self.thread_finished_open_file_func)
+            except TypeError:
+                pass
+
         self.template_view.disconnect_connections()
-        new_template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
+        new_template_view = TemplateView(template_path, self.worker.signals, self, self)
         self.grid.replaceWidget(self.template_view, new_template_view)
         self.template_view = new_template_view
 
-        self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
+        self.status_bar.showMessage(f"Opened file: {template_path}")
 
     def get_template_path(self):
         if os.path.isabs(self.template_path_settings.template_path):

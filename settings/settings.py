@@ -83,4 +83,4 @@ class SiteSettings(Settings):
     allowed_extensions = ConfigList(default=[], optional=True, hint_text="Add 'video' for all video types.")
     forbidden_extensions = ConfigList(default=["video"], optional=True, hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True)
-    force_download = ConfigBool(default=False, active_func=lambda instance: False)
+    force_download = ConfigBool(default=False)

@@ -101,7 +101,7 @@ class WidgetWrapper(QWidget):
 class ConfigString(object):
     def __init__(self,
                  default=None,
-                 active_func=lambda instance: True,
+                 active_func=lambda instance, from_widget: True,
                  depends_on=None,
                  optional=False,
                  gui_name=None,
@@ -130,7 +130,6 @@ class ConfigString(object):
     def get_widget(self) -> WidgetWrapper:
         if self.widget is None:
             self.widget = WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
-            self.widget.update_widget()
         return self.widget
 
     def init_widget(self):
@@ -206,10 +205,10 @@ class ConfigString(object):
     def _save(self):
         return self._value
 
-    def is_active(self, value=NotSet):
+    def is_active(self, value=NotSet, from_widget=False):
         if value is NotSet:
             value = self._value
-        return self.active_func(self.instance) and all([x.is_set(value) for x in self.depends_on])
+        return self.active_func(self.instance, from_widget) and all([x.is_set(value) for x in self.depends_on])
 
     def is_set(self, value=NotSet):
         if value is NotSet:
@@ -226,7 +225,7 @@ class ConfigString(object):
         return result
 
     def _is_valid(self, value, from_widget):
-        if not self.is_active(value):
+        if not self.is_active(value, from_widget):
             return True
         if not self.is_set(value):
             self.msg = "Can not be empty"
@@ -249,7 +248,7 @@ class ConfigString(object):
     def update_visibility(self):
         if self.widget is None:
             return
-        if self.is_active():
+        if self.is_active(from_widget=True):
             self.widget.show()
         else:
             self.widget.hide()

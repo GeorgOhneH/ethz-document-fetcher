@@ -32,7 +32,11 @@ async def get_folder_name(session, url, **kwargs):
     return item_data["name"]
 
 
-async def producer(session, queue, base_path, site_settings, url, etag=None):
+async def producer(session, queue, base_path, site_settings, url):
+    await _producer(session, queue, base_path, site_settings, url)
+
+
+async def _producer(session, queue, base_path, site_settings, url, etag=None):
     parameters = parse_qs(urlparse(url).query)
     api_url = get_api_url(parameters, children=True)
     authkey = parameters['authkey'][0]
@@ -49,7 +53,7 @@ async def producer(session, queue, base_path, site_settings, url, etag=None):
         elif "folder" in item:
             folder_url = await check_url_reference(session, item['webUrl']) + f"?authkey={authkey}"
             item_etag = item["lastModifiedDateTime"]
-            coroutine = producer(session, queue, path, site_settings, f"{folder_url}?authkey={authkey}", etag=item_etag)
+            coroutine = _producer(session, queue, path, site_settings, f"{folder_url}?authkey={authkey}", etag=item_etag)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

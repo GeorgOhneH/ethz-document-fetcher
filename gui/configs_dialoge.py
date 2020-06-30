@@ -151,6 +151,10 @@ class ConfigsScrollArea(QScrollArea):
             else:
                 self.required.layout().addWidget(widget)
 
+        for config_obj in self.configs:
+            config_obj.update_visibility()
+            config_obj.update_widget()
+
         if self.optional.layout().count() == 0:
             self.optional.hide()
         if self.required.layout().count() == 0:

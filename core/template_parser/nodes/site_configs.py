@@ -14,6 +14,7 @@ from core.storage import cache
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
 from core.template_parser.nodes.base import TemplateNode, NodeConfigs
 from core.template_parser import nodes
+from core.constants import ROOT_PATH
 from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.constants import POSSIBLE_CONSUMER_KWARGS
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
@@ -141,42 +142,60 @@ class FunctionFolderConfigString(ConfigString):
             raise ValueError(str(e))
 
 
-def raw_folder_name_active(instance: NodeConfigs):
-    try:
+def raw_folder_name_active(instance: NodeConfigs, from_widget):
+    if from_widget:
         use_folder = instance.get_config_obj("use_folder").get_from_widget()
         folder_function = instance.get_config_obj("raw_folder_function").get_from_widget()
-        return use_folder and folder_function is None
-    except ValueError:
-        return False
+        raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
+    else:
+        use_folder = instance.get_config_obj("use_folder").get()
+        folder_function = instance.get_config_obj("raw_folder_function").get()
+        raw_module_name = instance.get_config_obj("raw_module_name").get()
+
+    return use_folder and (folder_function is None or raw_module_name != "custom")
 
 
-def raw_function_active(instance):
-    try:
-        return instance.get_config_obj("raw_module_name").get_from_widget() == "custom"
-    except ValueError:
-        return False
+def raw_function_active(instance, from_widget):
+    if from_widget:
+        raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
+    else:
+        raw_module_name = instance.get_config_obj("raw_module_name").get()
+
+    return raw_module_name == "custom"
 
 
-def folder_function_active(instance):
-    try:
+def folder_function_active(instance, from_widget):
+    if from_widget:
         raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
         use_folder = instance.get_config_obj("use_folder").get_from_widget()
         raw_folder_name = instance.get_config_obj("raw_folder_name").get_from_widget()
-        return raw_module_name == "custom" and use_folder and raw_folder_name is None
-    except ValueError:
-        return False
+    else:
+        raw_module_name = instance.get_config_obj("raw_module_name").get()
+        use_folder = instance.get_config_obj("use_folder").get()
+        raw_folder_name = instance.get_config_obj("raw_folder_name").get()
+
+    return raw_module_name == "custom" and use_folder and raw_folder_name is None
+
+
+def get_module_names():
+    sites_path = os.path.join(ROOT_PATH, "sites")
+    result = []
+    for file_name in os.listdir(sites_path):
+        if "." in file_name:
+            continue
+
+        if file_name in ["aai_logon", "__pycache__"]:
+            continue
+
+        result.append(file_name)
+    return result
 
 
 class SiteConfigs(NodeConfigs):
     TYPE = "site"
     TITLE_NAME = "Site"
 
-    raw_module_name = ConfigOptions(optional=False, options=["moodle",
-                                                             "nethz",
-                                                             "custom",
-                                                             "video_portal",
-                                                             "ilias",
-                                                             "polybox"])
+    raw_module_name = ConfigOptions(optional=False, options=get_module_names())
     use_folder = ConfigBool(default=True)
     raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active)
     raw_function = FunctionConfigString(active_func=raw_function_active)
