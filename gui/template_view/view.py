@@ -119,5 +119,11 @@ class TemplateView(QWidget):
 
         self.setLayout(self.layout)
 
+    def get_path(self):
+        return self.template_view_tree.template.path
+
+    def save_template_file(self):
+        self.template_view_tree.save_template_file()
+
     def disconnect_connections(self):
         self.template_view_tree.disconnect_connections()

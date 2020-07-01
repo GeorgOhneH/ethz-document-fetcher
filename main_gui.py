@@ -9,7 +9,9 @@ import colorama
 from PyQt5.QtWidgets import QApplication
 
 import gui.main_window
+from core.constants import IS_FROZEN
 from settings.logger import LOGGER_CONFIG
+from settings import global_settings
 
 colorama.init()
 
@@ -22,7 +24,9 @@ def except_hook(cls, exception, traceback):
 
 
 if __name__ == "__main__":
-    sys.excepthook = except_hook
+    if not IS_FROZEN and global_settings.loglevel == "DEBUG":
+        sys.excepthook = except_hook
+
     app = QApplication([])
 
     main_window = gui.main_window.MainWindow()

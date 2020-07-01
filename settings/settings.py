@@ -75,6 +75,15 @@ class TemplatePathSettings(Settings):
                                file_extensions=["yml"])
 
 
+def highlight_difference_active(instance, from_widget):
+    if from_widget:
+        keep_replaced_files = instance.get_config_obj("keep_replaced_files").get_from_widget()
+    else:
+        keep_replaced_files = instance.get_config_obj("keep_replaced_files").get()
+
+    return keep_replaced_files
+
+
 class SiteSettings(Settings):
     NAME = "Site"
     username = ConfigString(optional=True, gui_name="Username")
@@ -85,5 +94,6 @@ class SiteSettings(Settings):
     forbidden_extensions = ConfigList(default=["video"], optional=True, gui_name="Forbidden Extensions",
                                       hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
-    highlight_difference = ConfigBool(default=True, gui_name="Add Highlight Difference to Replaced Files (pdf only)")
+    highlight_difference = ConfigBool(default=True, active_func=highlight_difference_active, gray_out=True,
+                                      gui_name="Add Highlight Difference to Replaced Files (pdf only)")
     force_download = ConfigBool(default=False, gui_name="Force Download")

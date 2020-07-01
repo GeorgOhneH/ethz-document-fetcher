@@ -66,8 +66,11 @@ class TemplateEditDialog(QDialog):
         else:
             raise ValueError
 
-        with open(path, "w+") as f:
-            f.write(yaml.dump(template_dict))
+        try:
+            with open(path, "w+") as f:
+                f.write(yaml.dump(template_dict))
+        except FileNotFoundError:
+            return
 
         try:
             self.template_path_settings.template_path = path

@@ -25,15 +25,22 @@ class NodeConfigs(Configs):
 class TemplateNode(object):
     DEFAULT_ICON_PATH = os.path.join(ASSETS_PATH, "globe.svg")
 
-    def __init__(self, parent, folder_name=None, unique_key_args=None, use_folder=True, is_producer=False):
+    def __init__(self, parent,
+                 folder_name=None,
+                 unique_key_args=None,
+                 use_folder=True,
+                 is_producer=False,
+                 meta_data=None):
+        if meta_data is None:
+            meta_data = {}
+        self.meta_data = meta_data
         self.is_producer = is_producer
         if unique_key_args is None:
             unique_key_args = []
         self.position = None
         self.use_folder = use_folder
         self.parent = parent
-        self.folder = None
-        self.sites = []
+        self.children = []
         self.child_index = self._init_parent()
 
         self.unique_key = self._init_unique_key(self.child_index, *unique_key_args)
@@ -43,21 +50,12 @@ class TemplateNode(object):
         return self.unique_key
 
     def _init_parent(self):
-        raise NotImplementedError()
+        return self.parent.add_node(self)
 
-    def add_site(self, child):
-        if child.parent is None:
-            raise ValueError("Child already has a parent")
-        self.sites.append(child)
-        child.parent = self
-        return f"site:{len(self.sites) - 1}"
-
-    def add_folder(self, folder):
-        if folder.parent is None:
-            raise ValueError("Child already has a parent")
-        self.folder = folder
-        folder.parent = self
-        return "folder"
+    def add_node(self, node):
+        self.children.append(node)
+        node.parent = self
+        return f"{len(self.children) - 1}:"
 
     def _init_base_path(self, folder_name, use_folder):
         if not self.use_folder:
@@ -85,15 +83,17 @@ class TemplateNode(object):
     def convert_to_dict(self, result=None):
         if result is None:
             result = {}
-        result["sites"] = []
 
-        if self.folder is not None:
-            result["folder"] = self.folder.convert_to_dict()
-        for site in self.sites:
-            result["sites"].append(site.convert_to_dict())
+        children = []
 
-        if len(result["sites"]) == 0:
-            del result["sites"]
+        for node in self.children:
+            children.append(node.convert_to_dict())
+
+        if self.meta_data:
+            result["meta_data"] = self.meta_data
+
+        if len(children) > 0:
+            result["children"] = children
 
         return result
 

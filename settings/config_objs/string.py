@@ -105,13 +105,15 @@ class ConfigString(object):
                  depends_on=None,
                  optional=False,
                  gui_name=None,
-                 hint_text=None):
+                 hint_text=None,
+                 gray_out=False):
         if depends_on is None:
             depends_on = []
         self.depends_on = depends_on
         self.default = default
         self.gui_name = gui_name
         self.hint_text = hint_text
+        self.gray_out = gray_out
         self._value = None
         self.active_func = active_func
         self.name = None  # will be set on runtime
@@ -121,8 +123,6 @@ class ConfigString(object):
         self._buffer = None
         self.widget = None
         self.observers = []
-        if default is not None:
-            self.set(default)
 
     def instance_created(self):
         pass
@@ -251,10 +251,10 @@ class ConfigString(object):
     def update_visibility(self):
         if self.widget is None:
             return
-        if self.is_active(from_widget=True):
-            self.widget.show()
+        if self.gray_out:
+            self.widget.setEnabled(self.is_active(from_widget=True))
         else:
-            self.widget.hide()
+            self.widget.setVisible(self.is_active(from_widget=True))
 
     def cancel(self):
         pass

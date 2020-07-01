@@ -20,6 +20,7 @@ class HeaderItem(QTreeWidgetItem):
         self.replaced_count = 0
         self.setText(TreeWidgetItem.COLUMN_NAME, "Name")
         self.setText(TreeWidgetItem.COLUMN_STATE, "State")
+        self.setText(TreeWidgetItem.COLUMN_EMPTY, "")
         self.setTextAlignment(TreeWidgetItem.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.setTextAlignment(TreeWidgetItem.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.set_text_replaced()
@@ -45,7 +46,7 @@ class TemplateViewTree(QTreeWidget):
         super().__init__(parent=parent)
         self.widgets = {}
         self.controller = controller
-        self.setColumnCount(4)
+        self.setColumnCount(5)
         self.header_item = HeaderItem()
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -61,6 +62,8 @@ class TemplateViewTree(QTreeWidget):
             error_dialog.showMessage(f"Error while loading the file. Error: {e}")
         self.init_view_tree()
         self.read_settings()
+
+        self.itemChanged.connect(self.item_changed)
 
         self.connection_map = [
             (signals.stopped, self.stop_widgets),
@@ -102,6 +105,18 @@ class TemplateViewTree(QTreeWidget):
             self.header().restoreGeometry(qsettings.value("templateViewTree/geometry"))
         if qsettings.value("templateViewTree/windowState") is not None:
             self.header().restoreState(qsettings.value("templateViewTree/windowState"))
+
+    def save_template_file(self):
+        logger.debug("Saving Template")
+        for widget in self.widgets.values():
+            node = widget.template_node
+            node.meta_data["check_state"] = int(widget.checkState(TreeWidgetItem.COLUMN_NAME))
+
+        self.template.save_template()
+
+    def item_changed(self, item, column):
+        if column == TreeWidgetItem.COLUMN_NAME:
+            item.update_checked()
 
     @pyqtSlot(str, str)
     def update_folder_name(self, unique_key, folder_name):
@@ -186,7 +201,8 @@ class TemplateViewTree(QTreeWidget):
                                         widget.template_node.parent.base_path is not None)
         if self.controller.thread.isRunning():
             self.controller.thread.finished.connect(lambda template_node=widget.template_node:
-                                                    run_action_recursive.setEnabled(template_node.parent.base_path is not None))
+                                                    run_action_recursive.setEnabled(
+                                                        template_node.parent.base_path is not None))
         run_action_recursive.triggered.connect(
             lambda: self.controller.start_thread(widget.template_node.unique_key, True))
 
@@ -195,7 +211,8 @@ class TemplateViewTree(QTreeWidget):
                               and widget.template_node.parent.base_path is not None)
         if self.controller.thread.isRunning():
             self.controller.thread.finished.connect(lambda template_node=widget.template_node:
-                                                    run_action_recursive.setEnabled(template_node.parent.base_path is not None))
+                                                    run_action_recursive.setEnabled(
+                                                        template_node.parent.base_path is not None))
         run_action.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, False))
 
         menu.addSeparator()
@@ -213,10 +230,8 @@ class TemplateViewTree(QTreeWidget):
         menu.exec_(self.mapToGlobal(point))
 
     def init_view_tree(self):
-        if self.template.root.folder is not None:
-            self.init_widgets(self.template.root.folder, parent=None)
-        for site in self.template.root.sites:
-            self.init_widgets(site, parent=None)
+        for child in self.template.root.children:
+            self.init_widgets(child, parent=None)
 
         for key, widget in self.widgets.items():
             widget.init_widgets()
@@ -224,7 +239,5 @@ class TemplateViewTree(QTreeWidget):
     def init_widgets(self, node, parent):
         widget = self.add_item_widget(node, node.unique_key, parent)
 
-        if node.folder is not None:
-            self.init_widgets(node.folder, parent=widget)
-        for site in node.sites:
-            self.init_widgets(site, parent=widget)
+        for child in node.children:
+            self.init_widgets(child, parent=widget)

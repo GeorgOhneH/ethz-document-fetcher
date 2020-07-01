@@ -26,18 +26,18 @@ class FolderConfigs(NodeConfigs):
 class Folder(TemplateNode):
     FOLDER_ICON_PATH = os.path.join(ASSETS_PATH, "folder.svg")
 
-    def __init__(self, name, parent):
-        super().__init__(parent=parent, folder_name=name, unique_key_args=[name])
+    def __init__(self, name, parent, **kwargs):
+        super().__init__(parent=parent,
+                         folder_name=name,
+                         unique_key_args=[name],
+                         **kwargs)
         self.name = name
 
     def __str__(self):
         return self.name
 
-    def _init_parent(self):
-        return self.parent.add_folder(self)
-
     def convert_to_dict(self, result=None):
-        result = {"name": self.name}
+        result = {"folder": self.name}
         return super().convert_to_dict(result=result)
 
     def get_gui_name(self):

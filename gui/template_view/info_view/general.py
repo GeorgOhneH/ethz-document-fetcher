@@ -39,8 +39,7 @@ class GeneralGroupBox(GroupBox):
             ("Type", None),
             ("State", None),
             ("Path", None),
-            ("Sub-Folder", None),
-            ("Sub-Sites", None),
+            ("Children", None),
         ]
 
         for key, value in attributes:
@@ -53,8 +52,7 @@ class GeneralGroupBox(GroupBox):
             ("Type", selected_widget.template_node.__class__.__name__),
             ("State", selected_widget.state_text()),
             ("Path", selected_widget.template_node.base_path),
-            ("Sub-Folder", bool(selected_widget.template_node.folder)),
-            ("Sub-Sites", len(selected_widget.template_node.sites)),
+            ("Children", len(selected_widget.template_node.children)),
         ]
         for i, (key, value) in enumerate(attributes):
             label = self.layout.itemAt(i).widget()

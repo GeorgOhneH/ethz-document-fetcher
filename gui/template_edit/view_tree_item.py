@@ -33,9 +33,7 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         standard_flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
         if self.item_status == self.STATUS_NEW:
             self.setFlags(standard_flags)
-        elif self.node_configs.TYPE == FolderConfigs.TYPE:
-            self.setFlags(standard_flags | Qt.ItemIsDropEnabled)
-        elif self.node_configs.TYPE == SiteConfigs.TYPE:
+        else:
             self.setFlags(standard_flags | Qt.ItemIsDropEnabled | Qt.ItemIsDragEnabled)
 
     def init_widgets(self):
@@ -56,13 +54,19 @@ class TreeEditWidgetItem(QTreeWidgetItem):
             self.addChildren([folder_child, site_child])
             folder_child.init_widgets()
             site_child.init_widgets()
+
+            sibling = None
             if self.node_configs.TYPE == SiteConfigs.TYPE:
-                site_sibling = TreeEditWidgetItem(SiteConfigs(), self.STATUS_NEW)
+                sibling = TreeEditWidgetItem(SiteConfigs(), self.STATUS_NEW)
+            elif self.node_configs.TYPE == FolderConfigs.TYPE:
+                sibling = TreeEditWidgetItem(FolderConfigs(), self.STATUS_NEW)
+
+            if sibling is not None:
                 if self.parent() is None:
-                    self.treeWidget().addTopLevelItem(site_sibling)
+                    self.treeWidget().addTopLevelItem(sibling)
                 else:
-                    self.parent().addChild(site_sibling)
-                site_sibling.init_widgets()
+                    self.parent().addChild(sibling)
+                sibling.init_widgets()
 
             self.item_status = self.STATUS_SET
             self.set_flags()

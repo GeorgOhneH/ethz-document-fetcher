@@ -82,6 +82,7 @@ class CentralWidget(QWidget):
 
     def clean_up(self):
         self.stop_thread()
+        self.template_view.save_template_file()
 
     def start_thread(self, unique_key="root", recursive=True):
         if not self.site_settings.check_if_valid():
@@ -130,9 +131,9 @@ class CentralWidget(QWidget):
         self.template_edit_dialog.open()
 
     def apply_edit(self):
-        self.open_file(file_path=self.get_template_path())
+        self.open_file(file_path=self.get_template_path(), file_changed=True)
 
-    def open_file(self, checked=None, file_path=None):
+    def open_file(self, checked=None, file_path=None, file_changed=False):
         if file_path is None:
             config_obj = self.template_path_settings.get_config_obj("template_path")
             current_template_path = self.get_template_path()
@@ -151,14 +152,15 @@ class CentralWidget(QWidget):
         self.template_path_settings.save()
 
         if self.thread.isRunning():
-            self.thread_finished_open_file_func = lambda: self._open_file(self.get_template_path())
+            self.thread_finished_open_file_func = lambda: self._open_file(self.get_template_path(),
+                                                                          file_changed=file_changed)
             self.thread.finished.connect(self.thread_finished_open_file_func)
             self.stop_thread()
             return
 
-        self._open_file(self.get_template_path())
+        self._open_file(self.get_template_path(), file_changed=file_changed)
 
-    def _open_file(self, template_path):
+    def _open_file(self, template_path, file_changed):
         if self.thread_finished_open_file_func is not None:
             try:
                 self.thread.finished.disconnect(self.thread_finished_open_file_func)
@@ -166,6 +168,8 @@ class CentralWidget(QWidget):
                 pass
 
         self.template_view.disconnect_connections()
+        if template_path != self.template_view.get_path() or not file_changed:
+            self.template_view.save_template_file()
         new_template_view = TemplateView(template_path, self.worker.signals, self, self)
         self.grid.replaceWidget(self.template_view, new_template_view)
         self.template_view = new_template_view

@@ -44,74 +44,6 @@ class MovieLabel(QLabel):
         self.movie.start()
 
 
-class TreeWidgetItemName(QWidget):
-    LOADING_GIF_PATH = os.path.join(ASSETS_PATH, "loading.gif")
-    IDLE_IMAGE_PATH = os.path.join(ASSETS_PATH, "idle.png")
-    WARNING_SVG_PATH = os.path.join(ASSETS_PATH, "warning.svg")
-    ERROR_SVG_PATH = os.path.join(ASSETS_PATH, "error.svg")
-    SUCCESS_SVG_PATH = os.path.join(ASSETS_PATH, "success.svg")
-
-    def __init__(self, text, parent=None):
-        super().__init__(parent=parent)
-        self.text = QLabel()
-        self.text.setText(text)
-        self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        size = self.text.minimumSizeHint().height()
-
-        self.stateWidget = QStackedWidget()
-        self.stateWidget.setMaximumSize(size, size)
-
-        main_layout = QHBoxLayout()
-        main_layout.setAlignment(Qt.AlignLeft)
-        main_layout.setContentsMargins(2, 2, 2, 2)
-        main_layout.addWidget(self.text)
-        main_layout.addWidget(self.stateWidget)
-
-        self.setLayout(main_layout)
-
-        self.loading_movie = MovieLabel(self.LOADING_GIF_PATH, size, size, self)
-        self.idle_image = ImageLabel(self.IDLE_IMAGE_PATH, size, size, self)
-        self.warning_svg = SVGWidget(self.WARNING_SVG_PATH, size, size, self)
-        self.error_svg = SVGWidget(self.ERROR_SVG_PATH, size, size, self)
-        self.success_svg = SVGWidget(self.SUCCESS_SVG_PATH, size, size, self)
-
-        self.stateWidget.addWidget(self.loading_movie)
-        self.stateWidget.addWidget(self.idle_image)
-        self.stateWidget.addWidget(self.warning_svg)
-        self.stateWidget.addWidget(self.error_svg)
-        self.stateWidget.addWidget(self.success_svg)
-
-        self.set_idle()
-
-    def set_idle(self):
-        self.stateWidget.hide()
-        self.stateWidget.setCurrentWidget(self.idle_image)
-
-    def set_loading(self, msg=None):
-        if msg is not None:
-            self.loading_movie.setToolTip(msg)
-        self.stateWidget.show()
-        self.stateWidget.setCurrentWidget(self.loading_movie)
-
-    def set_error(self, msg=None):
-        if msg is not None:
-            self.error_svg.setToolTip(msg)
-        self.stateWidget.show()
-        self.stateWidget.setCurrentWidget(self.error_svg)
-
-    def set_warning(self, msg=None):
-        if msg is not None:
-            self.warning_svg.setToolTip(msg)
-        self.stateWidget.show()
-        self.stateWidget.setCurrentWidget(self.warning_svg)
-
-    def set_success(self, msg=None):
-        if msg is not None:
-            self.success_svg.setToolTip(msg)
-        self.stateWidget.show()
-        self.stateWidget.setCurrentWidget(self.success_svg)
-
-
 class TreeWidgetItemSignals(QObject):
     data_changed = pyqtSignal(object)
 
@@ -125,16 +57,17 @@ class TreeWidgetItem(QTreeWidgetItem):
     STATE_SUCCESS = 5
 
     COLUMN_NAME = 0
-    COLUMN_ADDED_FILE = 1
-    COLUMN_REPLACED_FILE = 2
-    COLUMN_STATE = 3
+    COLUMN_STATE = 1
+    COLUMN_ADDED_FILE = 2
+    COLUMN_REPLACED_FILE = 3
+    COLUMN_EMPTY = 4
 
     def __init__(self, template_node, controller):
         super().__init__()
         self.template_node = template_node
         self.controller = controller
         self.signals = TreeWidgetItemSignals()
-        self.name_widget = TreeWidgetItemName(template_node.get_gui_name())
+        self.state_widget = TreeWidgetItemState()
 
         self.added_new_file_count = 0
         self.replaced_file_count = 0
@@ -147,11 +80,13 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.controller.settings_dialog.accepted.connect(self.emit_data_changed)
 
     def init_widgets(self):
-        self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)
+        self.setText(self.COLUMN_NAME, self.template_node.get_gui_name())
         self.setIcon(self.COLUMN_NAME, self.template_node.get_gui_icon())
+        self.setCheckState(self.COLUMN_NAME, self.template_node.meta_data.get("check_state", Qt.Checked))
         self.setExpanded(True)
         if not self.template_node.is_producer:
             return
+        self.treeWidget().setItemWidget(self, self.COLUMN_STATE, self.state_widget)
         self._set_state(self.STATE_IDLE)
         self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
         self.setTextAlignment(self.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
@@ -195,26 +130,25 @@ class TreeWidgetItem(QTreeWidgetItem):
 
     def _set_state(self, state):
         self.state = state
-        self.setText(self.COLUMN_STATE, self.state_to_string(state))
         self.emit_data_changed()
 
     def set_idle(self):
         self.active_item_count = 0
         self._set_state(self.STATE_IDLE)
-        self.name_widget.set_idle()
+        self.state_widget.set_idle()
 
     def set_loading(self, msg=None):
         self.active_item_count += 1
         self._set_state(self.STATE_LOADING)
-        self.name_widget.set_loading(msg)
+        self.state_widget.set_loading(msg)
 
     def set_error(self, msg=None):
         self._set_state(self.STATE_ERROR)
-        self.name_widget.set_error(msg)
+        self.state_widget.set_error(msg)
 
     def set_warning(self, msg=None):
         self._set_state(self.STATE_WARNING)
-        self.name_widget.set_warning(msg)
+        self.state_widget.set_warning(msg)
 
     def set_success(self, msg=None):
         self.active_item_count -= 1
@@ -222,11 +156,11 @@ class TreeWidgetItem(QTreeWidgetItem):
             logger.warning("Active count is negative")
         if self.active_item_count == 0 and self.state not in [self.STATE_ERROR, self.STATE_WARNING]:
             self._set_state(self.STATE_SUCCESS)
-            self.name_widget.set_success(msg)
+            self.state_widget.set_success(msg)
 
     def set_folder_name(self, folder_name):
         self.template_node.folder_name = folder_name
-        self.name_widget.text.setText(folder_name)
+        self.setText(self.COLUMN_NAME, folder_name)
         self.emit_data_changed()
 
     def set_base_path(self, base_path):
@@ -253,3 +187,125 @@ class TreeWidgetItem(QTreeWidgetItem):
             "timestamp": int(time.time()),
         })
         self.emit_data_changed()
+
+    def update_checked(self):
+        state = self.checkState(self.COLUMN_NAME)
+        if not self.template_node.is_producer and state in [Qt.Checked, Qt.Unchecked]:
+            self.update_checked_children(state=state)
+
+        self.update_checked_parents()
+
+    def update_checked_children(self, state):
+        self.setCheckState(self.COLUMN_NAME, state)
+        for i in range(self.childCount()):
+            child = self.child(i)
+            child.update_checked_children(state)
+
+    def update_checked_parents(self, previous_state=None):
+        if self.parent() is None:
+            return
+
+        if previous_state == Qt.PartiallyChecked:
+            item_state = Qt.PartiallyChecked
+        else:
+            item_state = self.parent().get_state(only_children=True)
+
+        if not self.parent().template_node.is_producer:
+            self.parent().setCheckState(self.COLUMN_NAME, item_state)
+        self.parent().update_checked_parents(item_state)
+
+    def get_state(self, only_children=False):
+        state = None
+        for i in range(self.childCount()):
+            child = self.child(i)
+            child_state = child.get_state()
+            if child_state == Qt.PartiallyChecked:
+                return Qt.PartiallyChecked
+            if state is None:
+                state = child_state
+            elif state != child_state:
+                return Qt.PartiallyChecked
+
+        if only_children:
+            return state
+
+        if state is None:
+            return self.checkState(self.COLUMN_NAME)
+
+        if self.checkState(self.COLUMN_NAME) == state:
+            return state
+        else:
+            return Qt.PartiallyChecked
+
+
+
+class TreeWidgetItemState(QWidget):
+    LOADING_GIF_PATH = os.path.join(ASSETS_PATH, "loading.gif")
+    IDLE_IMAGE_PATH = os.path.join(ASSETS_PATH, "idle.png")
+    WARNING_SVG_PATH = os.path.join(ASSETS_PATH, "warning.svg")
+    ERROR_SVG_PATH = os.path.join(ASSETS_PATH, "error.svg")
+    SUCCESS_SVG_PATH = os.path.join(ASSETS_PATH, "success.svg")
+
+    def __init__(self, state=TreeWidgetItem.STATE_IDLE, parent=None):
+        super().__init__(parent=parent)
+        self.text = QLabel(TreeWidgetItem.state_to_string(state))
+        self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        size = self.text.minimumSizeHint().height()
+
+        self.stateWidget = QStackedWidget()
+        self.stateWidget.setMaximumSize(size, size)
+
+        main_layout = QHBoxLayout()
+        main_layout.setAlignment(Qt.AlignLeft)
+        main_layout.setContentsMargins(2, 2, 2, 2)
+        main_layout.addWidget(self.stateWidget)
+        main_layout.addWidget(self.text)
+
+        self.setLayout(main_layout)
+
+        self.loading_movie = MovieLabel(self.LOADING_GIF_PATH, size, size, self)
+        self.idle_image = ImageLabel(self.IDLE_IMAGE_PATH, size, size, self)
+        self.warning_svg = SVGWidget(self.WARNING_SVG_PATH, size, size, self)
+        self.error_svg = SVGWidget(self.ERROR_SVG_PATH, size, size, self)
+        self.success_svg = SVGWidget(self.SUCCESS_SVG_PATH, size, size, self)
+
+        self.stateWidget.addWidget(self.loading_movie)
+        self.stateWidget.addWidget(self.idle_image)
+        self.stateWidget.addWidget(self.warning_svg)
+        self.stateWidget.addWidget(self.error_svg)
+        self.stateWidget.addWidget(self.success_svg)
+
+        self.set_idle()
+
+    def set_idle(self):
+        self.stateWidget.hide()
+        self.stateWidget.setCurrentWidget(self.idle_image)
+        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_IDLE))
+
+    def set_loading(self, msg=None):
+        if msg is not None:
+            self.loading_movie.setToolTip(msg)
+        self.stateWidget.show()
+        self.stateWidget.setCurrentWidget(self.loading_movie)
+        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_LOADING))
+
+    def set_error(self, msg=None):
+        if msg is not None:
+            self.error_svg.setToolTip(msg)
+        self.stateWidget.show()
+        self.stateWidget.setCurrentWidget(self.error_svg)
+        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_ERROR))
+
+    def set_warning(self, msg=None):
+        if msg is not None:
+            self.warning_svg.setToolTip(msg)
+        self.stateWidget.show()
+        self.stateWidget.setCurrentWidget(self.warning_svg)
+        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_WARNING))
+
+    def set_success(self, msg=None):
+        if msg is not None:
+            self.success_svg.setToolTip(msg)
+        self.stateWidget.show()
+        self.stateWidget.setCurrentWidget(self.success_svg)
+        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_SUCCESS))

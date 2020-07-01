@@ -6,6 +6,7 @@ from typing import Iterator
 from collections.abc import Mapping
 
 from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, ConfigOptions, ConfigString
+from settings.config_objs.constants import NotSet
 from settings.constants import SEPARATOR, CONFIG_PATH
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,9 @@ class Configs(metaclass=ConfigBase):
             config_obj.instance = self
         for config_obj in self:
             config_obj.instance_created()
+        for config_obj in self:
+            if config_obj.default is not None:
+                config_obj.set(config_obj.default)
 
     def get_config_obj(self, name: str) -> ConfigString:
         return self._config_objs[name]

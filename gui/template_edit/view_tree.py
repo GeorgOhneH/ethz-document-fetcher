@@ -75,13 +75,10 @@ class TemplateEditViewTree(QTreeWidget):
         (item.parent() or root).removeChild(item)
 
     def init_view_tree(self):
-        if self.template.root.folder is None:
-            self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW)
-        else:
-            self.init_widgets(self.template.root.folder, parent=None)
-        for site in self.template.root.sites:
-            self.init_widgets(site, parent=None)
+        for child in self.template.root.children:
+            self.init_widgets(child, parent=None)
         self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW)
+        self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW)
 
         for widget in self.widgets:
             widget.init_widgets()
@@ -89,14 +86,10 @@ class TemplateEditViewTree(QTreeWidget):
     def init_widgets(self, node, parent):
         widget = self.add_item_widget(node.get_configs(), TreeEditWidgetItem.STATUS_SET, parent)
 
-        if node.folder is None:
-            self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW, widget_parent=widget)
-        else:
-            self.init_widgets(node.folder, parent=widget)
-
-        for site in node.sites:
-            self.init_widgets(site, parent=widget)
+        for child in node.children:
+            self.init_widgets(child, parent=widget)
         self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW, widget_parent=widget)
+        self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW, widget_parent=widget)
 
     def convert_to_dict(self):
         template = template_parser.Template(path=None)

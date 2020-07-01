@@ -2,8 +2,8 @@ from core.template_parser.nodes.base import TemplateNode
 
 
 class Root(TemplateNode):
-    def __init__(self):
-        super().__init__(parent=None)
+    def __init__(self, **kwargs):
+        super().__init__(parent=None, **kwargs)
 
     def _init_parent(self):
         return None

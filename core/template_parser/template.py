@@ -24,10 +24,8 @@ class Template(object):
     def __iter__(self):
         def gen(node):
             yield node
-            if node.folder is not None:
-                yield from gen(node.folder)
-            for site in node.sites:
-                yield from gen(site)
+            for child_node in node.children:
+                yield from gen(child_node)
 
         return gen(self.root)
 
@@ -46,50 +44,51 @@ class Template(object):
 
     def load_data(self, path):
         with open(path) as f:
-            data = yaml.load(f, Loader=yaml.Loader)
+            return yaml.load(f, Loader=yaml.Loader)
 
-        return data
+    def save_template(self):
+        data = self.root.convert_to_dict()
+        with open(self.path, "w+") as f:
+            yaml.dump(data=data, stream=f, Dumper=yaml.Dumper, default_flow_style=False, sort_keys=False)
 
     def convert_to_dict(self):
         return self.root.convert_to_dict()
 
     def parse_template(self):
-        if "folder" in self.data:
-            self.parse_folder(data=self.data["folder"], parent=self.root)
-        if "sites" in self.data:
-            self.parse_sites(data=self.data["sites"], parent=self.root)
+        if "children" in self.data:
+            self.parse_children(data=self.data["children"], parent=self.root)
 
-    def parse_folder(self, data, parent):
-        if "name" not in data:
-            raise ParseTemplateError("Expected a 'name' field in folder")
+    def parse_children(self, data, parent):
+        for node_dict in data:
+            if "module" in node_dict and "folder" in node_dict:
+                raise ParseTemplateError("Got module and folder node")
 
-        folder = Folder(name=data["name"],
-                        parent=parent)
+            children = node_dict.pop("children", None)
 
-        if "sites" in data:
-            self.parse_sites(data=data["sites"], parent=folder)
+            if "module" in node_dict:
+                child_node = self.parse_site(p_kwargs=node_dict, parent=parent)
 
-        if "folder" in data:
-            self.parse_folder(data=data["folder"], parent=folder)
-
-    def parse_sites(self, data, parent):
-        for producer_dict in data:
-            if "module" in producer_dict and "folder" in producer_dict:
-                raise ParseTemplateError("only module or folder allowed, not both")
-
-            if "module" in producer_dict:
-                self.parse_producer(p_kwargs=producer_dict, parent=parent)
-
-            elif "folder" in producer_dict:
-                self.parse_folder(data=producer_dict["folder"], parent=parent)
+            elif "folder" in node_dict:
+                child_node = self.parse_folder(data=node_dict, parent=parent)
             else:
                 raise ParseTemplateError("'module' or 'folder' field required")
 
-    def parse_producer(self, p_kwargs, parent):
-        raw_module_name = p_kwargs.pop("module")
+            if children is not None:
+                self.parse_children(children, child_node)
 
-        sub_sites = p_kwargs.pop("sites", None)
-        folder = p_kwargs.pop("folder", None)
+    def parse_folder(self, data, parent):
+        name = data["folder"]
+
+        meta_data = data.pop("meta_data", None)
+
+        folder = Folder(name=name,
+                        meta_data=meta_data,
+                        parent=parent)
+
+        return folder
+
+    def parse_site(self, p_kwargs, parent):
+        raw_module_name = p_kwargs.pop("module")
 
         raw_folder_name = p_kwargs.pop("folder_name", None)
         use_folder = p_kwargs.pop("use_folder", True)
@@ -97,6 +96,8 @@ class Template(object):
 
         raw_function = p_kwargs.pop("function", None)
         raw_folder_function = p_kwargs.pop("folder_function", None)
+
+        meta_data = p_kwargs.pop("meta_data", None)
 
         site = Site(
             raw_module_name=raw_module_name,
@@ -106,13 +107,11 @@ class Template(object):
             raw_folder_function=raw_folder_function,
             function_kwargs=p_kwargs,
             consumer_kwargs=consumer_kwargs,
+            meta_data=meta_data,
             parent=parent
         )
 
-        if sub_sites is not None:
-            self.parse_sites(data=sub_sites, parent=site)
-        if folder is not None:
-            self.parse_folder(data=folder, parent=site)
+        return site
 
     async def run_root(self, producers, session, queue, site_settings, cancellable_pool):
         await self.run(self.root,
@@ -134,6 +133,7 @@ class Template(object):
 
     async def run(self, node, producers, session, queue, site_settings, cancellable_pool, recursive=True):
         if node.parent is not None and node.parent.base_path is None:
+            self.signal_handler.quit_with_error(node.unique_key, "Parent needs to run first")
             return
 
         tasks = []
@@ -150,10 +150,8 @@ class Template(object):
             tasks.append(asyncio.ensure_future(coroutine))
 
         if recursive and node.base_path is not None:
-            if node.folder is not None:
-                tasks.append(self.run(node.folder, producers, session, queue, site_settings, cancellable_pool))
-            for site in node.sites:
-                tasks.append(self.run(site, producers, session, queue, site_settings, cancellable_pool))
+            for child in node.children:
+                tasks.append(self.run(child, producers, session, queue, site_settings, cancellable_pool))
         await asyncio.gather(*tasks)
 
     def add_producer_exception_handler(self, coroutine, node):

@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import bs4
 from bs4 import BeautifulSoup
@@ -12,6 +13,11 @@ try:
 except bs4.FeatureNotFound:
     logger.warning("It appears that 'lxml' is not installed. Falling back to 'html.parser'")
     BEAUTIFUL_SOUP_PARSER = "html.parser"
+
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    IS_FROZEN = True
+else:
+    IS_FROZEN = False
 
 FORCE_DOWNLOAD_BLACKLIST = ["ilias-app2.let.ethz.ch", "polybox.ethz.ch"]
 

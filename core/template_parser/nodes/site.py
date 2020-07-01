@@ -34,7 +34,8 @@ class Site(TemplateNode):
                  raw_folder_function,
                  function_kwargs,
                  consumer_kwargs,
-                 parent):
+                 parent,
+                 **kwargs):
         super().__init__(parent=parent,
                          folder_name=raw_folder_name,
                          unique_key_args=[
@@ -47,7 +48,8 @@ class Site(TemplateNode):
                              function_kwargs,
                          ],
                          use_folder=use_folder,
-                         is_producer=True)
+                         is_producer=True,
+                         **kwargs)
         self.raw_module_name = raw_module_name
         self.function_kwargs = function_kwargs
         self.consumer_kwargs = consumer_kwargs
@@ -62,9 +64,6 @@ class Site(TemplateNode):
         self.module_name, self.function_name = self.get_module_func_name(raw_module_name,
                                                                          raw_function)
         self.folder_name = self.get_folder_name(raw_folder_name, self.unique_key)
-
-    def _init_parent(self):
-        return self.parent.add_site(self)
 
     @staticmethod
     def get_folder_name(raw_folder_name, unique_key):
@@ -126,8 +125,8 @@ class Site(TemplateNode):
     def convert_to_dict(self, result=None):
         attributes = {
             "module": self.raw_module_name,
-            "folder_name": self.raw_folder_name,
             "use_folder": self.use_folder,
+            "folder_name": self.raw_folder_name,
             "function": self.raw_function,
             "folder_function": self.raw_folder_function,
             **self.function_kwargs,

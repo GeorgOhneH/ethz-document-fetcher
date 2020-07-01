@@ -91,6 +91,9 @@ class ConfigDict(ConfigString):
             config_obj.instance = self.instance
         for name, config_obj in layout.items():
             config_obj.instance_created()
+        for name, config_obj in layout.items():
+            if config_obj.default is not None:
+                config_obj.set(config_obj.default)
 
     def _get(self):
         result = {}

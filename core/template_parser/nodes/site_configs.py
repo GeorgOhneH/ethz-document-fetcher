@@ -19,6 +19,7 @@ from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.constants import POSSIBLE_CONSUMER_KWARGS
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
+import sites
 from gui.constants import SITE_ICON_PATH
 from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigList
 from settings import global_settings
@@ -197,7 +198,8 @@ class SiteConfigs(NodeConfigs):
 
     raw_module_name = ConfigOptions(optional=False, options=get_module_names(), gui_name="Module")
     use_folder = ConfigBool(default=True, gui_name="Use Folder")
-    raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active, gui_name="Folder Name")
+    raw_folder_name = ConfigString(optional=True, active_func=raw_folder_name_active,
+                                   gui_name="Folder Name", gray_out=True)
     raw_function = FunctionConfigString(active_func=raw_function_active, gui_name="Function")
     raw_folder_function = FunctionFolderConfigString(active_func=folder_function_active, gui_name="Function for Folder")
 
