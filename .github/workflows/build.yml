@@ -13,16 +13,25 @@ jobs:
   check_release:
     name: Check Release
     runs-on: ubuntu-latest
+    outputs:
+      latest_release: ${{ steps.release_info.outputs.latest_release }}
+      current_version: ${{ steps.release_info.outputs.current_version }}
     steps:
     - name: Checkout code
       uses: actions/checkout@master
     - name: Get Release Info
       id: release_info
-      run: sh release_info.sh
+      run: |
+        LATEST_RELEASE="$(curl -s https://api.github.com/repos/GeorgOhneH/ethz-document-fetcher/releases/latest | jq -r '.tag_name')"
+        CURRENT_VERSION="$(cat version.txt)"
+
+        echo "::set-output name=latest_release::$LATEST_RELEASE"
+        echo "::set-output name=current_version::$CURRENT_VERSION"
+      shell: sh
 
   build:
     needs: check_release
-    if: (check_release.steps.release_info.outputs.latest_release != check_release.steps.release_info.outputs.current_version)
+    if: (needs.check_release.outputs.latest_release != needs.check_release.outputs.current_version)
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -40,6 +49,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+        shell: cmd
 
       # WINDOWS
       - name: Build (Windows)
