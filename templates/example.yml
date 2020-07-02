@@ -1,11 +1,11 @@
 children:
-- children:
-  - folder_name: Polybox Folder
+- folder: Minimal Example
+  meta_data:
+    check_state: 2
+  children:
+  - module: polybox
+    use_folder: true
+    folder_name: Polybox Folder
     id: YrFA3IT7FhemOAs
     meta_data:
       check_state: 2
-    module: polybox
-    use_folder: true
-  folder: Minimal Example
-  meta_data:
-    check_state: 2

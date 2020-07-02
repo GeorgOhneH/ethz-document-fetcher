@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import *
 from gui.template_view import TemplateView
 from gui.template_edit import TemplateEditDialog
 from gui.worker import Worker
+from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.settings import SettingsDialog
 from gui.constants import ROOT_PATH
 from gui.utils import format_bytes
@@ -23,16 +24,12 @@ class CentralWidget(QWidget):
         super().__init__(parent=parent)
         self.actions = actions
         self.start_time = time.time()
-        self.downloaded_bytes = 0
         self.thread_finished_open_file_func = None
         self.template_path_settings = TemplatePathSettings()
 
-        self.one_second_timer = QTimer()
-        self.one_second_timer.timeout.connect(self.monitor_download_show)
         self.status_bar = self.parent().statusBar()
-        self.monitor_download_widget = QLabel()
-        self.monitor_download_widget.setText(format_bytes(self.downloaded_bytes) + "/s")
-        self.status_bar.addPermanentWidget(self.monitor_download_widget)
+        self.download_speed_widget = DownloadSpeedWidget()
+        self.status_bar.addPermanentWidget(self.download_speed_widget)
 
         self.site_settings = SiteSettings()
 
@@ -41,7 +38,7 @@ class CentralWidget(QWidget):
         self.worker.moveToThread(self.thread)
         self.worker.signals.finished.connect(self.quit_thread)
         self.thread.started.connect(self.worker.main)
-        self.worker.signals.downloaded_content_length.connect(self.monitor_download)
+        self.worker.signals.downloaded_content_length.connect(self.download_speed_widget.monitor_download)
 
         self.grid = QGridLayout()
         self.grid.setContentsMargins(17, 0, 17, 0)
@@ -78,8 +75,6 @@ class CentralWidget(QWidget):
         self.grid.addWidget(self.template_view)
         self.setLayout(self.grid)
 
-        self.one_second_timer.start(1000)
-
     def clean_up(self):
         self.stop_thread()
         self.template_view.save_template_file()
@@ -89,6 +84,8 @@ class CentralWidget(QWidget):
             self.open_settings()
             return
 
+        self.download_speed_widget.reset()
+
         self.start_time = time.time()
         self.btn_run.setText("Running...")
         self.btn_run.setEnabled(False)
@@ -96,6 +93,7 @@ class CentralWidget(QWidget):
 
         self.btn_stop.setEnabled(True)
         self.actions.stop.setEnabled(True)
+
 
         self.worker.unique_key = unique_key
         self.worker.recursive = recursive
@@ -181,10 +179,3 @@ class CentralWidget(QWidget):
             return self.template_path_settings.template_path
 
         return os.path.join(ROOT_PATH, self.template_path_settings.template_path)
-
-    def monitor_download(self, size):
-        self.downloaded_bytes += size
-
-    def monitor_download_show(self):
-        self.monitor_download_widget.setText(format_bytes(self.downloaded_bytes) + "/s")
-        self.downloaded_bytes = 0
