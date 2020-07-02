@@ -39,6 +39,7 @@ class GeneralGroupBox(GroupBox):
             ("Type", None),
             ("State", None),
             ("Path", None),
+            ("Selected", None),
             ("Children", None),
         ]
 
@@ -52,6 +53,7 @@ class GeneralGroupBox(GroupBox):
             ("Type", selected_widget.template_node.__class__.__name__),
             ("State", selected_widget.state_text()),
             ("Path", selected_widget.template_node.base_path),
+            ("Selected", "No" if selected_widget.checkState(selected_widget.COLUMN_NAME) == Qt.Unchecked else "Yes"),
             ("Children", len(selected_widget.template_node.children)),
         ]
         for i, (key, value) in enumerate(attributes):

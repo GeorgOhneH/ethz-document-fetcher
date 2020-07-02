@@ -6,7 +6,10 @@ import encodings.idna  # This import is important, else aiohttp won't be able to
 freeze_support()
 
 import colorama
-from PyQt5.QtWidgets import QApplication
+
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 import gui.main_window
 from core.constants import IS_FROZEN

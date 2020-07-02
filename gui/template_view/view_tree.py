@@ -117,6 +117,14 @@ class TemplateViewTree(QTreeWidget):
     def item_changed(self, item, column):
         if column == TreeWidgetItem.COLUMN_NAME:
             item.update_checked()
+        item.emit_data_changed()
+
+    def set_check_state_to_all(self, state):
+        for widget in self.widgets.values():
+            widget.setCheckState(widget.COLUMN_NAME, state)
+
+    def get_checked(self):
+        return [widget for widget in self.widgets.values() if widget.checkState(widget.COLUMN_NAME) != Qt.Unchecked]
 
     @pyqtSlot(str, str)
     def update_folder_name(self, unique_key, folder_name):
@@ -204,7 +212,7 @@ class TemplateViewTree(QTreeWidget):
                                                     run_action_recursive.setEnabled(
                                                         template_node.parent.base_path is not None))
         run_action_recursive.triggered.connect(
-            lambda: self.controller.start_thread(widget.template_node.unique_key, True))
+            lambda: self.controller.start_thread([widget.template_node.unique_key], True))
 
         run_action = menu.addAction("Run")
         run_action.setEnabled(not self.controller.thread.isRunning()
@@ -213,7 +221,7 @@ class TemplateViewTree(QTreeWidget):
             self.controller.thread.finished.connect(lambda template_node=widget.template_node:
                                                     run_action_recursive.setEnabled(
                                                         template_node.parent.base_path is not None))
-        run_action.triggered.connect(lambda: self.controller.start_thread(widget.template_node.unique_key, False))
+        run_action.triggered.connect(lambda: self.controller.start_thread([widget.template_node.unique_key], False))
 
         menu.addSeparator()
 

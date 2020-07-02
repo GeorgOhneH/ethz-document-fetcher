@@ -121,15 +121,20 @@ class Template(object):
                        site_settings=site_settings,
                        cancellable_pool=cancellable_pool)
 
-    async def run_from_unique_key(self, unique_key, producers, session, queue,
-                                  site_settings, cancellable_pool, recursive):
-        await self.run(node=self.nodes[unique_key],
-                       producers=producers,
-                       session=session,
-                       queue=queue,
-                       site_settings=site_settings,
-                       cancellable_pool=cancellable_pool,
-                       recursive=recursive)
+    async def run_from_unique_keys(self, unique_keys, producers, session, queue,
+                                   site_settings, cancellable_pool, recursive):
+        tasks = []
+        for unique_key in unique_keys:
+            coroutine = self.run(node=self.nodes[unique_key],
+                                 producers=producers,
+                                 session=session,
+                                 queue=queue,
+                                 site_settings=site_settings,
+                                 cancellable_pool=cancellable_pool,
+                                 recursive=recursive)
+            tasks.append(coroutine)
+
+        await asyncio.gather(*tasks)
 
     async def run(self, node, producers, session, queue, site_settings, cancellable_pool, recursive=True):
         if node.parent is not None and node.parent.base_path is None:

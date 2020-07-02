@@ -39,7 +39,7 @@ class Worker(QObject):
         super().__init__()
         self.signals = Signals()
 
-        self.unique_key = "root"
+        self.unique_keys = ["root"]
         self.recursive = True
         self.site_settings = None
         self.template_path = None
@@ -98,13 +98,13 @@ class Worker(QObject):
                 logger.debug("Starting consumers")
                 consumers = [asyncio.ensure_future(downloader.download_files(session, queue)) for _ in range(20)]
 
-                await template.run_from_unique_key(self.unique_key,
-                                                   producers=producers,
-                                                   session=session,
-                                                   queue=queue,
-                                                   site_settings=self.site_settings,
-                                                   cancellable_pool=cancellable_pool,
-                                                   recursive=self.recursive)
+                await template.run_from_unique_keys(self.unique_keys,
+                                                    producers=producers,
+                                                    session=session,
+                                                    queue=queue,
+                                                    site_settings=self.site_settings,
+                                                    cancellable_pool=cancellable_pool,
+                                                    recursive=self.recursive)
 
                 await user_statistics_future
 

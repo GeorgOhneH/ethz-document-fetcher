@@ -17,8 +17,10 @@ class Actions(object):
         self.exit_app.setStatusTip("Exit application")
         self.exit_app.triggered.connect(qApp.quit)
 
-        self.run = QAction("&Run")
+        self.run = QAction("&Run All")
         self.run.setShortcut("Ctrl+X")
+
+        self.run_checked = QAction("&Run Selected")
 
         self.stop = QAction("&Stop")
         self.stop.setShortcut("Ctrl+C")
@@ -62,6 +64,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.actions.exit_app)
         run_menu = menu_bar.addMenu("&Run")
         run_menu.addAction(self.actions.run)
+        run_menu.addAction(self.actions.run_checked)
         run_menu.addAction(self.actions.stop)
         self.setWindowTitle('eth document fetcher')
         self.setCentralWidget(self.central_widget)

@@ -5,7 +5,7 @@ children:
   children:
   - folder: Video Portal
     meta_data:
-      check_state: 0
+      check_state: 2
     children:
     - module: video_portal
       use_folder: true
@@ -22,7 +22,7 @@ children:
       semester: spring
       year: 2020
       meta_data:
-        check_state: 0
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 227-0002-00L
@@ -31,7 +31,7 @@ children:
       semester: spring
       year: 2020
       meta_data:
-        check_state: 0
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 227-0002-00L
@@ -58,13 +58,13 @@ children:
       semester: autumn
       year: 2019
       meta_data:
-        check_state: 0
+        check_state: 2
     - module: polybox
       use_folder: true
       folder_name: NuS2 Podcast
       id: SU2lkCtdoLH3X1w
       meta_data:
-        check_state: 0
+        check_state: 2
   - module: moodle
     use_folder: true
     id: 11838

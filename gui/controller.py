@@ -48,9 +48,13 @@ class CentralWidget(QWidget):
         self.button_container.layout().setContentsMargins(0, 11, 0, 0)
         self.button_container.layout().setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
-        self.btn_run = QPushButton("Run")
+        self.btn_run_all = QPushButton("Run All")
         actions.run.triggered.connect(lambda: self.start_thread())
-        self.btn_run.pressed.connect(self.start_thread)
+        self.btn_run_all.pressed.connect(self.start_thread)
+
+        self.btn_run_checked = QPushButton("Run Selected")
+        actions.run_checked.triggered.connect(self.start_thread_checked)
+        self.btn_run_checked.pressed.connect(self.start_thread_checked)
 
         self.btn_stop = QPushButton("Stop")
         self.btn_stop.setEnabled(False)
@@ -58,8 +62,22 @@ class CentralWidget(QWidget):
         actions.stop.setEnabled(False)
         self.btn_stop.pressed.connect(self.stop_thread)
 
-        self.button_container.layout().addWidget(self.btn_run)
+        line = QFrame()
+        line.setFrameShape(QFrame.VLine)
+        line.setLineWidth(1)
+        line.setStyleSheet("color: gray;")
+
+        self.btn_check_all = QPushButton("Select All")
+        self.btn_check_all.pressed.connect(lambda: self.template_view.check_all())
+        self.btn_uncheck_all = QPushButton("Select None")
+        self.btn_uncheck_all.pressed.connect(lambda: self.template_view.uncheck_all())
+
+        self.button_container.layout().addWidget(self.btn_run_all)
+        self.button_container.layout().addWidget(self.btn_run_checked)
         self.button_container.layout().addWidget(self.btn_stop)
+        self.button_container.layout().addWidget(line)
+        self.button_container.layout().addWidget(self.btn_check_all)
+        self.button_container.layout().addWidget(self.btn_uncheck_all)
 
         actions.settings.triggered.connect(self.open_settings)
         actions.new_file.triggered.connect(lambda: self.open_edit(new=True))
@@ -79,7 +97,16 @@ class CentralWidget(QWidget):
         self.stop_thread()
         self.template_view.save_template_file()
 
-    def start_thread(self, unique_key="root", recursive=True):
+    def start_thread_checked(self):
+        unique_keys = [widget.template_node.unique_key
+                       for widget in self.template_view.get_checked()]
+
+        self.start_thread(unique_keys=unique_keys, recursive=False)
+
+    def start_thread(self, unique_keys=None, recursive=True):
+        if unique_keys is None:
+            unique_keys = ["root"]
+
         if not self.site_settings.check_if_valid():
             self.open_settings()
             return
@@ -87,15 +114,17 @@ class CentralWidget(QWidget):
         self.download_speed_widget.reset()
 
         self.start_time = time.time()
-        self.btn_run.setText("Running...")
-        self.btn_run.setEnabled(False)
+        self.btn_run_all.setText("Running...")
+        self.btn_run_all.setEnabled(False)
         self.actions.run.setEnabled(False)
+
+        self.btn_run_checked.setEnabled(False)
+        self.actions.run_checked.setEnabled(False)
 
         self.btn_stop.setEnabled(True)
         self.actions.stop.setEnabled(True)
 
-
-        self.worker.unique_key = unique_key
+        self.worker.unique_keys = unique_keys
         self.worker.recursive = recursive
         self.worker.site_settings = copy.deepcopy(self.site_settings)
         self.worker.template_path = self.get_template_path()
@@ -106,9 +135,12 @@ class CentralWidget(QWidget):
 
     def quit_thread(self):
         self.thread.quit()
-        self.btn_run.setText("Run")
-        self.btn_run.setEnabled(True)
+        self.btn_run_all.setText("Run All")
+        self.btn_run_all.setEnabled(True)
         self.actions.run.setEnabled(True)
+
+        self.btn_run_checked.setEnabled(True)
+        self.actions.run_checked.setEnabled(True)
 
         self.btn_stop.setEnabled(False)
         self.actions.stop.setEnabled(False)

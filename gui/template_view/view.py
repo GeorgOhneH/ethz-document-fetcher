@@ -122,6 +122,15 @@ class TemplateView(QWidget):
     def get_path(self):
         return self.template_view_tree.template.path
 
+    def check_all(self):
+        self.template_view_tree.set_check_state_to_all(Qt.Checked)
+
+    def uncheck_all(self):
+        self.template_view_tree.set_check_state_to_all(Qt.Unchecked)
+
+    def get_checked(self):
+        return self.template_view_tree.get_checked()
+
     def save_template_file(self):
         self.template_view_tree.save_template_file()
 
