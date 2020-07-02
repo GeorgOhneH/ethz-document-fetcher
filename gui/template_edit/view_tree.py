@@ -24,6 +24,10 @@ class TemplateEditViewTree(QTreeWidget):
         self.setDragEnabled(True)
         self.setDropIndicatorShown(True)
         self.viewport().setAcceptDrops(True)
+
+        self.setColumnCount(1)
+        self.setHeaderLabels(["Name"])
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.setDragDropMode(QAbstractItemView.InternalMove)
