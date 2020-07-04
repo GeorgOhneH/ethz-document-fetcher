@@ -1,11 +1,9 @@
 import copy
 import difflib
-import io
-import time
-
-from core.constants import EMPTY_TWO_COLUMN_LEFT_PDF_PATH
 
 import fitz
+
+from core.constants import EMPTY_TWO_COLUMN_LEFT_PDF_PATH
 
 
 class Box(object):

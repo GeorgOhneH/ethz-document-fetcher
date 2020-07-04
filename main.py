@@ -10,11 +10,11 @@ import certifi
 import colorama
 
 from core import downloader, template_parser, monitor
-from core.utils import user_statistics, check_for_new_release
 from core.cancellable_pool import CancellablePool
+from core.utils import user_statistics, check_for_new_release
+from settings import global_settings
 from settings.logger import LOGGER_CONFIG
 from settings.settings import SiteSettings, TemplatePathSettings
-from settings import global_settings
 
 colorama.init()
 

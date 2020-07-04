@@ -1,6 +1,5 @@
 import asyncio
 import logging.config
-import os
 import ssl
 import time
 import traceback

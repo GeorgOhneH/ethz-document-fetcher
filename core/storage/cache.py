@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from core.storage.constants import FUNCTION_CACHE_PATH, JSON_CACHE_PATH, CACHE_PATH
+from core.storage.constants import JSON_CACHE_PATH
 from core.utils import get_extension_from_response
 
 logger = logging.getLogger(__name__)

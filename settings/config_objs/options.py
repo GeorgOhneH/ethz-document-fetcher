@@ -1,4 +1,3 @@
-import base64
 import logging
 
 from PyQt5.QtCore import *

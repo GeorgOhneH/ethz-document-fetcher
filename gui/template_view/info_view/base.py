@@ -1,12 +1,6 @@
-import datetime
 import logging
-import os
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
-from settings import settings
 
 logger = logging.getLogger(__name__)
 

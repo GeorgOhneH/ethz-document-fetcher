@@ -1,9 +1,7 @@
 import hashlib
 import os
 
-from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 
 from core.storage import cache
 from core.utils import safe_path_join

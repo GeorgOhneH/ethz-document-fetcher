@@ -124,9 +124,11 @@ class TemplateView(QWidget):
 
     def check_all(self):
         self.template_view_tree.set_check_state_to_all(Qt.Checked)
+        qApp.processEvents()
 
     def uncheck_all(self):
         self.template_view_tree.set_check_state_to_all(Qt.Unchecked)
+        qApp.processEvents()
 
     def get_checked(self):
         return self.template_view_tree.get_checked()

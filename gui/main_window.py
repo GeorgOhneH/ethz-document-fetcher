@@ -4,8 +4,8 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.controller import CentralWidget
 from gui.constants import ROOT_PATH
+from gui.controller import CentralWidget
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class Actions(object):
         self.stop.setShortcut("Ctrl+C")
 
         self.settings = QAction("&Settings")
-        self.settings.setShortcut("Ctrl+Alt+S")
+        self.settings.setShortcut("Ctrl+S")
 
         self.open_file = QAction("&Open...")
         self.open_file.setShortcut("Ctrl+O")
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow):
 
         open_presets = file_menu.addMenu("Open &Presets")
 
-        self.init_menu(open_presets, "templates")
+        self.init_menu(open_presets, os.path.join(ROOT_PATH, "templates"))
 
         file_menu.addSeparator()
         file_menu.addAction(self.actions.settings)

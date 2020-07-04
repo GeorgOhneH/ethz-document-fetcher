@@ -1,18 +1,13 @@
 import logging
-import time
-import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import *
 
-from core.storage import cache
-from core.template_parser.nodes.site_configs import SiteConfigs
-from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.base import NodeConfigs
+from core.template_parser.nodes.folder import FolderConfigs
+from core.template_parser.nodes.site_configs import SiteConfigs
 from gui.template_edit.node_dialog import NodeDialog
-from gui.constants import ASSETS_PATH
 
 logger = logging.getLogger(__name__)
 

@@ -1,12 +1,12 @@
 import logging
 import os
-import traceback
-import yaml
 
+import yaml
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.template_edit.view_tree import TemplateEditViewTree
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,8 @@ class TemplateEditDialog(QDialog):
 
         template_dict = self.template_view.convert_to_dict()
 
-        if self.is_new or not os.path.isabs(self.template_path_settings.template_path) or button is self.save_as_btn:
+        path = self.template_path_settings.template_path
+        if self.is_new or path in TEMPLATE_PRESET_FILE_PATHS or button is self.save_as_btn:
             if os.path.isabs(self.template_path_settings.template_path):
                 directory = os.path.dirname(self.template_path_settings.template_path)
             else:
@@ -61,10 +62,9 @@ class TemplateEditDialog(QDialog):
                 filter=" ".join([f"*.{extension}" for extension
                                  in self.template_path_settings['template_path'].file_extensions])
             )[0]
-        elif button is self.save_btn:
-            path = self.template_path_settings.template_path
-        else:
-            raise ValueError
+
+        if not path:
+            return
 
         try:
             with open(path, "w+") as f:

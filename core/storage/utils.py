@@ -4,7 +4,6 @@ import logging
 import os
 import pickle
 import random
-from pathlib import Path
 
 from core.storage import cache
 from core.storage.constants import FUNCTION_CACHE_PATH

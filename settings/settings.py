@@ -1,10 +1,11 @@
 import argparse
-import os
 import logging
+import os
 
-from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, ConfigOptions, ConfigString
-from settings.constants import SEPARATOR, CONFIG_PATH
 from settings.config import ConfigBase, Configs
+from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, ConfigOptions, ConfigString
+from settings.constants import ROOT_PATH
+from settings.constants import SEPARATOR, CONFIG_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +71,7 @@ class GlobalSettings(Settings):
 
 
 class TemplatePathSettings(Settings):
-    template_path = ConfigPath(absolute=False,
-                               default=os.path.join("templates", "example.yml"),
+    template_path = ConfigPath(default=os.path.join(ROOT_PATH, "templates", "example.yml"),
                                file_extensions=["yml"])
 
 

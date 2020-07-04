@@ -1,0 +1,9 @@
+push graphic-context
+encoding "utf-8"
+viewbox 0 0 500 500
+affine 1 0 0 1 0 0
+push graphic-context
+fill '#344A9A'
+circle 250.152,248.932 250.152,493
+pop graphic-context
+pop graphic-context

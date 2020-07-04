@@ -1,7 +1,9 @@
 import os
 from pathlib import Path
 
-CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "cache")
+from core.constants import APP_DATA_PATH
+
+CACHE_PATH = os.path.join(APP_DATA_PATH, "cache")
 Path(CACHE_PATH).mkdir(parents=True, exist_ok=True)
 
 JSON_CACHE_PATH = os.path.join(CACHE_PATH, "json")

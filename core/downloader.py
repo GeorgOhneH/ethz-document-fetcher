@@ -1,9 +1,8 @@
 import asyncio
-import traceback
-import pathlib
-import os
-from urllib.parse import urlparse
 import functools
+import pathlib
+import traceback
+from urllib.parse import urlparse
 
 import aiohttp
 from colorama import Fore, Style

@@ -1,9 +1,8 @@
 import os
 
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import *
 
 from gui.constants import ASSETS_PATH
 from gui.utils import format_bytes

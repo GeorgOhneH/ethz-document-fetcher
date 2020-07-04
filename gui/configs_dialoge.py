@@ -4,8 +4,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings import global_settings
-
 logger = logging.getLogger(__name__)
 
 

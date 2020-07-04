@@ -1,13 +1,9 @@
-import base64
 import logging
 import os
-import time
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from settings.constants import ROOT_PATH
 from settings.config_objs.string import ConfigString, LineEdit
 
 logger = logging.getLogger(__name__)
@@ -56,8 +52,7 @@ class PathLineEdit(LineEdit):
 
 
 class ConfigPath(ConfigString):
-    def __init__(self, absolute=True, ony_folder=False, file_extensions=None, *args, **kwargs):
-        self.absolute = absolute
+    def __init__(self, ony_folder=False, file_extensions=None, *args, **kwargs):
         self.file_extensions = file_extensions
         self.only_folder = ony_folder
         super().__init__(*args, **kwargs)
@@ -65,13 +60,9 @@ class ConfigPath(ConfigString):
     def init_widget(self):
         return PathLineEdit(self, self.only_folder, self.file_extensions)
 
-    def _test(self, value, from_widget):
-        if self.absolute or os.path.isabs(value):
-            if not os.path.isabs(value):
-                raise ValueError("Not an absolute path")
-            path = value
-        else:
-            path = os.path.join(ROOT_PATH, value)
+    def _test(self, path, from_widget):
+        if not os.path.isabs(path):
+            raise ValueError("Not an absolute path")
 
         if not os.path.exists(path):
             raise ValueError("Path does not exist or is not valid")

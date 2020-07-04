@@ -7,5 +7,5 @@ colorama
 pyyaml
 certifi
 PyMuPDF
-PyInstaller
 PyQt5
+pyinstaller

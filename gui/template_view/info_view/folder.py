@@ -1,4 +1,3 @@
-import datetime
 import logging
 import os
 
@@ -6,8 +5,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from gui.template_view.info_view.base import InfoView
 from gui.constants import EMPTY_FOLDER_PATH
+from gui.template_view.info_view.base import InfoView
 
 logger = logging.getLogger(__name__)
 

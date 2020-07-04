@@ -3,9 +3,16 @@ import os
 import sys
 
 import bs4
+from PyQt5.QtCore import QStandardPaths
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
+
+if not QStandardPaths.writableLocation(QStandardPaths.AppDataLocation):
+    raise ValueError("Could not find a AppData path")
+
+APP_DATA_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "eth-document-fetcher")
+
 
 try:
     BeautifulSoup("", "lxml")

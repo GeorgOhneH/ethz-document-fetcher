@@ -64,6 +64,7 @@ class TemplateViewTree(QTreeWidget):
         self.read_settings()
 
         self.itemChanged.connect(self.item_changed)
+        self.itemClicked.connect(self.item_clicked)
 
         self.connection_map = [
             (signals.stopped, self.stop_widgets),
@@ -115,9 +116,11 @@ class TemplateViewTree(QTreeWidget):
         self.template.save_template()
 
     def item_changed(self, item, column):
+        item.emit_data_changed()
+
+    def item_clicked(self, item , column):
         if column == TreeWidgetItem.COLUMN_NAME:
             item.update_checked()
-        item.emit_data_changed()
 
     def set_check_state_to_all(self, state):
         for widget in self.widgets.values():

@@ -4,8 +4,6 @@ from PyQt5.QtGui import *
 
 from core.template_parser.nodes.base import TemplateNode, NodeConfigs
 from gui.constants import ASSETS_PATH
-from settings.config import Configs
-
 from settings.config_objs import ConfigString
 
 

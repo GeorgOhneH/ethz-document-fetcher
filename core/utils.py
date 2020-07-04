@@ -1,10 +1,10 @@
+import copy
 import hashlib
 import html
 import logging
 import os
 import re
 import shutil
-import copy
 
 logger = logging.getLogger(__name__)
 

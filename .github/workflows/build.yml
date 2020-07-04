@@ -4,10 +4,10 @@ name: Build
 on:
   push:
     paths-ignore:
-      - '*.md'
+    - '*.md'
   pull_request:
     paths-ignore:
-      - '*.md'
+    - '*.md'
 
 jobs:
   check_release:
@@ -36,37 +36,126 @@ jobs:
     strategy:
       matrix:
         #os: [windows-latest, ubuntu-latest, macos-latest]
-        os: [windows-latest]
-      #fail-fast: false
+        os: [windows-latest, macos-latest]
+      fail-fast: false
 
     steps:
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-          architecture: 'x64'
+    - name: Checkout code
+      uses: actions/checkout@master
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-        shell: cmd
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.7'
+        architecture: 'x64'
 
-      # WINDOWS
-      - name: Build (Windows)
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          pyinstaller app.spec -y
-        shell: cmd
+    - name: Upgrade pip
+      run: python -m pip install --upgrade pip
 
-      - name: Upload artifact (Windows)
-        if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v1
-        with:
-          name: chatterino-windows-x86-64.zip
-          path: build/chatterino-windows-x86-64.zip
+    - name: Cache pip (Ubuntu)
+      uses: actions/cache@v2
+      if: startsWith(runner.os, 'ubuntu')
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      # LINUX
+    - name: Cache pip (MacOS)
+      uses: actions/cache@v2
+      if: startsWith(runner.os, 'macos')
+      with:
+        path: ~/Library/Caches/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Cache pip (Windows)
+      uses: actions/cache@v2
+      if: startsWith(runner.os, 'windows')
+      with:
+        path: ~\AppData\Local\pip\Cache
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Install dependencies (MacOS)
+      if: startsWith(matrix.os, 'macos')
+      run: pip install biplist dmgbuild
+
+    - name: Build (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: pyinstaller app.spec
+
+    - name: Build (MacOS)
+      if: startsWith(matrix.os, 'macos')
+      run: pyinstaller app.spec
+
+    - name: Build (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: python setup.py build
+
+    - name: Package (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: 7z a eth-document-fetcher-windows-x86-64.zip ./dist/eth-document-fetcher/*
+
+    - name: Upload artifact (Windows)
+      if: startsWith(matrix.os, 'windows')
+      uses: actions/upload-artifact@v1
+      with:
+        name: eth-document-fetcher-windows-x86-64.zip
+        path: eth-document-fetcher-windows-x86-64.zip
+
+    - name: Download ApplicationID plugin for NSIS (Windows)
+      if: startsWith(matrix.os, 'windows')
+      uses: carlosperate/download-file-action@v1.0.3
+      with:
+        file-url: https://github.com/connectiblutz/NSIS-ApplicationID/releases/download/1.1/NSIS-ApplicationID.zip
+        file-name: applicationid_plugin.zip
+        location: ${{ github.workspace }}\NSIS_Plugins
+
+    - name: Extract ApplicationID plugin (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: |
+        cd .\NSIS_Plugins
+        7z x .\applicationid_plugin.zip
+        rename Release x86-ansi
+        rename ReleaseUnicode x86-unicode
+      shell: cmd
+
+    - name: Create installer (Windows)
+      if: startsWith(matrix.os, 'windows')
+      uses: joncloud/makensis-action@v2.0
+      with:
+        script-file: "./.CI/windows_installer.nsi"
+        additional-plugin-paths: "./NSIS_Plugins/"
+
+    - name: Upload artifact (Windows)
+      if: startsWith(matrix.os, 'windows')
+      uses: actions/upload-artifact@v1
+      with:
+        name: eth-document-fetcher-windows-x86-64-installer.exe
+        path: eth-document-fetcher-windows-x86-64-installer.exe
+
+    - name: Package (MacOS)
+      if: startsWith(matrix.os, 'macos')
+      run: |
+        rmdir ./dist/eth-document-fetcher/eth-document-fetcher
+        mv ./dist/eth-document-fetcher/* ./dist/eth-document-fetcher.app/Contents/MacOS/
+        rmdir ./dist/eth-document-fetcher/
+        dmgbuild --settings ./.CI/dmg-settings.py -D app=./dist/eth-document-fetcher.app eth-document-fetcher eth-document-fetcher-osx.dmg
+
+    - name: Upload artifact (MacOS)
+      if: startsWith(matrix.os, 'macos')
+      uses: actions/upload-artifact@v1
+      with:
+        name: eth-document-fetcher-osx.dmg
+        path: eth-document-fetcher-osx.dmg
+
+    # LINUX
 #      - name: Install dependencies (Ubuntu)
 #        if: startsWith(matrix.os, 'ubuntu')
 #        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev libxkbcommon-x11-0 libgstreamer-plugins-base1.0-0 build-essential libgl1-mesa-dev

@@ -1,20 +1,20 @@
-import logging.config
-import time
 import copy
+import logging.config
 import os
+import time
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.template_view import TemplateView
-from gui.template_edit import TemplateEditDialog
-from gui.worker import Worker
-from gui.status_bar_widgets import DownloadSpeedWidget
-from gui.settings import SettingsDialog
 from gui.constants import ROOT_PATH
-from gui.utils import format_bytes
-from settings.settings import SiteSettings, TemplatePathSettings
+from gui.settings import SettingsDialog
+from gui.status_bar_widgets import DownloadSpeedWidget
+from gui.template_edit import TemplateEditDialog
+from gui.constants import TEMPLATE_PRESET_FILE_PATHS
+from gui.template_view import TemplateView
+from gui.worker import Worker
 from settings.config_objs.path import open_file_picker
+from settings.settings import SiteSettings, TemplatePathSettings
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +68,9 @@ class CentralWidget(QWidget):
         line.setStyleSheet("color: gray;")
 
         self.btn_check_all = QPushButton("Select All")
-        self.btn_check_all.pressed.connect(lambda: self.template_view.check_all())
+        self.btn_check_all.pressed.connect(lambda inst=self: inst.template_view.check_all())
         self.btn_uncheck_all = QPushButton("Select None")
-        self.btn_uncheck_all.pressed.connect(lambda: self.template_view.uncheck_all())
+        self.btn_uncheck_all.pressed.connect(lambda inst=self: inst.template_view.uncheck_all())
 
         self.button_container.layout().addWidget(self.btn_run_all)
         self.button_container.layout().addWidget(self.btn_run_checked)
@@ -95,7 +95,8 @@ class CentralWidget(QWidget):
 
     def clean_up(self):
         self.stop_thread()
-        self.template_view.save_template_file()
+        if self.template_view.get_path() not in TEMPLATE_PRESET_FILE_PATHS:
+            self.template_view.save_template_file()
 
     def start_thread_checked(self):
         unique_keys = [widget.template_node.unique_key
@@ -199,7 +200,8 @@ class CentralWidget(QWidget):
 
         self.template_view.disconnect_connections()
         if template_path != self.template_view.get_path() or not file_changed:
-            self.template_view.save_template_file()
+            if self.template_view.get_path() not in TEMPLATE_PRESET_FILE_PATHS:
+                self.template_view.save_template_file()
         new_template_view = TemplateView(template_path, self.worker.signals, self, self)
         self.grid.replaceWidget(self.template_view, new_template_view)
         self.template_view = new_template_view

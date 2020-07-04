@@ -1,25 +1,22 @@
+import asyncio
 import importlib
 import inspect
-import traceback
-import re
-import os
-import time
 import logging
-import asyncio
-from functools import partial
+import os
+import re
+import time
+import traceback
 
 from PyQt5.QtGui import *
 
-from core.storage import cache
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
-from core.template_parser.nodes.base import TemplateNode, NodeConfigs
-from core.template_parser.queue_wrapper import QueueWrapper
+from core.storage import cache
 from core.template_parser.nodes import site_configs
-from core.template_parser.constants import POSSIBLE_CONSUMER_KWARGS
+from core.template_parser.nodes.base import TemplateNode
+from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
-from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigList
 from settings import global_settings
 
 logger = logging.getLogger(__name__)

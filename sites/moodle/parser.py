@@ -1,7 +1,7 @@
 import asyncio
-import traceback
 import logging
 import re
+import traceback
 
 from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer

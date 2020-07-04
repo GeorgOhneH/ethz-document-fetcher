@@ -1,5 +1,6 @@
 # -*- mode: python -*-
 import os
+import sys
 
 
 def collect_submodules(name):
@@ -53,16 +54,41 @@ a = Analysis(['main_gui.py'],
              noarchive=False)
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
-exe = EXE(pyz,
-          a.scripts,
-          [],
-          exclude_binaries=True,
-          name='main_gui',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          console=True)
+
+if sys.platform == 'darwin':
+    exe = EXE(pyz,
+              a.scripts,
+              a.binaries,
+              a.zipfiles,
+              a.datas,
+              name='eth-document-fetcher',
+              debug=False,
+              strip=False,
+              upx=True,
+              runtime_tmpdir=None,
+              console=False,
+              icon=os.path.join("gui", "assets", "logo", "logo.ico"))
+
+    app = BUNDLE(exe,
+                 name='eth-document-fetcher.app',
+                 info_plist={
+                     'NSHighResolutionCapable': 'True'
+                 },
+                 icon=os.path.join("gui", "assets", "logo", "logo.ico"))
+
+else:
+    exe = EXE(pyz,
+              a.scripts,
+              [],
+              exclude_binaries=True,
+              name='eth-document-fetcher',
+              debug=False,
+              bootloader_ignore_signals=False,
+              strip=False,
+              upx=True,
+              console=False,
+              icon=os.path.join("gui", "assets", "logo", "logo.ico"))
+
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -70,4 +96,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='main_gui')
+               name='eth-document-fetcher')
