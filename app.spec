@@ -74,7 +74,7 @@ if sys.platform == 'darwin':
                  info_plist={
                      'NSHighResolutionCapable': 'True'
                  },
-                 icon=os.path.join("gui", "assets", "logo", "logo.ico"))
+                 icon=os.path.join("gui", "assets", "logo", "logo.icns"))
 
 else:
     exe = EXE(pyz,
