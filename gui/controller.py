@@ -68,9 +68,9 @@ class CentralWidget(QWidget):
         line.setStyleSheet("color: gray;")
 
         self.btn_check_all = QPushButton("Select All")
-        self.btn_check_all.pressed.connect(lambda inst=self: inst.template_view.check_all())
+        self.btn_check_all.pressed.connect(self.check_all)
         self.btn_uncheck_all = QPushButton("Select None")
-        self.btn_uncheck_all.pressed.connect(lambda inst=self: inst.template_view.uncheck_all())
+        self.btn_uncheck_all.pressed.connect(self.uncheck_all)
 
         self.button_container.layout().addWidget(self.btn_run_all)
         self.button_container.layout().addWidget(self.btn_run_checked)
@@ -213,3 +213,9 @@ class CentralWidget(QWidget):
             return self.template_path_settings.template_path
 
         return os.path.join(ROOT_PATH, self.template_path_settings.template_path)
+
+    def check_all(self):
+        self.template_view.set_check_state_to_all(Qt.Checked)
+
+    def uncheck_all(self):
+        self.template_view.set_check_state_to_all(Qt.Unchecked)
