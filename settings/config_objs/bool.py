@@ -7,19 +7,24 @@ from settings.config_objs.string import ConfigString, AbstractConfigWidget
 logger = logging.getLogger(__name__)
 
 
-class CheckBox(QCheckBox, AbstractConfigWidget):
+class CheckBox(QWidget, AbstractConfigWidget):
     def __init__(self, config_obj):
-        super().__init__(config_obj.get_gui_name())
-        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        super().__init__()
+        self.layout = QHBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.layout)
+        self.check_box = QCheckBox(config_obj.get_gui_name())
+        self.layout.addWidget(self.check_box)
         self.config_obj = config_obj
-        self.data_changed_signal = self.stateChanged
+        self.data_changed_signal = self.check_box.stateChanged
+        self.setContentsMargins(0, 3, 0, 3)
 
     def get_value(self):
-        return self.isChecked()
+        return self.check_box.isChecked()
 
     def set_value(self, value):
         if value is not None:
-            self.setChecked(value)
+            self.check_box.setChecked(value)
 
 
 class ConfigBool(ConfigString):
