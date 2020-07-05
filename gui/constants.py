@@ -27,3 +27,4 @@ def _get_file_paths(path):
 
 
 TEMPLATE_PRESET_FILE_PATHS = _get_file_paths(os.path.join(ROOT_PATH, "templates"))
+TEMPLATE_PRESET_FOLDER_PATHS = [os.path.dirname(path) for path in TEMPLATE_PRESET_FILE_PATHS]

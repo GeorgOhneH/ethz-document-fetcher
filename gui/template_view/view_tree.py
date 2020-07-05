@@ -51,16 +51,9 @@ class TemplateViewTree(QTreeWidget):
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
-        self.template = template_parser.Template(path=template_path)
-        try:
-            self.template.load()
-        except Exception as e:
-            if global_settings.loglevel == "DEBUG":
-                traceback.print_exc()
-            error_dialog = QErrorMessage(self)
-            error_dialog.setWindowTitle("Error")
-            error_dialog.showMessage(f"Error while loading the file. Error: {e}")
-        self.init_view_tree()
+        self.template = None
+        self.init(template_path)
+
         self.read_settings()
 
         self.itemChanged.connect(self.item_changed)
@@ -86,6 +79,18 @@ class TemplateViewTree(QTreeWidget):
         ]
 
         self.setup_connections()
+
+    def init(self, template_path):
+        self.template = template_parser.Template(path=template_path)
+        try:
+            self.template.load()
+        except Exception as e:
+            if global_settings.loglevel == "DEBUG":
+                traceback.print_exc()
+            error_dialog = QErrorMessage(self)
+            error_dialog.setWindowTitle("Error")
+            error_dialog.showMessage(f"Error while loading the file. Error: {e}")
+        self.init_view_tree()
 
     def setup_connections(self):
         for signal, func in self.connection_map:
@@ -118,7 +123,7 @@ class TemplateViewTree(QTreeWidget):
     def item_changed(self, item, column):
         item.emit_data_changed()
 
-    def item_clicked(self, item , column):
+    def item_clicked(self, item, column):
         if column == TreeWidgetItem.COLUMN_NAME:
             item.update_checked()
 
@@ -242,6 +247,9 @@ class TemplateViewTree(QTreeWidget):
         menu.exec_(self.mapToGlobal(point))
 
     def init_view_tree(self):
+        self.widgets.clear()
+        self.clear()
+
         for child in self.template.root.children:
             self.init_widgets(child, parent=None)
 

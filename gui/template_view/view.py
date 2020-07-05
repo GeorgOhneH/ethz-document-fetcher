@@ -77,6 +77,10 @@ class StackedWidgetView(QStackedWidget):
             self.button_group.addButton(view.button)
             self.layout_button.addWidget(view.button)
 
+    def reset_widget(self):
+        for view in self.views:
+            view.reset_widget()
+
     def only_if_one_selected(self):
         selected_widgets = self.view_tree.selectedItems()
         if len(selected_widgets) != 1:
@@ -118,6 +122,10 @@ class TemplateView(QWidget):
         self.layout.addWidget(self.state_widget.button_widget)
 
         self.setLayout(self.layout)
+
+    def reset(self, template_path):
+        self.template_view_tree.init(template_path)
+        self.state_widget.reset_widget()
 
     def get_path(self):
         return self.template_view_tree.template.path

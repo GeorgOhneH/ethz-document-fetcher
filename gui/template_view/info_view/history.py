@@ -49,6 +49,9 @@ class HistoryInfoView(QTreeWidget, InfoView):
                 item_widget.addChild(child)
                 child.setText(self.COLUMN_NOTE, "Old File")
 
+    def reset_widget(self):
+        self.clear()
+
     def setup_widget(self, widget, item, path, timestamp=None):
         file_info = QFileInfo(path)
         item.path = path

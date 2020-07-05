@@ -198,13 +198,11 @@ class CentralWidget(QWidget):
             except TypeError:
                 pass
 
-        self.template_view.disconnect_connections()
         if template_path != self.template_view.get_path() or not file_changed:
             if self.template_view.get_path() not in TEMPLATE_PRESET_FILE_PATHS:
                 self.template_view.save_template_file()
-        new_template_view = TemplateView(template_path, self.worker.signals, self, self)
-        self.grid.replaceWidget(self.template_view, new_template_view)
-        self.template_view = new_template_view
+
+        self.template_view.reset(template_path)
 
         self.status_bar.showMessage(f"Opened file: {template_path}")
 

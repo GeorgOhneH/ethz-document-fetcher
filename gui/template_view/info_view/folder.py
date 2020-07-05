@@ -22,6 +22,9 @@ class FolderInfoView(QTreeView, InfoView):
         self.activated.connect(self.open_file_with_index)
         qApp.aboutToQuit.connect(self.save_state)
 
+    def reset_widget(self):
+        self.change_root(None)
+
     def change_root(self, path):
         if path is None or not os.path.exists(path):
             index = self.model.setRootPath(EMPTY_FOLDER_PATH)

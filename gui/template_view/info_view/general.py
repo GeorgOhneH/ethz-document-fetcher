@@ -31,7 +31,7 @@ class GeneralGroupBox(GroupBox):
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.layout)
-        attributes = [
+        self.default_attributes = [
             ("Name", None),
             ("Type", None),
             ("State", None),
@@ -39,10 +39,20 @@ class GeneralGroupBox(GroupBox):
             ("Selected", None),
             ("Children", None),
         ]
+        self.init()
 
-        for key, value in attributes:
+    def init(self):
+        for key, value in self.default_attributes:
             label = QLabel(self.key_value_to_string(key, value))
             self.layout.addWidget(label)
+
+    def set_attributes(self, attributes):
+        for i, (key, value) in enumerate(attributes):
+            label = self.layout.itemAt(i).widget()
+            label.setText(self.key_value_to_string(key, value))
+
+    def reset_widget(self):
+        self.set_attributes(self.default_attributes)
 
     def update_content(self, selected_widget):
         attributes = [
@@ -53,9 +63,7 @@ class GeneralGroupBox(GroupBox):
             ("Selected", "No" if selected_widget.checkState(selected_widget.COLUMN_NAME) == Qt.Unchecked else "Yes"),
             ("Children", len(selected_widget.template_node.children)),
         ]
-        for i, (key, value) in enumerate(attributes):
-            label = self.layout.itemAt(i).widget()
-            label.setText(self.key_value_to_string(key, value))
+        self.set_attributes(attributes)
 
 
 class OptionsGroupBox(GroupBox):
@@ -65,6 +73,11 @@ class OptionsGroupBox(GroupBox):
         self.layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.layout)
         self.make_layout([])
+
+    def reset_widget(self):
+        for i in range(self.layout.count()):
+            label = self.layout.itemAt(i).widget()
+            label.hide()
 
     def update_content(self, selected_widget):
         self.make_layout(selected_widget.template_node.gui_options())
@@ -102,3 +115,7 @@ class GeneralInfoView(QScrollArea, InfoView):
     def update_view(self, selected_widget):
         self.general.update_content(selected_widget)
         self.options.update_content(selected_widget)
+
+    def reset_widget(self):
+        self.general.reset_widget()
+        self.options.reset_widget()

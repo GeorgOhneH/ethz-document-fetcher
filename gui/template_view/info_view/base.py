@@ -20,3 +20,6 @@ class InfoView(object):
 
     def update_view(self, selected_widget):
         pass
+
+    def reset_widget(self):
+        raise NotImplementedError

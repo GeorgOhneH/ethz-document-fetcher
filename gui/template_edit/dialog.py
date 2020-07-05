@@ -50,7 +50,7 @@ class TemplateEditDialog(QDialog):
 
         path = self.template_path_settings.template_path
         if self.is_new or path in TEMPLATE_PRESET_FILE_PATHS or button is self.save_as_btn:
-            if os.path.isabs(self.template_path_settings.template_path):
+            if self.template_path_settings.template_path not in TEMPLATE_PRESET_FILE_PATHS:
                 directory = os.path.dirname(self.template_path_settings.template_path)
             else:
                 directory = QStandardPaths.writableLocation(QStandardPaths.DesktopLocation)
