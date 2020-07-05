@@ -80,7 +80,7 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Install dependencies
-      run: pip install -r requirements.txt
+      run: pip install -r requirements.txt -U
 
     - name: Install dependencies (MacOS)
       if: startsWith(matrix.os, 'macos')
@@ -143,9 +143,6 @@ jobs:
     - name: Package (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
-        rmdir ./dist/eth-document-fetcher/eth-document-fetcher
-        mv ./dist/eth-document-fetcher/* ./dist/eth-document-fetcher.app/Contents/MacOS/
-        rmdir ./dist/eth-document-fetcher/
         dmgbuild --settings ./.CI/dmg-settings.py -D app=./dist/eth-document-fetcher.app eth-document-fetcher eth-document-fetcher-osx.dmg
 
     - name: Upload artifact (MacOS)

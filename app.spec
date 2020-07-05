@@ -89,11 +89,11 @@ else:
               console=False,
               icon=os.path.join("gui", "assets", "logo", "logo.ico"))
 
-coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='eth-document-fetcher')
+    coll = COLLECT(exe,
+                   a.binaries,
+                   a.zipfiles,
+                   a.datas,
+                   strip=False,
+                   upx=True,
+                   upx_exclude=[],
+                   name='eth-document-fetcher')
