@@ -17,7 +17,7 @@ class CheckBox(QWidget, AbstractConfigWidget):
         self.layout.addWidget(self.check_box)
         self.config_obj = config_obj
         self.data_changed_signal = self.check_box.stateChanged
-        self.setContentsMargins(0, 3, 0, 3)
+        self.setContentsMargins(0, 0, 0, 0)
 
     def get_value(self):
         return self.check_box.isChecked()
