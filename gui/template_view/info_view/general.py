@@ -60,7 +60,7 @@ class GeneralGroupBox(GroupBox):
             ("Type", selected_widget.template_node.__class__.__name__),
             ("State", selected_widget.state_text()),
             ("Path", selected_widget.template_node.base_path),
-            ("Selected", "No" if selected_widget.checkState(selected_widget.COLUMN_NAME) == Qt.Unchecked else "Yes"),
+            ("Selected", "No" if selected_widget.get_check_state() == Qt.Unchecked else "Yes"),
             ("Children", len(selected_widget.template_node.children)),
         ]
         self.set_attributes(attributes)

@@ -20,7 +20,6 @@ class HeaderItem(QTreeWidgetItem):
         self.replaced_count = 0
         self.setText(TreeWidgetItem.COLUMN_NAME, "Name")
         self.setText(TreeWidgetItem.COLUMN_STATE, "State")
-        self.setText(TreeWidgetItem.COLUMN_EMPTY, "")
         self.setTextAlignment(TreeWidgetItem.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.setTextAlignment(TreeWidgetItem.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.set_text_replaced()
@@ -46,7 +45,7 @@ class TemplateViewTree(QTreeWidget):
         super().__init__(parent=parent)
         self.widgets = {}
         self.controller = controller
-        self.setColumnCount(5)
+        self.setColumnCount(4)
         self.header_item = HeaderItem()
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -57,7 +56,6 @@ class TemplateViewTree(QTreeWidget):
         self.read_settings()
 
         self.itemChanged.connect(self.item_changed)
-        self.itemClicked.connect(self.item_clicked)
 
         self.connection_map = [
             (signals.stopped, self.stop_widgets),
@@ -116,23 +114,19 @@ class TemplateViewTree(QTreeWidget):
         logger.debug("Saving Template")
         for widget in self.widgets.values():
             node = widget.template_node
-            node.meta_data["check_state"] = int(widget.checkState(TreeWidgetItem.COLUMN_NAME))
+            node.meta_data["check_state"] = int(widget.get_check_state())
 
         self.template.save_template()
 
     def item_changed(self, item, column):
         item.emit_data_changed()
 
-    def item_clicked(self, item, column):
-        if column == TreeWidgetItem.COLUMN_NAME:
-            item.update_checked()
-
     def set_check_state_to_all(self, state):
         for widget in self.widgets.values():
             widget.set_check_state(state)
 
     def get_checked(self):
-        return [widget for widget in self.widgets.values() if widget.checkState(widget.COLUMN_NAME) != Qt.Unchecked]
+        return [widget for widget in self.widgets.values() if widget.get_check_state() != Qt.Unchecked]
 
     @pyqtSlot(str, str)
     def update_folder_name(self, unique_key, folder_name):

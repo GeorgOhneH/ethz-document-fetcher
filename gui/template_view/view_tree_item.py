@@ -57,9 +57,9 @@ class TreeWidgetItem(QTreeWidgetItem):
     STATE_SUCCESS = 5
 
     COLUMN_NAME = 0
-    COLUMN_STATE = 1
-    COLUMN_ADDED_FILE = 2
-    COLUMN_REPLACED_FILE = 3
+    COLUMN_ADDED_FILE = 1
+    COLUMN_REPLACED_FILE = 2
+    COLUMN_STATE = 3
     COLUMN_EMPTY = 4
 
     def __init__(self, template_node, controller):
@@ -67,7 +67,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.template_node = template_node
         self.controller = controller
         self.signals = TreeWidgetItemSignals()
-        self.state_widget = TreeWidgetItemState()
+        self.name_widget = None
 
         self.added_new_file_count = 0
         self.replaced_file_count = 0
@@ -80,13 +80,17 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.controller.settings_dialog.accepted.connect(self.emit_data_changed)
 
     def init_widgets(self):
-        self.setText(self.COLUMN_NAME, self.template_node.get_gui_name())
-        self.setIcon(self.COLUMN_NAME, self.template_node.get_gui_icon())
-        self.setCheckState(self.COLUMN_NAME, self.template_node.meta_data.get("check_state", Qt.Checked))
+        self.name_widget = TreeWidgetItemName(name=self.template_node.get_gui_name(),
+                                              icon=self.template_node.get_gui_icon(),
+                                              check_state=self.template_node.meta_data.get("check_state", Qt.Checked))
+        self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)
+
+        self.name_widget.state_check_changed.connect(self.update_checked)
+        self.name_widget.state_check_changed.connect(self.emit_data_changed)
+
         self.setExpanded(True)
         if not self.template_node.is_producer:
             return
-        self.treeWidget().setItemWidget(self, self.COLUMN_STATE, self.state_widget)
         self._set_state(self.STATE_IDLE)
         self.setText(self.COLUMN_ADDED_FILE, str(self.added_new_file_count))
         self.setTextAlignment(self.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
@@ -131,25 +135,26 @@ class TreeWidgetItem(QTreeWidgetItem):
 
     def _set_state(self, state):
         self.state = state
+        self.setText(self.COLUMN_STATE, self.state_to_string(state))
         self.emit_data_changed()
 
     def set_idle(self):
         self.active_item_count = 0
         self._set_state(self.STATE_IDLE)
-        self.state_widget.set_idle()
+        self.name_widget.set_idle()
 
     def set_loading(self, msg=None):
         self.active_item_count += 1
         self._set_state(self.STATE_LOADING)
-        self.state_widget.set_loading(msg)
+        self.name_widget.set_loading(msg)
 
     def set_error(self, msg=None):
         self._set_state(self.STATE_ERROR)
-        self.state_widget.set_error(msg)
+        self.name_widget.set_error(msg)
 
     def set_warning(self, msg=None):
         self._set_state(self.STATE_WARNING)
-        self.state_widget.set_warning(msg)
+        self.name_widget.set_warning(msg)
 
     def set_success(self, msg=None):
         self.active_item_count -= 1
@@ -157,11 +162,11 @@ class TreeWidgetItem(QTreeWidgetItem):
             logger.warning("Active count is negative")
         if self.active_item_count == 0 and self.state not in [self.STATE_ERROR, self.STATE_WARNING]:
             self._set_state(self.STATE_SUCCESS)
-            self.state_widget.set_success(msg)
+            self.name_widget.set_success(msg)
 
     def set_folder_name(self, folder_name):
         self.template_node.folder_name = folder_name
-        self.setText(self.COLUMN_NAME, folder_name)
+        self.name_widget.set_name(folder_name)
         self.emit_data_changed()
 
     def set_base_path(self, base_path):
@@ -189,18 +194,21 @@ class TreeWidgetItem(QTreeWidgetItem):
         })
         self.emit_data_changed()
 
+    def get_check_state(self):
+        return self.name_widget.get_check_state()
+
     def set_check_state(self, state):
-        self.setCheckState(self.COLUMN_NAME, state)
+        self.name_widget.set_check_state(state)
 
     def update_checked(self):
-        state = self.checkState(self.COLUMN_NAME)
+        state = self.get_check_state()
         if not self.template_node.is_producer and state in [Qt.Checked, Qt.Unchecked]:
             self.update_checked_children(state=state)
 
         self.update_checked_parents()
 
     def update_checked_children(self, state):
-        self.setCheckState(self.COLUMN_NAME, state)
+        self.set_check_state(state)
         for i in range(self.childCount()):
             child = self.child(i)
             child.update_checked_children(state)
@@ -215,7 +223,7 @@ class TreeWidgetItem(QTreeWidgetItem):
             item_state = self.parent().get_state(only_children=True)
 
         if not self.parent().template_node.is_producer:
-            self.parent().setCheckState(self.COLUMN_NAME, item_state)
+            self.parent().set_check_state(item_state)
         self.parent().update_checked_parents(item_state)
 
     def get_state(self, only_children=False):
@@ -234,24 +242,45 @@ class TreeWidgetItem(QTreeWidgetItem):
             return state
 
         if state is None:
-            return self.checkState(self.COLUMN_NAME)
+            return self.get_check_state()
 
-        if self.checkState(self.COLUMN_NAME) == state:
+        if self.get_check_state() == state:
             return state
         else:
             return Qt.PartiallyChecked
 
 
-class TreeWidgetItemState(QWidget):
+class CheckBox(QCheckBox):
+    def nextCheckState(self):
+        state = self.checkState()
+        if state == Qt.Checked:
+            self.setCheckState(Qt.Unchecked)
+        else:
+            self.setCheckState(Qt.Checked)
+
+
+class TreeWidgetItemName(QWidget):
     LOADING_GIF_PATH = os.path.join(ASSETS_PATH, "loading.gif")
     IDLE_IMAGE_PATH = os.path.join(ASSETS_PATH, "idle.png")
     WARNING_SVG_PATH = os.path.join(ASSETS_PATH, "warning.svg")
     ERROR_SVG_PATH = os.path.join(ASSETS_PATH, "error.svg")
     SUCCESS_SVG_PATH = os.path.join(ASSETS_PATH, "success.svg")
 
-    def __init__(self, state=TreeWidgetItem.STATE_IDLE, parent=None):
+    def __init__(self, name, icon, check_state, state=TreeWidgetItem.STATE_IDLE, parent=None):
         super().__init__(parent=parent)
-        self.text = QLabel(TreeWidgetItem.state_to_string(state))
+        self.check_box = CheckBox()
+        self.check_box.setCheckState(check_state)
+        self.check_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.state_check_changed = self.check_box.stateChanged
+
+        self.icon = QLabel()
+        pixmap = icon.pixmap(QSize(17, 17))
+        self.icon.setPixmap(pixmap)
+        self.icon.setMask(pixmap.mask())
+        self.icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.text = QLabel(name)
         self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         size = self.text.minimumSizeHint().height()
 
@@ -259,10 +288,12 @@ class TreeWidgetItemState(QWidget):
         self.stateWidget.setMaximumSize(size, size)
 
         main_layout = QHBoxLayout()
-        main_layout.setAlignment(Qt.AlignLeft)
         main_layout.setContentsMargins(2, 2, 2, 2)
-        main_layout.addWidget(self.stateWidget)
+        main_layout.setAlignment(Qt.AlignLeft)
+        main_layout.addWidget(self.check_box)
+        main_layout.addWidget(self.icon)
         main_layout.addWidget(self.text)
+        main_layout.addWidget(self.stateWidget)
 
         self.setLayout(main_layout)
 
@@ -280,35 +311,39 @@ class TreeWidgetItemState(QWidget):
 
         self.set_idle()
 
+    def set_name(self, name):
+        self.text.setText(name)
+
+    def get_check_state(self):
+        return self.check_box.checkState()
+
+    def set_check_state(self, state):
+        self.check_box.setCheckState(state)
+
     def set_idle(self):
         self.stateWidget.hide()
         self.stateWidget.setCurrentWidget(self.idle_image)
-        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_IDLE))
 
     def set_loading(self, msg=None):
         if msg is not None:
             self.loading_movie.setToolTip(msg)
         self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.loading_movie)
-        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_LOADING))
 
     def set_error(self, msg=None):
         if msg is not None:
             self.error_svg.setToolTip(msg)
         self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.error_svg)
-        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_ERROR))
 
     def set_warning(self, msg=None):
         if msg is not None:
             self.warning_svg.setToolTip(msg)
         self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.warning_svg)
-        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_WARNING))
 
     def set_success(self, msg=None):
         if msg is not None:
             self.success_svg.setToolTip(msg)
         self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.success_svg)
-        self.text.setText(TreeWidgetItem.state_to_string(TreeWidgetItem.STATE_SUCCESS))
