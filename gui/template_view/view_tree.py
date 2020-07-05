@@ -128,9 +128,12 @@ class TemplateViewTree(QTreeWidget):
             item.update_checked()
 
     def set_check_state_to_all(self, state):
-        for widget in self.widgets.values():
-            widget.setCheckState(widget.COLUMN_NAME, state)
-            widget.emit_data_changed()
+        it = QTreeWidgetItemIterator(self)
+        while it.value():
+            widget = it.value()
+            print("widget", widget)
+            widget.set_check_state(state)
+            it += 1
 
     def get_checked(self):
         return [widget for widget in self.widgets.values() if widget.checkState(widget.COLUMN_NAME) != Qt.Unchecked]

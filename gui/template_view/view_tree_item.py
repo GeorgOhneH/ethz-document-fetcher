@@ -189,6 +189,10 @@ class TreeWidgetItem(QTreeWidgetItem):
         })
         self.emit_data_changed()
 
+    def set_check_state(self, state):
+        print("Set STate")
+        self.setCheckState(self.COLUMN_NAME, state)
+
     def update_checked(self):
         state = self.checkState(self.COLUMN_NAME)
         if not self.template_node.is_producer and state in [Qt.Checked, Qt.Unchecked]:
