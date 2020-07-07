@@ -10,14 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class ComboBox(QWidget, AbstractConfigWidget):
-    PLACE_HOLDER_TEXT = "------"
-
     def __init__(self, config_obj):
         super().__init__()
         self.config_obj = config_obj
         self.combo_box = QComboBox()
         self.data_changed_signal = self.combo_box.currentTextChanged
-        self.combo_box.setPlaceholderText(self.PLACE_HOLDER_TEXT)
         self.combo_box.addItems(config_obj.options)
         if config_obj.get() is not None:
             self.set_value(config_obj.get())
@@ -30,9 +27,9 @@ class ComboBox(QWidget, AbstractConfigWidget):
 
     def get_value(self):
         text = self.combo_box.currentText()
-        if text == self.PLACE_HOLDER_TEXT:
+        if not text:
             return None
-        return self.combo_box.currentText()
+        return text
 
     def set_value(self, value):
         if value is None:

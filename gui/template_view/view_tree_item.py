@@ -266,8 +266,17 @@ class TreeWidgetItemName(QWidget):
     ERROR_SVG_PATH = os.path.join(ASSETS_PATH, "error.svg")
     SUCCESS_SVG_PATH = os.path.join(ASSETS_PATH, "success.svg")
 
-    def __init__(self, name, icon, check_state, state=TreeWidgetItem.STATE_IDLE, parent=None):
+    def __init__(self, name, icon, check_state, parent=None):
         super().__init__(parent=parent)
+        if isinstance(check_state, int):
+            if check_state == 0:
+                check_state = Qt.Unchecked
+            elif check_state == 1:
+                check_state = Qt.PartiallyChecked
+            elif check_state == 2:
+                check_state = Qt.Checked
+            else:
+                raise ValueError
         self.check_box = CheckBox()
         self.check_box.setCheckState(check_state)
         self.check_box.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
