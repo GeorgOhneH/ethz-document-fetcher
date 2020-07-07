@@ -20,7 +20,6 @@ class TemplateEditDialog(QDialog):
         self.setWindowModality(Qt.ApplicationModal)
         self.template_path_settings = template_path_settings
         self.is_new = template_path is None
-        self.finished.connect(self.save_geometry)
 
         self.button_box = QDialogButtonBox()
         self.save_btn = self.button_box.addButton("Save", QDialogButtonBox.AcceptRole)
@@ -37,6 +36,9 @@ class TemplateEditDialog(QDialog):
 
         self.layout.addWidget(self.template_view)
         self.layout.addWidget(self.button_box)
+
+        self.finished.connect(self.save_geometry)
+        self.finished.connect(self.template_view.save_state)
 
     def open(self):
         self.read_settings()
@@ -90,6 +92,7 @@ class TemplateEditDialog(QDialog):
 
     def closeEvent(self, event):
         self.save_geometry()
+        self.template_view.save_state()
         super().closeEvent(event)
 
     def save_geometry(self):

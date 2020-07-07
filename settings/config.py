@@ -61,6 +61,9 @@ class Configs(metaclass=ConfigBase):
     def __len__(self):
         return len(self._config_objs)
 
+    def to_dict(self):
+        return {config_obj.name: config_obj.get() for config_obj in self}
+
     def check_if_valid(self):
         for config_obj in self:
             if not config_obj.is_valid():

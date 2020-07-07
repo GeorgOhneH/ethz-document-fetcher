@@ -17,6 +17,9 @@ class FolderConfigs(NodeConfigs):
             return self.name
         return "+ Add Folder"
 
+    def get_folder_name(self):
+        return self.name
+
     def get_icon(self):
         return QIcon(Folder.FOLDER_ICON_PATH)
 
@@ -27,7 +30,7 @@ class Folder(TemplateNode):
     def __init__(self, name, parent, **kwargs):
         super().__init__(parent=parent,
                          folder_name=name,
-                         unique_key_args=[name],
+                         unique_key_kwargs=dict(name=name),
                          **kwargs)
         self.name = name
 

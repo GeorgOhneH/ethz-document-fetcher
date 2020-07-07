@@ -8,6 +8,7 @@ from PyQt5.QtGui import *
 from core.constants import ROOT_PATH
 from core.exceptions import ParseTemplateError
 from core.template_parser import nodes
+from core.template_parser.nodes.utils import get_folder_name_from_kwargs
 from core.template_parser.nodes.base import NodeConfigs
 from gui.constants import SITE_ICON_PATH
 from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigList
@@ -204,6 +205,17 @@ class SiteConfigs(NodeConfigs):
         if self.raw_module_name is not None:
             return self.raw_module_name
         return "+ Add Site"
+
+    def get_folder_name(self):
+        if self.raw_module_name is None:
+            return None
+        if not self.use_folder:
+            return "<No Folder>"
+        if self.raw_folder_name:
+            return self.raw_folder_name
+
+        kwargs = nodes.Site.get_unique_key_kwargs(**self.to_dict())
+        return get_folder_name_from_kwargs(kwargs)
 
     def get_icon(self):
         image_files = os.listdir(SITE_ICON_PATH)

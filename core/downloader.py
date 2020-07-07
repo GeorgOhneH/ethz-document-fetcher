@@ -47,7 +47,6 @@ async def download_if_not_exist(session,
                                 checksum=None,
                                 signal_handler=None,
                                 unique_key=None):
-    loop = asyncio.get_event_loop()
     if kwargs is None:
         kwargs = {}
 

@@ -91,15 +91,11 @@ def is_checksum_same(path, checksum):
     old_checksum = meta_data.get("checksum", None)
 
     if old_checksum is None:
-        meta_data["checksum"] = checksum
-        logger.debug(f"Added new checksum, path: {path}, checksum: {checksum}")
         return False
 
     if old_checksum == checksum:
         return True
 
-    meta_data["checksum"] = checksum
-    logger.debug(f"Replaced old checksum, path: {path}, new: {checksum}, old: {old_checksum}")
     return False
 
 
@@ -118,6 +114,7 @@ def save_checksum(path, checksum):
         logger.debug(f"Added new checksum, path: {path}, checksum: {checksum}")
     else:
         logger.debug(f"Replaced old checksum, path: {path}, new: {checksum}, old: {old_checksum}")
+
     meta_data["checksum"] = checksum
 
 
@@ -131,4 +128,7 @@ def save_etag(path, etag):
     meta_data = get_file_meta_data(path)
     if "etag" in meta_data:
         logger.debug(f"Replacing etag. Old: {meta_data['etag']}, New: {etag}")
+    else:
+        logger.debug(f"Adding new etag. New: {etag}")
+
     meta_data["etag"] = etag

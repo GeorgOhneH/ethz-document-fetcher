@@ -35,15 +35,14 @@ class Site(TemplateNode):
                  **kwargs):
         super().__init__(parent=parent,
                          folder_name=raw_folder_name,
-                         unique_key_args=[
-                             raw_module_name,
-                             function_kwargs,
-                             raw_folder_name,
-                             use_folder,
-                             raw_function,
-                             raw_folder_function,
-                             function_kwargs,
-                         ],
+                         unique_key_kwargs=self.get_unique_key_kwargs(
+                             raw_module_name=raw_module_name,
+                             raw_folder_name=raw_folder_name,
+                             use_folder=use_folder,
+                             raw_function=raw_function,
+                             raw_folder_function=raw_folder_function,
+                             function_kwargs=function_kwargs,
+                         ),
                          use_folder=use_folder,
                          is_producer=True,
                          **kwargs)
@@ -60,16 +59,17 @@ class Site(TemplateNode):
                                                                                               use_folder)
         self.module_name, self.function_name = self.get_module_func_name(raw_module_name,
                                                                          raw_function)
-        self.folder_name = self.get_folder_name(raw_folder_name, self.unique_key)
 
     @staticmethod
-    def get_folder_name(raw_folder_name, unique_key):
-        folder_name = raw_folder_name
-        if raw_folder_name is None:
-            folder_name_cache = cache.get_json("folder_name")
-            folder_name = folder_name_cache.get(unique_key, None)
-
-        return folder_name
+    def get_unique_key_kwargs(**kwargs):
+        return dict(
+            raw_module_name=kwargs.get("raw_module_name"),
+            raw_folder_name=kwargs.get("raw_folder_name"),
+            use_folder=kwargs.get("use_folder"),
+            raw_function=kwargs.get("raw_function"),
+            raw_folder_function=kwargs.get("raw_folder_function"),
+            function_kwargs=kwargs.get("function_kwargs"),
+        )
 
     @staticmethod
     def get_module_func_name(raw_module_name, raw_function):
@@ -212,9 +212,9 @@ class Site(TemplateNode):
         await login_module(session, site_settings, site_module)
 
         if self.base_path is None:
-            folder_name = await self.retrieve_folder_name(session, signal_handler)
+            self.folder_name = await self.retrieve_folder_name(session, signal_handler)
 
-            self.base_path = safe_path_join(self.parent.base_path, folder_name)
+            self.base_path = safe_path_join(self.parent.base_path, self.folder_name)
             signal_handler.update_base_path(self.unique_key, self.base_path)
 
         queue_wrapper = QueueWrapper(queue,
@@ -242,7 +242,7 @@ class Site(TemplateNode):
         folder_name = await function(session=session, **self.function_kwargs)
 
         folder_name_cache = cache.get_json("folder_name")
-        folder_name_cache[self.unique_key] = folder_name
+        folder_name_cache[self.kwargs_hash] = folder_name
 
         signal_handler.update_folder_name(self.unique_key, folder_name)
         return folder_name

@@ -23,8 +23,8 @@ class TemplateEditViewTree(QTreeWidget):
         self.setDropIndicatorShown(True)
         self.viewport().setAcceptDrops(True)
 
-        self.setColumnCount(1)
-        self.setHeaderLabels(["Name"])
+        self.setColumnCount(2)
+        self.setHeaderLabels(["Name", "Folder Name"])
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
@@ -40,8 +40,21 @@ class TemplateEditViewTree(QTreeWidget):
             error_dialog.setWindowTitle("Error")
             error_dialog.showMessage(f"Error while loading the file. Error: {e}")
         self.init_view_tree()
+        self.read_settings()
 
         self.itemActivated.connect(self.edit_item)
+
+    def save_state(self):
+        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        qsettings.setValue("templateEditViewTree/geometry", self.header().saveGeometry())
+        qsettings.setValue("templateEditViewTree/windowState", self.header().saveState())
+
+    def read_settings(self):
+        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        if qsettings.value("templateEditViewTree/geometry") is not None:
+            self.header().restoreGeometry(qsettings.value("templateEditViewTree/geometry"))
+        if qsettings.value("templateEditViewTree/windowState") is not None:
+            self.header().restoreState(qsettings.value("templateEditViewTree/windowState"))
 
     def edit_item(self, item, column=None):
         item.open_dialog()

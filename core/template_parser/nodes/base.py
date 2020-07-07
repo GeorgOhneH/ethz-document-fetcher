@@ -3,6 +3,7 @@ import os
 
 from PyQt5.QtGui import *
 
+from core.template_parser.nodes.utils import get_kwargs_hash, get_folder_name_from_hash
 from core.storage import cache
 from core.utils import safe_path_join
 from gui.constants import ASSETS_PATH
@@ -16,6 +17,9 @@ class NodeConfigs(Configs):
     def get_name(self):
         raise NotImplementedError
 
+    def get_folder_name(self):
+        return None
+
     def get_icon(self):
         return QIcon(TemplateNode.DEFAULT_ICON_PATH)
 
@@ -25,27 +29,34 @@ class TemplateNode(object):
 
     def __init__(self, parent,
                  folder_name=None,
-                 unique_key_args=None,
+                 unique_key_kwargs=None,
                  use_folder=True,
                  is_producer=False,
                  meta_data=None):
         if meta_data is None:
             meta_data = {}
+        if unique_key_kwargs is None:
+            unique_key_kwargs = {}
+        self.unique_key_kwargs = unique_key_kwargs
         self.meta_data = meta_data
         self.is_producer = is_producer
-        if unique_key_args is None:
-            unique_key_args = []
-        self.position = None
         self.use_folder = use_folder
         self.parent = parent
         self.children = []
-        self.child_index = self._init_parent()
 
-        self.unique_key = self._init_unique_key(self.child_index, *unique_key_args)
-        self.base_path = self._init_base_path(folder_name, use_folder)
+        self.child_index = self._init_parent()
+        self.position = self._init_position()
+        self.kwargs_hash = get_kwargs_hash(self.unique_key_kwargs)
+
+        self.unique_key = self._init_unique_key()
+        self.folder_name = self._init_folder_name(folder_name)
+        self.base_path = self._init_base_path(use_folder)
 
     def __str__(self):
         return self.unique_key
+
+    def _init_position(self):
+        return self.parent.position + self.child_index
 
     def _init_parent(self):
         return self.parent.add_node(self)
@@ -55,27 +66,26 @@ class TemplateNode(object):
         node.parent = self
         return f"{len(self.children) - 1}:"
 
-    def _init_base_path(self, folder_name, use_folder):
+    def _init_base_path(self, use_folder):
         if not self.use_folder:
             return self.parent.base_path
 
-        if folder_name is None:
-            folder_name_cache = cache.get_json("folder_name")
-            folder_name = folder_name_cache.get(self.unique_key, None)
-
-        if folder_name is None:
-            return None
+        if self.folder_name is None:
+            return
 
         if self.parent.base_path is None:
-            return None
+            return
 
-        return safe_path_join(self.parent.base_path, folder_name)
+        return safe_path_join(self.parent.base_path, self.folder_name)
 
-    def _init_unique_key(self, child_index, *args):
-        if self.parent.position is None:
-            raise ValueError("parents position must be set")
-        self.position = self.parent.position + child_index
-        unique_string = self.position + "".join([f"{value}" for value in args])
+    def _init_folder_name(self, folder_name):
+        if folder_name is None:
+            folder_name = get_folder_name_from_hash(self.kwargs_hash)
+
+        return folder_name
+
+    def _init_unique_key(self):
+        unique_string = self.position + self.kwargs_hash
         return hashlib.md5(unique_string.encode('utf-8')).hexdigest()
 
     def convert_to_dict(self, result=None):

@@ -34,15 +34,18 @@ class TreeEditWidgetItem(QTreeWidgetItem):
     def init_widgets(self):
         if self.childCount() > 2:
             self.setExpanded(True)
+        self._init_widgets()
+
+    def _init_widgets(self):
         self.setText(0, self.node_configs.get_name())
         self.setIcon(0, self.node_configs.get_icon())
+        self.setText(1, self.node_configs.get_folder_name())
 
     def open_dialog(self):
         self.dialog.show()
 
     def update(self):
-        self.setText(0, self.node_configs.get_name())
-        self.setIcon(0, self.node_configs.get_icon())
+        self._init_widgets()
         if self.item_status == self.STATUS_NEW:
             folder_child = TreeEditWidgetItem(FolderConfigs(), self.STATUS_NEW)
             site_child = TreeEditWidgetItem(SiteConfigs(), self.STATUS_NEW)

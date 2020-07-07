@@ -8,9 +8,11 @@ class Root(TemplateNode):
     def _init_parent(self):
         return None
 
-    def _init_base_path(self, folder_name, use_folder):
+    def _init_position(self):
+        return "root"
+
+    def _init_base_path(self, use_folder):
         return ""
 
-    def _init_unique_key(self, child_position, **kwargs):
-        self.position = "root"
+    def _init_unique_key(self):
         return "root"

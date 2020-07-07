@@ -1,0 +1,16 @@
+app: eth-document-fetcher
+script:
+  - cat > eth-document-fetcher.desktop <<EOF
+  - [Desktop Entry]
+  - Type=Application
+  - Name=eth-document-fetcher
+  - Comment=A Python editor for beginner programmers
+  - Icon=/usr/bin/gui/assets/logo/logo.svg
+  - Exec=eth-document-fetcher
+  - Terminal=false
+#  - Categories=Application;
+  - Keywords=Python;Editor;microbit;micro:bit;
+  - StartupWMClass=eth-document-fetcher
+#  - MimeType=text/x-python3;text/x-python3;
+  - EOF
+  - cp ./dist/eth-document-fetcher/* ./usr/bin/

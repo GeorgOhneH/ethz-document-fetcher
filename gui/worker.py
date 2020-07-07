@@ -10,6 +10,7 @@ from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
+from core.storage import cache
 from core.utils import user_statistics
 
 logger = logging.getLogger(__name__)

@@ -87,7 +87,6 @@ class CentralWidget(QWidget):
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
-        self.template_edit_dialog = None
         self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
         self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
 
@@ -157,11 +156,11 @@ class CentralWidget(QWidget):
             template_path = None
         else:
             template_path = self.get_template_path()
-        self.template_edit_dialog = TemplateEditDialog(parent=self,
-                                                       template_path=template_path,
-                                                       template_path_settings=self.template_path_settings)
-        self.template_edit_dialog.accepted.connect(self.apply_edit)
-        self.template_edit_dialog.open()
+        template_edit_dialog = TemplateEditDialog(parent=self,
+                                                  template_path=template_path,
+                                                  template_path_settings=self.template_path_settings)
+        template_edit_dialog.accepted.connect(self.apply_edit)
+        template_edit_dialog.open()
 
     def apply_edit(self):
         self.open_file(file_path=self.get_template_path(), file_changed=True)
