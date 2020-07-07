@@ -36,7 +36,7 @@ jobs:
     strategy:
       matrix:
         #os: [windows-latest, ubuntu-latest, macos-latest]
-        os: [windows-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
       fail-fast: false
 
     steps:
@@ -86,6 +86,10 @@ jobs:
       if: startsWith(matrix.os, 'macos')
       run: pip install biplist dmgbuild
 
+    - name: Install dependencies (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get update && sudo apt-get -y install p7zip-full
+
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
       run: pyinstaller app.spec
@@ -96,7 +100,7 @@ jobs:
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: python setup.py build
+      run: pyinstaller app.spec
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -152,67 +156,16 @@ jobs:
         name: eth-document-fetcher-osx.dmg
         path: eth-document-fetcher-osx.dmg
 
-    # LINUX
-#      - name: Install dependencies (Ubuntu)
-#        if: startsWith(matrix.os, 'ubuntu')
-#        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev libxkbcommon-x11-0 libgstreamer-plugins-base1.0-0 build-essential libgl1-mesa-dev
-#
-#      - name: Build (Ubuntu)
-#        if: startsWith(matrix.os, 'ubuntu')
-#        run: |
-#            mkdir build
-#            cd build
-#            qmake PREFIX=/usr ..
-#            make -j8
-#        shell: bash
-#
-#      - name: Package (Ubuntu)
-#        if: startsWith(matrix.os, 'ubuntu')
-#        run: |
-#            cd build
-#            sh ./../.CI/CreateAppImage.sh
-#        shell: bash
-#
-#      - name: Upload artifact (Ubuntu)
-#        if: startsWith(matrix.os, 'ubuntu')
-#        uses: actions/upload-artifact@v1
-#        with:
-#          name: Chatterino-x86_64.AppImage
-#          path: build/Chatterino-x86_64.AppImage
-#
-#      # MACOS
-#      - name: Install dependencies (MacOS)
-#        if: startsWith(matrix.os, 'macos')
-#        run: |
-#            brew install boost openssl rapidjson qt p7zip create-dmg
-#        shell: bash
-#
-#      - name: Build (MacOS)
-#        if: startsWith(matrix.os, 'macos')
-#        run: |
-#            mkdir build
-#            cd build
-#            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
-#            sed -ie 's/-framework\\\ /-framework /g' Makefile
-#            make -j8
-#        shell: bash
-#
-#      - name: Package (MacOS)
-#        if: startsWith(matrix.os, 'macos')
-#        run: |
-#            ls -la
-#            pwd
-#            ls -la build || true
-#            cd build
-#            sh ./../.CI/CreateDMG.sh
-#        shell: bash
-#
-#      - name: Upload artifact (MacOS)
-#        if: startsWith(matrix.os, 'macos')
-#        uses: actions/upload-artifact@v1
-#        with:
-#          name: chatterino-osx.dmg
-#          path: build/chatterino-osx.dmg
+      - name: Package (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: 7z a eth-document-fetcher-linux-x86-64.zip ./dist/eth-document-fetcher/*
+
+      - name: Upload artifact (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v1
+        with:
+          name: eth-document-fetcher-linux-x86-64.zip
+          path: eth-document-fetcher-linux-x86-64.zip
 
 #  create-release:
 #    needs: build
