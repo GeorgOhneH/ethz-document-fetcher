@@ -40,7 +40,7 @@ if __name__ == "__main__":
     if not IS_FROZEN and global_settings.loglevel == "DEBUG":
         sys.excepthook = except_hook
 
-    app = QApplication([])
+    app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 
     main_window = gui.main_window.MainWindow()

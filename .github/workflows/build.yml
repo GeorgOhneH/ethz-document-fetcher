@@ -88,7 +88,10 @@ jobs:
 
     - name: Install dependencies (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: sudo apt-get update && sudo apt-get -y install p7zip-full
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install p7zip-full
+        sudo apt-get -y install -qq libegl1-mesa
 
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
