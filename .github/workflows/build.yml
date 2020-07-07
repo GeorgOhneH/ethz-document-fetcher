@@ -156,16 +156,16 @@ jobs:
         name: eth-document-fetcher-osx.dmg
         path: eth-document-fetcher-osx.dmg
 
-      - name: Package (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: 7z a eth-document-fetcher-linux-x86-64.zip ./dist/eth-document-fetcher/*
+    - name: Package (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: 7z a eth-document-fetcher-linux-x86-64.zip ./dist/eth-document-fetcher/*
 
-      - name: Upload artifact (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v1
-        with:
-          name: eth-document-fetcher-linux-x86-64.zip
-          path: eth-document-fetcher-linux-x86-64.zip
+    - name: Upload artifact (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      uses: actions/upload-artifact@v1
+      with:
+        name: eth-document-fetcher-linux-x86-64.zip
+        path: eth-document-fetcher-linux-x86-64.zip
 
 #  create-release:
 #    needs: build
