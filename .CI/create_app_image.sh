@@ -23,7 +23,9 @@ chmod +x appimagetool-x86_64.AppImage
   --icon-filename eth-document-fetcher \
   --create-desktop-file
 
+cp ./.CI/eth-document-fetcher.desktop ./AppDir/usr/share/applications/eth-document-fetcher.desktop
 cp ./dist/eth-document-fetcher/* ./AppDir -r
+rm ./AppDir/eth-document-fetcher
 
 ./appimagetool-x86_64.AppImage ./AppDir eth-document-fetcher-linux-x86_64.AppImage
 
