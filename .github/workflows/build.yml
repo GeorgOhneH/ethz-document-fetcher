@@ -161,7 +161,7 @@ jobs:
 
     - name: Package (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: ./.CI/create_app_image.sh
+      run: sh ./.CI/create_app_image.sh
       shell: bash
 
     - name: Upload artifact (Ubuntu)
