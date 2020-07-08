@@ -161,14 +161,15 @@ jobs:
 
     - name: Package (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: 7z a eth-document-fetcher-linux-x86-64.zip ./dist/eth-document-fetcher/*
+      run: ./.CI/create_app_image.sh
+      shell: bash
 
     - name: Upload artifact (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-linux-x86-64.zip
-        path: eth-document-fetcher-linux-x86-64.zip
+        name: eth-document-fetcher-linux-x86_64.AppImage
+        path: eth-document-fetcher-linux-x86_64.AppImage
 
 #  create-release:
 #    needs: build
