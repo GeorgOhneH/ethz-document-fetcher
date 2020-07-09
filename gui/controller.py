@@ -76,10 +76,10 @@ class CentralWidget(QWidget):
         self.button_container.layout().addWidget(self.btn_run_all)
         self.button_container.layout().addWidget(self.btn_run_checked)
         self.button_container.layout().addWidget(self.btn_stop)
-        # if sys.platform != "darwin":
-        self.button_container.layout().addWidget(line)
-        self.button_container.layout().addWidget(self.btn_check_all)
-        self.button_container.layout().addWidget(self.btn_uncheck_all)
+        if sys.platform != "darwin":
+            self.button_container.layout().addWidget(line)
+            self.button_container.layout().addWidget(self.btn_check_all)
+            self.button_container.layout().addWidget(self.btn_uncheck_all)
 
         actions.settings.triggered.connect(self.open_settings)
         actions.new_file.triggered.connect(lambda: self.open_edit(new=True))
@@ -125,6 +125,8 @@ class CentralWidget(QWidget):
 
         self.btn_stop.setEnabled(True)
         self.actions.stop.setEnabled(True)
+
+        self.template_view.reset_state()
 
         self.worker.unique_keys = unique_keys
         self.worker.recursive = recursive

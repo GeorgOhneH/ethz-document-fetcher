@@ -175,7 +175,7 @@ class TemplateViewTree(QTreeWidget):
     @pyqtSlot()
     def reset_widgets(self):
         for key, widget in self.widgets.items():
-            widget.set_idle()
+            widget.reset()
 
     @pyqtSlot()
     def stop_widgets(self):

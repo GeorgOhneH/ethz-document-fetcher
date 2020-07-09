@@ -127,6 +127,9 @@ class TemplateView(QWidget):
         self.template_view_tree.init(template_path)
         self.state_widget.reset_widget()
 
+    def reset_state(self):
+        self.template_view_tree.reset_widgets()
+
     def get_path(self):
         return self.template_view_tree.template.path
 

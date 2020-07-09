@@ -44,5 +44,6 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 
     main_window = gui.main_window.MainWindow()
+    main_window.show()
 
     sys.exit(app.exec_())

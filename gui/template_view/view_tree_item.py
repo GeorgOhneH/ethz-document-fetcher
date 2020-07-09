@@ -133,6 +133,11 @@ class TreeWidgetItem(QTreeWidgetItem):
     def state_text(self):
         return self.state_to_string(self.state)
 
+    def reset(self):
+        if self.state == self.STATE_NOTHING:
+            return
+        self.set_idle()
+
     def _set_state(self, state):
         self.state = state
         self.setText(self.COLUMN_STATE, self.state_to_string(state))
