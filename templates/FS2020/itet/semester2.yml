@@ -1,7 +1,11 @@
 children:
 - folder: semester2
+  meta_data:
+    check_state: 2
   children:
   - folder: Video Portal
+    meta_data:
+      check_state: 2
     children:
     - module: video_portal
       use_folder: true
@@ -9,12 +13,16 @@ children:
       department: d-math
       semester: spring
       year: 2020
+      meta_data:
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 401-0302-10L
       department: d-math
       semester: spring
       year: 2020
+      meta_data:
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 227-0002-00L
@@ -22,6 +30,8 @@ children:
       pwd_username: bie-20s
       semester: spring
       year: 2020
+      meta_data:
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 227-0002-00L
@@ -29,6 +39,8 @@ children:
       pwd_username: bie-19s
       semester: spring
       year: 2019
+      meta_data:
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 252-0848-00L
@@ -36,6 +48,8 @@ children:
       pwd_username: scw-20s
       semester: spring
       year: 2020
+      meta_data:
+        check_state: 2
     - module: video_portal
       use_folder: true
       course_id: 252-0847-00L
@@ -43,51 +57,79 @@ children:
       pwd_username: scw-19s
       semester: autumn
       year: 2019
+      meta_data:
+        check_state: 2
     - module: polybox
       use_folder: true
       folder_name: NuS2 Podcast
       id: SU2lkCtdoLH3X1w
+      meta_data:
+        check_state: 2
   - module: moodle
     use_folder: true
     id: 11838
+    meta_data:
+      check_state: 2
     children:
     - module: polybox
       use_folder: true
       id: 4YGUCHIXorTsvVL
+      meta_data:
+        check_state: 2
   - module: moodle
     use_folder: true
     id: 12228
+    meta_data:
+      check_state: 2
     children:
     - module: polybox
       use_folder: true
       id: iSYMs1nnDAzDWtU
+      meta_data:
+        check_state: 2
   - module: moodle
     use_folder: true
     id: 12301
     forbidden_extensions:
     - video
+    meta_data:
+      check_state: 2
     children:
     - module: nethz
       use_folder: true
       url: https://n.ethz.ch/~tiagos/download/2020/
+      meta_data:
+        check_state: 2
   - module: moodle
     use_folder: true
     id: 12611
+    meta_data:
+      check_state: 2
     children:
     - module: custom
       use_folder: false
       function: FS2020.analysis.parse_main_page
+      meta_data:
+        check_state: 2
     - module: ilias
       use_folder: true
       folder_name: Notizen
       id: 187834
+      meta_data:
+        check_state: 2
     - module: nethz
       use_folder: true
       url: https://n.ethz.ch/~cdirren/downloads/Analysis_2/
+      meta_data:
+        check_state: 2
     - module: polybox
       use_folder: true
       id: C8LWUyvLRUbh3zX
+      meta_data:
+        check_state: 2
   - module: custom
     use_folder: true
     folder_name: Computer Science  D-ITET  SS 20
     function: FS2020.informatik.parse_main_page
+    meta_data:
+      check_state: 2
