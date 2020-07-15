@@ -69,7 +69,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle('eth document fetcher')
         self.setCentralWidget(self.central_widget)
         self.read_settings()
-        self.show()
 
     def init_menu(self, menu, path):
         for file_name in os.listdir(path):

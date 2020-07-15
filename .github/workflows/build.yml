@@ -35,7 +35,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        #os: [windows-latest, ubuntu-latest, macos-latest]
         os: [windows-latest, macos-latest, ubuntu-latest]
       fail-fast: false
 
@@ -171,83 +170,90 @@ jobs:
         name: eth-document-fetcher-linux-x86_64.AppImage
         path: eth-document-fetcher-linux-x86_64.AppImage
 
-#  create-release:
-#    needs: build
-#    runs-on: ubuntu-latest
-#    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
-#
-#    steps:
-#      - name: Create release
-#        id: create_release
-#        uses: pajlada/create-release@v2
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: github-actions-nightly
-#          backup_tag_name: backup-github-actions-nightly
-#          release_name: GitHub Actions Nightly Test
-#          body: |
-#              1 ${{ github.eventName }}
-#              2 ${{ github.sha }}
-#              3 ${{ github.ref }}
-#              4 ${{ github.workflow }}
-#              5 ${{ github.action }}
-#              6 ${{ github.actor }}
-#          prerelease: true
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: chatterino-windows-x86-64.zip
-#          path: windows/
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: Chatterino-x86_64.AppImage
-#          path: linux/
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: chatterino-osx.dmg
-#          path: macos/
-#
-#      # TODO: Extract dmg and appimage
-#
-#      - name: TREE
-#        run: |
-#            sudo apt update && sudo apt install tree
-#            tree .
-#
-#      # - name: Read upload URL into output
-#      #   id: upload_url
-#      #   run: |
-#      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
-#
-#      - name: Upload release asset (Windows)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./windows/chatterino-windows-x86-64.zip
-#          asset_name: chatterino-windows-x86-64.zip
-#          asset_content_type: application/zip
-#
-#      - name: Upload release asset (Ubuntu)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./linux/Chatterino-x86_64.AppImage
-#          asset_name: Chatterino-x86_64.AppImage
-#          asset_content_type: application/x-executable
-#
-#      - name: Upload release asset (MacOS)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./macos/chatterino-osx.dmg
-#          asset_name: chatterino-osx.dmg
-#          asset_content_type: application/x-bzip2
+  create-release:
+    needs: [build, check_release]
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check_release.outputs.current_version }}
+          release_name: Release ${{ needs.check_release.outputs.current_version }}
+          body:
+          draft: false
+          prerelease: false
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: eth-document-fetcher-windows-x86-64.zip
+          path: windows/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: eth-document-fetcher-windows-x86-64-installer.exe
+          path: windows/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: eth-document-fetcher-linux-x86_64.AppImage
+          path: linux/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: eth-document-fetcher-osx.dmg
+          path: macos/
+
+      - name: TREE
+        run: |
+            sudo apt update && sudo apt install tree
+            tree .
+
+      # - name: Read upload URL into output
+      #   id: upload_url
+      #   run: |
+      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
+
+      - name: Upload release asset zip (Windows)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/eth-document-fetcher-windows-x86-64.zip
+          asset_name: eth-document-fetcher-windows-x86-64.zip
+          asset_content_type: application/zip
+
+      - name: Upload release asset exe (Windows)
+          uses: actions/upload-release-asset@v1.0.1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: ./windows/eth-document-fetcher-windows-x86-64-installer.exe
+            asset_name: eth-document-fetcher-windows-x86-64-installer.exe
+            asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload release asset (Ubuntu)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux/eth-document-fetcher-linux-x86_64.AppImage
+          asset_name: eth-document-fetcher-linux-x86_64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: Upload release asset (MacOS)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./macos/eth-document-fetcher-osx.dmg
+          asset_name: eth-document-fetcher-osx.dmg
+          asset_content_type: application/x-bzip2

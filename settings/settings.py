@@ -66,7 +66,7 @@ class Settings(Configs, metaclass=SettingBase):
 
 
 class GlobalSettings(Settings):
-    NAME = "Global"
+    NAME = "Advanced"
     loglevel = ConfigOptions(default="DEBUG", options=["ERROR", "WARNING", "INFO", "DEBUG"], gui_name="Loglevel")
 
 
@@ -85,7 +85,7 @@ def highlight_difference_active(instance, from_widget):
 
 
 class SiteSettings(Settings):
-    NAME = "Site"
+    NAME = "Download"
     username = ConfigString(optional=True, gui_name="Username")
     password = ConfigPassword(optional=True, gui_name="Password")
     base_path = ConfigPath(ony_folder=True, gui_name="Save Path")
@@ -95,5 +95,5 @@ class SiteSettings(Settings):
                                       hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
     highlight_difference = ConfigBool(default=True, active_func=highlight_difference_active, gray_out=True,
-                                      gui_name="Add Highlight Difference to Replaced Files (pdf only)")
+                                      gui_name="Add Highlight Difference to Replaced Files (pdf only, can be cpu heavy)")
     force_download = ConfigBool(default=False, gui_name="Force Download")

@@ -1,5 +1,6 @@
 import copy
 import difflib
+import os
 
 import fitz
 
@@ -99,7 +100,7 @@ def add_differ_highlight(new_path, old_path, out_path):
                             garbage=4,
                             clean=True,
                             deflate=True,
-                            pretty=True,
+                            pretty=False,
                             ascii=False)
 
 
@@ -194,3 +195,8 @@ def reduce_boxes(boxes):
         reduced_boxes.append(copy.copy(current_box))
 
     return reduced_boxes
+
+
+if __name__ == "__main__":
+    base = "D:\ethz\semester2\\401-0302-10L Komplexe Analysis FS2020\Vorlesungen; Skript, Vorlesungsnotizen, Notability-Aufzeichnungen"
+    add_differ_highlight(os.path.join(base, "SkriptKomplexeAnalysis-2.pdf"), os.path.join(base, "KA.pdf"), os.path.join(base, "KA-out.pdf"))
