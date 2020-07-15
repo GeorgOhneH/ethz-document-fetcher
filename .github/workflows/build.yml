@@ -229,14 +229,14 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload release asset exe (Windows)
-          uses: actions/upload-release-asset@v1.0.1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: ./windows/eth-document-fetcher-windows-x86-64-installer.exe
-            asset_name: eth-document-fetcher-windows-x86-64-installer.exe
-            asset_content_type: application/vnd.microsoft.portable-executable
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/eth-document-fetcher-windows-x86-64-installer.exe
+          asset_name: eth-document-fetcher-windows-x86-64-installer.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Upload release asset (Ubuntu)
         uses: actions/upload-release-asset@v1.0.1
