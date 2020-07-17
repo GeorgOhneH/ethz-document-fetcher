@@ -14,8 +14,7 @@ logger = logging.getLogger(__name__)
 
 class TemplateEditDialog(QDialog):
     def __init__(self, parent, template_path, template_path_settings):
-        super().__init__(parent=parent)
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        super().__init__(parent=parent, flags=Qt.Window)
         self.setWindowTitle("Edit")
         self.setWindowModality(Qt.ApplicationModal)
         self.template_path_settings = template_path_settings

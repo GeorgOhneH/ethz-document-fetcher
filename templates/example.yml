@@ -3,5 +3,5 @@ children:
   children:
   - module: polybox
     use_folder: true
-    folder_name: Polybox Folder
+    folder_name: Polybox
     id: YrFA3IT7FhemOAs

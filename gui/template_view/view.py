@@ -13,17 +13,27 @@ logger = logging.getLogger(__name__)
 class ButtonGroup(QButtonGroup):
     def __init__(self):
         super().__init__()
+        self.setExclusive(False)
         self.buttonClicked.connect(self.uncheck_button)
-        self.last_button_clicked = None
-        self.last_button_clicked_checked = None
+        qApp.aboutToQuit.connect(self.save_state)
 
-    def uncheck_button(self, button: QAbstractButton):
-        if button is self.last_button_clicked and self.last_button_clicked_checked:
-            self.setExclusive(False)
-            button.setChecked(False)
-            self.setExclusive(True)
-        self.last_button_clicked = button
-        self.last_button_clicked_checked = button.isChecked()
+    def uncheck_button(self, clicked_btn: QAbstractButton):
+        for btn in self.buttons():
+            if btn is clicked_btn:
+                continue
+            btn.setChecked(False)
+
+    def save_state(self):
+        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        qsettings.setValue("buttonGroupView/id", self.checkedId())
+
+    def read_settings(self):
+        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+        if qsettings.value("buttonGroupView/id") is None:
+            return
+        button = self.button(qsettings.value("buttonGroupView/id"))
+        if button is not None:
+            button.setChecked(True)
 
 
 class Splitter(QSplitter):
@@ -76,6 +86,7 @@ class StackedWidgetView(QStackedWidget):
             self.addWidget(view)
             self.button_group.addButton(view.button)
             self.layout_button.addWidget(view.button)
+        self.button_group.read_settings()
 
     def reset_widget(self):
         for view in self.views:

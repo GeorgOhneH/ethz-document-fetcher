@@ -12,6 +12,7 @@ from gui.settings import SettingsDialog
 from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.template_edit import TemplateEditDialog
 from gui.constants import TEMPLATE_PRESET_FILE_PATHS
+from gui.button_container import ButtonContainer
 from gui.template_view import TemplateView
 from gui.worker import Worker
 from settings.config_objs.path import open_file_picker
@@ -44,10 +45,7 @@ class CentralWidget(QWidget):
         self.grid = QGridLayout()
         self.grid.setContentsMargins(17, 0, 17, 0)
 
-        self.button_container = QWidget()
-        self.button_container.setLayout(QHBoxLayout())
-        self.button_container.layout().setContentsMargins(0, 11, 0, 0)
-        self.button_container.layout().setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+        self.button_container = ButtonContainer()
 
         self.btn_run_all = QPushButton("Run All")
         actions.run.triggered.connect(lambda: self.start_thread())
@@ -56,6 +54,18 @@ class CentralWidget(QWidget):
         self.btn_run_checked = QPushButton("Run Selected")
         actions.run_checked.triggered.connect(self.start_thread_checked)
         self.btn_run_checked.pressed.connect(self.start_thread_checked)
+
+        self.btn_edit = QPushButton("Edit")
+        actions.edit_file.triggered.connect(self.open_edit)
+        self.btn_edit.pressed.connect(self.open_edit)
+
+        self.btn_edit = QPushButton("Edit")
+        actions.edit_file.triggered.connect(self.open_edit)
+        self.btn_edit.pressed.connect(self.open_edit)
+
+        self.btn_settings = QPushButton("Settings")
+        actions.settings.triggered.connect(self.open_settings)
+        self.btn_settings.pressed.connect(self.open_settings)
 
         self.btn_stop = QPushButton("Stop")
         self.btn_stop.setEnabled(False)
@@ -73,17 +83,18 @@ class CentralWidget(QWidget):
         self.btn_uncheck_all = QPushButton("Select None")
         self.btn_uncheck_all.pressed.connect(self.uncheck_all)
 
-        self.button_container.layout().addWidget(self.btn_run_all)
-        self.button_container.layout().addWidget(self.btn_run_checked)
-        self.button_container.layout().addWidget(self.btn_stop)
+        self.button_container.left_layout.addWidget(self.btn_run_all)
+        self.button_container.left_layout.addWidget(self.btn_run_checked)
+        self.button_container.left_layout.addWidget(self.btn_stop)
         if sys.platform != "darwin":
-            self.button_container.layout().addWidget(line)
-            self.button_container.layout().addWidget(self.btn_check_all)
-            self.button_container.layout().addWidget(self.btn_uncheck_all)
+            self.button_container.left_layout.addWidget(line)
+            self.button_container.left_layout.addWidget(self.btn_check_all)
+            self.button_container.left_layout.addWidget(self.btn_uncheck_all)
 
-        actions.settings.triggered.connect(self.open_settings)
+        self.button_container.right_layout.addWidget(self.btn_edit)
+        self.button_container.right_layout.addWidget(self.btn_settings)
+
         actions.new_file.triggered.connect(lambda: self.open_edit(new=True))
-        actions.edit_file.triggered.connect(self.open_edit)
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
