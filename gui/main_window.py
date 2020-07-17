@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
             elif ".yml" in file_name:
                 action = menu.addAction(str(file_name))
                 action.triggered.connect(lambda checked, file_path=sub_path:
-                                         self.central_widget.open_file(checked, file_path))
+                                         self.central_widget.open_file(file_path=file_path))
 
     def closeEvent(self, event):
         self.central_widget.clean_up()

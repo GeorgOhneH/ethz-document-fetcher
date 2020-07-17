@@ -14,14 +14,16 @@ class ButtonGroup(QButtonGroup):
     def __init__(self):
         super().__init__()
         self.setExclusive(False)
+        self.last_active_button = None
         self.buttonClicked.connect(self.uncheck_button)
         qApp.aboutToQuit.connect(self.save_state)
 
     def uncheck_button(self, clicked_btn: QAbstractButton):
-        for btn in self.buttons():
-            if btn is clicked_btn:
-                continue
-            btn.setChecked(False)
+        if clicked_btn is self.last_active_button:
+            return
+        if self.last_active_button is not None:
+            self.last_active_button.setChecked(False)
+        self.last_active_button = clicked_btn
 
     def save_state(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
@@ -33,6 +35,7 @@ class ButtonGroup(QButtonGroup):
             return
         button = self.button(qsettings.value("buttonGroupView/id"))
         if button is not None:
+            self.last_active_button = button
             button.setChecked(True)
 
 
@@ -57,8 +60,8 @@ class Splitter(QSplitter):
 
 
 class StackedWidgetView(QStackedWidget):
-    def __init__(self, view_tree, controller):
-        super().__init__()
+    def __init__(self, view_tree, controller, parent):
+        super().__init__(parent=parent)
         self.view_tree = view_tree
         self.old_selected_widget = None
         self.button_group = ButtonGroup()
@@ -122,7 +125,7 @@ class TemplateView(QWidget):
         self.layout.setContentsMargins(0, 6, 0, 6)
 
         self.splitter = Splitter()
-        self.state_widget = StackedWidgetView(self.template_view_tree, controller)
+        self.state_widget = StackedWidgetView(self.template_view_tree, controller, parent=self)
 
         self.splitter.addWidget(self.template_view_tree)
         self.splitter.addWidget(self.state_widget)

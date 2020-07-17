@@ -39,9 +39,9 @@ class TemplateEditDialog(QDialog):
         self.finished.connect(self.save_geometry)
         self.finished.connect(self.template_view.save_state)
 
-    def open(self):
+    def show(self):
         self.read_settings()
-        super().open()
+        super().show()
 
     def save_and_exit(self, button):
         if button is self.cancel_btn:

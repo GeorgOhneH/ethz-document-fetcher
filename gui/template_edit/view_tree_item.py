@@ -21,7 +21,7 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         self.node_configs = node_configs
         self.item_status = item_status
         self.set_flags()
-        self.dialog = NodeDialog(node_configs=node_configs, parent=None)
+        self.dialog = NodeDialog(node_configs=node_configs, parent=self.treeWidget())
         self.dialog.accepted.connect(self.update)
 
     def set_flags(self):

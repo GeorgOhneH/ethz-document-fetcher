@@ -56,14 +56,12 @@ class CentralWidget(QWidget):
         self.btn_run_checked.pressed.connect(self.start_thread_checked)
 
         self.btn_edit = QPushButton("Edit")
-        actions.edit_file.triggered.connect(self.open_edit)
-        self.btn_edit.pressed.connect(self.open_edit)
-
-        self.btn_edit = QPushButton("Edit")
+        self.btn_edit.setFocusPolicy(Qt.ClickFocus)
         actions.edit_file.triggered.connect(self.open_edit)
         self.btn_edit.pressed.connect(self.open_edit)
 
         self.btn_settings = QPushButton("Settings")
+        self.btn_settings.setFocusPolicy(Qt.ClickFocus)
         actions.settings.triggered.connect(self.open_settings)
         self.btn_settings.pressed.connect(self.open_settings)
 
@@ -163,8 +161,9 @@ class CentralWidget(QWidget):
 
     def open_settings(self):
         self.settings_dialog.open()
+        self.btn_settings.clearFocus()
 
-    def open_edit(self, checked=None, new=False):
+    def open_edit(self, *args, new=False, **kwargs):
         if new:
             template_path = None
         else:
@@ -173,12 +172,13 @@ class CentralWidget(QWidget):
                                                   template_path=template_path,
                                                   template_path_settings=self.template_path_settings)
         template_edit_dialog.accepted.connect(self.apply_edit)
-        template_edit_dialog.open()
+        template_edit_dialog.show()
+        self.btn_edit.clearFocus()
 
     def apply_edit(self):
         self.open_file(file_path=self.get_template_path(), file_changed=True)
 
-    def open_file(self, checked=None, file_path=None, file_changed=False):
+    def open_file(self, *args, file_path=None, file_changed=False, **kwargs):
         if file_path is None:
             config_obj = self.template_path_settings.get_config_obj("template_path")
             current_template_path = self.get_template_path()
