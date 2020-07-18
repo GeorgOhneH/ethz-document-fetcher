@@ -4,6 +4,8 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from core.constants import VERSION
+
 from gui.constants import ROOT_PATH
 from gui.controller import CentralWidget
 
@@ -66,7 +68,7 @@ class MainWindow(QMainWindow):
         run_menu.addAction(self.actions.run)
         run_menu.addAction(self.actions.run_checked)
         run_menu.addAction(self.actions.stop)
-        self.setWindowTitle('eth document fetcher')
+        self.setWindowTitle(f"eth-document-fetcher {VERSION}")
         self.setCentralWidget(self.central_widget)
         self.read_settings()
 
