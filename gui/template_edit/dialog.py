@@ -80,6 +80,7 @@ class TemplateEditDialog(QDialog):
             error_dialog = QErrorMessage(self)
             error_dialog.setWindowTitle("Error")
             error_dialog.showMessage(f"{path} has not the right file format.")
+            error_dialog.raise_()
             return
 
         self.template_path_settings.save()

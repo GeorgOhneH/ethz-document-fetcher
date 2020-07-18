@@ -88,6 +88,7 @@ class TemplateViewTree(QTreeWidget):
             error_dialog = QErrorMessage(self)
             error_dialog.setWindowTitle("Error")
             error_dialog.showMessage(f"Error while loading the file. Error: {e}")
+            error_dialog.raise_()
         self.init_view_tree()
 
     def setup_connections(self):
