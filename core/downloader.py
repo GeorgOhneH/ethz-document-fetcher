@@ -110,6 +110,7 @@ async def download_if_not_exist(session,
 
         if response.status == 304:
             logger.debug(f"File '{absolute_path}' not modified")
+            cache.save_checksum(absolute_path, checksum)
             return
 
         if file_extension.lower() in MOVIE_EXTENSIONS:
