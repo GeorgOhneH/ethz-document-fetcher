@@ -27,7 +27,9 @@ async def main(signals=None, site_settings=None):
     if site_settings is None:
         site_settings = SiteSettings()
     if not site_settings.check_if_valid():
-        logger.critical("Settings are not correctly configured. Please run 'python setup.py'. Exiting...")
+        logger.critical("Settings are not correctly configured. "
+                        "Please run 'python main.py --help' for more info. "
+                        "Exiting...")
         return
 
     ssl_context = ssl.create_default_context(cafile=certifi.where())

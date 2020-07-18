@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class ButtonGroup(QButtonGroup):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent=parent)
         self.setExclusive(False)
         self.last_active_button = None
         self.buttonClicked.connect(self.uncheck_button)
@@ -24,6 +24,10 @@ class ButtonGroup(QButtonGroup):
         if self.last_active_button is not None:
             self.last_active_button.setChecked(False)
         self.last_active_button = clicked_btn
+        # A weird bug in pyinstaller. We 'refresh' the buttons so that they get updated
+        for btn in self.buttons():
+            btn.hide()
+            btn.show()
 
     def save_state(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
@@ -64,7 +68,7 @@ class StackedWidgetView(QStackedWidget):
         super().__init__(parent=parent)
         self.view_tree = view_tree
         self.old_selected_widget = None
-        self.button_group = ButtonGroup()
+        self.button_group = ButtonGroup(parent=self)
         self.button_widget = QWidget()
         self.layout_button = QHBoxLayout()
         self.layout_button.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -72,9 +76,9 @@ class StackedWidgetView(QStackedWidget):
         self.button_widget.setLayout(self.layout_button)
 
         self.views = [
-            GeneralInfoView(controller=controller),
-            FolderInfoView(controller=controller),
-            HistoryInfoView(controller=controller),
+            GeneralInfoView(controller=controller, parent=self),
+            FolderInfoView(controller=controller, parent=self),
+            HistoryInfoView(controller=controller, parent=self),
         ]
 
         self.init_views()

@@ -84,10 +84,9 @@ class CentralWidget(QWidget):
         self.button_container.left_layout.addWidget(self.btn_run_all)
         self.button_container.left_layout.addWidget(self.btn_run_checked)
         self.button_container.left_layout.addWidget(self.btn_stop)
-        if sys.platform != "darwin":
-            self.button_container.left_layout.addWidget(line)
-            self.button_container.left_layout.addWidget(self.btn_check_all)
-            self.button_container.left_layout.addWidget(self.btn_uncheck_all)
+        self.button_container.left_layout.addWidget(line)
+        self.button_container.left_layout.addWidget(self.btn_check_all)
+        self.button_container.left_layout.addWidget(self.btn_uncheck_all)
 
         self.button_container.right_layout.addWidget(self.btn_edit)
         self.button_container.right_layout.addWidget(self.btn_settings)
@@ -96,7 +95,7 @@ class CentralWidget(QWidget):
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
-        self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, self)
+        self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, parent=self)
         self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
 
         self.grid.addWidget(self.button_container)

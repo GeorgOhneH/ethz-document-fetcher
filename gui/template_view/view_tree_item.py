@@ -333,6 +333,9 @@ class TreeWidgetItemName(QWidget):
 
     def set_check_state(self, state):
         self.check_box.setCheckState(state)
+        # Weird bug in pyinstaller. Updates check_box
+        self.check_box.hide()
+        self.check_box.show()
 
     def set_idle(self):
         self.stateWidget.hide()
