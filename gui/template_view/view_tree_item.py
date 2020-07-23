@@ -44,10 +44,6 @@ class MovieLabel(QLabel):
         self.movie.start()
 
 
-class TreeWidgetItemSignals(QObject):
-    data_changed = pyqtSignal(object)
-
-
 class TreeWidgetItem(QTreeWidgetItem):
     STATE_NOTHING = 0
     STATE_IDLE = 1
@@ -66,7 +62,6 @@ class TreeWidgetItem(QTreeWidgetItem):
         super().__init__()
         self.template_node = template_node
         self.controller = controller
-        self.signals = TreeWidgetItemSignals()
         self.name_widget = None
 
         self.added_new_file_count = 0
@@ -111,7 +106,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         return json[self.template_node.unique_key]
 
     def emit_data_changed(self):
-        self.signals.data_changed.emit(self)
+        self.treeWidget().emit_item_changed(self, 0)
 
     @staticmethod
     def state_to_string(state):
@@ -141,7 +136,6 @@ class TreeWidgetItem(QTreeWidgetItem):
     def _set_state(self, state):
         self.state = state
         self.setText(self.COLUMN_STATE, self.state_to_string(state))
-        self.emit_data_changed()
 
     def set_idle(self):
         self.active_item_count = 0
@@ -186,7 +180,6 @@ class TreeWidgetItem(QTreeWidgetItem):
             "path": path,
             "timestamp": int(time.time()),
         })
-        self.emit_data_changed()
 
     def replaced_file(self, path, old_path=None):
         self.replaced_file_count += 1
@@ -197,7 +190,6 @@ class TreeWidgetItem(QTreeWidgetItem):
             "old_path": old_path,
             "timestamp": int(time.time()),
         })
-        self.emit_data_changed()
 
     def get_check_state(self):
         return self.name_widget.get_check_state()

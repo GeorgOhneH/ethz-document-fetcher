@@ -68,7 +68,6 @@ class StackedWidgetView(QStackedWidget):
     def __init__(self, view_tree, controller, parent):
         super().__init__(parent=parent)
         self.view_tree = view_tree
-        self.old_selected_widget = None
         self.button_group = ButtonGroup(parent=self)
         self.button_widget = QWidget()
         self.layout_button = QHBoxLayout()
@@ -94,6 +93,7 @@ class StackedWidgetView(QStackedWidget):
             self.addWidget(view)
             self.button_group.addButton(view.button)
             self.layout_button.addWidget(view.button)
+            view.init_connection(self.view_tree)
         self.button_group.read_settings()
 
     def reset_widget(self):
@@ -106,8 +106,7 @@ class StackedWidgetView(QStackedWidget):
             return
 
         for view in self.views:
-            view.detect_change_selected(selected_widgets[0], self.old_selected_widget)
-        self.old_selected_widget = selected_widgets[0]
+            view.detect_change_selected(selected_widgets[0])
 
     def change_state_widget(self, *args):
         button = self.button_group.checkedButton()
