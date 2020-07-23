@@ -39,6 +39,12 @@ class HeaderItem(QTreeWidgetItem):
         self.replaced_count += 1
         self.set_text_replaced()
 
+    def reset(self):
+        self.replaced_count = 0
+        self.added_new_count = 0
+        self.set_text_added()
+        self.set_text_replaced()
+
 
 class TemplateViewTree(QTreeWidget):
     def __init__(self, template_path, signals, controller, parent):
@@ -78,6 +84,7 @@ class TemplateViewTree(QTreeWidget):
 
     def init(self, template_path):
         self.template = template_parser.Template(path=template_path)
+        self.header_item.reset()
         try:
             self.template.load()
         except Exception as e:
