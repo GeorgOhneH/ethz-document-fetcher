@@ -115,7 +115,6 @@ Section "Main Component"
   ;Create optional start menu shortcut for uninstaller and Main component
   CreateDirectory "$SMPROGRAMS\${PRODUCT}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT}\eth-document-fetcher.lnk" "$INSTDIR\eth-document-fetcher.exe" "" "$INSTDIR\eth-document-fetcher.exe " 0
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\Uninstall ${PRODUCT}.lnk" "$INSTDIR\${PRODUCT}-uninstaller.exe" "" "$INSTDIR\${PRODUCT}-uninstaller.exe" 0
 
 
   ApplicationID::Set "$SMPROGRAMS\${PRODUCT}\eth-document-fetcher.lnk" "eth-document-fetcher.eth-document-fetcher"
