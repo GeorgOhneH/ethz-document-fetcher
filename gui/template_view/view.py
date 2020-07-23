@@ -46,6 +46,7 @@ class ButtonGroup(QButtonGroup):
 class Splitter(QSplitter):
     def __init__(self):
         super().__init__()
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setChildrenCollapsible(False)
         self.setOrientation(Qt.Vertical)
         qApp.aboutToQuit.connect(self.save_state)
@@ -150,6 +151,12 @@ class TemplateView(QWidget):
 
     def get_path(self):
         return self.template_view_tree.template.path
+
+    def get_splitter_orientation(self):
+        return self.splitter.orientation()
+
+    def set_splitter_orientation(self, orientation):
+        self.splitter.setOrientation(orientation)
 
     def set_check_state_to_all(self, state):
         self.template_view_tree.set_check_state_to_all(state)

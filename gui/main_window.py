@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Actions(object):
-    def __init__(self):
+    def __init__(self, parent):
         self.exit_app = QAction("&Exit")
         self.exit_app.setShortcut("Ctrl+Q")
         self.exit_app.setStatusTip("Exit application")
@@ -39,11 +39,20 @@ class Actions(object):
         self.new_file = QAction("&New")
         self.new_file.setShortcut("Ctrl+N")
 
+        self.info_position_bottom = QAction("Bottom")
+        self.info_position_bottom.setCheckable(True)
+        self.info_position_right = QAction("Right")
+        self.info_position_right.setCheckable(True)
+
+        self.info_position_group = QActionGroup(parent)
+        self.info_position_group.addAction(self.info_position_bottom)
+        self.info_position_group.addAction(self.info_position_right)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.actions = Actions()
+        self.actions = Actions(self)
         self.central_widget = CentralWidget(self.actions, parent=self)
 
         self.statusBar()
@@ -68,6 +77,12 @@ class MainWindow(QMainWindow):
         run_menu.addAction(self.actions.run)
         run_menu.addAction(self.actions.run_checked)
         run_menu.addAction(self.actions.stop)
+
+        view_menu = menu_bar.addMenu("&View")
+        info_position_menu = view_menu.addMenu("Info Tab Position")
+        info_position_menu.addAction(self.actions.info_position_bottom)
+        info_position_menu.addAction(self.actions.info_position_right)
+
         self.setWindowTitle(f"eth-document-fetcher {VERSION}")
         self.setCentralWidget(self.central_widget)
         self.read_settings()

@@ -98,6 +98,13 @@ class CentralWidget(QWidget):
         self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, parent=self)
         self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
 
+        actions.info_position_group.triggered.connect(lambda action, inst=self:
+                                                      inst.template_view.set_splitter_orientation(
+                                                          Qt.Horizontal if action.text() == "Right" else Qt.Vertical)
+                                                      )
+        actions.info_position_bottom.setChecked(self.template_view.get_splitter_orientation() == Qt.Vertical)
+        actions.info_position_right.setChecked(self.template_view.get_splitter_orientation() == Qt.Horizontal)
+
         self.grid.addWidget(self.button_container)
         self.grid.addWidget(self.template_view)
         self.setLayout(self.grid)
