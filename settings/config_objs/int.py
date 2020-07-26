@@ -20,7 +20,7 @@ class SpinBox(QWidget, AbstractConfigWidget):
         if config_obj.get() is not None:
             self.set_value(config_obj.get())
         self.layout = QHBoxLayout()
-        self.layout.setContentsMargins(4, 4, 4, 4)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setAlignment(Qt.AlignLeft)
         self.setLayout(self.layout)
         self.layout.addWidget(QLabel(f"{config_obj.get_gui_name()}: "))
