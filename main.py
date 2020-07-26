@@ -33,7 +33,9 @@ async def main(signals=None, site_settings=None):
         return
 
     ssl_context = ssl.create_default_context(cafile=certifi.where())
-    conn = aiohttp.TCPConnector(ssl=ssl_context)
+    conn = aiohttp.TCPConnector(ssl=ssl_context,
+                                limit=site_settings.conn_limit,
+                                limit_per_host=site_settings.conn_limit_per_host)
 
     async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
                                       timeout=aiohttp.ClientTimeout(30)) as session:

@@ -3,7 +3,8 @@ import logging
 import os
 
 from settings.config import ConfigBase, Configs
-from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, ConfigOptions, ConfigString
+from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword,\
+    ConfigOptions, ConfigString, ConfigInt
 from settings.constants import ROOT_PATH
 from settings.constants import SEPARATOR, CONFIG_PATH
 
@@ -97,3 +98,7 @@ class SiteSettings(Settings):
     highlight_difference = ConfigBool(default=True, active_func=highlight_difference_active, gray_out=True,
                                       gui_name="Add Highlight Difference to Replaced Files (pdf only, can be cpu heavy)")
     force_download = ConfigBool(default=False, gui_name="Force Download")
+    conn_limit = ConfigInt(minimum=0, default=50, gui_name="Maximum Number of Connections",
+                           hint_text="0 for unlimited")
+    conn_limit_per_host = ConfigInt(minimum=0, default=5, gui_name="Maximum Number of Connections per Host",
+                                    hint_text="0 for unlimited")
