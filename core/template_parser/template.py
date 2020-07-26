@@ -48,8 +48,11 @@ class Template(object):
 
     def save_template(self):
         data = self.root.convert_to_dict()
-        with open(self.path, "w+") as f:
-            yaml.dump(data=data, stream=f, Dumper=yaml.Dumper, default_flow_style=False, sort_keys=False)
+        try:
+            with open(self.path, "w+") as f:
+                yaml.dump(data=data, stream=f, Dumper=yaml.Dumper, default_flow_style=False, sort_keys=False)
+        except PermissionError:
+            logger.warning(f"Could not save file: {self.path}. Permission Error")
 
     def convert_to_dict(self):
         return self.root.convert_to_dict()
