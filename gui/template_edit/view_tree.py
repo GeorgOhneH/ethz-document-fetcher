@@ -94,13 +94,18 @@ class TemplateEditViewTree(QTreeWidget):
         item = self.currentItem()
         super().dropEvent(event)
         root = self.invisibleRootItem()
-        while self.itemAbove(item) and self.itemAbove(item).item_status == item.STATUS_NEW:
+        while True:
             parent = (item.parent() or root)
-            if parent is not (self.itemAbove(item).parent() or root):
-                break
             index = parent.indexOfChild(item)
-            new_widget = parent.takeChild(index-1)
-            parent.insertChild(index, new_widget)
+            if index <= 0:
+                break
+            item_above = parent.child(index-1)
+            if item_above is None:
+                break
+            if item_above.item_status != item_above.STATUS_NEW:
+                break
+            item_above = parent.takeChild(index-1)
+            parent.insertChild(index, item_above)
 
     def init_view_tree(self):
         for child in self.template.root.children:
