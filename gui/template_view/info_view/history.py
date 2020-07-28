@@ -47,10 +47,16 @@ class LazyStandardItemModel(QStandardItemModel):
     def clear_rows(self):
         self.removeRows(0, self.rowCount())
 
+    def reset(self):
+        self.clear_rows()
+        self.widget = None
+        self.model_data = None
+
     def update_data(self):
         root = self.invisibleRootItem()
-
-        first_old_file = self.model_data[0]
+        first_old_file = None
+        if len(self.model_data) != 0:
+            first_old_file = self.model_data[0]
         new_data = list(reversed(self.widget.load_from_cache("added_files")))
         items_list = []
         for new_file in new_data:
@@ -137,7 +143,7 @@ class HistoryInfoView(QTreeView, InfoView):
         self.model.set_widget(widget)
 
     def reset_widget(self):
-        self.model.clear_rows()
+        self.model.reset()
 
     def update_view(self, selected_widget):
         self.init(selected_widget)

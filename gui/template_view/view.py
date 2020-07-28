@@ -102,6 +102,10 @@ class StackedWidgetView(QStackedWidget):
 
     def only_if_one_selected(self):
         selected_widgets = self.view_tree.selectedItems()
+
+        if len(selected_widgets) == 0:
+            self.reset_widget()
+            return
         if len(selected_widgets) != 1:
             return
 

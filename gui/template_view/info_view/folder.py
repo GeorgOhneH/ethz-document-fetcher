@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class FolderInfoView(QTreeView, InfoView):
     def __init__(self, controller, parent=None):
         super().__init__(parent=parent, name="Folder", controller=controller)
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.model = QFileSystemModel()
         self.setModel(self.model)
         self.read_settings()
