@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -31,6 +32,40 @@ class FolderInfoView(QTreeView, InfoView):
         else:
             index = self.model.setRootPath(path)
         self.setRootIndex(index)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Delete:
+            selected_indexes = self.selectedIndexes()
+            if selected_indexes:
+                self.delete_item(selected_indexes)
+        super().keyPressEvent(event)
+
+    def delete_item(self, indexes):
+        if not indexes:
+            return
+
+        paths = set()
+        for index in indexes:
+            if not index.isValid():
+                continue
+            file_info = self.model.fileInfo(index)
+            if os.path.exists(file_info.absoluteFilePath()):
+                paths.add(file_info.absoluteFilePath())
+
+        result = QMessageBox.question(self,
+                                      "Are you sure?",
+                                      f"This will delete {len(paths)} file/folders",
+                                      QMessageBox.Ok | QMessageBox.Cancel)
+
+        if result != QMessageBox.Ok:
+            return
+
+        for path in paths:
+            if os.path.exists(path):
+                if os.path.isfile(path):
+                    os.remove(path)
+                else:
+                    shutil.rmtree(path)
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path
@@ -67,11 +102,12 @@ class FolderInfoView(QTreeView, InfoView):
         if file_info.isFile():
             open_file_action = menu.addAction("Open File")
             open_file_action.triggered.connect(lambda: self.open_file(file_info.filePath()))
-            open_folder_action = menu.addAction("Open Folder")
-            open_folder_action.triggered.connect(lambda: self.open_folder(file_info.filePath()))
-        else:
-            open_folder_action = menu.addAction("Open Folder")
-            open_folder_action.triggered.connect(lambda: self.open_file(file_info.filePath()))
+        open_folder_action = menu.addAction("Open Folder")
+        open_folder_action.triggered.connect(lambda: self.open_folder(file_info.filePath()))
+        menu.addSeparator()
+
+        delete_action = menu.addAction("Delete")
+        delete_action.triggered.connect(lambda: self.delete_item([index]))
 
         menu.exec_(self.mapToGlobal(point))
 
