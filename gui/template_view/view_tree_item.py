@@ -56,7 +56,7 @@ class TreeWidgetItem(QTreeWidgetItem):
     COLUMN_ADDED_FILE = 1
     COLUMN_REPLACED_FILE = 2
     COLUMN_STATE = 3
-    COLUMN_EMPTY = 4
+    COLUMN_TYPE = 4
 
     def __init__(self, template_node, controller):
         super().__init__()
@@ -83,6 +83,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.name_widget.state_check_changed.connect(self.update_checked)
         self.name_widget.state_check_changed.connect(self.emit_data_changed)
 
+        self.setText(self.COLUMN_TYPE, str(self.template_node.get_type_name()))
         self.setExpanded(True)
         if not self.template_node.is_producer:
             return

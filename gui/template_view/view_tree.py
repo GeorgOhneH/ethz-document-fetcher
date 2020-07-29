@@ -20,6 +20,7 @@ class HeaderItem(QTreeWidgetItem):
         self.replaced_count = 0
         self.setText(TreeWidgetItem.COLUMN_NAME, "Name")
         self.setText(TreeWidgetItem.COLUMN_STATE, "State")
+        self.setText(TreeWidgetItem.COLUMN_TYPE, "Type")
         self.setTextAlignment(TreeWidgetItem.COLUMN_ADDED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.setTextAlignment(TreeWidgetItem.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
         self.set_text_replaced()
@@ -51,7 +52,7 @@ class TemplateViewTree(QTreeWidget):
         super().__init__(parent=parent)
         self.widgets = {}
         self.controller = controller
-        self.setColumnCount(4)
+        self.setColumnCount(5)
         self.header_item = HeaderItem()
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)

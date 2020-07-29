@@ -47,6 +47,9 @@ class Folder(TemplateNode):
     def get_gui_icon(self):
         return QIcon(self.FOLDER_ICON_PATH)
 
+    def get_type_name(self):
+        return "Folder"
+
     def gui_options(self):
         return [
             ("name", self.name),

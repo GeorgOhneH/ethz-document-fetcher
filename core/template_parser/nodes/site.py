@@ -140,6 +140,9 @@ class Site(TemplateNode):
             return self.folder_name
         return self.raw_module_name
 
+    def get_type_name(self):
+        return self.raw_module_name
+
     def get_gui_icon(self):
         image_files = os.listdir(SITE_ICON_PATH)
         file_name = None
