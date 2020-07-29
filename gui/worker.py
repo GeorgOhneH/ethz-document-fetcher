@@ -3,6 +3,7 @@ import logging.config
 import ssl
 import time
 import traceback
+import gc
 
 import aiohttp
 import certifi
@@ -21,9 +22,9 @@ class Signals(QObject):
     stopped = pyqtSignal()
 
     site_started = pyqtSignal([str], [str, str])
-    site_finished_successful = pyqtSignal([str], [str, str])
-    site_quit_with_warning = pyqtSignal([str], [str, str])
-    site_quit_with_error = pyqtSignal([str], [str, str])
+    site_finished = pyqtSignal([str], [str, str])
+    got_warning = pyqtSignal([str], [str, str])
+    got_error = pyqtSignal([str], [str, str])
 
     update_folder_name = pyqtSignal([str, str])
     update_base_path = pyqtSignal([str, str])
@@ -60,12 +61,19 @@ class Worker(QObject):
             traceback.print_exc()
             logger.error(f"Unexpected error: {e}")
         finally:
+            self.tasks = None
+            for task in asyncio.all_tasks(loop=self.loop):  # clean up not finished tasks
+                task.cancel()
+                try:
+                    self.loop.run_until_complete(task)
+                except BaseException as e:
+                    pass
             self.signals.finished.emit()
 
     def stop(self):
         if self.tasks is not None:
-            self.tasks.cancel()
             self.signals.stopped.emit()
+            self.tasks.cancel()
 
     async def run(self, signals=None):
         if not self.site_settings.check_if_valid():
@@ -134,8 +142,9 @@ class Worker(QObject):
 
                 logger.debug("Clearing queue")
                 while not queue.empty():
-                    queue.get_nowait()
+                    item = queue.get_nowait()
                     queue.task_done()
+                    signals.site_finished[str].emit(item["unique_key"])
 
                 logger.debug("Shutting down worker pool")
                 cancellable_pool.shutdown()

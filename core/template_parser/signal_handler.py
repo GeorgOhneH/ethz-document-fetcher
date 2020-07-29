@@ -13,25 +13,25 @@ class SignalHandler(object):
             self.signals.site_started[str, str].emit(unique_key, msg)
 
     @ignore_if_signal_is_none
-    def finished_successful(self, unique_key, msg=None):
+    def finished(self, unique_key, msg=None):
         if msg is None:
-            self.signals.site_finished_successful[str].emit(unique_key)
+            self.signals.site_finished[str].emit(unique_key)
         else:
-            self.signals.site_finished_successful[str, str].emit(unique_key, msg)
+            self.signals.site_finished[str, str].emit(unique_key, msg)
 
     @ignore_if_signal_is_none
-    def quit_with_warning(self, unique_key, msg=None):
+    def got_warning(self, unique_key, msg=None):
         if msg is None:
-            self.signals.site_quit_with_warning[str].emit(unique_key)
+            self.signals.got_warning[str].emit(unique_key)
         else:
-            self.signals.site_quit_with_warning[str, str].emit(unique_key, msg)
+            self.signals.got_warning[str, str].emit(unique_key, msg)
 
     @ignore_if_signal_is_none
-    def quit_with_error(self, unique_key, msg=None):
+    def got_error(self, unique_key, msg=None):
         if msg is None:
-            self.signals.site_quit_with_error[str].emit(unique_key)
+            self.signals.got_error[str].emit(unique_key)
         else:
-            self.signals.site_quit_with_error[str, str].emit(unique_key, msg)
+            self.signals.got_error[str, str].emit(unique_key, msg)
 
     @ignore_if_signal_is_none
     def update_folder_name(self, unique_key, new_folder_name):

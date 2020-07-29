@@ -67,6 +67,9 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.added_new_file_count = 0
         self.replaced_file_count = 0
 
+        self.error_msgs = []
+        self.warning_msgs = []
+
         self.active_item_count = 0
         self.state = self.STATE_NOTHING
         self.children = []
@@ -134,35 +137,49 @@ class TreeWidgetItem(QTreeWidgetItem):
             return
         self.set_idle()
 
-    def _set_state(self, state):
+    def _set_state(self, state, msg=None):
+        if not self.template_node.is_producer:
+            return
         self.state = state
         self.setText(self.COLUMN_STATE, self.state_to_string(state))
+        self.name_widget.set_state(state, msg)
 
     def set_idle(self):
         self.active_item_count = 0
+        self.error_msgs.clear()
+        self.warning_msgs.clear()
         self._set_state(self.STATE_IDLE)
-        self.name_widget.set_idle()
 
     def set_loading(self, msg=None):
         self.active_item_count += 1
-        self._set_state(self.STATE_LOADING)
-        self.name_widget.set_loading(msg)
+        self._set_state(self.STATE_LOADING, msg)
 
     def set_error(self, msg=None):
-        self._set_state(self.STATE_ERROR)
-        self.name_widget.set_error(msg)
+        self._set_state(self.STATE_ERROR, msg)
+
+    def got_error(self, msg=None):
+        if msg is not None:
+            self.error_msgs.append(msg)
 
     def set_warning(self, msg=None):
-        self._set_state(self.STATE_WARNING)
-        self.name_widget.set_warning(msg)
+        self._set_state(self.STATE_WARNING, msg)
+
+    def got_warning(self, msg=None):
+        if msg is not None:
+            self.warning_msgs.append(msg)
 
     def set_success(self, msg=None):
         self.active_item_count -= 1
         if self.active_item_count < 0:
             logger.warning("Active count is negative")
-        if self.active_item_count == 0 and self.state not in [self.STATE_ERROR, self.STATE_WARNING]:
-            self._set_state(self.STATE_SUCCESS)
-            self.name_widget.set_success(msg)
+        if self.active_item_count == 0:
+            if self.error_msgs:
+                self.set_error("\n".join(self.error_msgs[:min(5, len(self.error_msgs))]))
+                return
+            if self.warning_msgs:
+                self.set_warning("\n".join(self.warning_msgs[:min(5, len(self.warning_msgs))]))
+                return
+            self._set_state(self.STATE_SUCCESS, msg)
 
     def set_folder_name(self, folder_name):
         self.template_node.folder_name = folder_name
@@ -329,6 +346,20 @@ class TreeWidgetItemName(QWidget):
         # Weird bug in pyinstaller. Updates check_box
         self.check_box.hide()
         self.check_box.show()
+
+    def set_state(self, state, msg=None):
+        if state == TreeWidgetItem.STATE_IDLE:
+            self.set_idle()
+        elif state == TreeWidgetItem.STATE_LOADING:
+            self.set_loading(msg=msg)
+        elif state == TreeWidgetItem.STATE_WARNING:
+            self.set_warning(msg=msg)
+        elif state == TreeWidgetItem.STATE_ERROR:
+            self.set_error(msg=msg)
+        elif state == TreeWidgetItem.STATE_SUCCESS:
+            self.set_success(msg=msg)
+        elif state == TreeWidgetItem.STATE_NOTHING:
+            self.set_idle()
 
     def set_idle(self):
         self.stateWidget.hide()

@@ -23,16 +23,17 @@ async def download_files(session: aiohttp.ClientSession, queue):
         signal_handler = item["signal_handler"]
         try:
             await download_if_not_exist(session, **item)
-            signal_handler.finished_successful(unique_key)
         except asyncio.CancelledError:
             return
         except Exception as e:
             if global_settings.loglevel == "DEBUG":
                 traceback.print_exc()
             logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}")
-            signal_handler.quit_with_error(unique_key, f"Could not download file from url: {item['url']}. Error: {e}")
+            signal_handler.got_error(unique_key, f"Could not download file from url: {item['url']}. Error: {e}")
 
-        queue.task_done()
+        finally:
+            signal_handler.finished(unique_key)
+            queue.task_done()
 
 
 async def download_if_not_exist(session,
@@ -140,7 +141,7 @@ async def download_if_not_exist(session,
     if site_settings.highlight_difference and\
             action == ACTION_REPLACE and site_settings.keep_replaced_files and\
             file_extension.lower() == "pdf":
-        logger.debug("Adding highlights")
+        logger.debug(f"Adding highlights to {absolute_path}")
 
         temp_file_name = f"{pure_name}-temp.{extension}"
         temp_absolute_path = os.path.join(dir_path, temp_file_name)

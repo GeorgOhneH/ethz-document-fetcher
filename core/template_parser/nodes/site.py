@@ -204,8 +204,6 @@ class Site(TemplateNode):
         return configs
 
     async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
-        signal_handler.start(self.unique_key)
-
         if check_if_null(self.function_kwargs):
             raise ParseTemplateRuntimeError("Found null field")
 
@@ -258,10 +256,10 @@ class Site(TemplateNode):
             function_name_kwargs = f"{function_name}<{dict_to_string(kwargs)}>"
             try:
                 logger.debug(f"Starting: {function_name_kwargs}")
+                signal_handler.start(unique_key)
                 t = time.time()
                 result = await function(session=session, queue=queue, base_path=base_path,
                                         site_settings=site_settings, *args, **kwargs)
-                signal_handler.finished_successful(unique_key, f"Finished in {(time.time() - t):.2f} seconds")
                 logger.debug(f"Finished: {function_name_kwargs}, time: {(time.time() - t):.2f}")
                 return result
             except asyncio.CancelledError as e:
@@ -272,14 +270,16 @@ class Site(TemplateNode):
                 keyword = re.findall("'(.+)'", e.args[0])
                 logger.error(f"The producer {function_name_kwargs} got an unexpected keyword: {keyword}."
                              f" Stopping the producer..")
-                signal_handler.quit_with_error(unique_key, f"Unexpected keyword: {keyword}.")
+                signal_handler.got_error(unique_key, f"Unexpected keyword: {keyword}.")
                 return
             except Exception as e:
                 if global_settings.loglevel == "DEBUG":
                     traceback.print_exc()
                 logger.error(
                     f"Got an unexpected error from producer: {function_name_kwargs}, Error: {type(e).__name__}: {e}")
-                signal_handler.quit_with_error(self.unique_key, f"Error: {type(e).__name__}: {e}")
+                signal_handler.got_error(self.unique_key, f"Error: {type(e).__name__}: {e}")
                 return
+            finally:
+                signal_handler.finished(unique_key)
 
         return wrapper

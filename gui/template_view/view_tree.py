@@ -72,12 +72,12 @@ class TemplateViewTree(QTreeWidget):
             (signals.replaced_file[str, str, str], self.replaced_file),
             (signals.site_started[str], self.site_started),
             (signals.site_started[str, str], self.site_started),
-            (signals.site_finished_successful[str], self.site_finished_successful),
-            (signals.site_finished_successful[str, str], self.site_finished_successful),
-            (signals.site_quit_with_warning[str], self.site_quit_with_warning),
-            (signals.site_quit_with_warning[str, str], self.site_quit_with_warning),
-            (signals.site_quit_with_error[str], self.site_quit_with_error),
-            (signals.site_quit_with_error[str, str], self.site_quit_with_error),
+            (signals.site_finished[str], self.site_finished),
+            (signals.site_finished[str, str], self.site_finished),
+            (signals.got_warning[str], self.got_warning),
+            (signals.got_warning[str, str], self.got_warning),
+            (signals.got_error[str], self.got_error),
+            (signals.got_error[str, str], self.got_error),
             (qApp.aboutToQuit, self.save_state),
         ]
 
@@ -163,21 +163,21 @@ class TemplateViewTree(QTreeWidget):
 
     @pyqtSlot(str)
     @pyqtSlot(str, str)
-    def site_finished_successful(self, unique_key, msg=None):
+    def site_finished(self, unique_key, msg=None):
         widget = self.widgets[unique_key]
         widget.set_success(msg)
 
     @pyqtSlot(str)
     @pyqtSlot(str, str)
-    def site_quit_with_warning(self, unique_key, msg=None):
+    def got_warning(self, unique_key, msg=None):
         widget = self.widgets[unique_key]
-        widget.set_warning(msg)
+        widget.got_warning(msg)
 
     @pyqtSlot(str)
     @pyqtSlot(str, str)
-    def site_quit_with_error(self, unique_key, msg=None):
+    def got_error(self, unique_key, msg=None):
         widget = self.widgets[unique_key]
-        widget.set_error(msg)
+        widget.got_error(msg)
 
     @pyqtSlot()
     def reset_widgets(self):
@@ -187,8 +187,7 @@ class TemplateViewTree(QTreeWidget):
     @pyqtSlot()
     def stop_widgets(self):
         for key, widget in self.widgets.items():
-            if widget.state == widget.STATE_LOADING:
-                widget.set_warning("Interrupted by user")
+            widget.got_warning("Interrupted by user")
 
     @pyqtSlot()
     def quit_widgets(self):

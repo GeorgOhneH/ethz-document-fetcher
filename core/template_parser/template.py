@@ -140,8 +140,11 @@ class Template(object):
         await asyncio.gather(*tasks)
 
     async def run(self, node, producers, session, queue, site_settings, cancellable_pool, recursive=True):
+        if node.unique_key != "root":
+            self.signal_handler.start(node.unique_key)  # finished signal in add_producer_exception_handler
+
         if node.parent is not None and node.parent.base_path is None:
-            self.signal_handler.quit_with_error(node.unique_key, "Parent needs to run first")
+            self.signal_handler.got_error(node.unique_key, "Parent needs to run first")
             return
 
         tasks = []
@@ -175,12 +178,15 @@ class Template(object):
                     traceback.print_exc()
                 error_msg = f"{node} login was not successful. Error: {e}."
                 logger.error(error_msg)
-                self.signal_handler.quit_with_error(node.unique_key, error_msg)
+                self.signal_handler.got_error(node.unique_key, error_msg)
             except Exception as e:
                 if global_settings.loglevel == "DEBUG":
                     traceback.print_exc()
                 error_msg = f"Got error while trying to fetch the folder name. Error: {e}."
                 logger.error(error_msg)
-                self.signal_handler.quit_with_error(node.unique_key, error_msg)
+                self.signal_handler.got_error(node.unique_key, error_msg)
+            finally:
+                if node.unique_key != "root":
+                    self.signal_handler.finished(node.unique_key)
 
         return wrapper

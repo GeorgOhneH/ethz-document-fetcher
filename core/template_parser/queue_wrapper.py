@@ -11,7 +11,7 @@ def queue_wrapper_put(obj, attr, **consumer_kwargs):
             kwargs["item"].update(consumer_kwargs)
         else:
             args[0].update(consumer_kwargs)
-        signal_handler.start(unique_key)
+        signal_handler.start(unique_key)  # finish signal in downloader
 
         await getattr(obj, attr)(*args, **kwargs)
 
