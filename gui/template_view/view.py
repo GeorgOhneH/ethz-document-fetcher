@@ -130,7 +130,7 @@ class TemplateView(QWidget):
         self.template_view_tree = TemplateViewTree(template_path, signals, controller, self)
 
         self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(0, 6, 0, 6)
+        self.layout.setContentsMargins(0, 6, 0, 0)
 
         self.splitter = Splitter()
         self.state_widget = StackedWidgetView(self.template_view_tree, controller, parent=self)

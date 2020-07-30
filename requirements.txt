@@ -9,3 +9,4 @@ certifi
 PyMuPDF
 PyQt5==5.14
 pyinstaller
+ansi2html

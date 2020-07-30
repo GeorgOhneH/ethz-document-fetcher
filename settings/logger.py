@@ -1,5 +1,8 @@
 import logging
+import re
+from ansi2html import Ansi2HTMLConverter
 
+from PyQt5.QtCore import *
 from colorama import Fore, Style
 
 from settings import global_settings
@@ -48,3 +51,34 @@ class ColouredFormatter(logging.Formatter):
         levelname = record.levelname
         record.levelname = self.COLOURS[levelname] + levelname + Style.RESET_ALL
         return logging.Formatter.format(self, record)
+
+
+class QtHandler(QObject, logging.Handler):
+    new_record = pyqtSignal(object)
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        super(logging.Handler).__init__()
+        formatter = QtFormatter('%(levelname)s: %(asctime)s - %(name)s - %(message)s')
+        self.setFormatter(formatter)
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.new_record.emit(msg)
+
+
+class QtFormatter(logging.Formatter):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conv = Ansi2HTMLConverter(linkify=True, line_wrap=False)
+
+    def format(self, record):
+        s = super().format(record)
+        html = self.conv.convert(s, full=True)
+        html = html.replace(""".ansi2html-content { display: inline; white-space: pre; word-wrap: break-word; }
+.body_foreground { color: #AAAAAA; }
+.body_background { background-color: #000000; }
+.body_foreground > .bold,.bold > .body_foreground, body.body_foreground > pre > .bold { color: #FFFFFF; font-weight: normal; }
+.inv_foreground { color: #000000; }
+.inv_background { background-color: #AAAAAA; }""", "")
+        return html

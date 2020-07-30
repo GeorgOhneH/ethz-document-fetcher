@@ -48,6 +48,9 @@ class Actions(object):
         self.info_position_group.addAction(self.info_position_bottom)
         self.info_position_group.addAction(self.info_position_right)
 
+        self.logger = QAction("Logger")
+        self.logger.setCheckable(True)
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -82,6 +85,8 @@ class MainWindow(QMainWindow):
         info_position_menu = view_menu.addMenu("Info Tab Position")
         info_position_menu.addAction(self.actions.info_position_bottom)
         info_position_menu.addAction(self.actions.info_position_right)
+
+        view_menu.addAction(self.actions.logger)
 
         self.setWindowTitle(f"eth-document-fetcher {VERSION}")
         self.setCentralWidget(self.central_widget)

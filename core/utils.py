@@ -15,8 +15,11 @@ async def user_statistics(session, name):
     data = {
         'name': hashlib.md5(name.encode('utf-8')).hexdigest(),
     }
-    async with session.post("https://ethz-document-fetcher.mikrounix.com/add", data=data) as response:
-        pass
+    try:
+        async with session.post("https://ethz-document-fetcher.mikrounix.com/add", data=data) as response:
+            pass
+    except Exception as e:
+        logger.warning(f"Error while tying to post user statistics. Error: {e}")
 
 
 def get_extension_from_response(response):

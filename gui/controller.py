@@ -15,6 +15,7 @@ from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.button_container import ButtonContainer
 from gui.template_view import TemplateView
 from gui.worker import Worker
+from gui.logger import Logger, LoggerSplitter
 from settings.config_objs.path import open_file_picker
 from settings.settings import SiteSettings, TemplatePathSettings
 
@@ -105,8 +106,18 @@ class CentralWidget(QWidget):
         actions.info_position_bottom.setChecked(self.template_view.get_splitter_orientation() == Qt.Vertical)
         actions.info_position_right.setChecked(self.template_view.get_splitter_orientation() == Qt.Horizontal)
 
+        self.logger_widget = Logger(parent=self)
+
+        logger_splitter = LoggerSplitter()
+        logger_splitter.addWidget(self.template_view)
+        logger_splitter.addWidget(self.logger_widget)
+        logger_splitter.read_settings()
+
+        actions.logger.setChecked(not self.logger_widget.isHidden())
+        actions.logger.triggered.connect(self.logger_widget.setVisible)
+
         self.grid.addWidget(self.button_container)
-        self.grid.addWidget(self.template_view)
+        self.grid.addWidget(logger_splitter)
         self.setLayout(self.grid)
 
     def clean_up(self):
