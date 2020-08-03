@@ -18,7 +18,7 @@ jobs:
       current_version: ${{ steps.release_info.outputs.current_version }}
     steps:
     - name: Checkout code
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
     - name: Get Release Info
       id: release_info
       run: |
@@ -40,7 +40,9 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
+      with:
+        submodules: true
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
