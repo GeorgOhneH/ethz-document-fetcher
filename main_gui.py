@@ -39,7 +39,9 @@ def except_hook(cls, exception, traceback):
 if __name__ == "__main__":
     if not IS_FROZEN and global_settings.loglevel == "DEBUG":
         sys.excepthook = except_hook
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
 
+    #QGuiApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 
