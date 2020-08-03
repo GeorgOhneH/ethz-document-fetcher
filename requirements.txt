@@ -9,4 +9,3 @@ certifi
 PyMuPDF
 PyQt5==5.14
 pyinstaller
-six

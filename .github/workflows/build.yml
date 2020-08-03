@@ -44,14 +44,10 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Test
-      shell: cmd
-      run: dir /s /b /o:gn
-
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'
+        python-version: '3.7'
         architecture: 'x64'
 
     - name: Upgrade pip
