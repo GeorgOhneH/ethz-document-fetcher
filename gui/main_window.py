@@ -104,11 +104,26 @@ class MainWindow(QMainWindow):
                                          self.central_widget.open_file(file_path=file_path))
 
     def closeEvent(self, event):
-        self.central_widget.clean_up()
         settings = QSettings("eth-document-fetcher", "eth-document-fetcher")
         settings.setValue("mainWindow/geometry", self.saveGeometry())
         settings.setValue("mainWindow/windowState", self.saveState())
-        super(MainWindow, self).closeEvent(event)
+        self.central_widget.clean_up()
+        self.central_widget.thread.finished.connect(qApp.quit)
+        if not self.central_widget.thread.isRunning():
+            event.accept()
+        else:
+            event.ignore()
+            QTimer.singleShot(100, lambda: self._force_quit_prompt())
+
+    def _force_quit_prompt(self):
+        r = QMessageBox.question(self,
+                                 "Are you sure?",
+                                 "Force Quit",
+                                 QMessageBox.Yes | QMessageBox.No)
+        if r == QMessageBox.Yes:
+            qApp.quit()
+        else:
+            self.central_widget.thread.finished.disconnect(qApp.quit)
 
     def read_settings(self):
         settings = QSettings("eth-document-fetcher", "eth-document-fetcher")
@@ -116,5 +131,3 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(settings.value("mainWindow/geometry"))
         if settings.value("mainWindow/windowState") is not None:
             self.restoreState(settings.value("mainWindow/windowState"))
-
-
