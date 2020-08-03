@@ -1,7 +1,6 @@
 import logging
 import re
 
-from ansi2html import Ansi2HTMLConverter
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
