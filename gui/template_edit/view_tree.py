@@ -43,7 +43,7 @@ class TemplateEditViewTree(QTreeWidget):
         self.init_view_tree()
         self.read_settings()
 
-        self.itemActivated.connect(self.edit_item)
+        self.itemDoubleClicked.connect(self.edit_item)
 
     def save_state(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")

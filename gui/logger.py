@@ -26,7 +26,7 @@ class Logger(QWidget):
         self.handler.new_record.connect(self.log_text_box.appendHtml)
 
         self.layout = QHBoxLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setContentsMargins(0, 5, 0, 0)
         self.layout.addWidget(self.log_text_box)
         self.setLayout(self.layout)
         self.read_settings()

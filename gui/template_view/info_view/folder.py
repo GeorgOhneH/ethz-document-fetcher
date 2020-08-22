@@ -16,12 +16,14 @@ class FolderInfoView(QTreeView, InfoView):
     def __init__(self, controller, parent=None):
         super().__init__(parent=parent, name="Folder", controller=controller)
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setExpandsOnDoubleClick(False)
         self.model = QFileSystemModel()
         self.setModel(self.model)
         self.read_settings()
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.activated.connect(self.open_file_with_index)
+        self.doubleClicked.connect(self.expand_row)
         qApp.aboutToQuit.connect(self.save_state)
 
     def reset_widget(self):
@@ -75,6 +77,17 @@ class FolderInfoView(QTreeView, InfoView):
             self.change_root(absolute_path)
         else:
             self.change_root(None)
+
+    def expand_row(self, index):
+        if not index.isValid():
+            return
+
+        index = index.siblingAtColumn(0)
+
+        if self.isExpanded(index):
+            self.collapse(index)
+        else:
+            self.expand(index)
 
     def open_file_with_index(self, index):
         if not index.isValid():

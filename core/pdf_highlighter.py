@@ -97,7 +97,7 @@ def add_differ_highlight(new_path, old_path, out_path):
                                          annots=True)
 
             doc_preset.save(out_path,
-                            garbage=3,
+                            garbage=2,
                             clean=True,
                             deflate=True,
                             pretty=False,
@@ -198,6 +198,6 @@ def reduce_boxes(boxes):
 
 
 if __name__ == "__main__":
-    base = "D:\ethz\semester2\\401-0302-10L Komplexe Analysis FS2020\Vorlesungen; Skript, Vorlesungsnotizen, Notability-Aufzeichnungen"
-    add_differ_highlight(os.path.join(base, "SkriptKomplexeAnalysis-2.pdf"), os.path.join(base, "KA.pdf"),
-                         os.path.join(base, "KA-out.pdf"))
+    base = "D:\ethz\semester2\\227-0002-00L Netzwerke und Schaltungen II FS2020\Skript-Bücher"
+    add_differ_highlight(os.path.join(base, "Zusammenfassung-old.pdf"), os.path.join(base, "Zusammenfassung-old.pdf"),
+                         os.path.join(base, "test-test-new.pdf"))

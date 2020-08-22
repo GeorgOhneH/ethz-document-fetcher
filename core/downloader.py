@@ -54,16 +54,18 @@ async def download_if_not_exist(session,
     if allowed_extensions is None:
         allowed_extensions = []
 
-    allowed_extensions = [item.lower() for item in allowed_extensions + site_settings.allowed_extensions]
+    allowed_extensions = set([item.lower() for item in allowed_extensions + site_settings.allowed_extensions])
     if "video" in allowed_extensions:
-        allowed_extensions += MOVIE_EXTENSIONS
+        allowed_extensions |= MOVIE_EXTENSIONS
 
     if forbidden_extensions is None:
         forbidden_extensions = []
 
-    forbidden_extensions = [item.lower() for item in forbidden_extensions + site_settings.forbidden_extensions]
+    forbidden_extensions = set([item.lower() for item in forbidden_extensions + site_settings.forbidden_extensions])
     if "video" in forbidden_extensions:
-        forbidden_extensions += MOVIE_EXTENSIONS
+        forbidden_extensions |= MOVIE_EXTENSIONS
+
+    forbidden_extensions -= allowed_extensions
 
     domain = urlparse(url).netloc
 

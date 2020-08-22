@@ -5,8 +5,6 @@ ethz-document-fetcher is a program which can fetch and organise all files from e
  The main goal of this project is, that you can easily check if
  new exercises (or any other files) have been released/updated.
  
- **IMPORTANT**: The default behavior of the fetcher does **not** update files.
-
  Files from these sites will be updated:
  * Polybox
  * one drive
@@ -17,4 +15,10 @@ ethz-document-fetcher is a program which can fetch and organise all files from e
  Files from other sites will **not** be updated.
 
 ## Download
-You can find and download the latest release [here](https://github.com/GeorgOhneH/ethz-document-fetcher/releases/latest)
+You can download the latest release [here](https://github.com/GeorgOhneH/ethz-document-fetcher/releases/latest)
+
+
+## Command Line
+
+You can also run the script over the command line. Run `python main.py --help` 
+for more info.

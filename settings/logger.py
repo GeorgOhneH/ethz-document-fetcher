@@ -69,7 +69,7 @@ class QtHandler(QObject, logging.Handler):
 class QtFormatter(logging.Formatter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.conv = Ansi2HTMLConverter(linkify=True, line_wrap=False, scheme="eth-document-fetcher", dark_bg=True)
+        self.conv = Ansi2HTMLConverter(linkify=False, line_wrap=False, scheme="eth-document-fetcher", dark_bg=True)
 
     def format(self, record):
         s = super().format(record)
