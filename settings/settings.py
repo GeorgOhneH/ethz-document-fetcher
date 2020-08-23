@@ -69,6 +69,7 @@ class Settings(Configs, metaclass=SettingBase):
 class GlobalSettings(Settings):
     NAME = "Advanced"
     loglevel = ConfigOptions(default="DEBUG", options=["ERROR", "WARNING", "INFO", "DEBUG"], gui_name="Loglevel")
+    check_for_updates = ConfigBool(default=True, gui_name="Check for Updates")
 
 
 class TemplatePathSettings(Settings):

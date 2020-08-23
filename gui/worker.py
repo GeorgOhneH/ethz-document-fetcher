@@ -12,7 +12,6 @@ from PyQt5.QtCore import *
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
 from core.storage import cache
-from core.utils import user_statistics
 
 logger = logging.getLogger(__name__)
 
@@ -103,8 +102,6 @@ class Worker(QObject):
                     logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
                     return
 
-                user_statistics_future = asyncio.ensure_future(user_statistics(session, self.site_settings.username))
-
                 logger.debug("Starting consumers")
                 consumers = [asyncio.ensure_future(downloader.download_files(session, queue)) for _ in range(20)]
 
@@ -116,16 +113,10 @@ class Worker(QObject):
                                                     cancellable_pool=cancellable_pool,
                                                     recursive=self.recursive)
 
-                await user_statistics_future
-
                 logger.debug("Gathering producers")
                 await asyncio.gather(*producers)
 
                 logger.debug("Waiting for queue")
-
-                num_unfinished_downloads = queue.qsize() + queue._unfinished_tasks
-                if num_unfinished_downloads:
-                    logger.info(f"Waiting for {num_unfinished_downloads} potential download(s) to finish")
                 await queue.join()
 
             except asyncio.CancelledError:

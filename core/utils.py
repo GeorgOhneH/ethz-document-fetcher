@@ -6,10 +6,14 @@ import os
 import re
 import shutil
 
+import requests
+
 logger = logging.getLogger(__name__)
 
+LATEST_RELEASE_URL = "https://api.github.com/repos/GeorgOhneH/ethz-document-fetcher/releases/latest"
 
-async def user_statistics(session, name):
+
+async def async_user_statistics(session, name):
     if not name:
         return
     data = {
@@ -18,6 +22,18 @@ async def user_statistics(session, name):
     try:
         async with session.post("https://ethz-document-fetcher.mikrounix.com/add", data=data) as response:
             pass
+    except Exception as e:
+        logger.warning(f"Error while tying to post user statistics. Error: {e}")
+
+
+def user_statistics(name):
+    if not name:
+        return
+    data = {
+        'name': hashlib.md5(name.encode('utf-8')).hexdigest(),
+    }
+    try:
+        requests.post("https://ethz-document-fetcher.mikrounix.com/add", data=data)
     except Exception as e:
         logger.warning(f"Error while tying to post user statistics. Error: {e}")
 
@@ -41,30 +57,22 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    return html.unescape(string.replace("/", "-").replace("\\", "-")).\
-        replace(":", ";").replace("|", "").replace("?", "").\
+    return html.unescape(string.replace("/", "-").replace("\\", "-")). \
+        replace(":", ";").replace("|", "").replace("?", ""). \
         replace("<", "").replace(">", "").replace("*", "")
 
 
-async def check_for_new_release(session):
-    main_path = os.path.dirname(os.path.dirname(__file__))
-    path = os.path.join(main_path, "version.txt")
-    with open(path) as f:
-        current_version = f.readline().strip()
-
-    async with session.get("https://api.github.com/repos/GeorgOhneH/ethz-document-fetcher/releases/latest") as response:
+async def async_get_latest_version(session):
+    async with session.get(LATEST_RELEASE_URL) as response:
         data = await response.json()
 
-    latest_version = data["tag_name"]
-    c_v_i = [int(x) for x in current_version[1:].split(".")]
-    l_v_i = [int(x) for x in latest_version[1:].split(".")]
-    for i, latest_i in enumerate(l_v_i):
-        current_i = c_v_i[i] if i < len(c_v_i) else 0
-        if latest_i > current_i:
-            return True, latest_version, current_version
-        elif latest_i < current_i:
-            return False, latest_version, current_version
-    return False, latest_version, current_version
+    return data["tag_name"]
+
+
+def get_latest_version():
+    response = requests.get(LATEST_RELEASE_URL)
+    data = response.json()
+    return data["tag_name"]
 
 
 def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):

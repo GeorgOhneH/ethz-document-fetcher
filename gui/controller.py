@@ -14,6 +14,7 @@ from gui.template_edit import TemplateEditDialog
 from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.button_container import ButtonContainer
 from gui.template_view import TemplateView
+from gui.start_up_tasks import StartUpController
 from gui.worker import Worker
 from gui.logger import Logger, LoggerSplitter
 from settings.config_objs.path import open_file_picker
@@ -119,6 +120,8 @@ class CentralWidget(QWidget):
         self.grid.addWidget(self.button_container)
         self.grid.addWidget(logger_splitter)
         self.setLayout(self.grid)
+
+        self.start_up_controller = StartUpController(parent=self, site_settings=self.site_settings)
 
     def clean_up(self):
         self.stop_thread()

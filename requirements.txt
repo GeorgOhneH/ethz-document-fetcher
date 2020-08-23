@@ -1,4 +1,5 @@
 aiohttp
+requests
 beautifulsoup4
 lxml
 aiodns

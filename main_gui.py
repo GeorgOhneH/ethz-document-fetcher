@@ -1,6 +1,7 @@
 import logging.config
 import sys
 import os
+import time
 from multiprocessing import freeze_support
 import encodings.idna  # This import is important, else aiohttp won't be able to work probably
 
@@ -41,7 +42,6 @@ if __name__ == "__main__":
         sys.excepthook = except_hook
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
 
-    #QGuiApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 

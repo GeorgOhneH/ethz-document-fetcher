@@ -5,17 +5,17 @@ ethz-document-fetcher is a program which can fetch and organise all files from e
  The main goal of this project is, that you can easily check if
  new exercises (or any other files) have been released/updated.
  
- Files from these sites will be updated:
+ Existing files from these sites will be updated:
  * Polybox
  * one drive
  * nethz
  * ilias
  * moodle
  
- Files from other sites will **not** be updated.
+ Existing files from other sites will **not** be updated.
 
 ## Download
-You can download the latest release [here](https://github.com/GeorgOhneH/ethz-document-fetcher/releases/latest)
+You can download the latest release [here](https://github.com/GeorgOhneH/ethz-document-fetcher/releases/latest).
 
 
 ## Command Line

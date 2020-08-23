@@ -11,7 +11,8 @@ import colorama
 
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
-from core.utils import user_statistics, check_for_new_release
+from core.utils import async_user_statistics, async_get_latest_version
+from core.constants import VERSION
 from settings import global_settings
 from settings.logger import LOGGER_CONFIG
 from settings.settings import SiteSettings, TemplatePathSettings
@@ -59,13 +60,13 @@ async def main(signals=None, site_settings=None):
                                 site_settings=site_settings,
                                 cancellable_pool=cancellable_pool)
 
-        user_statistic = asyncio.ensure_future(user_statistics(session, site_settings.username))
+        user_statistic = asyncio.ensure_future(async_user_statistics(session, site_settings.username))
 
         logger.debug(f"Checking for update")
-        is_new_release, latest_version, current_version = await check_for_new_release(session)
-        if is_new_release:
+        latest_version = await async_get_latest_version(session)
+        if latest_version != VERSION:
             logger.info(f"A new update is available. Update with 'git pull'."
-                        f" New version: {latest_version}. Current version {current_version}")
+                        f" New version: {latest_version}. Current version {VERSION}")
 
         logger.debug("Starting consumers")
         consumers = [asyncio.ensure_future(downloader.download_files(session, queue)) for _ in range(20)]
