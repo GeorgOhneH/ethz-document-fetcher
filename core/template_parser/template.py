@@ -174,16 +174,12 @@ class Template(object):
                 raise e
 
             except LoginError as e:
-                if global_settings.loglevel == "DEBUG":
-                    traceback.print_exc()
-                error_msg = f"{node} login was not successful. Error: {e}."
-                logger.error(error_msg)
+                error_msg = f"{node} login was not successful. {e.__class__.__name__}: {e}."
+                logger.error(error_msg, exc_info=True)
                 self.signal_handler.got_error(node.unique_key, error_msg)
             except Exception as e:
-                if global_settings.loglevel == "DEBUG":
-                    traceback.print_exc()
-                error_msg = f"Got error while trying to fetch the folder name. Error: {e}."
-                logger.error(error_msg)
+                error_msg = f"Got error while trying to fetch the folder name. {e.__class__.__name__}: {e}."
+                logger.error(error_msg, exc_info=True)
                 self.signal_handler.got_error(node.unique_key, error_msg)
             finally:
                 if node.unique_key != "root":

@@ -14,6 +14,7 @@ class Logger(QWidget):
         super().__init__(parent=parent)
         self.setHidden(True)
         self.handler = QtHandler(self)
+        self.handler.setLevel(global_settings.loglevel if global_settings.loglevel else logging.INFO)
         self.log_text_box = QPlainTextEdit(self)
 
         self.log_text_box.setReadOnly(True)
@@ -22,7 +23,6 @@ class Logger(QWidget):
         self.setContentsMargins(0, 0, 0, 0)
 
         logging.getLogger().addHandler(self.handler)
-        logging.getLogger().setLevel(global_settings.loglevel if global_settings.loglevel else logging.INFO)
         self.handler.new_record.connect(self.log_text_box.appendHtml)
 
         self.layout = QHBoxLayout()

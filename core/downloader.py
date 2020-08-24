@@ -26,10 +26,8 @@ async def download_files(session: aiohttp.ClientSession, queue):
         except asyncio.CancelledError:
             return
         except Exception as e:
-            if global_settings.loglevel == "DEBUG":
-                traceback.print_exc()
-            logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}")
-            signal_handler.got_error(unique_key, f"Could not download file from url: {item['url']}. Error: {e}")
+            logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}", exc_info=True)
+            signal_handler.got_error(unique_key, f"Could not download file from url: {item['url']}. {type(e).__name__}: {e}")
 
         finally:
             signal_handler.finished(unique_key)

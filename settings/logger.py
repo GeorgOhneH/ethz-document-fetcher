@@ -1,43 +1,30 @@
 import logging
+import sys
+import copy
 
 from PyQt5.QtCore import *
 from colorama import Fore, Style
 
-from lib.ansi2html import Ansi2HTMLConverter
 from settings import global_settings
 
-LOGGER_CONFIG = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'info_fmt': {
-            '()': 'settings.logger.ColouredFormatter',
-            'format': '%(levelname)s: %(message)s',
-        },
-        'debug_fmt': {
-            '()': 'settings.logger.ColouredFormatter',
-            'format': '%(levelname)s: %(asctime)s - %(name)s - %(message)s',
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "level": global_settings.loglevel if global_settings.loglevel in ["ERROR", "WARNING", "INFO",
-                                                                              "DEBUG"] else "INFO",
-            "formatter": "debug_fmt" if global_settings.loglevel == "DEBUG" else "info_fmt",
-            "stream": "ext://sys.stdout",
-        },
-    },
-    'loggers': {
-        '': {
-            'level': 'DEBUG',
-            'handlers': ["console"],
-        },
-    }
-}
+
+def setup_logger():
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+
+    loglevel = global_settings.loglevel if global_settings.loglevel in ["ERROR", "WARNING", "INFO", "DEBUG"] else "INFO"
+
+    console_basic_fmt = AnsiColouredFormatter("%(levelname)s: %(message)s")
+    console_debug_fmt = AnsiColouredFormatter("%(levelname)s: %(asctime)s - %(name)s - %(message)s")
+
+    console = logging.StreamHandler(stream=sys.stdout)
+    console.setLevel(loglevel)
+    console.setFormatter(console_debug_fmt if loglevel == "DEBUG" else console_basic_fmt)
+
+    root.addHandler(console)
 
 
-class ColouredFormatter(logging.Formatter):
+class AnsiColouredFormatter(logging.Formatter):
     COLOURS = {
         "CRITICAL": Fore.RED,
         "ERROR": Fore.RED,
@@ -48,8 +35,9 @@ class ColouredFormatter(logging.Formatter):
 
     def format(self, record):
         levelname = record.levelname
-        record.levelname = self.COLOURS[levelname] + levelname + Style.RESET_ALL
-        return logging.Formatter.format(self, record)
+        copy_record = copy.copy(record)
+        copy_record.levelname = self.COLOURS[levelname] + levelname + Style.RESET_ALL
+        return super().format(copy_record)
 
 
 class QtHandler(QObject, logging.Handler):
@@ -58,20 +46,34 @@ class QtHandler(QObject, logging.Handler):
     def __init__(self, parent):
         super().__init__(parent)
         super(logging.Handler).__init__()
-        formatter = QtFormatter('%(levelname)s: %(asctime)s - %(name)s - %(message)s')
+        formatter = HtmlColourFormatter("%(levelname)s: %(asctime)s - %(name)s - %(message)s")
         self.setFormatter(formatter)
 
     def emit(self, record):
         msg = self.format(record)
-        self.new_record.emit(msg)
+        for line in msg.split("\n"):
+            white_space_count = 0
+            while line and line[0] == " ":
+                line = line[1:]
+                white_space_count += 1
+
+            if white_space_count != 0:
+                line = ("&nbsp;" * white_space_count) + line
+            self.new_record.emit(line)
 
 
-class QtFormatter(logging.Formatter):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.conv = Ansi2HTMLConverter(linkify=False, line_wrap=False, scheme="eth-document-fetcher", dark_bg=True)
+class HtmlColourFormatter(logging.Formatter):
+    COLOURS = {
+        "CRITICAL": "red",
+        "ERROR": "red",
+        "WARNING": "Orange",
+        "INFO": "blue",
+        "DEBUG": "magenta",
+    }
 
     def format(self, record):
-        s = super().format(record)
-        html = self.conv.convert(s, full=True)
-        return html
+        levelname = record.levelname
+        copy_record = copy.copy(record)
+        copy_record.exc_info = copy_record.exc_info if "DEBUG" == global_settings.loglevel else False
+        copy_record.levelname = f"""<span style="color:{self.COLOURS[levelname]};">{copy_record.levelname}</span>"""
+        return super().format(copy_record)

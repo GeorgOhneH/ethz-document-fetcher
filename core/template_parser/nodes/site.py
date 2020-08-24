@@ -237,18 +237,14 @@ class Site(TemplateNode):
             except asyncio.CancelledError as e:
                 raise e
             except TypeError as e:
-                if global_settings.loglevel == "DEBUG":
-                    traceback.print_exc()
                 keyword = re.findall("'(.+)'", e.args[0])
                 logger.error(f"The producer {function_name_kwargs} got an unexpected keyword: {keyword}."
-                             f" Stopping the producer..")
+                             f" Stopping the producer..", exc_info=True)
                 signal_handler.got_error(unique_key, f"Unexpected keyword: {keyword}.")
                 return
             except Exception as e:
-                if global_settings.loglevel == "DEBUG":
-                    traceback.print_exc()
-                logger.error(
-                    f"Got an unexpected error from producer: {function_name_kwargs}, Error: {type(e).__name__}: {e}")
+                logger.error(f"Got an unexpected error from producer: {function_name_kwargs},"
+                             f" Error: {type(e).__name__}: {e}", exc_info=True)
                 signal_handler.got_error(self.unique_key, f"Error: {type(e).__name__}: {e}")
                 return
             finally:

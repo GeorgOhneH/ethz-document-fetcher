@@ -178,10 +178,8 @@ async def exception_handler(coroutine, moodle_id, url):
     except asyncio.CancelledError:
         raise asyncio.CancelledError()
     except Exception as e:
-        if global_settings.loglevel == "DEBUG":
-            traceback.print_exc()
         logger.error(f"Got an unexpected error from moodle: {moodle_id} "
-                     f"while trying to access {url}, Error: {type(e).__name__}: {e}")
+                     f"while trying to access {url}, Error: {type(e).__name__}: {e}", exc_info=True)
 
 
 def get_update_payload(courseid, since=0):

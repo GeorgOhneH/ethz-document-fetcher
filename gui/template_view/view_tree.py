@@ -89,11 +89,11 @@ class TemplateViewTree(QTreeWidget):
         try:
             self.template.load()
         except Exception as e:
-            if global_settings.loglevel == "DEBUG":
-                traceback.print_exc()
+            msg = f"Error while loading the file. {e.__class__.__name__}: {e}"
+            logger.error(msg, exc_info=True)
             error_dialog = QErrorMessage(self)
             error_dialog.setWindowTitle("Error")
-            error_dialog.showMessage(f"Error while loading the file. Error: {e}")
+            error_dialog.showMessage(msg)
             error_dialog.raise_()
         self.init_view_tree()
 

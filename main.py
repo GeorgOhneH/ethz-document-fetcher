@@ -14,12 +14,12 @@ from core.cancellable_pool import CancellablePool
 from core.utils import async_user_statistics, async_get_latest_version
 from core.constants import VERSION
 from settings import global_settings
-from settings.logger import LOGGER_CONFIG
+from settings.logger import setup_logger
 from settings.settings import SiteSettings, TemplatePathSettings
 
 colorama.init()
 
-logging.config.dictConfig(LOGGER_CONFIG)
+setup_logger()
 logger = logging.getLogger(__name__)
 
 
@@ -49,9 +49,8 @@ async def main(signals=None, site_settings=None):
         try:
             template.load()
         except Exception as e:
-            if global_settings.loglevel == "DEBUG":
-                traceback.print_exc()
-            logger.critical(f"A critical error occurred while passing the template: {e}. Exiting...")
+            logger.critical(f"A critical error occurred while passing the template."
+                            f" {type(e).__name__}: {e}. Exiting...", exc_info=True)
             return
 
         await template.run_root(producers,

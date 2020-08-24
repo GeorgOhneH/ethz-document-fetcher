@@ -57,8 +57,7 @@ class Worker(QObject):
             self.loop.run_until_complete(self.tasks)
             logger.info(f"Finished in {(time.time() - start_t):.2f} seconds")
         except Exception as e:
-            traceback.print_exc()
-            logger.error(f"Unexpected error: {e}")
+            logger.error(f"Unexpected error. {type(e).__name__}: {e}", exc_info=True)
         finally:
             self.tasks = None
             for task in asyncio.all_tasks(loop=self.loop):  # clean up not finished tasks

@@ -24,12 +24,12 @@ except ImportError:
 import gui.main_window
 from gui.constants import ASSETS_PATH
 from core.constants import IS_FROZEN
-from settings.logger import LOGGER_CONFIG
+from settings.logger import setup_logger
 from settings import global_settings
 
 colorama.init()
 
-logging.config.dictConfig(LOGGER_CONFIG)
+setup_logger()
 logger = logging.getLogger(__name__)
 
 
