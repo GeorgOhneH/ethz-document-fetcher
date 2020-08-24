@@ -43,7 +43,7 @@ class TemplateEditViewTree(QTreeWidget):
         self.init_view_tree()
         self.read_settings()
 
-        self.itemDoubleClicked.connect(self.edit_item)
+        self.itemActivated.connect(self.edit_item)
 
     def save_state(self):
         qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
@@ -92,7 +92,9 @@ class TemplateEditViewTree(QTreeWidget):
 
     def dropEvent(self, event: QDropEvent) -> None:
         item = self.currentItem()
+        was_expanded = item.isExpanded()
         super().dropEvent(event)
+        item.setExpanded(was_expanded)
         root = self.invisibleRootItem()
         while True:
             parent = (item.parent() or root)

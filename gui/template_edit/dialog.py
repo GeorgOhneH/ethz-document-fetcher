@@ -21,9 +21,14 @@ class TemplateEditDialog(QDialog):
         self.is_new = template_path is None
 
         self.button_box = QDialogButtonBox()
-        self.save_btn = self.button_box.addButton("Save", QDialogButtonBox.AcceptRole)
-        self.save_as_btn = self.button_box.addButton("Save As...", QDialogButtonBox.AcceptRole)
+        self.save_btn = self.button_box.addButton("Save", QDialogButtonBox.YesRole)
+        self.save_as_btn = self.button_box.addButton("Save As...", QDialogButtonBox.YesRole)
         self.cancel_btn = self.button_box.addButton(QDialogButtonBox.Cancel)
+
+        for button in self.button_box.buttons():
+            button.setAutoDefault(False)
+            button.setDefault(False)
+
         self.button_box.clicked.connect(self.save_and_exit)
         self.button_box.rejected.connect(self.exit)
 
