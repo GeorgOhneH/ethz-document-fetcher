@@ -8,6 +8,7 @@ from core.constants import VERSION
 
 from gui.constants import ROOT_PATH
 from gui.controller import CentralWidget
+from gui.startup_tasks import run_startup_tasks
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +92,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f"eth-document-fetcher {VERSION}")
         self.setCentralWidget(self.central_widget)
         self.read_settings()
+
+        run_startup_tasks(self.central_widget.site_settings)
 
     def init_menu(self, menu, path):
         for file_name in os.listdir(path):

@@ -156,34 +156,6 @@ class Site(TemplateNode):
         path = os.path.join(SITE_ICON_PATH, file_name)
         return QIcon(path)
 
-    def gui_options(self):
-        result = [("module", self.raw_module_name)]
-        if self.raw_module_name == "custom":
-            result.append(("function", self.raw_function))
-        result.append(("use_folder", self.use_folder))
-        if self.use_folder:
-            if self.raw_module_name == "custom" and self.raw_folder_function is not None:
-                result.append(("folder_function", self.raw_folder_function))
-            else:
-                result.append(("folder_name", self.raw_folder_name))
-
-        site_module = importlib.import_module(self.module_name)
-        producer_function = getattr(site_module, self.function_name)
-
-        for name, parameter in inspect.signature(producer_function).parameters.items():
-            if name in ["session", "queue", "base_path", "site_settings"]:
-                continue
-            if name in self.function_kwargs:
-                result.append((name, self.function_kwargs[name]))
-                continue
-
-            result.append((name, parameter.default if parameter.default is not parameter.empty else None))
-
-        for key, value in self.consumer_kwargs.items():
-            result.append((key, value))
-
-        return result
-
     def get_configs(self):
         configs = site_configs.SiteConfigs()
         attributes = [

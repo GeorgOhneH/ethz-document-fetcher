@@ -117,7 +117,6 @@ class ConfigString(object):
         self.instance = None  # will be set on runtime
         self.optional = optional
         self.msg = ""
-        self._buffer = None
         self.widget = None
         self.observers = []
 

@@ -1,10 +1,12 @@
 import logging
+import time
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView
+from settings.config_objs import ConfigDict
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +19,12 @@ class GroupBox(QGroupBox):
         pass
 
     @staticmethod
-    def key_value_to_string(key, value):
+    def value_to_string(value):
         if value is None:
-            return f"{key}: "
+            return ""
         if isinstance(value, (list, set)):
             value = "[" + " ".join(value) + "]"
-        return f"{key}: {value}"
+        return f"{value}"
 
 
 class GeneralGroupBox(GroupBox):
@@ -43,13 +45,13 @@ class GeneralGroupBox(GroupBox):
 
     def init(self):
         for key, value in self.default_attributes:
-            label = QLabel(self.key_value_to_string(key, value))
+            label = QLabel(f"{key}: {self.value_to_string(value)}")
             self.layout.addWidget(label)
 
     def set_attributes(self, attributes):
         for i, (key, value) in enumerate(attributes):
             label = self.layout.itemAt(i).widget()
-            label.setText(self.key_value_to_string(key, value))
+            label.setText(f"{key}: {self.value_to_string(value)}")
 
     def reset_widget(self):
         self.set_attributes(self.default_attributes)
@@ -72,7 +74,6 @@ class OptionsGroupBox(GroupBox):
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignTop)
         self.setLayout(self.layout)
-        self.make_layout([])
 
     def reset_widget(self):
         for i in range(self.layout.count()):
@@ -80,22 +81,43 @@ class OptionsGroupBox(GroupBox):
             label.hide()
 
     def update_content(self, selected_widget):
-        self.make_layout(selected_widget.template_node.gui_options())
+        self.make_layout(selected_widget.template_node.get_configs())
 
-    def make_layout(self, attributes):
-        for i, (key, value) in enumerate(attributes):
-            item = self.layout.itemAt(i)
-            text = self.key_value_to_string(key, value)
-            if item is None:
-                label = QLabel(self.key_value_to_string(key, value))
-                self.layout.addWidget(label)
+    def make_layout(self, configs):
+        self._update_layout(configs, self.layout)
+
+    def _update_layout(self, config_objs, layout):
+        active_config_objs = list(filter(lambda x: x.is_active(), config_objs))
+        for i, config_obj in enumerate(active_config_objs):
+            layout_item = layout.itemAt(i)
+
+            if layout_item is not None:
+                if not isinstance(config_obj, ConfigDict) and isinstance(layout_item.widget(), QLabel):
+                    layout_item.widget().setText(f"{config_obj.get_gui_name()}:"
+                                                 f" {self.value_to_string(config_obj.get())}")
+                    continue
+                elif isinstance(config_obj, ConfigDict) and isinstance(layout_item.widget(), GroupBox):
+                    layout_item.widget().setTitle(config_obj.get_gui_name())
+                    self._update_layout(config_obj.layout.values(), layout_item.widget().layout())
+                    continue
+
+                child = layout.takeAt(i)
+                child.widget().setParent(None)
+
+            if not isinstance(config_obj, ConfigDict):
+                widget = QLabel(f"{config_obj.get_gui_name()}: {self.value_to_string(config_obj.get())}")
             else:
-                label = item.widget()
-                label.setText(text)
-                label.show()
-        for i in range(len(attributes), self.layout.count()):
-            label = self.layout.itemAt(i).widget()
-            label.hide()
+                widget = QGroupBox()
+                widget.setTitle(config_obj.get_gui_name())
+                widget.setLayout(QVBoxLayout())
+                self._update_layout(config_obj.layout.values(), widget.layout())
+
+            layout.insertWidget(i, widget)
+
+        while layout.count() > len(active_config_objs):
+            child = layout.takeAt(len(active_config_objs))
+            if child is not None:
+                child.widget().setParent(None)
 
 
 class GeneralInfoView(QScrollArea, InfoView):

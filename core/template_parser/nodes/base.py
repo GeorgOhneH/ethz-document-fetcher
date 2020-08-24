@@ -114,9 +114,6 @@ class TemplateNode(object):
     def get_gui_icon(self):
         return QIcon(self.DEFAULT_ICON_PATH)
 
-    def gui_options(self):
-        return []
-
     def get_configs(self):
         return NodeConfigs()
 

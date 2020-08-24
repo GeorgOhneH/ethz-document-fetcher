@@ -65,8 +65,7 @@ class DictWidgetWrapper(WidgetWrapper):
 class ConfigDict(ConfigString):
     def __init__(self, layout, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._layout = None
-        self.layout = layout
+        self._layout = layout
 
     def init_widget(self):
         return GroupBox(self)

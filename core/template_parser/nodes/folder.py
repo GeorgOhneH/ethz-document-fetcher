@@ -50,11 +50,6 @@ class Folder(TemplateNode):
     def get_type_name(self):
         return "Folder"
 
-    def gui_options(self):
-        return [
-            ("name", self.name),
-        ]
-
     def get_configs(self):
         folder_configs = FolderConfigs()
         try:
