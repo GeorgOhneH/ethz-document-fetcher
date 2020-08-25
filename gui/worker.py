@@ -2,8 +2,6 @@ import asyncio
 import logging.config
 import ssl
 import time
-import traceback
-import gc
 
 import aiohttp
 import certifi
@@ -11,7 +9,6 @@ from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
-from core.storage import cache
 
 logger = logging.getLogger(__name__)
 

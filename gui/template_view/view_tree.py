@@ -1,6 +1,5 @@
 import logging
 import os
-import traceback
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -8,7 +7,6 @@ from PyQt5.QtWidgets import *
 
 from core import template_parser
 from gui.template_view.view_tree_item import TreeWidgetItem
-from settings import global_settings
 
 logger = logging.getLogger(__name__)
 

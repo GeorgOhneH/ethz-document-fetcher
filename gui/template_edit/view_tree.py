@@ -1,5 +1,4 @@
 import logging
-import traceback
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -10,7 +9,6 @@ from core.template_parser.nodes import Folder, Site
 from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
 from gui.template_edit.view_tree_item import TreeEditWidgetItem
-from settings import global_settings
 
 logger = logging.getLogger(__name__)
 

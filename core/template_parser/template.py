@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import traceback
 
 import yaml
 
@@ -8,7 +7,6 @@ from core.exceptions import ParseTemplateError, LoginError
 from core.template_parser.constants import POSSIBLE_CONSUMER_KWARGS
 from core.template_parser.nodes import Root, Folder, Site
 from core.template_parser.signal_handler import SignalHandler
-from settings import global_settings
 
 logger = logging.getLogger(__name__)
 

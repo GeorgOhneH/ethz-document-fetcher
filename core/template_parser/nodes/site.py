@@ -1,11 +1,9 @@
 import asyncio
 import importlib
-import inspect
 import logging
 import os
 import re
 import time
-import traceback
 
 from PyQt5.QtGui import *
 
@@ -17,7 +15,6 @@ from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
 from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
-from settings import global_settings
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,6 @@
 import asyncio
 import functools
 import pathlib
-import traceback
 from urllib.parse import urlparse
 
 import aiohttp
@@ -11,7 +10,6 @@ from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
 from core.utils import get_extension, fit_sections_to_console, split_name_extension
-from settings import global_settings
 
 logger = logging.getLogger(__name__)
 

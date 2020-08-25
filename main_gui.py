@@ -1,16 +1,13 @@
 import logging.config
-import sys
 import os
-import time
+import sys
 from multiprocessing import freeze_support
-import encodings.idna  # This import is important, else aiohttp won't be able to work probably
 
 freeze_support()
 
 import colorama
 
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 try:

@@ -50,6 +50,7 @@ class PathLineEdit(LineEdit):
         file_name = open_file_picker(self.only_folder, self.file_extensions, self.get_value())
         if file_name is not None:
             self.line_edit.setText(QDir.toNativeSeparators(file_name))
+        self.file_button.clearFocus()
 
 
 class ConfigPath(ConfigString):

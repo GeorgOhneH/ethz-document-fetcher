@@ -103,7 +103,8 @@ class ConfigString(object):
                  optional=False,
                  gui_name=None,
                  hint_text=None,
-                 gray_out=False):
+                 gray_out=False,
+                 require_restart=False):
         if depends_on is None:
             depends_on = []
         self.depends_on = depends_on
@@ -111,6 +112,7 @@ class ConfigString(object):
         self.gui_name = gui_name
         self.hint_text = hint_text
         self.gray_out = gray_out
+        self.require_restart = require_restart
         self._value = None
         self.active_func = active_func
         self.name = None  # will be set on runtime
@@ -118,7 +120,6 @@ class ConfigString(object):
         self.optional = optional
         self.msg = ""
         self.widget = None
-        self.observers = []
 
     def instance_created(self):
         pass
@@ -143,9 +144,11 @@ class ConfigString(object):
         return self.widget.get_value()
 
     def get_gui_name(self):
-        if self.gui_name is not None:
-            return self.gui_name
-        return self.name
+        name = self.gui_name
+        if name is None:
+            name = self.name
+
+        return name + (" (Requires Restart)" if self.require_restart else "")
 
     def set(self, value):
         if not self.is_valid(value):

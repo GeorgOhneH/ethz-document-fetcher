@@ -1,21 +1,20 @@
 import copy
 import logging.config
 import os
-import sys
 import time
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from gui.button_container import ButtonContainer
 from gui.constants import ROOT_PATH
+from gui.constants import TEMPLATE_PRESET_FILE_PATHS
+from gui.logger import Logger, LoggerSplitter
 from gui.settings import SettingsDialog
 from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.template_edit import TemplateEditDialog
-from gui.constants import TEMPLATE_PRESET_FILE_PATHS
-from gui.button_container import ButtonContainer
 from gui.template_view import TemplateView
 from gui.worker import Worker
-from gui.logger import Logger, LoggerSplitter
 from settings.config_objs.path import open_file_picker
 from settings.settings import SiteSettings, TemplatePathSettings
 

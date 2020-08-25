@@ -1,10 +1,8 @@
 import logging
-import os
-import time
 
 from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from core.constants import VERSION
 from core.utils import get_latest_version, user_statistics

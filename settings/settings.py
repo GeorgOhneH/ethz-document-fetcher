@@ -3,7 +3,7 @@ import logging
 import os
 
 from settings.config import ConfigBase, Configs
-from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword,\
+from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, \
     ConfigOptions, ConfigString, ConfigInt
 from settings.constants import ROOT_PATH
 from settings.constants import SEPARATOR, CONFIG_PATH
@@ -68,7 +68,10 @@ class Settings(Configs, metaclass=SettingBase):
 
 class GlobalSettings(Settings):
     NAME = "Advanced"
-    loglevel = ConfigOptions(default="DEBUG", options=["ERROR", "WARNING", "INFO", "DEBUG"], gui_name="Loglevel")
+    loglevel = ConfigOptions(default="DEBUG",
+                             options=["ERROR", "WARNING", "INFO", "DEBUG"],
+                             gui_name="Loglevel",
+                             require_restart=True)
     check_for_updates = ConfigBool(default=True, gui_name="Check for Updates")
 
 

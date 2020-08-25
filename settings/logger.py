@@ -1,6 +1,6 @@
+import copy
 import logging
 import sys
-import copy
 
 from PyQt5.QtCore import *
 from colorama import Fore, Style

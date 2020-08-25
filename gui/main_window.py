@@ -5,7 +5,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from core.constants import VERSION
-
 from gui.constants import ROOT_PATH
 from gui.controller import CentralWidget
 from gui.startup_tasks import run_startup_tasks

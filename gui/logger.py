@@ -1,12 +1,11 @@
 import logging
-import re
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
-from settings.logger import QtHandler
 from settings import global_settings
+from settings.logger import QtHandler
 
 
 class Logger(QWidget):

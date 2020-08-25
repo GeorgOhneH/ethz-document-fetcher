@@ -15,8 +15,11 @@ class ConfigsDialog(QDialog):
         self.finished.connect(self.save_geometry)
         self.rejected.connect(self.cancel)
 
-    def init(self, configs_areas):
+        self.configs_areas = None
+        self.layout = None
+        self.button_box = None
 
+    def init(self, configs_areas):
         self.configs_areas = configs_areas
 
         self.layout = QVBoxLayout()

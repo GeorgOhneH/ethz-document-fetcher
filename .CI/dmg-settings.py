@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import biplist
 import os.path
+
+import biplist
 
 #
 # Example settings file for dmgbuild

@@ -8,8 +8,8 @@ from PyQt5.QtGui import *
 from core.constants import ROOT_PATH
 from core.exceptions import ParseTemplateError
 from core.template_parser import nodes
-from core.template_parser.nodes.utils import get_folder_name_from_kwargs
 from core.template_parser.nodes.base import NodeConfigs
+from core.template_parser.nodes.utils import get_folder_name_from_kwargs
 from gui.constants import SITE_ICON_PATH
 from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigList
 

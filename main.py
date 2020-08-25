@@ -3,7 +3,6 @@ import logging.config
 import os
 import ssl
 import time
-import traceback
 
 import aiohttp
 import certifi
@@ -11,9 +10,8 @@ import colorama
 
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
-from core.utils import async_user_statistics, async_get_latest_version
 from core.constants import VERSION
-from settings import global_settings
+from core.utils import async_user_statistics, async_get_latest_version
 from settings.logger import setup_logger
 from settings.settings import SiteSettings, TemplatePathSettings
 
