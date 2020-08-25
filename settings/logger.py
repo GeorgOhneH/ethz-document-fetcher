@@ -17,11 +17,18 @@ def setup_logger():
     console_basic_fmt = AnsiColouredFormatter("%(levelname)s: %(message)s")
     console_debug_fmt = AnsiColouredFormatter("%(levelname)s: %(asctime)s - %(name)s - %(message)s")
 
-    console = logging.StreamHandler(stream=sys.stdout)
+    console = ExcInfoStreamHandler(stream=sys.stdout)
     console.setLevel(loglevel)
     console.setFormatter(console_debug_fmt if loglevel == "DEBUG" else console_basic_fmt)
 
     root.addHandler(console)
+
+
+class ExcInfoStreamHandler(logging.StreamHandler):
+    def emit(self, record: logging.LogRecord) -> None:
+        copy_record = copy.copy(record)
+        copy_record.exc_info = copy_record.exc_info if "DEBUG" == self.level else False
+        super().emit(copy_record)
 
 
 class AnsiColouredFormatter(logging.Formatter):
@@ -51,6 +58,7 @@ class QtHandler(QObject, logging.Handler):
 
     def emit(self, record):
         msg = self.format(record)
+
         for line in msg.split("\n"):
             white_space_count = 0
             while line and line[0] == " ":
@@ -74,6 +82,5 @@ class HtmlColourFormatter(logging.Formatter):
     def format(self, record):
         levelname = record.levelname
         copy_record = copy.copy(record)
-        copy_record.exc_info = copy_record.exc_info if "DEBUG" == global_settings.loglevel else False
         copy_record.levelname = f"""<span style="color:{self.COLOURS[levelname]};">{copy_record.levelname}</span>"""
         return super().format(copy_record)
