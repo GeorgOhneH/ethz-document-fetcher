@@ -299,7 +299,7 @@ class TreeWidgetItemName(QWidget):
         self.state_check_changed = self.check_box.stateChanged
 
         self.icon = QLabel()
-        pixmap = icon.pixmap(QSize(17, 17))
+        pixmap = icon.pixmap(QSize(15, 15))
         self.icon.setPixmap(pixmap)
         self.icon.setMask(pixmap.mask())
         self.icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
