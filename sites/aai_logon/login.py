@@ -28,16 +28,25 @@ async def login(session: ClientSession, site_settings, url, data):
         locks[id(session)] = lock
     else:
         lock = locks[id(session)]
+
     async with lock:
         async with session.post(url, data=data) as resp:
             text = await resp.text()
 
-        if "you must press the Continue button once to proceed" not in text:
+        if "SAMLResponse" not in text:
+
+            action_url = re.search("""<form .*action="(.+)" method="post">""", text)[1]
+            action_url = html.unescape(action_url)
+
+            async with session.post(BASE_URL + action_url, data=LOCAL_STORAGE_DATA) as resp:
+                text = await resp.text()
+
             action_url = re.search("""<form action="(.+)" method="post">""", text)[1]
             action_url = html.unescape(action_url)
 
             async with session.post(BASE_URL + action_url, data=get_sso_data(site_settings)) as resp:
                 text = await resp.text()
+
         try:
             sam_url = re.search("""<form action="(.+)" method="post">""", text)[1]
             sam_url = html.unescape(sam_url)
@@ -46,7 +55,7 @@ async def login(session: ClientSession, site_settings, url, data):
             sam = re.search("""name="SAMLResponse" value="(.+)"/>""", text)[1]
             sam = html.unescape(sam)
         except TypeError as e:
-            raise LoginError("Wasn't able to log in. Please check that your username and password are correct")
+            raise LoginError("Wasn't able to log in. Please check that your username and password are correct") from e
 
         saml_data = {
             "RelayState": ssm,

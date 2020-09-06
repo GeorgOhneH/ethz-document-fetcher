@@ -11,7 +11,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 try:
-    # Include in try/except block if you're also targeting Mac/Linux
     from PyQt5.QtWinExtras import QtWin
     myappid = 'eth-document-fetcher.eth-document-fetcher'
     QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
