@@ -11,7 +11,7 @@ from core.template_parser import nodes
 from core.template_parser.nodes.base import NodeConfigs
 from core.template_parser.nodes.utils import get_folder_name_from_kwargs
 from gui.constants import SITE_ICON_PATH
-from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigList
+from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigListString
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class FunctionKwargsConfigDict(ConfigDict):
                 if parameter.annotation is bool or isinstance(default_value, bool):
                     config_obj = ConfigBool(default=default_value, optional=optional)
                 elif parameter.annotation is list or isinstance(default_value, list):
-                    config_obj = ConfigList(default=default_value, optional=optional)
+                    config_obj = ConfigListString(default=default_value, optional=optional)
                 else:
                     config_obj = ConfigString(default=default_value, optional=optional)
                 result[name] = config_obj
@@ -193,10 +193,10 @@ class SiteConfigs(NodeConfigs):
     raw_folder_function = FunctionFolderConfigString(active_func=folder_function_active, gui_name="Function for Folder")
 
     consumer_kwargs = ConfigDict(layout={
-        "allowed_extensions": ConfigList(optional=True, gui_name="Allowed Extensions",
-                                         hint_text="Add 'video' for all video types"),
-        "forbidden_extensions": ConfigList(optional=True, gui_name="Forbidden Extensions",
-                                           hint_text="Add 'video' for all video types"),
+        "allowed_extensions": ConfigListString(optional=True, gui_name="Allowed Extensions",
+                                               hint_text="Add 'video' for all video types"),
+        "forbidden_extensions": ConfigListString(optional=True, gui_name="Forbidden Extensions",
+                                                 hint_text="Add 'video' for all video types"),
     }, gui_name="Download Arguments")
 
     function_kwargs = FunctionKwargsConfigDict(gui_name="Function Specific Arguments")

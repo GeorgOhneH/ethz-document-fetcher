@@ -3,7 +3,7 @@ import logging
 import os
 
 from settings.config import ConfigBase, Configs
-from settings.config_objs import ConfigPath, ConfigList, ConfigBool, ConfigPassword, \
+from settings.config_objs import ConfigPath, ConfigListString, ConfigBool, ConfigPassword, \
     ConfigOptions, ConfigString, ConfigInt
 from settings.constants import ROOT_PATH
 from settings.constants import SEPARATOR, CONFIG_PATH
@@ -94,10 +94,10 @@ class SiteSettings(Settings):
     username = ConfigString(optional=True, gui_name="Username")
     password = ConfigPassword(optional=True, gui_name="Password")
     base_path = ConfigPath(ony_folder=True, gui_name="Save Path")
-    allowed_extensions = ConfigList(default=[], optional=True, gui_name="Allowed Extensions",
-                                    hint_text="Add 'video' for all video types.")
-    forbidden_extensions = ConfigList(default=["video"], optional=True, gui_name="Forbidden Extensions",
-                                      hint_text="Add 'video' for all video types.")
+    allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
+                                          hint_text="Add 'video' for all video types.")
+    forbidden_extensions = ConfigListString(default=["video"], optional=True, gui_name="Forbidden Extensions",
+                                            hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
     highlight_difference = ConfigBool(default=True, active_func=highlight_difference_active, gray_out=True,
                                       gui_name="Add Highlight Difference to Replaced Files (pdf only, can be cpu heavy)")

@@ -66,6 +66,7 @@ class ConfigDict(ConfigString):
     def __init__(self, layout, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._layout = layout
+        self._init_layout()
 
     def init_widget(self):
         return GroupBox(self)
@@ -82,12 +83,15 @@ class ConfigDict(ConfigString):
     @layout.setter
     def layout(self, layout):
         self._layout = layout
-        for name, config_obj in layout.items():
+        self._init_layout()
+
+    def _init_layout(self):
+        for name, config_obj in self._layout.items():
             config_obj.name = name
             config_obj.instance = self.instance
-        for name, config_obj in layout.items():
+        for name, config_obj in self._layout.items():
             config_obj.instance_created()
-        for name, config_obj in layout.items():
+        for name, config_obj in self._layout.items():
             if config_obj.default is not None:
                 config_obj.set(config_obj.default)
 

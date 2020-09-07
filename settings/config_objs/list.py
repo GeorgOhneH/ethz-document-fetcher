@@ -19,7 +19,7 @@ class ListLineEdit(LineEdit):
             super(ListLineEdit, self).set_value(", ".join(value))
 
 
-class ConfigList(ConfigString):
+class ConfigListString(ConfigString):
     def __init__(self, hint_text="", *args, **kwargs):
         super().__init__(hint_text="Separate by comma. " + hint_text, *args, **kwargs)
 
