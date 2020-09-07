@@ -27,7 +27,6 @@ def setup_logger():
 class ExcInfoStreamHandler(logging.StreamHandler):
     def emit(self, record: logging.LogRecord) -> None:
         copy_record = copy.copy(record)
-        copy_record.exc_info = copy_record.exc_info if "DEBUG" == self.level else False
         super().emit(copy_record)
 
 

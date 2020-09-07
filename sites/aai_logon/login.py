@@ -35,24 +35,24 @@ async def login(session: ClientSession, site_settings, url, data):
 
         if "SAMLResponse" not in text:
 
-            action_url = re.search("""<form .*action="(.+)" method="post">""", text)[1]
-            action_url = html.unescape(action_url)
+            local_storage_url = re.search(r"<form .*action=\"(.+)\" method=\"post\">", text)[1]
+            local_storage_url = html.unescape(local_storage_url)
 
-            async with session.post(BASE_URL + action_url, data=LOCAL_STORAGE_DATA) as resp:
+            async with session.post(BASE_URL + local_storage_url, data=LOCAL_STORAGE_DATA) as resp:
                 text = await resp.text()
 
-            action_url = re.search("""<form action="(.+)" method="post">""", text)[1]
-            action_url = html.unescape(action_url)
+            sso_url = re.search(r"<form action=\"(.+)\" method=\"post\">", text)[1]
+            sso_url = html.unescape(sso_url)
 
-            async with session.post(BASE_URL + action_url, data=get_sso_data(site_settings)) as resp:
+            async with session.post(BASE_URL + sso_url, data=get_sso_data(site_settings)) as resp:
                 text = await resp.text()
 
         try:
-            sam_url = re.search("""<form action="(.+)" method="post">""", text)[1]
+            sam_url = re.search(r"<form action=\"(.+)\" method=\"post\">", text)[1]
             sam_url = html.unescape(sam_url)
-            ssm = re.search("""name="RelayState" value="(.+)"/>""", text)[1]
+            ssm = re.search(r"name=\"RelayState\" value=\"(.+)\"/>", text)[1]
             ssm = html.unescape(ssm)
-            sam = re.search("""name="SAMLResponse" value="(.+)"/>""", text)[1]
+            sam = re.search(r"name=\"SAMLResponse\" value=\"(.+)\"/>", text)[1]
             sam = html.unescape(sam)
         except TypeError as e:
             raise LoginError("Wasn't able to log in. Please check that your username and password are correct") from e

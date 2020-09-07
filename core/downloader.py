@@ -4,7 +4,6 @@ import pathlib
 from urllib.parse import urlparse
 
 import aiohttp
-from colorama import Fore, Style
 
 from core import pdf_highlighter
 from core.constants import *
@@ -137,7 +136,8 @@ async def download_if_not_exist(session,
             raise e
 
     if site_settings.highlight_difference and\
-            action == ACTION_REPLACE and site_settings.keep_replaced_files and\
+            action == ACTION_REPLACE and\
+            site_settings.keep_replaced_files and\
             file_extension.lower() == "pdf":
         logger.debug(f"Adding highlights to {absolute_path}")
 
@@ -182,7 +182,7 @@ async def download_if_not_exist(session,
         method_msg = "Unexpected action"
 
     start = {
-        "name": f"{method_msg} file: '{Fore.GREEN}{{}}{Style.RESET_ALL}'",
+        "name": f"{method_msg} file: '{{}}'",
         "var": file_name,
         "priority": 100,
         "cut": "back",
@@ -195,4 +195,4 @@ async def download_if_not_exist(session,
         "cut": "front",
     }
 
-    logger.info(fit_sections_to_console(start, end, margin=-8))
+    logger.info(fit_sections_to_console(start, end, margin=1))
