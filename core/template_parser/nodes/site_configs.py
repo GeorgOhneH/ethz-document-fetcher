@@ -2,6 +2,7 @@ import importlib
 import inspect
 import logging
 import os
+import copy
 
 from PyQt5.QtGui import *
 
@@ -76,6 +77,8 @@ class FunctionKwargsConfigDict(ConfigDict):
                     config_obj = ConfigBool(default=default_value, optional=optional)
                 elif parameter.annotation is list or isinstance(default_value, list):
                     config_obj = ConfigListString(default=default_value, optional=optional)
+                elif isinstance(parameter.annotation, ConfigString):
+                    config_obj = copy.deepcopy(parameter.annotation)
                 else:
                     config_obj = ConfigString(default=default_value, optional=optional)
                 result[name] = config_obj

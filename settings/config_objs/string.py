@@ -77,7 +77,7 @@ class WidgetWrapper(QWidget):
     def set_value(self, value):
         self.config_widget.set_value(value)
 
-    def set_error_msg(self):
+    def _set_error_msg(self):
         if self.config_widget.config_obj.is_valid_from_widget():
             return False
         msg = self.config_widget.config_obj.msg
@@ -85,7 +85,7 @@ class WidgetWrapper(QWidget):
         return True
 
     def update_widget(self):
-        if self.set_error_msg():
+        if self._set_error_msg():
             self.error_label.show()
         else:
             self.error_label.hide()
@@ -124,9 +124,12 @@ class ConfigString(object):
     def instance_created(self):
         pass
 
+    def _get_new_widget(self):
+        return WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
+
     def get_widget(self) -> WidgetWrapper:
         if self.widget is None:
-            self.widget = WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
+            self.widget = self._get_new_widget()
         return self.widget
 
     def init_widget(self):

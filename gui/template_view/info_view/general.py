@@ -21,8 +21,7 @@ class GroupBox(QGroupBox):
     def value_to_string(value):
         if value is None:
             return ""
-        if isinstance(value, (list, set)):
-            value = "[" + " ".join(value) + "]"
+        #TODO make it right
         return f"{value}"
 
 

@@ -71,10 +71,8 @@ class ConfigDict(ConfigString):
     def init_widget(self):
         return GroupBox(self)
 
-    def get_widget(self) -> WidgetWrapper:
-        if self.widget is None:
-            self.widget = DictWidgetWrapper(self.init_widget(), hint_text=self.hint_text)
-        return self.widget
+    def _get_new_widget(self):
+        return DictWidgetWrapper(self.init_widget(), hint_text=self.hint_text)
 
     @property
     def layout(self):
