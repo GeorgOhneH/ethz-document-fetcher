@@ -42,7 +42,7 @@ async def producer(session,
         pattern = regrex_pattern["pattern"]
         folder_regrex = regrex_pattern["folder"]
         file_name_regrex = regrex_pattern["file_name"]
-        for link in links:
+        for link, name in links:
 
             if re.search(pattern, link) is None:
                 continue
@@ -53,6 +53,9 @@ async def producer(session,
 
             file_name = o.path.split("/")[-1]
             extension = file_name.split(".")[-1]
+
+            if name:
+                file_name = f"{name}.{extension}"
 
             if file_name_regrex:
                 user_file_name = re.sub(pattern, file_name_regrex, link)
@@ -84,7 +87,7 @@ async def get_all_file_links(session, url):
 
         result = urljoin(url, href)
 
-        all_links.add(result)
+        all_links.add((result, link.string))
 
     return all_links
 
