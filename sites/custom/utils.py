@@ -1,4 +1,8 @@
-from core.constants import *
+import os
+
+from bs4 import BeautifulSoup
+
+from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
 
 

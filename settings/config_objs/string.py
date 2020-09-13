@@ -63,6 +63,9 @@ class WidgetWrapper(QWidget):
 
         if hint_text is not None:
             hint = QLabel()
+            hint.setTextFormat(Qt.RichText)
+            hint.setTextInteractionFlags(Qt.TextBrowserInteraction)
+            hint.setOpenExternalLinks(True)
             hint.setText(hint_text)
             hint.setStyleSheet("QLabel { color : gray; }")
             self.layout.addWidget(hint)

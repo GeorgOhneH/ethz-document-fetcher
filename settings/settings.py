@@ -93,7 +93,7 @@ class SiteSettings(Settings):
     NAME = "Download"
     username = ConfigString(optional=True, gui_name="Username")
     password = ConfigPassword(optional=True, gui_name="Password")
-    base_path = ConfigPath(ony_folder=True, gui_name="Save Path")
+    base_path = ConfigPath(only_folder=True, gui_name="Save Path")
     allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
                                           hint_text="Add 'video' for all video types.")
     forbidden_extensions = ConfigListString(default=["video"], optional=True, gui_name="Forbidden Extensions",

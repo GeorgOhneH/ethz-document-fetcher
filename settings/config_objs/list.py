@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from settings.config_objs.string import ConfigString, WidgetWrapper, AbstractConfigWidget, LineEdit
+from settings.config_objs.dict import DictWidgetWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -138,7 +139,6 @@ class ListGroupBox(QGroupBox, AbstractConfigWidget):
 
     def append_new_widget(self):
         new_config_obj = copy.deepcopy(self.config_obj.config_obj_default)
-        new_config_obj.name = self.config_obj.item_name
 
         config_widget = ListWidgetWrapper(new_config_obj.get_widget())
         config_widget.data_changed_signal.connect(self.data_changed_emit)
@@ -175,9 +175,10 @@ class ListGroupBox(QGroupBox, AbstractConfigWidget):
 
 
 class ConfigList(ConfigString):
-    def __init__(self, config_obj_default, item_name, *args, **kwargs):
+    def __init__(self, config_obj_default, *args, **kwargs):
         super().__init__(*args, default=[], **kwargs)
-        self.item_name = item_name
+        if config_obj_default.get_gui_name() is None:
+            raise ValueError("config_obj_default must have the gui_name set")
         self.config_obj_default = config_obj_default
         if self.config_obj_default.default is not None:
             self.config_obj_default.set(self.config_obj_default.default)
@@ -185,10 +186,8 @@ class ConfigList(ConfigString):
     def init_widget(self):
         return ListGroupBox(self)
 
-    # def get_widget(self):
-    #     if self.widget is None:
-    #         self.widget = DictWidgetWrapper(self.init_widget(), hint_text=self.hint_text)
-    #     return self.widget
+    def _get_new_widget(self):
+        return DictWidgetWrapper(self.init_widget(), hint_text=self.hint_text)
 
     def _test(self, value, from_widget):
         if not isinstance(value, list):

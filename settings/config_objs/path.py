@@ -54,9 +54,9 @@ class PathLineEdit(LineEdit):
 
 
 class ConfigPath(ConfigString):
-    def __init__(self, ony_folder=False, file_extensions=None, *args, **kwargs):
+    def __init__(self, only_folder=False, file_extensions=None, *args, **kwargs):
         self.file_extensions = file_extensions
-        self.only_folder = ony_folder
+        self.only_folder = only_folder
         super().__init__(*args, **kwargs)
 
     def init_widget(self):
