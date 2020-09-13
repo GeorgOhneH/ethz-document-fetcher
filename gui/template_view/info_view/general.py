@@ -1,11 +1,12 @@
 import logging
+import copy
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView
-from settings.config_objs import ConfigDict
+from settings.config_objs import ConfigDict, ConfigList
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,8 @@ class GroupBox(QGroupBox):
     def value_to_string(value):
         if value is None:
             return ""
-        #TODO make it right
+        if isinstance(value, (list, set)):
+            value = "[" + " ".join(value) + "]"
         return f"{value}"
 
 
@@ -90,25 +92,41 @@ class OptionsGroupBox(GroupBox):
             layout_item = layout.itemAt(i)
 
             if layout_item is not None:
-                if not isinstance(config_obj, ConfigDict) and isinstance(layout_item.widget(), QLabel):
+                if not isinstance(config_obj, (ConfigDict, ConfigList)) and isinstance(layout_item.widget(), QLabel):
                     layout_item.widget().setText(f"{config_obj.get_gui_name()}:"
                                                  f" {self.value_to_string(config_obj.get())}")
                     continue
-                elif isinstance(config_obj, ConfigDict) and isinstance(layout_item.widget(), GroupBox):
+                elif isinstance(config_obj, (ConfigDict, ConfigList)) and isinstance(layout_item.widget(), GroupBox):
                     layout_item.widget().setTitle(config_obj.get_gui_name())
-                    self._update_layout(config_obj.layout.values(), layout_item.widget().layout())
+                    if isinstance(config_obj, ConfigDict):
+                        sub_config_objs = config_obj.layout.values()
+                    else:
+                        sub_config_objs = []
+                        for sub_value in config_obj.get():
+                            x = copy.deepcopy(config_obj.config_obj_default)
+                            x.set(sub_value)
+                            sub_config_objs.append(x)
+                    self._update_layout(sub_config_objs, layout_item.widget().layout())
                     continue
 
                 child = layout.takeAt(i)
                 child.widget().setParent(None)
 
-            if not isinstance(config_obj, ConfigDict):
+            if not isinstance(config_obj, (ConfigDict, ConfigList)):
                 widget = QLabel(f"{config_obj.get_gui_name()}: {self.value_to_string(config_obj.get())}")
             else:
                 widget = QGroupBox()
                 widget.setTitle(config_obj.get_gui_name())
                 widget.setLayout(QVBoxLayout())
-                self._update_layout(config_obj.layout.values(), widget.layout())
+                if isinstance(config_obj, ConfigDict):
+                    sub_config_objs = config_obj.layout.values()
+                else:
+                    sub_config_objs = []
+                    for sub_value in config_obj.get():
+                        x = copy.deepcopy(config_obj.config_obj_default)
+                        x.set(sub_value)
+                        sub_config_objs.append(x)
+                self._update_layout(sub_config_objs, widget.layout())
 
             layout.insertWidget(i, widget)
 

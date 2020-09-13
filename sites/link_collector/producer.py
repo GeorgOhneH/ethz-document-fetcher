@@ -11,8 +11,8 @@ from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigPat
 
 regrex_pattern_config = ConfigList(
     gui_name="Regrex Patterns",
-    hint_text="This will use the <a href=\"https://docs.python.org/3/library/re.html#re.sub/\">re.sub</a>"
-              " function from python.",
+    hint_text="This uses the <a href=\"https://docs.python.org/3/library/re.html#re.sub\">re.sub</a>"
+              " function. The replacements are 'Folder Name' and 'File Name'",
     config_obj_default=ConfigDict(
         gui_name="",
         layout={
