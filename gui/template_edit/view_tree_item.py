@@ -49,7 +49,8 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         if self.item_status == self.STATUS_NEW:
             folder_child = TreeEditWidgetItem(FolderConfigs(), self.STATUS_NEW)
             site_child = TreeEditWidgetItem(SiteConfigs(), self.STATUS_NEW)
-            self.addChildren([folder_child, site_child])
+            self.addChild(folder_child)
+            self.addChild(site_child)
             folder_child.init_widgets()
             site_child.init_widgets()
 
@@ -68,3 +69,4 @@ class TreeEditWidgetItem(QTreeWidgetItem):
 
             self.item_status = self.STATUS_SET
             self.set_flags()
+            self.treeWidget().order_item(self)

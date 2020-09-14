@@ -93,6 +93,9 @@ class TemplateEditViewTree(QTreeWidget):
         was_expanded = item.isExpanded()
         super().dropEvent(event)
         item.setExpanded(was_expanded)
+        self.order_item(item)
+
+    def order_item(self, item):
         root = self.invisibleRootItem()
         while True:
             parent = (item.parent() or root)
@@ -110,8 +113,8 @@ class TemplateEditViewTree(QTreeWidget):
     def init_view_tree(self):
         for child in self.template.root.children:
             self.init_widgets(child, parent=None)
-        self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW)
         self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW)
+        self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW)
 
         for widget in self.widgets:
             widget.init_widgets()
@@ -121,8 +124,8 @@ class TemplateEditViewTree(QTreeWidget):
 
         for child in node.children:
             self.init_widgets(child, parent=widget)
-        self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW, widget_parent=widget)
         self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW, widget_parent=widget)
+        self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW, widget_parent=widget)
 
     def convert_to_dict(self):
         template = template_parser.Template(path=None)
