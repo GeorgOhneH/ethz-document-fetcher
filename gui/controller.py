@@ -49,27 +49,27 @@ class CentralWidget(QWidget):
 
         self.btn_run_all = QPushButton("Run All")
         actions.run.triggered.connect(lambda triggered: self.start_thread())
-        self.btn_run_all.pressed.connect(self.start_thread)
+        self.btn_run_all.clicked.connect(lambda triggered: self.start_thread())
 
         self.btn_run_checked = QPushButton("Run Selected")
         actions.run_checked.triggered.connect(self.start_thread_checked)
-        self.btn_run_checked.pressed.connect(self.start_thread_checked)
+        self.btn_run_checked.clicked.connect(self.start_thread_checked)
 
         self.btn_edit = QPushButton("Edit")
         self.btn_edit.setFocusPolicy(Qt.ClickFocus)
         actions.edit_file.triggered.connect(self.open_edit)
-        self.btn_edit.pressed.connect(self.open_edit)
+        self.btn_edit.clicked.connect(self.open_edit)
 
         self.btn_settings = QPushButton("Settings")
         self.btn_settings.setFocusPolicy(Qt.ClickFocus)
         actions.settings.triggered.connect(self.open_settings)
-        self.btn_settings.pressed.connect(self.open_settings)
+        self.btn_settings.clicked.connect(self.open_settings)
 
         self.btn_stop = QPushButton("Stop")
         self.btn_stop.setEnabled(False)
         actions.stop.triggered.connect(self.stop_thread)
         actions.stop.setEnabled(False)
-        self.btn_stop.pressed.connect(self.stop_thread)
+        self.btn_stop.clicked.connect(self.stop_thread)
 
         line = QFrame()
         line.setFrameShape(QFrame.VLine)
@@ -77,9 +77,9 @@ class CentralWidget(QWidget):
         line.setStyleSheet("color: gray;")
 
         self.btn_check_all = QPushButton("Select All")
-        self.btn_check_all.pressed.connect(self.check_all)
+        self.btn_check_all.clicked.connect(self.check_all)
         self.btn_uncheck_all = QPushButton("Select None")
-        self.btn_uncheck_all.pressed.connect(self.uncheck_all)
+        self.btn_uncheck_all.clicked.connect(self.uncheck_all)
 
         self.button_container.left_layout.addWidget(self.btn_run_all)
         self.button_container.left_layout.addWidget(self.btn_run_checked)

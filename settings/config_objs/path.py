@@ -43,7 +43,7 @@ class PathLineEdit(LineEdit):
         self.file_extensions = file_extensions
         self.file_button = QPushButton()
         self.file_button.setIcon(QFileIconProvider().icon(QFileIconProvider.Folder))
-        self.file_button.pressed.connect(self.open_file_picker)
+        self.file_button.clicked.connect(self.open_file_picker)
         self.layout.addWidget(self.file_button)
 
     def open_file_picker(self):
