@@ -37,14 +37,14 @@ async def download_if_not_exist(session,
                                 site_settings,
                                 cancellable_pool,
                                 with_extension=True,
-                                kwargs=None,
+                                session_kwargs=None,
                                 allowed_extensions=None,
                                 forbidden_extensions=None,
                                 checksum=None,
                                 signal_handler=None,
                                 unique_key=None):
-    if kwargs is None:
-        kwargs = {}
+    if session_kwargs is None:
+        session_kwargs = {}
 
     if allowed_extensions is None:
         allowed_extensions = []
@@ -83,12 +83,12 @@ async def download_if_not_exist(session,
         return
 
     if os.path.exists(absolute_path):
-        headers = kwargs.get("headers", {})
+        headers = session_kwargs.get("headers", {})
         etag = cache.get_etag(absolute_path)
         if etag is not None:
             headers["If-None-Match"] = etag
         if headers:
-            kwargs["headers"] = headers
+            session_kwargs["headers"] = headers
 
     if os.path.exists(absolute_path):
         action = ACTION_REPLACE
@@ -102,7 +102,7 @@ async def download_if_not_exist(session,
     if file_extension.lower() in forbidden_extensions:
         return
 
-    async with session.get(url, timeout=timeout, **kwargs) as response:
+    async with session.get(url, timeout=timeout, **session_kwargs) as response:
         response.raise_for_status()
         response_headers = response.headers
 

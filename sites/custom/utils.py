@@ -26,7 +26,7 @@ async def validate_url(session, queue, links_to_pdf, base_url, base_path, **kwar
                 continue
 
             item_path = os.path.join(path, name + f" {i}.pdf")
-            await queue.put({"path": item_path, "url": base_url + real_url, "kwargs": kwargs})
+            await queue.put({"path": item_path, "url": base_url + real_url, "session_kwargs": kwargs})
 
 
 async def collect_all_links(session, queue, url, base_path, valid_extensions=None):

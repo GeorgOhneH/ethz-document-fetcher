@@ -3,6 +3,7 @@ import re
 from urllib.parse import urlparse, urlunparse, urljoin
 
 from bs4 import BeautifulSoup
+from aiohttp import BasicAuth
 
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
@@ -99,8 +100,17 @@ async def producer(session,
                    headers: headers_config,
                    basic_auth: basic_auth_config):
     headers = {d["key"]: d["value"] for d in headers}
+    session_kwargs = {"headers": headers}
 
-    links = await get_all_file_links(session, url)
+    if basic_auth["use"]:
+        if basic_auth["use_eth_credentials"]:
+            session_kwargs["auth"] = BasicAuth(login=site_settings.username,
+                                               password=site_settings.password)
+        else:
+            session_kwargs["auth"] = BasicAuth(login=basic_auth["custom"]["username"],
+                                               password=basic_auth["custom"]["password"])
+
+    links = await get_all_file_links(session, url, session_kwargs)
     for regrex_pattern in regrex_patterns:
         pattern = regrex_pattern["pattern"]
         folder_regrex = regrex_pattern["folder"]
@@ -126,11 +136,15 @@ async def producer(session,
                     user_file_name += f".{extension}"
                 file_name = user_file_name
 
-            await queue.put({"url": link, "path": safe_path_join(base_path, folder_name, file_name)})
+            await queue.put({
+                "url": link,
+                "path": safe_path_join(base_path, folder_name, file_name),
+                "session_kwargs": session_kwargs,
+            })
 
 
-async def get_all_file_links(session, url):
-    async with session.get(url) as response:
+async def get_all_file_links(session, url, session_kwargs):
+    async with session.get(url, **session_kwargs) as response:
         html = await response.text()
 
     all_links = set([])
