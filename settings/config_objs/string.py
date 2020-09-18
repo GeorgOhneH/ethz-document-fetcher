@@ -220,9 +220,7 @@ class ConfigString(object):
     def _save(self):
         return self._value
 
-    def is_active(self, value=NotSet, from_widget=False):
-        if value is NotSet:
-            value = self._value
+    def is_active(self, from_widget=False):
         return self.active_func(self.instance, from_widget, self.parent)
 
     def is_set(self, value=NotSet):
@@ -240,7 +238,7 @@ class ConfigString(object):
         return result
 
     def _is_valid(self, value, from_widget):
-        if not self.is_active(value, from_widget):
+        if not self.is_active(from_widget):
             return True
         if not self.is_set(value):
             self.msg = "Can not be empty"

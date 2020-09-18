@@ -100,15 +100,17 @@ class ConfigDict(ConfigString):
 
     def _set(self, value):
         for name, config_obj in self._layout.items():
+            if not config_obj.is_active():
+                continue
             if name not in value and config_obj.optional:
                 continue
-            try:
-                config_obj.set(value[name])
-            except ValueError:
-                pass
+            config_obj.set(value[name])
 
     def _test(self, value, from_widget):
         for name, config_obj in self._layout.items():
+            if not config_obj.is_active(from_widget=from_widget):
+                continue
+
             if name not in value:
                 if config_obj.optional:
                     continue

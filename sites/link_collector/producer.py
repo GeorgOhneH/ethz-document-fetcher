@@ -21,7 +21,8 @@ regrex_pattern_config = ConfigList(
                 gui_name="Pattern"
             ),
             "folder": ConfigString(
-                gui_name="Folder Name"
+                gui_name="Folder Name",
+                optional=True,
             ),
             "file_name": ConfigString(
                 gui_name="File Name",
@@ -114,6 +115,8 @@ async def producer(session,
     for regrex_pattern in regrex_patterns:
         pattern = regrex_pattern["pattern"]
         folder_regrex = regrex_pattern["folder"]
+        if folder_regrex is None:
+            folder_regrex = ""
         file_name_regrex = regrex_pattern["file_name"]
         for link, name in links:
 
