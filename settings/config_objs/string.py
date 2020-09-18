@@ -77,7 +77,6 @@ class WidgetWrapper(QWidget):
 
         if hint_text is not None:
             hint = QLabel(hint_text)
-            hint.setTextFormat(Qt.RichText)
             hint.setTextInteractionFlags(Qt.TextBrowserInteraction)
             hint.setOpenExternalLinks(True)
             hint.setText(hint_text)
@@ -85,6 +84,7 @@ class WidgetWrapper(QWidget):
             self.layout.addWidget(hint)
 
         self.error_label = ErrorLabel()
+        self.error_label.hide()
         self.layout.addWidget(self.error_label)
 
     def get_value(self):
@@ -101,11 +101,11 @@ class WidgetWrapper(QWidget):
         return True
 
     def update_widget(self):
+        self.config_widget.update_widget()
         if self._set_error_msg():
             self.error_label.show()
         else:
             self.error_label.hide()
-        self.config_widget.update_widget()
 
     def data_changed_emit(self, *args, **kwargs):
         self.data_changed_signal.emit()
@@ -261,10 +261,11 @@ class ConfigString(object):
     def update_visibility(self):
         if self.widget is None:
             return
+        is_active = self.is_active(from_widget=True)
         if self.gray_out:
-            self.widget.setEnabled(self.is_active(from_widget=True))
+            self.widget.setEnabled(is_active)
         else:
-            self.widget.setVisible(self.is_active(from_widget=True))
+            self.widget.setVisible(is_active)
 
     def cancel(self):
         pass
