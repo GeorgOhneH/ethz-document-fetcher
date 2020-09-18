@@ -135,7 +135,7 @@ class FunctionFolderConfigString(ConfigString):
             raise ValueError(str(e))
 
 
-def raw_folder_name_active(instance: NodeConfigs, from_widget):
+def raw_folder_name_active(instance: NodeConfigs, from_widget, parent):
     if from_widget:
         use_folder = instance.get_config_obj("use_folder").get_from_widget()
         folder_function = instance.get_config_obj("raw_folder_function").get_from_widget()
@@ -148,7 +148,7 @@ def raw_folder_name_active(instance: NodeConfigs, from_widget):
     return use_folder and (folder_function is None or raw_module_name != "custom")
 
 
-def raw_function_active(instance, from_widget):
+def raw_function_active(instance, from_widget, parent):
     if from_widget:
         raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
     else:
@@ -157,7 +157,7 @@ def raw_function_active(instance, from_widget):
     return raw_module_name == "custom"
 
 
-def folder_function_active(instance, from_widget):
+def folder_function_active(instance, from_widget, parent):
     if from_widget:
         raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
         use_folder = instance.get_config_obj("use_folder").get_from_widget()

@@ -177,9 +177,11 @@ class ListGroupBox(QGroupBox, AbstractConfigWidget):
 class ConfigList(ConfigString):
     def __init__(self, config_obj_default, *args, **kwargs):
         super().__init__(*args, default=[], **kwargs)
+        config_obj_default.parent = self
         if config_obj_default.get_gui_name() is None:
             raise ValueError("config_obj_default must have the gui_name set")
         self.config_obj_default = config_obj_default
+        self.config_obj_default.instance = self.instance
         if self.config_obj_default.default is not None:
             self.config_obj_default.set(self.config_obj_default.default)
 

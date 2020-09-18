@@ -101,16 +101,12 @@ class WidgetWrapper(QWidget):
 class ConfigString(object):
     def __init__(self,
                  default=None,
-                 active_func=lambda instance, from_widget: True,
-                 depends_on=None,
+                 active_func=lambda instance, from_widget, parent: True,
                  optional=False,
                  gui_name=None,
                  hint_text=None,
                  gray_out=False,
                  require_restart=False):
-        if depends_on is None:
-            depends_on = []
-        self.depends_on = depends_on
         self.default = default
         self.gui_name = gui_name
         self.hint_text = hint_text
@@ -123,9 +119,7 @@ class ConfigString(object):
         self.optional = optional
         self.msg = ""
         self.widget = None
-
-    def instance_created(self):
-        pass
+        self.parent = None
 
     def _get_new_widget(self):
         return WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
@@ -216,7 +210,7 @@ class ConfigString(object):
     def is_active(self, value=NotSet, from_widget=False):
         if value is NotSet:
             value = self._value
-        return self.active_func(self.instance, from_widget) and all([x.is_set(value) for x in self.depends_on])
+        return self.active_func(self.instance, from_widget, self.parent)
 
     def is_set(self, value=NotSet):
         if value is NotSet:

@@ -44,8 +44,6 @@ class Configs(metaclass=ConfigBase):
         for config_obj in self:
             config_obj.instance = self
         for config_obj in self:
-            config_obj.instance_created()
-        for config_obj in self:
             if config_obj.default is not None:
                 config_obj.set(config_obj.default)
 

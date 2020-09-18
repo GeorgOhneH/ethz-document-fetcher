@@ -87,8 +87,7 @@ class ConfigDict(ConfigString):
         for name, config_obj in self._layout.items():
             config_obj.name = name
             config_obj.instance = self.instance
-        for name, config_obj in self._layout.items():
-            config_obj.instance_created()
+            config_obj.parent = self
         for name, config_obj in self._layout.items():
             if config_obj.default is not None:
                 config_obj.set(config_obj.default)
@@ -103,7 +102,10 @@ class ConfigDict(ConfigString):
         for name, config_obj in self._layout.items():
             if name not in value and config_obj.optional:
                 continue
-            config_obj.set(value[name])
+            try:
+                config_obj.set(value[name])
+            except ValueError:
+                pass
 
     def _test(self, value, from_widget):
         for name, config_obj in self._layout.items():

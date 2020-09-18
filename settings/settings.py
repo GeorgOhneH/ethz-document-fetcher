@@ -80,7 +80,7 @@ class TemplatePathSettings(Settings):
                                file_extensions=["yml"])
 
 
-def highlight_difference_active(instance, from_widget):
+def highlight_difference_active(instance, from_widget, parent):
     if from_widget:
         keep_replaced_files = instance.get_config_obj("keep_replaced_files").get_from_widget()
     else:
