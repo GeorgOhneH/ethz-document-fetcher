@@ -47,6 +47,20 @@ class LineEdit(QWidget, AbstractConfigWidget):
             self.line_edit.setText(str(value))
 
 
+class ErrorLabel(QLabel):
+    def __init__(self):
+        super().__init__()
+        self.setStyleSheet("QLabel { color : red; }")
+
+    def changeEvent(self, event: QEvent):
+        super().changeEvent(event)
+        if QEvent.EnabledChange == event.type():
+            if self.isEnabled():
+                self.setStyleSheet("QLabel { color : red; }")
+            else:
+                self.setStyleSheet("QLabel { color : gray; }")
+
+
 class WidgetWrapper(QWidget):
     data_changed_signal = pyqtSignal()
 
@@ -62,7 +76,7 @@ class WidgetWrapper(QWidget):
         self.layout.addWidget(self.config_widget)
 
         if hint_text is not None:
-            hint = QLabel()
+            hint = QLabel(hint_text)
             hint.setTextFormat(Qt.RichText)
             hint.setTextInteractionFlags(Qt.TextBrowserInteraction)
             hint.setOpenExternalLinks(True)
@@ -70,8 +84,7 @@ class WidgetWrapper(QWidget):
             hint.setStyleSheet("QLabel { color : gray; }")
             self.layout.addWidget(hint)
 
-        self.error_label = QLabel()
-        self.error_label.setStyleSheet("QLabel { color : red; }")
+        self.error_label = ErrorLabel()
         self.layout.addWidget(self.error_label)
 
     def get_value(self):

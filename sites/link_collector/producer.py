@@ -75,10 +75,12 @@ basic_auth_config = ConfigDict(
         "use": ConfigBool(default=False, gui_name="Use Basic Authentication"),
         "use_eth_credentials": ConfigBool(default=False,
                                           gui_name="Use ETH Credentials",
+                                          gray_out=True,
                                           active_func=basic_auth_config_use_eth_credentials),
         "custom": ConfigDict(
             active_func=basic_auth_config_custom,
             gui_name="Custom",
+            gray_out=True,
             layout={
                 "username": ConfigString(),
                 "password": ConfigString(),
