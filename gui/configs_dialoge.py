@@ -196,8 +196,8 @@ class ConfigsScrollArea(QScrollArea):
             config_obj.set_from_widget()
 
     def data_changed(self):
-        self.update_visibility()
         self.update_widgets()
+        self.update_visibility()
         self.update_group_box_visibility(self.optional)
         self.update_group_box_visibility(self.required)
         self.data_changed_signal.emit()

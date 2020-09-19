@@ -4,6 +4,7 @@ import pathlib
 from urllib.parse import urlparse
 
 import aiohttp
+from aiohttp.client import URL
 
 from core import pdf_highlighter
 from core.constants import *
@@ -62,7 +63,10 @@ async def download_if_not_exist(session,
 
     forbidden_extensions -= allowed_extensions
 
-    domain = urlparse(url).netloc
+    if isinstance(url, str):
+        url = URL(url)
+
+    domain = url.host
 
     timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
@@ -71,7 +75,7 @@ async def download_if_not_exist(session,
     absolute_path = os.path.join(site_settings.base_path, path)
 
     if not with_extension:
-        absolute_path += "." + await cache.check_extension(session, url)
+        absolute_path += "." + await cache.check_extension(session, str(url))
 
     force = False
     if checksum is not None:

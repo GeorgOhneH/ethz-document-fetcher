@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+import os
 
 from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer
@@ -10,6 +11,7 @@ from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path
 from sites import polybox, one_drive
+from sites.moodle import zoom
 from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK
 
 logger = logging.getLogger(__name__)
@@ -100,6 +102,17 @@ async def parse_sections(session, queue, section, base_path, site_settings, mood
                                                                           safe_path_join(base_path, name),
                                                                           site_settings,
                                                                           poly_id)
+
+            elif "zoom.us/rec/play" in driver_url:
+                absolute_path = os.path.join(site_settings.base_path, base_path)
+
+                if not check_if_name_exist(absolute_path, name):
+                    logger.debug(f"Starting zoom download from moodle: {moodle_id}")
+                    coroutine = zoom.download(session=session,
+                                              queue=queue,
+                                              base_path=base_path,
+                                              url=driver_url,
+                                              file_name=name)
 
             if coroutine is not None:
                 tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
@@ -213,3 +226,14 @@ def parse_update_json(update_json):
         result[instance_id] = last_update
 
     return result
+
+
+def check_if_name_exist(path, name):
+    for file_name in os.listdir(path):
+        if "." not in file_name:
+            continue
+
+        if ".".join(file_name.split(".")[:-1]) == name:
+            return True
+
+    return False
