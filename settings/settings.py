@@ -58,6 +58,7 @@ class Settings(Configs, metaclass=SettingBase):
         return os.path.join(CONFIG_PATH, self.__class__.__name__.lower() + ".config")
 
     def save(self):
+        logger.debug(f"Saving settings: {self.__class__.__name__}")
         path = self.get_file_path()
         with open(path, "w+") as f:
             for config_obj in self:

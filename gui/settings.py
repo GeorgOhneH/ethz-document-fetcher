@@ -16,3 +16,5 @@ class SettingsDialog(ConfigsDialog):
         self.init(settings_areas)
         self.setWindowTitle("Settings")
 
+        self.accepted.connect(lambda: site_settings.save())
+
