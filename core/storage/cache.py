@@ -69,13 +69,25 @@ async def check_url_reference(session, url):
     return new_url
 
 
-async def check_extension(session, url):
+async def check_extension(session, url, session_kwargs=None):
+    if session_kwargs is None:
+        session_kwargs = {}
+
     table = get_json("extensions")
     extension = table.get(url, None)
 
+    if extension == "error":
+        return None
+
     if extension is None:
-        async with session.get(url, raise_for_status=True) as response:
+        async with session.get(url, raise_for_status=True, **session_kwargs) as response:
             extension = get_extension_from_response(response)
+
+        if extension is None:
+            table[url] = "error"
+            logger.warning(f"Could not retrieve from {url}. {response.status}")
+            return None
+
         table[url] = extension
         logger.debug(f"Called extension_cache, url: {url}, extension: {extension}")
 

@@ -75,7 +75,12 @@ async def download_if_not_exist(session,
     absolute_path = os.path.join(site_settings.base_path, path)
 
     if not with_extension:
-        absolute_path += "." + await cache.check_extension(session, str(url))
+        guess_extension = await cache.check_extension(session, str(url), session_kwargs=session_kwargs)
+        if guess_extension is None:
+            logger.warning(f"Could not retrieve the extension for {url}")
+            return
+
+        absolute_path += "." + guess_extension
 
     force = False
     if checksum is not None:

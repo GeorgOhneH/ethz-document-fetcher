@@ -2,6 +2,7 @@ import asyncio
 import logging
 import re
 import os
+from mimetypes import guess_extension
 
 from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer
@@ -67,8 +68,10 @@ async def parse_sections(session, queue, section, base_path, site_settings, mood
                 with_extension = True
 
             url = instance.a["href"] + "&redirect=1"
-            await queue.put({"path": safe_path_join(base_path, file_name), "url": url,
-                             "with_extension": with_extension, "checksum": last_updated})
+            await queue.put({"path": safe_path_join(base_path, file_name),
+                             "url": url,
+                             "with_extension": with_extension,
+                             "checksum": last_updated})
 
         elif mtype == MTYPE_DIRECTORY:
             last_updated = last_updated_dict[module_id]
@@ -85,37 +88,15 @@ async def parse_sections(session, queue, section, base_path, site_settings, mood
 
             driver_url = await check_url_reference(session, url)
 
-            coroutine = None
-            if "onedrive.live.com" in driver_url:
-                logger.debug(f"Starting one drive from moodle: {moodle_id}")
-                coroutine = one_drive.producer(session,
-                                               queue,
-                                               base_path + f"; {safe_path(name)}",
-                                               site_settings=site_settings,
-                                               url=driver_url)
+            coroutine = process_link(session=session,
+                                     queue=queue,
+                                     base_path=base_path,
+                                     site_settings=site_settings,
+                                     url=driver_url,
+                                     moodle_id=moodle_id,
+                                     name=name)
 
-            elif "polybox" in driver_url:
-                logger.debug(f"Starting polybox from moodle: {moodle_id}")
-                poly_id = driver_url.split("s/")[-1].split("/")[0]
-                coroutine = poly_box_wrapper(polybox.producer, moodle_id)(session,
-                                                                          queue,
-                                                                          safe_path_join(base_path, name),
-                                                                          site_settings,
-                                                                          poly_id)
-
-            elif "zoom.us/rec/play" in driver_url:
-                absolute_path = os.path.join(site_settings.base_path, base_path)
-
-                if not check_if_name_exist(absolute_path, name):
-                    logger.debug(f"Starting zoom download from moodle: {moodle_id}")
-                    coroutine = zoom.download(session=session,
-                                              queue=queue,
-                                              base_path=base_path,
-                                              url=driver_url,
-                                              file_name=name)
-
-            if coroutine is not None:
-                tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
+            tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
 
     await asyncio.gather(*tasks)
 
@@ -228,12 +209,28 @@ def parse_update_json(update_json):
     return result
 
 
-def check_if_name_exist(path, name):
-    for file_name in os.listdir(path):
-        if "." not in file_name:
-            continue
+async def process_link(session, queue, base_path, site_settings, url, moodle_id, name):
+    if "onedrive.live.com" in url:
+        logger.debug(f"Starting one drive from moodle: {moodle_id}")
+        await one_drive.producer(session,
+                                 queue,
+                                 base_path + f"; {safe_path(name)}",
+                                 site_settings=site_settings,
+                                 url=url)
 
-        if ".".join(file_name.split(".")[:-1]) == name:
-            return True
+    elif "polybox" in url:
+        logger.debug(f"Starting polybox from moodle: {moodle_id}")
+        poly_id = url.split("s/")[-1].split("/")[0]
+        await poly_box_wrapper(polybox.producer, moodle_id)(session,
+                                                            queue,
+                                                            safe_path_join(base_path, name),
+                                                            site_settings,
+                                                            poly_id)
 
-    return False
+    elif "zoom.us/rec/play" in url:
+        logger.debug(f"Starting zoom download from moodle: {moodle_id}")
+        await zoom.download(session=session,
+                            queue=queue,
+                            base_path=base_path,
+                            url=url,
+                            file_name=name)

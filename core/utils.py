@@ -5,6 +5,7 @@ import logging
 import os
 import re
 import shutil
+from mimetypes import guess_extension
 
 import requests
 
@@ -39,9 +40,17 @@ def user_statistics(name):
 
 
 def get_extension_from_response(response):
-    disposition = response.headers['content-disposition']
-    resp_file_name = re.search("""filename="(.+).""", disposition)[1]
-    return get_extension(resp_file_name)
+    if "content-disposition" in response.headers:
+        disposition = response.headers['content-disposition']
+        resp_file_name_match = re.search("""filename="(.+)\"""", disposition)
+        if resp_file_name_match is not None:
+            return get_extension(resp_file_name_match[1])
+
+    extension = guess_extension(response.headers['content-type'].partition(';')[0].strip())
+    if extension is None:
+        return None
+
+    return extension[1:]
 
 
 def get_extension(file):
