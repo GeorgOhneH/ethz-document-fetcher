@@ -2,6 +2,7 @@ import asyncio
 import logging
 import re
 import os
+import pprint
 from mimetypes import guess_extension
 
 from aiohttp.client_exceptions import ClientResponseError
@@ -98,22 +99,22 @@ async def parse_sections(session, queue, section, base_path, site_settings, mood
 
             tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
 
-    if process_external_links:
-        for text_link in section.find_all("a"):
-            url = text_link.get("href", None)
-            name = text_link.string
-            if url is None or name is None:
-                continue
+        if process_external_links:
+            for text_link in module.find_all("a"):
+                url = text_link.get("href", None)
+                name = text_link.string
+                if url is None or name is None:
+                    continue
 
-            coroutine = process_link(session=session,
-                                     queue=queue,
-                                     base_path=base_path,
-                                     site_settings=site_settings,
-                                     url=url,
-                                     moodle_id=moodle_id,
-                                     name=name)
+                coroutine = process_link(session=session,
+                                         queue=queue,
+                                         base_path=base_path,
+                                         site_settings=site_settings,
+                                         url=url,
+                                         moodle_id=moodle_id,
+                                         name=name)
 
-            tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
+                tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
 
     await asyncio.gather(*tasks)
 

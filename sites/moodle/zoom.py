@@ -72,5 +72,5 @@ async def download(session, queue, base_path, url, password=None, file_name=None
     await queue.put({
         "url": URL(vid_url, encoded=True),
         "path": safe_path_join(base_path, f"{name}.{extension}"),
-        "session_kwargs": dict(headers=agent_header),
+        "session_kwargs": dict(headers=agent_header)
     })
