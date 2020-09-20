@@ -9,6 +9,7 @@ from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
+from core import unique_queue
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,7 @@ class Worker(QObject):
 
             try:
                 logger.debug(f"Loading template: {self.template_path}")
-                queue = asyncio.Queue()
+                queue = unique_queue.UniqueQueue()
                 producers = []
                 cancellable_pool = CancellablePool()
                 template = template_parser.Template(path=self.template_path,

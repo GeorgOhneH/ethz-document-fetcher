@@ -19,13 +19,9 @@ def queue_wrapper_put(obj, attr, **consumer_kwargs):
 
 
 class QueueWrapper:
-    def __init__(self, obj, signal_handler, unique_key, site_settings, **kwargs):
+    def __init__(self, queue, signal_handler, unique_key, site_settings, **kwargs):
         kwargs["signal_handler"] = signal_handler
         kwargs["unique_key"] = unique_key
         kwargs["site_settings"] = site_settings
         self.consumer_kwargs = kwargs
-        for attr, method in obj.__class__.__dict__.items():
-            if callable(method):
-                if inspect.iscoroutinefunction(method) or asyncio.iscoroutinefunction(method):
-                    if attr == "put":
-                        setattr(self, attr, queue_wrapper_put(obj, attr, **kwargs))
+        setattr(self, "put", queue_wrapper_put(queue, "put", **kwargs))

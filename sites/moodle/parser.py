@@ -98,6 +98,23 @@ async def parse_sections(session, queue, section, base_path, site_settings, mood
 
             tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
 
+    if process_external_links:
+        for text_link in section.find_all("a"):
+            url = text_link.get("href", None)
+            name = text_link.string
+            if url is None or name is None:
+                continue
+
+            coroutine = process_link(session=session,
+                                     queue=queue,
+                                     base_path=base_path,
+                                     site_settings=site_settings,
+                                     url=url,
+                                     moodle_id=moodle_id,
+                                     name=name)
+
+            tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
+
     await asyncio.gather(*tasks)
 
 
@@ -227,7 +244,7 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
                                                             site_settings,
                                                             poly_id)
 
-    elif "zoom.us/rec/play" in url:
+    elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
         await zoom.download(session=session,
                             queue=queue,

@@ -8,6 +8,7 @@ import aiohttp
 import certifi
 import colorama
 
+from core import unique_queue
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
 from core.constants import VERSION
@@ -39,7 +40,7 @@ async def main(signals=None, site_settings=None):
     async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
                                       timeout=aiohttp.ClientTimeout(30)) as session:
         logger.debug(f"Loading template: {template_path}")
-        queue = asyncio.Queue()
+        queue = unique_queue.UniqueQueue()
         producers = []
         cancellable_pool = CancellablePool()
         template_file = os.path.join(os.path.dirname(__file__), template_path)
