@@ -1,5 +1,6 @@
 import logging
 import os
+import importlib
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -240,6 +241,14 @@ class TemplateViewTree(QTreeWidget):
             open_folder_action.triggered.connect(lambda: QDesktopServices.openUrl(url))
         else:
             open_folder_action.setEnabled(False)
+
+        open_website_action = menu.addAction("Open Website")
+        if widget.template_node.has_website_url():
+            open_website_action.setEnabled(True)
+            open_website_action.triggered.connect(
+                lambda: QDesktopServices.openUrl(QUrl(widget.template_node.get_website_url())))
+        else:
+            open_website_action.setEnabled(False)
 
         menu.exec_(self.mapToGlobal(point))
 

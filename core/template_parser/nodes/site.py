@@ -248,3 +248,12 @@ class Site(TemplateNode):
                 signal_handler.finished(unique_key)
 
         return wrapper
+
+    def has_website_url(self):
+        site_module = importlib.import_module(self.module_name)
+        return hasattr(site_module, "get_website_url")
+
+    def get_website_url(self):
+        site_module = importlib.import_module(self.module_name)
+        return getattr(site_module, "get_website_url")(**self.function_kwargs)
+

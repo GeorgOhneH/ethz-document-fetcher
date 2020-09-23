@@ -118,3 +118,9 @@ class TemplateNode(object):
 
     async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
         pass
+
+    def has_website_url(self):
+        return False
+
+    def get_website_url(self):
+        raise NotImplemented
