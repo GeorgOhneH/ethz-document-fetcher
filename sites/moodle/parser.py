@@ -19,7 +19,14 @@ from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTE
 logger = logging.getLogger(__name__)
 
 
-async def parse_main_page(session, queue, html, base_path, site_settings, moodle_id, process_external_links):
+async def parse_main_page(session,
+                          queue,
+                          html,
+                          base_path,
+                          site_settings,
+                          moodle_id,
+                          process_external_links,
+                          keep_section_order):
     sesskey = re.search(b"""sesskey":"([^"]+)""", html)[1].decode("utf-8")
     async with session.post(AJAX_SERVICE_URL, json=get_update_payload(moodle_id),
                             params={"sesskey": sesskey}) as response:
@@ -39,14 +46,26 @@ async def parse_main_page(session, queue, html, base_path, site_settings, moodle
                                  site_settings=site_settings,
                                  moodle_id=moodle_id,
                                  process_external_links=process_external_links,
-                                 last_updated_dict=last_updated_dict)
-                  for section in sections]
+                                 last_updated_dict=last_updated_dict,
+                                 index=index,
+                                 keep_section_order=keep_section_order)
+                  for index, section in enumerate(sections)]
     await asyncio.gather(*coroutines)
 
 
-async def parse_sections(session, queue, section, base_path, site_settings, moodle_id,
-                         process_external_links, last_updated_dict):
+async def parse_sections(session,
+                         queue,
+                         section,
+                         base_path,
+                         site_settings,
+                         moodle_id,
+                         process_external_links,
+                         last_updated_dict,
+                         index=None,
+                         keep_section_order=False):
     section_name = str(section["aria-label"])
+    if keep_section_order:
+        section_name = f"[{index+1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
 
     modules = section.find_all("li", id=re.compile("module-[0-9]+"))
