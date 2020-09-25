@@ -26,7 +26,8 @@ regrex_pattern_config = ConfigList(
             ),
             "file_name": ConfigString(
                 gui_name="File Name",
-                optional=True
+                optional=True,
+                hint_text="<name> will be replaced with the file name from the website.",
             )
         }
     )
@@ -134,7 +135,8 @@ async def producer(session,
                 file_name = f"{name}.{extension}"
 
             if file_name_regrex:
-                user_file_name = re.sub(pattern, file_name_regrex, link)
+                modified_file_name_regrex = file_name_regrex.replace("<name>", name)
+                user_file_name = re.sub(pattern, modified_file_name_regrex, link)
                 if "." not in user_file_name:
                     user_file_name += f".{extension}"
                 file_name = user_file_name
@@ -167,7 +169,7 @@ async def get_all_file_links(session, url, session_kwargs):
 
         result = urljoin(url, href)
 
-        all_links.add((result, link.string))
+        all_links.add((result, str(link.string)))
 
     return all_links
 
