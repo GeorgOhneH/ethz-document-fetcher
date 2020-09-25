@@ -14,7 +14,7 @@ from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path
 from sites import polybox, one_drive
 from sites.moodle import zoom
-from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK
+from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN
 
 logger = logging.getLogger(__name__)
 
@@ -118,6 +118,21 @@ async def parse_sections(session,
 
             tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
 
+        elif mtype == MTYPE_ASSIGN:
+            instance = module.find("div", class_="activityinstance")
+            href = instance.a["href"]
+            last_updated = last_updated_dict[module_id]
+            name = str(instance.a.span.contents[0])
+
+            assign_file_tree_soup_soup = await call_function_or_cache(get_assign_files_tree,
+                                                                      last_updated,
+                                                                      session,
+                                                                      href)
+            coroutine = parse_assign_files_tree(queue=queue,
+                                                soup=assign_file_tree_soup_soup,
+                                                path=safe_path_join(base_path, name))
+            tasks.append(asyncio.ensure_future(coroutine))
+
         if process_external_links:
             for text_link in module.find_all("a"):
                 url = text_link.get("href", None)
@@ -144,6 +159,14 @@ async def get_filemanager(session, href):
 
     only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
     return BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
+
+
+async def get_assign_files_tree(session, href):
+    async with session.get(href) as response:
+        text = await response.text()
+
+    assign_files_tree = SoupStrainer("div", id=re.compile("assign_files_tree[0-9a-f]*"))
+    return BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=assign_files_tree)
 
 
 async def parse_folder(session, queue, site_settings, module, base_path, last_updated):
@@ -185,6 +208,20 @@ async def parse_folder_tree(queue, soup, folder_path, last_updated):
             name = child.span.a.find("span", recursive=False, class_="fp-filename").get_text(strip=True)
             item = {"path": safe_path_join(sub_folder_path, name), "url": url, "checksum": last_updated}
             await queue.put(item)
+
+
+async def parse_assign_files_tree(queue, soup, path):
+    for item in soup.ul.find_all("li", recursive=False):
+        date_time = str(item.find("div", class_="fileuploadsubmissiontime").string)
+        fileuploadsubmission_soup = item.find("div", class_="fileuploadsubmission")
+        name = str(fileuploadsubmission_soup.a.string)
+        url = fileuploadsubmission_soup.a["href"]
+
+        await queue.put({
+            "path": safe_path_join(path, name),
+            "url": url,
+            "checksum": date_time,
+        })
 
 
 def poly_box_wrapper(func, moodle_id):

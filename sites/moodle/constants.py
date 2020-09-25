@@ -5,6 +5,7 @@ IDP_DATA = {"idp": "https://aai-logon.ethz.ch/idp/shibboleth"}
 MTYPE_FILE = "resource"
 MTYPE_EXTERNAL_LINK = "url"
 MTYPE_DIRECTORY = "folder"
+MTYPE_ASSIGN = "assign"
 
 UPDATE_REQUEST_PAYLOAD = [{
     "index": 0,
