@@ -119,7 +119,7 @@ async def producer(session,
         if folder_regrex is None:
             folder_regrex = ""
         file_name_regrex = regrex_pattern["file_name"]
-        for link, name in links:
+        for link, html_name in links:
 
             if re.search(pattern, link) is None:
                 continue
@@ -128,24 +128,40 @@ async def producer(session,
 
             o = urlparse(link)
 
-            file_name = o.path.split("/")[-1]
-            extension = file_name.split(".")[-1]
-
-            if name:
-                file_name = f"{name}.{extension}"
-
-            if file_name_regrex:
-                modified_file_name_regrex = file_name_regrex.replace("<name>", name)
-                user_file_name = re.sub(pattern, modified_file_name_regrex, link)
-                if "." not in user_file_name:
-                    user_file_name += f".{extension}"
-                file_name = user_file_name
+            file_name = _get_file_name(url_file_name=o.path.split("/")[-1],
+                                       html_name=html_name,
+                                       file_name_regrex=file_name_regrex,
+                                       pattern=pattern,
+                                       link=link)
 
             await queue.put({
                 "url": link,
                 "path": safe_path_join(base_path, folder_name, file_name),
                 "session_kwargs": session_kwargs,
             })
+
+
+def _get_file_name(url_file_name: str,
+                   html_name: str,
+                   pattern: str,
+                   link: str,
+                   file_name_regrex: str) -> str:
+
+    extension = url_file_name.split(".")[-1]
+
+    if file_name_regrex:
+        modified_file_name_regrex = file_name_regrex.replace("<name>", html_name)
+        file_name = re.sub(pattern, modified_file_name_regrex, link)
+        if not file_name.endswith("." + extension):
+            file_name += f".{extension}"
+        return file_name
+
+    if html_name:
+        if html_name.endswith("." + extension):
+            return html_name
+        return f"{html_name}.{extension}"
+
+    return url_file_name
 
 
 async def get_all_file_links(session, url, session_kwargs):
