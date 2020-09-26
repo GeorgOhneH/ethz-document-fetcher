@@ -97,6 +97,7 @@ class Template(object):
 
         raw_function = p_kwargs.pop("function", None)
         raw_folder_function = p_kwargs.pop("folder_function", None)
+        raw_login_function = p_kwargs.pop("login_function", None)
 
         meta_data = p_kwargs.pop("meta_data", None)
 
@@ -106,6 +107,7 @@ class Template(object):
             raw_folder_name=raw_folder_name,
             raw_function=raw_function,
             raw_folder_function=raw_folder_function,
+            raw_login_function=raw_login_function,
             function_kwargs=p_kwargs,
             consumer_kwargs=consumer_kwargs,
             meta_data=meta_data,

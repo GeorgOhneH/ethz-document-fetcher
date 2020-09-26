@@ -9,15 +9,13 @@ logger = logging.getLogger(__name__)
 locks = {}
 
 
-async def login_module(session, site_settings, module):
-    if not hasattr(module, "login"):
+async def safe_login_module(session, site_settings, login_function):
+    if not callable(login_function):
+        logger.warning("login function was not callable")
         return
 
-    func = module.login
-    if not callable(func):
-        return
-
-    lock_name = module.__name__ + str(id(session))
+    func_name = login_function.__module__ + "." + login_function.__name__
+    lock_name = func_name + str(id(session))
 
     if lock_name in locks:
         lock = locks[lock_name]
@@ -26,19 +24,19 @@ async def login_module(session, site_settings, module):
         locks[lock_name] = lock
 
     async with lock:
-        if not hasattr(func, "errors"):
-            func.errors = {}
-        if id(session) not in func.errors:
-            logger.debug(f"Logging into {module.__name__}")
+        if not hasattr(login_function, "errors"):
+            login_function.errors = {}
+        if id(session) not in login_function.errors:
+            logger.debug(f"Logging into {func_name}")
             start_time = time.time()
             try:
-                await func(session=session, site_settings=site_settings)
-                logger.debug(f"Logged into {module.__name__}, time: {(time.time() - start_time):.2f}")
-                func.errors[id(session)] = False
+                await login_function(session=session, site_settings=site_settings)
+                logger.debug(f"Logged into {func_name}, time: {(time.time() - start_time):.2f}")
+                login_function.errors[id(session)] = False
             except LoginError as e:
-                func.errors[id(session)] = True
+                login_function.errors[id(session)] = True
                 raise e
-        if func.errors[id(session)]:
+        if login_function.errors[id(session)]:
             raise LoginError("Previous login was not successful")
 
 

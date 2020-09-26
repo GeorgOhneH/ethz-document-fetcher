@@ -65,73 +65,22 @@ async def parse_sections(session,
                          keep_section_order=False):
     section_name = str(section["aria-label"])
     if keep_section_order:
-        section_name = f"[{index+1:02}] {section_name}"
+        section_name = f"[{index + 1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
 
     modules = section.find_all("li", id=re.compile("module-[0-9]+"))
     tasks = []
     for module in modules:
-        mtype = module["class"][1]
-        module_id = int(re.search("module-([0-9]+)", module["id"])[1])
+        coroutine = parse_mtype(session=session,
+                                queue=queue,
+                                site_settings=site_settings,
+                                base_path=base_path,
+                                module=module,
+                                last_updated_dict=last_updated_dict,
+                                moodle_id=moodle_id,
+                                process_external_links=process_external_links)
 
-        if mtype == MTYPE_FILE:
-            instance = module.find("div", class_="activityinstance")
-            try:
-                file_name = str(instance.a.span.contents[0])
-            except AttributeError:
-                continue
-            last_updated = last_updated_dict[module_id]
-
-            with_extension = False
-            if "pdf-24" in instance.a.img["src"]:
-                file_name += ".pdf"
-                with_extension = True
-
-            url = instance.a["href"] + "&redirect=1"
-            await queue.put({"path": safe_path_join(base_path, file_name),
-                             "url": url,
-                             "with_extension": with_extension,
-                             "checksum": last_updated})
-
-        elif mtype == MTYPE_DIRECTORY:
-            last_updated = last_updated_dict[module_id]
-            coroutine = parse_folder(session, queue, site_settings, module, base_path, last_updated)
-            tasks.append(asyncio.ensure_future(coroutine))
-
-        elif mtype == MTYPE_EXTERNAL_LINK:
-            if not process_external_links:
-                continue
-
-            instance = module.find("div", class_="activityinstance")
-            url = instance.a["href"] + "&redirect=1"
-            name = str(instance.a.span.contents[0])
-
-            driver_url = await check_url_reference(session, url)
-
-            coroutine = process_link(session=session,
-                                     queue=queue,
-                                     base_path=base_path,
-                                     site_settings=site_settings,
-                                     url=driver_url,
-                                     moodle_id=moodle_id,
-                                     name=name)
-
-            tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, driver_url)))
-
-        elif mtype == MTYPE_ASSIGN:
-            instance = module.find("div", class_="activityinstance")
-            href = instance.a["href"]
-            last_updated = last_updated_dict[module_id]
-            name = str(instance.a.span.contents[0])
-
-            assign_file_tree_soup_soup = await call_function_or_cache(get_assign_files_tree,
-                                                                      last_updated,
-                                                                      session,
-                                                                      href)
-            coroutine = parse_assign_files_tree(queue=queue,
-                                                soup=assign_file_tree_soup_soup,
-                                                path=safe_path_join(base_path, name))
-            tasks.append(asyncio.ensure_future(coroutine))
+        tasks.append(asyncio.ensure_future(coroutine))
 
         if process_external_links:
             for text_link in module.find_all("a"):
@@ -151,6 +100,76 @@ async def parse_sections(session,
                 tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
 
     await asyncio.gather(*tasks)
+
+
+async def parse_mtype(session,
+                      queue,
+                      site_settings,
+                      base_path,
+                      module,
+                      last_updated_dict,
+                      moodle_id,
+                      process_external_links):
+    mtype = module["class"][1]
+    module_id = int(re.search("module-([0-9]+)", module["id"])[1])
+
+    if mtype == MTYPE_FILE:
+        instance = module.find("div", class_="activityinstance")
+        try:
+            file_name = str(instance.a.span.contents[0])
+        except AttributeError:
+            return
+        last_updated = last_updated_dict[module_id]
+
+        with_extension = False
+        if "pdf-24" in instance.a.img["src"]:
+            file_name += ".pdf"
+            with_extension = True
+
+        url = instance.a["href"] + "&redirect=1"
+        await queue.put({"path": safe_path_join(base_path, file_name),
+                         "url": url,
+                         "with_extension": with_extension,
+                         "checksum": last_updated})
+
+    elif mtype == MTYPE_DIRECTORY:
+        last_updated = last_updated_dict[module_id]
+        await parse_folder(session, queue, site_settings, module, base_path, last_updated)
+
+    elif mtype == MTYPE_EXTERNAL_LINK:
+        if not process_external_links:
+            return
+
+        instance = module.find("div", class_="activityinstance")
+        url = instance.a["href"] + "&redirect=1"
+        name = str(instance.a.span.contents[0])
+
+        driver_url = await check_url_reference(session, url)
+
+        await process_link(session=session,
+                           queue=queue,
+                           base_path=base_path,
+                           site_settings=site_settings,
+                           url=driver_url,
+                           moodle_id=moodle_id,
+                           name=name)
+
+    elif mtype == MTYPE_ASSIGN:
+        instance = module.find("div", class_="activityinstance")
+        link = instance.a
+        if link is not None:
+            href = instance.a["href"]
+            last_updated = last_updated_dict[module_id]
+            name = str(instance.a.span.contents[0])
+
+            assign_file_tree_soup_soup = await call_function_or_cache(get_assign_files_tree,
+                                                                      last_updated,
+                                                                      session,
+                                                                      href)
+
+            await parse_assign_files_tree(queue=queue,
+                                          soup=assign_file_tree_soup_soup,
+                                          path=safe_path_join(base_path, name))
 
 
 async def get_filemanager(session, href):
@@ -211,17 +230,18 @@ async def parse_folder_tree(queue, soup, folder_path, last_updated):
 
 
 async def parse_assign_files_tree(queue, soup, path):
-    for item in soup.ul.find_all("li", recursive=False):
-        date_time = str(item.find("div", class_="fileuploadsubmissiontime").string)
-        fileuploadsubmission_soup = item.find("div", class_="fileuploadsubmission")
-        name = str(fileuploadsubmission_soup.a.string)
-        url = fileuploadsubmission_soup.a["href"]
+    for assign_files_tree in soup.find_all("div", id=re.compile("assign_files_tree[0-9a-f]*")):
+        for item in assign_files_tree.ul.find_all("li", recursive=False):
+            date_time = str(item.find("div", class_="fileuploadsubmissiontime").string)
+            fileuploadsubmission_soup = item.find("div", class_="fileuploadsubmission")
+            name = str(fileuploadsubmission_soup.a.string)
+            url = fileuploadsubmission_soup.a["href"]
 
-        await queue.put({
-            "path": safe_path_join(path, name),
-            "url": url,
-            "checksum": date_time,
-        })
+            await queue.put({
+                "path": safe_path_join(path, name),
+                "url": url,
+                "checksum": date_time,
+            })
 
 
 def poly_box_wrapper(func, moodle_id):

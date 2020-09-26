@@ -12,7 +12,7 @@ from core.storage import cache
 from core.template_parser.nodes import site_configs
 from core.template_parser.nodes.base import TemplateNode
 from core.template_parser.queue_wrapper import QueueWrapper
-from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, login_module
+from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, safe_login_module
 from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
 
@@ -21,14 +21,15 @@ logger = logging.getLogger(__name__)
 
 class Site(TemplateNode):
     def __init__(self,
+                 parent,
                  raw_module_name,
                  use_folder,
                  raw_folder_name,
                  raw_function,
                  raw_folder_function,
+                 raw_login_function,
                  function_kwargs,
                  consumer_kwargs,
-                 parent,
                  **kwargs):
         super().__init__(parent=parent,
                          folder_name=raw_folder_name,
@@ -38,6 +39,7 @@ class Site(TemplateNode):
                              use_folder=use_folder,
                              raw_function=raw_function,
                              raw_folder_function=raw_folder_function,
+                             raw_login_function=raw_login_function,
                              function_kwargs=function_kwargs,
                          ),
                          use_folder=use_folder,
@@ -49,6 +51,7 @@ class Site(TemplateNode):
         self.raw_folder_name = raw_folder_name
         self.raw_function = raw_function
         self.raw_folder_function = raw_folder_function
+        self.raw_login_function = raw_login_function
 
         self.folder_module_name, self.folder_function_name = self.get_folder_module_func_name(raw_module_name,
                                                                                               raw_folder_function,
@@ -56,6 +59,8 @@ class Site(TemplateNode):
                                                                                               use_folder)
         self.module_name, self.function_name = self.get_module_func_name(raw_module_name,
                                                                          raw_function)
+        self.login_module_name, self.login_function_name = self.get_login_func_name(raw_module_name,
+                                                                                    raw_login_function)
 
     @staticmethod
     def get_unique_key_kwargs(**kwargs):
@@ -64,9 +69,17 @@ class Site(TemplateNode):
             raw_folder_name=kwargs.get("raw_folder_name"),
             use_folder=kwargs.get("use_folder"),
             raw_function=kwargs.get("raw_function"),
+            raw_login_function=kwargs.get("raw_login_function"),
             raw_folder_function=kwargs.get("raw_folder_function"),
             function_kwargs=kwargs.get("function_kwargs"),
         )
+
+    @staticmethod
+    def _import_module(module_name):
+        try:
+            return importlib.import_module(module_name)
+        except ModuleNotFoundError:
+            raise ParseTemplateError(f"Module with name: {module_name} does not exist")
 
     @staticmethod
     def get_module_func_name(raw_module_name, raw_function):
@@ -79,11 +92,7 @@ class Site(TemplateNode):
             module_name, function_name = get_module_function(raw_function)
 
         module_name = "sites." + module_name
-
-        try:
-            site_module = importlib.import_module(module_name)
-        except ModuleNotFoundError:
-            raise ParseTemplateError(f"Site module with name: {module_name} does not exist")
+        site_module = Site._import_module(module_name)
         if not hasattr(site_module, function_name):
             raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
 
@@ -103,15 +112,30 @@ class Site(TemplateNode):
 
         if folder_module_name is not None:
             folder_module_name = "sites." + folder_module_name
-            try:
-                folder_module = importlib.import_module(folder_module_name)
-            except ModuleNotFoundError:
-                raise ParseTemplateError(f"Folder module with name: {folder_module_name} does not exist")
+            folder_module = Site._import_module(folder_module_name)
             if not hasattr(folder_module, folder_function_name):
                 raise ParseTemplateError(f"Function: {folder_function_name} in module:"
                                          f" {folder_module_name} does not exist")
 
         return folder_module_name, folder_function_name
+
+    @staticmethod
+    def get_login_func_name(raw_module_name, raw_login_function):
+        if raw_login_function is None:
+            login_module_name = "sites." + raw_module_name
+            module = Site._import_module(login_module_name)
+            if hasattr(module, "login"):
+                return login_module_name, "login"
+            return None, None
+
+        raw_login_parts = raw_login_function.split(".")
+        login_module_name = "sites." + ".".join(raw_login_parts[:-1])
+        login_func_name = raw_login_parts[-1]
+        login_func_module = Site._import_module(login_module_name)
+        if not hasattr(login_func_module, login_func_name):
+            raise ParseTemplateError(f"Module {login_module_name} has not a {login_func_name} function")
+
+        return login_module_name, login_func_name
 
     def __str__(self):
         return self.module_name
@@ -123,6 +147,7 @@ class Site(TemplateNode):
             "folder_name": self.raw_folder_name,
             "function": self.raw_function,
             "folder_function": self.raw_folder_function,
+            "login_function": self.raw_login_function,
             **self.function_kwargs,
             **self.consumer_kwargs,
         }
@@ -161,6 +186,7 @@ class Site(TemplateNode):
             "raw_folder_name",
             "raw_function",
             "raw_folder_function",
+            "raw_login_function",
             "consumer_kwargs",
             "function_kwargs",
         ]
@@ -176,10 +202,11 @@ class Site(TemplateNode):
         if check_if_null(self.function_kwargs):
             raise ParseTemplateRuntimeError("Found null field")
 
-        site_module = importlib.import_module(self.module_name)
-        producer_function = getattr(site_module, self.function_name)
+        if self.login_module_name is not None:
+            login_module = importlib.import_module(self.login_module_name)
+            login_function = getattr(login_module, self.login_function_name)
 
-        await login_module(session, site_settings, site_module)
+            await safe_login_module(session, site_settings, login_function)
 
         if self.base_path is None:
             self.folder_name = await self.retrieve_folder_name(session, signal_handler)
@@ -193,6 +220,9 @@ class Site(TemplateNode):
                                      site_settings=site_settings,
                                      cancellable_pool=cancellable_pool,
                                      **self.consumer_kwargs)
+
+        site_module = importlib.import_module(self.module_name)
+        producer_function = getattr(site_module, self.function_name)
 
         coroutine = self.exception_handler(producer_function, signal_handler)(session=session,
                                                                               queue=queue_wrapper,
@@ -256,4 +286,3 @@ class Site(TemplateNode):
     def get_website_url(self):
         site_module = importlib.import_module(self.module_name)
         return getattr(site_module, "get_website_url")(**self.function_kwargs)
-
