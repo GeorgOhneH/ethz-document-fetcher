@@ -135,6 +135,21 @@ class FunctionFolderConfigString(ConfigString):
             raise ValueError(str(e))
 
 
+class FunctionLoginConfigString(ConfigString):
+    def _test(self, value, from_widget):
+        if from_widget:
+            raw_login_function = self.instance["raw_login_function"].get_from_widget()
+            raw_module_name = self.instance["raw_module_name"].get_from_widget()
+        else:
+            raw_login_function = self.instance["raw_login_function"].get()
+            raw_module_name = self.instance["raw_module_name"].get()
+
+        try:
+            nodes.Site.get_login_func_name(raw_module_name, raw_login_function)
+        except ParseTemplateError as e:
+            raise ValueError(str(e))
+
+
 def raw_folder_name_active(instance: NodeConfigs, from_widget, parent):
     if from_widget:
         use_folder = instance.get_config_obj("use_folder").get_from_widget()
@@ -170,6 +185,15 @@ def folder_function_active(instance, from_widget, parent):
     return raw_module_name == "custom" and use_folder and raw_folder_name is None
 
 
+def raw_login_function_active(instance, from_widget, parent):
+    if from_widget:
+        raw_module_name = instance.get_config_obj("raw_module_name").get_from_widget()
+    else:
+        raw_module_name = instance.get_config_obj("raw_module_name").get()
+
+    return raw_module_name in["custom", "link_collector"]
+
+
 def get_module_names():
     sites_path = os.path.join(ROOT_PATH, "sites")
     result = []
@@ -194,6 +218,9 @@ class SiteConfigs(NodeConfigs):
                                    gui_name="Folder Name", gray_out=True)
     raw_function = FunctionConfigString(active_func=raw_function_active, gui_name="Function")
     raw_folder_function = FunctionFolderConfigString(active_func=folder_function_active, gui_name="Function for Folder")
+
+    raw_login_function = FunctionLoginConfigString(optional=True, gui_name="Login Function",
+                                                   active_func=raw_login_function_active)
 
     consumer_kwargs = ConfigDict(layout={
         "allowed_extensions": ConfigListString(optional=True, gui_name="Allowed Extensions",

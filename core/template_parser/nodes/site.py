@@ -129,7 +129,7 @@ class Site(TemplateNode):
             return None, None
 
         raw_login_parts = raw_login_function.split(".")
-        login_module_name = "sites." + ".".join(raw_login_parts[:-1])
+        login_module_name = ".".join(["sites"] + raw_login_parts[:-1])
         login_func_name = raw_login_parts[-1]
         login_func_module = Site._import_module(login_module_name)
         if not hasattr(login_func_module, login_func_name):
