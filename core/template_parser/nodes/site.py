@@ -194,7 +194,7 @@ class Site(TemplateNode):
             try:
                 setattr(configs, attribute, getattr(self, attribute))
             except ValueError as e:
-                logger.debug(f"Tried to set wrong value {attribute}. Error: {str(e)}")
+                logger.debug(f"Tried to set wrong value {attribute}: {getattr(self, attribute)}. Error: {str(e)}")
 
         return configs
 
