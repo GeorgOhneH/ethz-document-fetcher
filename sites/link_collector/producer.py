@@ -196,4 +196,4 @@ async def get_folder_name(session, url, **kwargs):
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
     title = soup.find("title")
 
-    return title.string
+    return str(title.string)

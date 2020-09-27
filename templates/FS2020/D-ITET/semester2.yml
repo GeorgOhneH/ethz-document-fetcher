@@ -50,6 +50,8 @@ children:
   - module: moodle
     use_folder: true
     id: 11838
+    keep_section_order: false
+    process_external_links: true
     children:
     - module: polybox
       use_folder: true
@@ -57,6 +59,8 @@ children:
   - module: moodle
     use_folder: true
     id: 12228
+    keep_section_order: false
+    process_external_links: true
     children:
     - module: polybox
       use_folder: true
@@ -64,6 +68,8 @@ children:
   - module: moodle
     use_folder: true
     id: 12301
+    keep_section_order: false
+    process_external_links: true
     forbidden_extensions:
     - video
     children:
@@ -73,9 +79,18 @@ children:
   - module: moodle
     use_folder: true
     id: 12611
+    keep_section_order: false
+    process_external_links: true
     children:
     - module: link_collector
       use_folder: false
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: false
+        use_eth_credentials: false
+      headers: []
       regrex_patterns:
       - file_name: Serie \1
         folder: Woche \1

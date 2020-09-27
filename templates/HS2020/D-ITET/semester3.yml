@@ -1,0 +1,145 @@
+children:
+- folder: semester3
+  children:
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regrex_patterns:
+    - file_name: null
+      folder: Woche \1
+      pattern: .*material/lecture[0-9]+/ex([0-9]+).pdf
+    - file_name: null
+      folder: Woche \1
+      pattern: .*material/lecture[0-9]+/hand_notes([0-9]+).pdf
+    - file_name: null
+      folder: Woche \1
+      pattern: .*material/lecture[0-9]+/solutions([0-9]+).pdf
+    url: https://metaphor.ethz.ch/x/2020/hs/401-0353-00L/
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: moodle
+    use_folder: true
+    id: '13668'
+    keep_section_order: false
+    process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regrex_patterns:
+    - file_name: '[\1] <name>'
+      folder: Slides
+      pattern: .*slides/Info2-ITET-([0-9]+).pdf
+    - file_name: null
+      folder: Source-Dateien
+      pattern: .*downloads/u[0-9]+.zip
+    url: http://www.vs.inf.ethz.ch/edu/I2/
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: link_collector
+    use_folder: true
+    folder_name: Signal- und Systemtheorie I
+    basic_auth:
+      custom:
+        password: Fourier2020
+        username: sigsys2020
+      use: true
+      use_eth_credentials: false
+    headers: []
+    regrex_patterns:
+    - file_name: Script
+      folder: null
+      pattern: .*downloads/SST1-Vorlesung.pdf
+    - file_name: Formelsammlung
+      folder: null
+      pattern: .*formeln.pdf
+    - file_name: "\xDCbungen"
+      folder: null
+      pattern: .*downloads/SST1-Uebung.pdf
+    url: https://www.mins.ee.ethz.ch/teaching/signal/
+    allowed_extensions: []
+    forbidden_extensions: []
+    children:
+    - module: link_collector
+      use_folder: true
+      folder_name: "Alte Pr\xFCfungen"
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: false
+        use_eth_credentials: false
+      headers: []
+      regrex_patterns:
+      - file_name: "20\\1 Fr\xFChjahr"
+        folder: null
+        pattern: .*klausuren/klausur_([0-9]+)a.pdf
+      - file_name: 20\1 Sommer
+        folder: null
+        pattern: .*klausuren/klausur_([0-9]+)b.pdf
+      - file_name: "20\\1 Fr\xFChjahr L\xF6sungen"
+        folder: null
+        pattern: .*klausuren/klausur_([0-9]+)a_loes.pdf
+      - file_name: "20\\1 Sommer L\xF6sungen"
+        folder: null
+        pattern: .*klausuren/klausur_([0-9]+)a_loes.pdf
+      - file_name: Probeklausur \1
+        folder: null
+        pattern: .*klausuren/muster([0-9]+).pdf
+      - file_name: "Probeklausur \\1 L\xF6sungen"
+        folder: null
+        pattern: .*klausuren/muster([0-9]+)_loes.pdf
+      url: https://www.mins.ee.ethz.ch/teaching/signal/klausuren.html
+      allowed_extensions: []
+      forbidden_extensions: []
+  - module: moodle
+    use_folder: true
+    id: '13200'
+    keep_section_order: true
+    process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: moodle
+    use_folder: true
+    id: '13442'
+    keep_section_order: false
+    process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
+    children:
+    - module: link_collector
+      use_folder: true
+      folder_name: Slides
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: false
+        use_eth_credentials: false
+      headers: []
+      regrex_patterns:
+      - file_name: '[\1] <name>'
+        folder: null
+        pattern: .*/assets/ElectronicCircuits/lecture([0-9]+).pdf
+      - file_name: '[\1] <name>'
+        folder: null
+        pattern: .*assets/Uploads/lecture([0-9]+)-corrected.pdf
+      - file_name: null
+        folder: null
+        pattern: .*assets/ElectronicCircuits/revision.pdf
+      url: https://iis-students.ee.ethz.ch/lectures/electronic-circuits/lecture-notes/
+      allowed_extensions: []
+      forbidden_extensions: []

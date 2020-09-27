@@ -95,7 +95,7 @@ async def parse_sections(session,
                                          site_settings=site_settings,
                                          url=url,
                                          moodle_id=moodle_id,
-                                         name=name)
+                                         name=str(name))
 
                 tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
 
@@ -112,7 +112,6 @@ async def parse_mtype(session,
                       process_external_links):
     mtype = module["class"][1]
     module_id = int(re.search("module-([0-9]+)", module["id"])[1])
-
     if mtype == MTYPE_FILE:
         instance = module.find("div", class_="activityinstance")
         try:
