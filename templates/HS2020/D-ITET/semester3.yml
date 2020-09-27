@@ -55,7 +55,7 @@ children:
     basic_auth:
       custom:
         password: Fourier2020
-        username: sigsys2020
+        username: null
       use: true
       use_eth_credentials: false
     headers: []
