@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
 
+from sites.standard_config_objs import BASIC_AUTH_CONFIG, basic_auth_config_to_session_kwargs
+
 
 async def get_folder_name(session, url, **kwargs):
     async with session.get(url) as response:
@@ -18,11 +20,16 @@ async def get_folder_name(session, url, **kwargs):
     return name
 
 
-async def producer(session, queue, url, base_path, site_settings):
+async def producer(session, queue, url, base_path, site_settings, basic_auth: BASIC_AUTH_CONFIG):
+    session_kwargs = basic_auth_config_to_session_kwargs(basic_auth, site_settings)
+    await _producer(session, queue, url, base_path, session_kwargs)
+
+
+async def _producer(session, queue, url, base_path, session_kwargs):
     if url[-1] != "/":
         url += "/"
 
-    async with session.get(url) as response:
+    async with session.get(url, **session_kwargs) as response:
         html = await response.text()
 
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
@@ -41,9 +48,12 @@ async def producer(session, queue, url, base_path, site_settings):
 
         if "." in href:
             checksum = str(link.next_sibling.string).strip()
-            await queue.put({"url": url + href, "path": path, "checksum": checksum})
+            await queue.put({"url": url + href,
+                             "path": path,
+                             "session_kwargs": session_kwargs,
+                             "checksum": checksum})
         else:
-            coroutine = producer(session, queue, url + href, path, site_settings)
+            coroutine = _producer(session, queue, url + href, path, session_kwargs)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

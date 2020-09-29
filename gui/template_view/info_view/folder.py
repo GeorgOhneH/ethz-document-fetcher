@@ -68,7 +68,7 @@ class FolderInfoView(QTreeView, InfoView):
                 if os.path.isfile(path):
                     os.remove(path)
                 else:
-                    shutil.rmtree(path)
+                    shutil.rmtree(path, ignore_errors=True)
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path

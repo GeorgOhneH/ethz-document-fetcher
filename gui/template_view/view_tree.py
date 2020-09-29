@@ -57,6 +57,7 @@ class TemplateViewTree(QTreeWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.template = None
+        self._template_load_error = False
         self.init(template_path)
 
         self.read_settings()
@@ -87,9 +88,11 @@ class TemplateViewTree(QTreeWidget):
         self.header_item.reset()
         try:
             self.template.load()
+            self._template_load_error = False
         except Exception as e:
             msg = f"Error while loading the file. {e.__class__.__name__}: {e}"
             logger.error(msg, exc_info=True)
+            self._template_load_error = True
             error_dialog = QErrorMessage(self)
             error_dialog.setWindowTitle("Error")
             error_dialog.showMessage(msg)
@@ -117,6 +120,10 @@ class TemplateViewTree(QTreeWidget):
             self.header().restoreState(qsettings.value("templateViewTree/windowState"))
 
     def save_template_file(self):
+        if self._template_load_error:
+            logger.warning("Error on load. Not saving template")
+            return
+
         logger.debug("Saving Template")
         for widget in self.widgets.values():
             node = widget.template_node

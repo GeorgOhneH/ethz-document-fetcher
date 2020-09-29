@@ -82,6 +82,15 @@ class Site(TemplateNode):
             raise ParseTemplateError(f"Module with name: {module_name} does not exist")
 
     @staticmethod
+    def _test_function_exist(module, function_name):
+        if not hasattr(module, function_name):
+            raise ParseTemplateError(f"Function: {function_name} in module:"
+                                     f" {module} does not exist")
+        if not callable(getattr(module, function_name)):
+            raise ParseTemplateError(f"Function: {function_name} in module:"
+                                     f" {module} is not a function")
+
+    @staticmethod
     def get_module_func_name(raw_module_name, raw_function):
         if raw_module_name != "custom":
             module_name = raw_module_name
@@ -93,8 +102,7 @@ class Site(TemplateNode):
 
         module_name = "sites." + module_name
         site_module = Site._import_module(module_name)
-        if not hasattr(site_module, function_name):
-            raise ParseTemplateError(f"Function: {function_name} in module: {module_name} does not exist")
+        Site._test_function_exist(site_module, function_name)
 
         return module_name, function_name
 
@@ -113,9 +121,7 @@ class Site(TemplateNode):
         if folder_module_name is not None:
             folder_module_name = "sites." + folder_module_name
             folder_module = Site._import_module(folder_module_name)
-            if not hasattr(folder_module, folder_function_name):
-                raise ParseTemplateError(f"Function: {folder_function_name} in module:"
-                                         f" {folder_module_name} does not exist")
+            Site._test_function_exist(folder_module, folder_function_name)
 
         return folder_module_name, folder_function_name
 
@@ -132,8 +138,7 @@ class Site(TemplateNode):
         login_module_name = ".".join(["sites"] + raw_login_parts[:-1])
         login_func_name = raw_login_parts[-1]
         login_func_module = Site._import_module(login_module_name)
-        if not hasattr(login_func_module, login_func_name):
-            raise ParseTemplateError(f"Module {login_module_name} has not a {login_func_name} function")
+        Site._test_function_exist(login_func_module, login_func_name)
 
         return login_module_name, login_func_name
 

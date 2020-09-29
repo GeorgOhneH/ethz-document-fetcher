@@ -13,6 +13,7 @@ from core.template_parser.nodes.base import NodeConfigs
 from core.template_parser.nodes.utils import get_folder_name_from_kwargs
 from gui.constants import SITE_ICON_PATH
 from settings.config_objs import ConfigString, ConfigBool, ConfigOptions, ConfigDict, ConfigListString
+from sites.constants import POSSIBLE_LOGIN_FUNCTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +192,7 @@ def raw_login_function_active(instance, from_widget, parent):
     else:
         raw_module_name = instance.get_config_obj("raw_module_name").get()
 
-    return raw_module_name in["custom", "link_collector"]
+    return raw_module_name in POSSIBLE_LOGIN_FUNCTIONS
 
 
 def get_module_names():
