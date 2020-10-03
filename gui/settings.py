@@ -11,13 +11,11 @@ class SettingsDialog(ConfigsDialog):
         super().__init__(parent=parent)
         settings_areas = [
             ConfigsScrollArea(site_settings, parent=self),
-            ConfigsScrollArea(gui_settings, parent=self),
             ConfigsScrollArea(advanced_settings, parent=self),
         ]
         self.init(settings_areas)
         self.setWindowTitle("Settings")
 
         self.accepted.connect(lambda: site_settings.save())
-        self.accepted.connect(lambda: gui_settings.save())
         self.accepted.connect(lambda: advanced_settings.save())
 

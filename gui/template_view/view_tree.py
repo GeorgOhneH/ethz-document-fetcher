@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 
 from core import template_parser
 from gui.template_view.view_tree_item import TreeWidgetItem
+from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ class TemplateViewTree(QTreeWidget):
         self.setHeaderItem(self.header_item)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
+
         self.template = None
         self._template_load_error = False
         self.init(template_path)

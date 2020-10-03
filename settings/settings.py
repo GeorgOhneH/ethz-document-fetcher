@@ -111,4 +111,4 @@ class SiteSettings(Settings):
 
 class GUISettings(Settings):
     NAME = "GUI"
-    font_size = ConfigInt(minimum=1, maximum=99, gui_name="Font Size", require_restart=True, default=8)
+

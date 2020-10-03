@@ -90,6 +90,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(f"eth-document-fetcher {VERSION}")
         self.setCentralWidget(self.central_widget)
+
         self.read_settings()
 
         run_startup_tasks(self.central_widget.site_settings)

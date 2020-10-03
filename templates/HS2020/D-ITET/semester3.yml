@@ -1,5 +1,7 @@
 children:
 - folder: semester3
+  meta_data:
+    check_state: 2
   children:
   - module: link_collector
     use_folder: true
@@ -23,6 +25,8 @@ children:
     url: https://metaphor.ethz.ch/x/2020/hs/401-0353-00L/
     allowed_extensions: []
     forbidden_extensions: []
+    meta_data:
+      check_state: 2
   - module: moodle
     use_folder: true
     id: '13668'
@@ -30,6 +34,8 @@ children:
     process_external_links: true
     allowed_extensions: []
     forbidden_extensions: []
+    meta_data:
+      check_state: 2
   - module: link_collector
     use_folder: true
     basic_auth:
@@ -49,6 +55,8 @@ children:
     url: http://www.vs.inf.ethz.ch/edu/I2/
     allowed_extensions: []
     forbidden_extensions: []
+    meta_data:
+      check_state: 2
   - module: link_collector
     use_folder: true
     folder_name: Signal- und Systemtheorie I
@@ -72,6 +80,8 @@ children:
     url: https://www.mins.ee.ethz.ch/teaching/signal/
     allowed_extensions: []
     forbidden_extensions: []
+    meta_data:
+      check_state: 2
     children:
     - module: link_collector
       use_folder: true
@@ -105,6 +115,8 @@ children:
       url: https://www.mins.ee.ethz.ch/teaching/signal/klausuren.html
       allowed_extensions: []
       forbidden_extensions: []
+      meta_data:
+        check_state: 2
   - module: moodle
     use_folder: true
     id: '13200'
@@ -112,6 +124,8 @@ children:
     process_external_links: true
     allowed_extensions: []
     forbidden_extensions: []
+    meta_data:
+      check_state: 2
   - module: moodle
     use_folder: true
     id: '13442'
@@ -119,6 +133,8 @@ children:
     process_external_links: true
     allowed_extensions: []
     forbidden_extensions: []
+    meta_data:
+      check_state: 2
     children:
     - module: link_collector
       use_folder: true
@@ -143,3 +159,5 @@ children:
       url: https://iis-students.ee.ethz.ch/lectures/electronic-circuits/lecture-notes/
       allowed_extensions: []
       forbidden_extensions: []
+      meta_data:
+        check_state: 2

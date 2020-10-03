@@ -17,6 +17,7 @@ from gui.template_view import TemplateView
 from gui.worker import Worker
 from settings.config_objs.path import open_file_picker
 from settings.settings import SiteSettings, TemplatePathSettings
+from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 class CentralWidget(QWidget):
     def __init__(self, actions, parent=None):
         super().__init__(parent=parent)
+
         self.actions = actions
         self.start_time = time.time()
         self.thread_finished_open_file_func = None

@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import *
 
 from core.storage import cache
 from gui.constants import ASSETS_PATH
+from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 
@@ -300,10 +301,11 @@ class TreeWidgetItemName(QWidget):
 
         self.text = QLabel(name)
         self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        size = self.text.fontMetrics().height()
+
+        size = self.fontMetrics().height()
 
         self.icon = QLabel()
-        pixmap = icon.pixmap(QSize(size*0.9, size*0.9))
+        pixmap = icon.pixmap(QSize(size, size))
         self.icon.setPixmap(pixmap)
         self.icon.setMask(pixmap.mask())
         self.icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)

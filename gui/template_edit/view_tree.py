@@ -9,6 +9,7 @@ from core.template_parser.nodes import Folder, Site
 from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
 from gui.template_edit.view_tree_item import TreeEditWidgetItem
+from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class TemplateEditViewTree(QTreeWidget):
 
         size = self.fontMetrics().height()
 
-        self.setIconSize(QSize(size*0.9, size*0.9))
+        self.setIconSize(QSize(size, size))
 
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
