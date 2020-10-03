@@ -1,0 +1,100 @@
+children:
+- folder: semester1
+  children:
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regrex_patterns:
+    - file_name: Notes \3-\2-\1
+      folder: Notes
+      pattern: .*notes-([0-9]+)-([0-9]+)-([0-9]+).pdf
+    - file_name: \1 Serie
+      folder: Serien
+      pattern: .*ex/ex([0-9]+).pdf
+    - file_name: "\\1 Musterl\xF6sung"
+      folder: Serien
+      pattern: .*ex/ml([0-9]+).pdf
+    - file_name: "\\1 Schnell\xFCbung"
+      folder: "Schnell\xFCbungen"
+      pattern: .*ex/su([0-9]+).pdf
+    - file_name: "\\1 Schnell\xFCbung L\xF6sungen"
+      folder: "Schnell\xFCbungen"
+      pattern: .*ex/lsu([0-9]+).pdf
+    url: https://metaphor.ethz.ch/x/2020/hs/401-0231-10L/
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: link_collector
+    use_folder: true
+    folder_name: Digitaltechnik
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regrex_patterns:
+    - file_name: null
+      folder: "\xDCbung \\1"
+      pattern: .*assets/Digitaltechnik/2020/Uebung/U([0-9]+).pdf
+    - file_name: null
+      folder: "\xDCbung \\1"
+      pattern: .*assets/Digitaltechnik/2020/Uebung/Mulo([0-9]+).pdf
+    url: https://iis-students.ee.ethz.ch/lectures/digital-circuits/uebungen/
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regrex_patterns:
+    - file_name: null
+      folder: Woche \1
+      pattern: .*ex/serie([0-9]+).pdf
+    - file_name: null
+      folder: Woche \1
+      pattern: .*ex/matlab_serie([0-9]+).zip
+    - file_name: null
+      folder: Woche \1
+      pattern: .*ex/serie([0-9]+)SOL.pdf
+    url: https://metaphor.ethz.ch/x/2020/hs/401-0151-00L/
+    allowed_extensions: []
+    forbidden_extensions: []
+    children:
+    - module: nethz
+      use_folder: true
+      folder_name: Vorlesungsnotizen
+      basic_auth:
+        custom:
+          password: null
+          username: student
+        use: true
+        use_eth_credentials: false
+      url: http://www.sam.math.ethz.ch/~gradinar/Teaching/LinAlgITET//LectureNotes/HS20/
+      allowed_extensions: []
+      forbidden_extensions: []
+  - module: moodle
+    use_folder: true
+    id: '12747'
+    keep_section_order: false
+    process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: moodle
+    use_folder: true
+    id: '13280'
+    keep_section_order: false
+    process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
