@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 
 from core.constants import VERSION
 from core.utils import get_latest_version, user_statistics
-from settings import global_settings
+from settings import advanced_settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ DOWNLOAD_RELEASE_URL = "https://github.com/GeorgOhneH/ethz-document-fetcher/rele
 def run_startup_tasks(site_settings):
     send_user_stats = SendUserStats(site_settings.username)
     QThreadPool.globalInstance().start(send_user_stats)
-    if global_settings.check_for_updates:
+    if advanced_settings.check_for_updates:
         check_for_update = CheckForUpdate()
         QThreadPool.globalInstance().start(check_for_update)
 

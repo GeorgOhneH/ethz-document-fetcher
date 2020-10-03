@@ -21,12 +21,14 @@ class DownloadSpeedWidget(QWidget):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(self.layout)
 
-        self.icon = QSvgWidget()
-        self.icon.load(os.path.join(ASSETS_PATH, "speed_download.svg"))
-        self.icon.setFixedSize(13, 13)
-
         self.text = QLabel()
         self.set_text()
+
+        size = self.text.fontMetrics().height()
+
+        self.icon = QSvgWidget()
+        self.icon.load(os.path.join(ASSETS_PATH, "speed_download.svg"))
+        self.icon.setFixedSize(size*0.7, size*0.7)
 
         self.layout.addWidget(self.icon)
         self.layout.addWidget(self.text)

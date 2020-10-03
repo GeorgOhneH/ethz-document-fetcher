@@ -5,14 +5,14 @@ import sys
 from PyQt5.QtCore import *
 from colorama import Fore, Style
 
-from settings import global_settings
+from settings import advanced_settings
 
 
 def setup_logger():
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
 
-    loglevel = global_settings.loglevel if global_settings.loglevel in ["ERROR", "WARNING", "INFO", "DEBUG"] else "INFO"
+    loglevel = advanced_settings.loglevel if advanced_settings.loglevel in ["ERROR", "WARNING", "INFO", "DEBUG"] else "INFO"
 
     console_basic_fmt = AnsiColouredFormatter("%(levelname)s: %(message)s")
     console_debug_fmt = AnsiColouredFormatter("%(levelname)s: %(asctime)s - %(name)s - %(message)s")

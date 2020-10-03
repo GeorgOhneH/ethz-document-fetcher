@@ -6,7 +6,7 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
-from urllib.parse import unquote, quote
+from urllib.parse import unquote, quote, urlparse
 
 from bs4 import BeautifulSoup
 
@@ -19,7 +19,7 @@ from sites.polybox.constants import *
 logger = logging.getLogger(__name__)
 
 
-async def login(session, poly_id, password, **kwargs):
+async def login_folder(session, poly_id, password, **kwargs):
     auth_url = INDEX_URL + f"{poly_id}/authenticate"
 
     async with session.get(auth_url) as response:
@@ -35,15 +35,25 @@ async def login(session, poly_id, password, **kwargs):
     async with session.post(auth_url, data=data) as response:
         await response.text()
 
+async def login_user(session, site_settings):
+    data = {
+        "requesttoken": requesttoken,
+        "password": password,
+    }
+    async with session.post(auth_url, data=data) as response:
+        await response.text()
 
-async def authenticate(session, poly_id, password):
+
+async def authenticate(session, site_settings, poly_type, poly_id, password):
     poly_id_with_null = poly_id + ":null"
 
     headers = copy.copy(BASIC_HEADER)
     headers["Authorization"] = f"Basic {base64.b64encode(poly_id_with_null.encode('utf-8')).decode('utf-8')}"
 
+    if poly_type == "f":
+        await login_user(session, site_settings)
     if password is not None:
-        await login(session, poly_id, password)
+        await login_folder(session, poly_id, password)
 
     return headers
 
@@ -66,13 +76,14 @@ async def get_folder_name(session, id, password=None):
         return f"Polybox - {author}"
 
 
-async def producer(session, queue, base_path, site_settings, id, password=None):
-    poly_id = id
+async def producer(session, queue, base_path, site_settings, url, password=None):
+    o = urlparse(url)
+    _, poly_type, poly_id = o.path.strip().strip("/").split("/")
     tasks = []
     # We create a new session, because polybox doesn't work
     # when you jump around with the same session
     async with MonitorSession(raise_for_status=True, signals=session.signals) as session:
-        headers = await authenticate(session, poly_id, password)
+        headers = await authenticate(session, site_settings, poly_type, poly_id, password)
 
         async with session.request("PROPFIND", url=WEBDAV_URL, data=PROPFIND_DATA, headers=headers) as response:
             xml = await response.text()

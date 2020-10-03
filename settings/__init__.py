@@ -2,6 +2,7 @@ import atexit
 
 from settings import utils
 from settings.config_objs import ConfigPath
-from settings.settings import GlobalSettings
+from settings.settings import AdvancedSettings, GUISettings
 
-global_settings = GlobalSettings()
+advanced_settings = AdvancedSettings()
+gui_settings = GUISettings()

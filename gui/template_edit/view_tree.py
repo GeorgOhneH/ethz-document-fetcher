@@ -24,6 +24,10 @@ class TemplateEditViewTree(QTreeWidget):
         self.setColumnCount(2)
         self.setHeaderLabels(["Name", "Folder Name"])
 
+        size = self.fontMetrics().height()
+
+        self.setIconSize(QSize(size*0.9, size*0.9))
+
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.setDragDropMode(QAbstractItemView.InternalMove)

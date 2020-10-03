@@ -8,6 +8,7 @@ PROPFIND_DATA = """<?xml version="1.0"?>
 
 WEBDAV_URL = "https://polybox.ethz.ch/public.php/webdav/"
 INDEX_URL = "https://polybox.ethz.ch/index.php/s/"
+LOGIN_USER_URL = "https://polybox.ethz.ch/index.php/login/"
 
 BASIC_HEADER = {
     "Content-Type": "application/xml; charset=utf-8",

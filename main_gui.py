@@ -9,6 +9,7 @@ import colorama
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 try:
     from PyQt5.QtWinExtras import QtWin
@@ -21,7 +22,7 @@ import gui.main_window
 from gui.constants import ASSETS_PATH
 from core.constants import IS_FROZEN
 from settings.logger import setup_logger
-from settings import global_settings
+from settings import advanced_settings, gui_settings
 
 colorama.init()
 
@@ -34,11 +35,16 @@ def except_hook(cls, exception, traceback):
 
 
 if __name__ == "__main__":
-    if not IS_FROZEN and global_settings.loglevel == "DEBUG":
+    if not IS_FROZEN and advanced_settings.loglevel == "DEBUG":
         sys.excepthook = except_hook
-    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
 
     app = QApplication(sys.argv)
+    font = app.font()
+    font.setPointSizeF(gui_settings.font_size)
+    app.setFont(font)
+
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 
     main_window = gui.main_window.MainWindow()

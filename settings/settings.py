@@ -67,7 +67,7 @@ class Settings(Configs, metaclass=SettingBase):
                     f.write(f"{config_obj.name}{SEPARATOR}{string}\n")
 
 
-class GlobalSettings(Settings):
+class AdvancedSettings(Settings):
     NAME = "Advanced"
     loglevel = ConfigOptions(default="DEBUG",
                              options=["ERROR", "WARNING", "INFO", "DEBUG"],
@@ -107,3 +107,8 @@ class SiteSettings(Settings):
                            hint_text="0 for unlimited")
     conn_limit_per_host = ConfigInt(minimum=0, default=5, gui_name="Maximum Number of Connections per Host",
                                     hint_text="0 for unlimited")
+
+
+class GUISettings(Settings):
+    NAME = "GUI"
+    font_size = ConfigInt(minimum=1, maximum=99, gui_name="Font Size", require_restart=True, default=8)

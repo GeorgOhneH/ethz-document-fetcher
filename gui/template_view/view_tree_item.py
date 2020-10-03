@@ -298,15 +298,15 @@ class TreeWidgetItemName(QWidget):
 
         self.state_check_changed = self.check_box.stateChanged
 
+        self.text = QLabel(name)
+        self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        size = self.text.fontMetrics().height()
+
         self.icon = QLabel()
-        pixmap = icon.pixmap(QSize(15, 15))
+        pixmap = icon.pixmap(QSize(size*0.9, size*0.9))
         self.icon.setPixmap(pixmap)
         self.icon.setMask(pixmap.mask())
         self.icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-
-        self.text = QLabel(name)
-        self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        size = self.text.minimumSizeHint().height()
 
         self.stateWidget = QStackedWidget()
         self.stateWidget.setMaximumSize(size, size)
