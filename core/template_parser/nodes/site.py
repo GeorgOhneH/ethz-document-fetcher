@@ -214,7 +214,9 @@ class Site(TemplateNode):
             await safe_login_module(session, site_settings, login_function)
 
         if self.base_path is None:
-            self.folder_name = await self.retrieve_folder_name(session, signal_handler)
+            self.folder_name = await self.retrieve_folder_name(session=session,
+                                                               signal_handler=signal_handler,
+                                                               site_settings=site_settings)
 
             self.base_path = safe_path_join(self.parent.base_path, self.folder_name)
             signal_handler.update_base_path(self.unique_key, self.base_path)
@@ -236,7 +238,7 @@ class Site(TemplateNode):
                                                                               **self.function_kwargs)
         producers.append(asyncio.ensure_future(coroutine))
 
-    async def retrieve_folder_name(self, session, signal_handler):
+    async def retrieve_folder_name(self, session, signal_handler, site_settings):
         if self.folder_name is not None or self.folder_module_name is None:
             return self.folder_name
 
@@ -244,7 +246,7 @@ class Site(TemplateNode):
         function = getattr(folder_module, self.folder_function_name)
         logger.debug(f"Calling folder function: {function.__module__}."
                      f"{function.__name__}<{dict_to_string(self.function_kwargs)}>")
-        folder_name = await function(session=session, **self.function_kwargs)
+        folder_name = await function(session=session, site_settings=site_settings, **self.function_kwargs)
 
         folder_name_cache = cache.get_json("folder_name")
         folder_name_cache[self.kwargs_hash] = folder_name
