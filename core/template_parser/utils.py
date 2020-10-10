@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 locks = {}
 
 
-async def safe_login_module(session, site_settings, login_function):
+async def safe_login_module(session, site_settings, login_function, function_kwargs):
     if not callable(login_function):
         logger.warning("login function was not callable")
         return
@@ -30,7 +30,7 @@ async def safe_login_module(session, site_settings, login_function):
             logger.debug(f"Logging into {func_name}")
             start_time = time.time()
             try:
-                await login_function(session=session, site_settings=site_settings)
+                await login_function(session=session, site_settings=site_settings, **function_kwargs)
                 logger.debug(f"Logged into {func_name}, time: {(time.time() - start_time):.2f}")
                 login_function.errors[id(session)] = False
             except LoginError as e:

@@ -211,7 +211,7 @@ class Site(TemplateNode):
             login_module = importlib.import_module(self.login_module_name)
             login_function = getattr(login_module, self.login_function_name)
 
-            await safe_login_module(session, site_settings, login_function)
+            await safe_login_module(session, site_settings, login_function, self.function_kwargs)
 
         if self.base_path is None:
             self.folder_name = await self.retrieve_folder_name(session=session,

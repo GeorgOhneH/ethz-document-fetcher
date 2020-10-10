@@ -2,7 +2,7 @@ from sites import aai_logon
 from sites.ilias.constants import *
 
 
-async def login(session, site_settings):
+async def login(session, site_settings, **kwargs):
     async with session.get(LOGIN_URL) as response:
         response_url = response.url
         # We read the response, because on some system we get

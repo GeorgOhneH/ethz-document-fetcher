@@ -6,6 +6,7 @@ PROPFIND_DATA = """<?xml version="1.0"?>
     </a:prop>
 </a:propfind>"""
 
+BASE_URL = "https://polybox.ethz.ch"
 WEBDAV_PUBLIC_URL = "https://polybox.ethz.ch/public.php/webdav/"
 WEBDAV_REMOTE_URL = "https://polybox.ethz.ch/remote.php/webdav/"
 INDEX_URL = "https://polybox.ethz.ch/index.php/"

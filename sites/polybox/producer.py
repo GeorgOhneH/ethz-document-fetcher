@@ -9,17 +9,19 @@ from pathlib import PurePath
 from urllib.parse import unquote, quote, urlparse
 
 from bs4 import BeautifulSoup
+from aiohttp import BasicAuth
 
 from core.constants import BEAUTIFUL_SOUP_PARSER
-from core.downloader import download_if_not_exist
 from core.monitor import MonitorSession
 from core.utils import safe_path_join
-from settings.config_objs import ConfigOptions
+from core.storage.utils import call_function_or_cache
+from settings.config_objs import ConfigOptions, ConfigString
 from sites.polybox.constants import *
 
 logger = logging.getLogger(__name__)
 
 poly_type_config = ConfigOptions(default="s", options=["s", "f"], optional=True)
+poly_id_config = ConfigString(gui_name="Id")
 
 
 async def login_folder(session, poly_type, poly_id, password, **kwargs):
@@ -36,7 +38,7 @@ async def login_folder(session, poly_type, poly_id, password, **kwargs):
         "password": password,
     }
     async with session.post(auth_url, data=data) as response:
-        await response.text()
+        pass
 
 
 async def login_user(session, site_settings):
@@ -55,112 +57,166 @@ async def login_user(session, site_settings):
     async with session.post(LOGIN_USER_URL, data=data) as response:
         pass
 
-    return {"requesttoken": requesttoken}
 
-
-async def authenticate(session, site_settings, poly_type, poly_id, password):
-    if poly_type == "f":
-        headers = copy.copy(BASIC_HEADER)
-        headers.update(await login_user(session, site_settings))
+async def _get_dire_path_unsafe(session, site_settings, poly_type, poly_id):
+    logger.debug("Calling _get_dire_path_unsafe")
+    async with MonitorSession(raise_for_status=True, signals=session.signals) as new_session:
+        await login_user(new_session, site_settings)
 
         url = INDEX_URL + poly_type + "/" + poly_id
-
-        async with session.get(url=url) as response:
+        async with new_session.get(url=url) as response:
             dir_path = response.url.query["dir"]
 
-        return f"{USER_WEBDAV_URL}{site_settings.username}{dir_path}", headers
-
-    else:
-        poly_id_with_null = poly_id + ":null"
-
-        headers = copy.copy(BASIC_HEADER)
-        headers["Authorization"] = f"Basic {base64.b64encode(poly_id_with_null.encode('utf-8')).decode('utf-8')}"
-
-        if password is not None:
-            await login_folder(session, poly_type, poly_id, password)
-
-        return WEBDAV_PUBLIC_URL, headers
+        return dir_path
 
 
-async def get_folder_name(session, site_settings, id, poly_type="s", password=None):
-    poly_id = id
-    async with MonitorSession(raise_for_status=True, signals=session.signals) as session:
-        await authenticate(session=session,
-                           site_settings=site_settings,
-                           poly_type=poly_type,
-                           poly_id=poly_id,
-                           password=password)
-
-        url = INDEX_URL + poly_type + "/" + poly_id
-
-        async with session.get(url=url) as response:
-            html = await response.text()
-            if poly_type == "f":
-                return _url_to_name(response.url)
-
-        soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
-
-        data_info = soup.body.header.div
-        author = " ".join(data_info["data-owner-display-name"].split(" ")[:2])
-        name = data_info["data-name"]
-        return f"Polybox - {author}"
+async def _get_dir_path(session, site_settings, poly_type, poly_id):
+    identifier = poly_id + site_settings.username
+    return await call_function_or_cache(func=_get_dire_path_unsafe,
+                                        identifier=identifier,
+                                        session=session,
+                                        site_settings=site_settings,
+                                        poly_type=poly_type,
+                                        poly_id=poly_id)
 
 
-async def producer(session, queue, base_path, site_settings, id, poly_type: poly_type_config = "s", password=None):
-    poly_id = id
-    tasks = []
+async def get_folder_name(session, site_settings, poly_id, poly_type="s", password=None):
     # We create a new session, because polybox doesn't work
     # when you jump around with the same session
     async with MonitorSession(raise_for_status=True, signals=session.signals) as session:
-        url, headers = await authenticate(session=session,
-                                          site_settings=site_settings,
-                                          poly_type=poly_type,
-                                          poly_id=poly_id,
-                                          password=password)
+        if poly_type == "s":
+            return await _get_folder_name_s(session=session,
+                                            poly_type=poly_type,
+                                            poly_id=poly_id,
+                                            password=password)
+        elif poly_type == "f":
+            return await _get_folder_name_f(session=session,
+                                            site_settings=site_settings,
+                                            poly_type=poly_type,
+                                            poly_id=poly_id)
+        else:
+            raise ValueError(f"poly_type value: {poly_type} not allowed")
 
-        async with session.request("PROPFIND", url=url, data=PROPFIND_DATA, headers=headers) as response:
-            xml = await response.text()
 
-            base_url = unquote(str(response.url).replace("https://polybox.ethz.ch/remote.php/dav/", ""))
+async def _get_folder_name_s(session, poly_type, poly_id, password=None):
+    if password is not None:
+        await login_folder(session, poly_type, poly_id, password)
 
-        tree = ET.fromstring(xml)
+    url = INDEX_URL + poly_type + "/" + poly_id
 
-        for response in tree:
-            href = go_down_tree(response, "d:href", to_text=True)
-            prop = go_down_tree(response, "d:propstat", "d:prop")
-            checksum = go_down_tree(prop, "oc:checksums", "oc:checksum", to_text=True)
-            contenttype = go_down_tree(prop, "d:getcontenttype", to_text=True)
-            if contenttype is None:
-                continue
+    async with session.get(url=url) as response:
+        html = await response.text()
 
-            path = PurePath(unquote(href))
-            path = safe_path_join("", *path.parts[3:])
+    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 
-            if not path:
-                raise ValueError("Can not download single file")
+    data_info = soup.body.header.div
+    author = " ".join(data_info["data-owner-display-name"].split(" ")[:2])
+    name = data_info["data-name"]
+    return f"Polybox - {author}"
 
-            files = os.path.basename(href)
 
-            if poly_type == "f":
-                url = WEBDAV_REMOTE_URL + path.replace("\\", "/").replace(f"files/{site_settings.username}/", "")
-                print(path, base_url)
-                print(re.sub(f".*{base_url}", "", path.replace("\\", "/")))
-                print("\\".join(path.replace("\\", "/").replace(base_url, "").split("/")))
-                absolute_path = os.path.join(base_path,  "\\".join(path.replace("\\", "/").replace(base_url, "").split("/")))
-                print(absolute_path)
-            else:
-                url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
-                url = f"{INDEX_URL}{poly_type}/{poly_id}/download?files={files}&path={url_path}"
-                absolute_path = os.path.join(base_path, path)
+async def _get_folder_name_f(session, site_settings, poly_type, poly_id):
+    await login_user(session, site_settings)
 
-            if password is not None or poly_type == "f":
-                coroutine = download_if_not_exist(session, path=absolute_path, url=url,
-                                                  checksum=checksum, **queue.consumer_kwargs)
-                tasks.append(asyncio.ensure_future(coroutine))
-            else:
-                await queue.put({"url": url, "path": absolute_path, "checksum": checksum})
+    url = INDEX_URL + poly_type + "/" + poly_id
 
-        await asyncio.gather(*tasks)
+    async with session.get(url=url) as response:
+        folder_name = response.url.query["dir"].split("/")[-1]
+
+    if folder_name:
+        return folder_name
+
+    return "Polybox Root Folder"
+
+
+async def producer(session,
+                   queue,
+                   base_path,
+                   site_settings,
+                   poly_id: poly_id_config,
+                   poly_type: poly_type_config = "s",
+                   password=None):
+    if poly_type == "f":
+        await _producer_f(session=session,
+                          queue=queue,
+                          base_path=base_path,
+                          site_settings=site_settings,
+                          poly_type=poly_type,
+                          poly_id=poly_id)
+    elif poly_type == "s":
+        await _producer_s(session=session,
+                          queue=queue,
+                          base_path=base_path,
+                          poly_id=poly_id,
+                          password=password)
+    else:
+        raise ValueError(f"poly_type value: {poly_type} not allowed")
+
+
+async def _producer_s(session, queue, base_path, poly_id, password):
+    auth = BasicAuth(login=poly_id,
+                     password="null" if password is None else password)
+
+    await _parse_tree(session=session,
+                      queue=queue,
+                      base_path=base_path,
+                      url=WEBDAV_PUBLIC_URL,
+                      auth=auth)
+
+
+async def _producer_f(session, queue, base_path, site_settings, poly_type, poly_id):
+    dir_path = await _get_dir_path(session=session,
+                                   site_settings=site_settings,
+                                   poly_type=poly_type,
+                                   poly_id=poly_id)
+
+    cut_parts_num = 5 + len([x for x in dir_path.split("/") if x.strip() != ""])
+
+    url = f"{USER_WEBDAV_URL}{site_settings.username}{dir_path}"
+
+    auth = BasicAuth(login=site_settings.username,
+                     password=site_settings.password)
+
+    await _parse_tree(session=session,
+                      queue=queue,
+                      base_path=base_path,
+                      url=url,
+                      auth=auth,
+                      cut_parts_num=cut_parts_num)
+
+
+async def _parse_tree(session, queue, base_path, url, auth, cut_parts_num=3):
+    tasks = []
+
+    async with session.request("PROPFIND", url=url, data=PROPFIND_DATA, headers=BASIC_HEADER, auth=auth) as response:
+        xml = await response.text()
+
+    tree = ET.fromstring(xml)
+
+    for response in tree:
+        href = go_down_tree(response, "d:href", to_text=True)
+        prop = go_down_tree(response, "d:propstat", "d:prop")
+        checksum = go_down_tree(prop, "oc:checksums", "oc:checksum", to_text=True)
+        contenttype = go_down_tree(prop, "d:getcontenttype", to_text=True)
+        if contenttype is None:
+            continue
+
+        path = PurePath(unquote(href))
+        path = safe_path_join("", *path.parts[cut_parts_num:])
+
+        if not path:
+            raise ValueError("Can not download single file")
+
+        url = BASE_URL + href
+        absolute_path = os.path.join(base_path, path)
+
+        await queue.put({"url": url,
+                         "path": absolute_path,
+                         "checksum": checksum,
+                         "session_kwargs": {"auth": auth},
+                         })
+
+    await asyncio.gather(*tasks)
 
 
 def go_down_tree(tree, *args, to_text=False):
@@ -176,7 +232,3 @@ def go_down_tree(tree, *args, to_text=False):
     if to_text:
         return tree.text
     return tree
-
-
-def _url_to_name(url):
-    return url.query["dir"].split("/")[-1]
