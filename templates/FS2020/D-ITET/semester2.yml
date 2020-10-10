@@ -46,7 +46,7 @@ children:
     - module: polybox
       use_folder: true
       folder_name: NuS2 Podcast
-      id: SU2lkCtdoLH3X1w
+      poly_id: SU2lkCtdoLH3X1w
   - module: moodle
     use_folder: true
     id: 11838
@@ -55,7 +55,7 @@ children:
     children:
     - module: polybox
       use_folder: true
-      id: 4YGUCHIXorTsvVL
+      poly_id: 4YGUCHIXorTsvVL
   - module: moodle
     use_folder: true
     id: 12228
@@ -64,7 +64,7 @@ children:
     children:
     - module: polybox
       use_folder: true
-      id: iSYMs1nnDAzDWtU
+      poly_id: iSYMs1nnDAzDWtU
   - module: moodle
     use_folder: true
     id: 12301
@@ -110,7 +110,7 @@ children:
       url: https://n.ethz.ch/~cdirren/downloads/Analysis_2/
     - module: polybox
       use_folder: true
-      id: C8LWUyvLRUbh3zX
+      poly_id: C8LWUyvLRUbh3zX
   - module: custom
     use_folder: true
     folder_name: Computer Science  D-ITET  SS 20
