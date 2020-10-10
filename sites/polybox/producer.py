@@ -121,6 +121,8 @@ async def producer(session, queue, base_path, site_settings, id, poly_type: poly
         async with session.request("PROPFIND", url=url, data=PROPFIND_DATA, headers=headers) as response:
             xml = await response.text()
 
+            base_url = unquote(str(response.url).replace("https://polybox.ethz.ch/remote.php/dav/", ""))
+
         tree = ET.fromstring(xml)
 
         for response in tree:
@@ -141,7 +143,11 @@ async def producer(session, queue, base_path, site_settings, id, poly_type: poly
 
             if poly_type == "f":
                 url = WEBDAV_REMOTE_URL + path.replace("\\", "/").replace(f"files/{site_settings.username}/", "")
-                absolute_path = os.path.join(base_path,  "\\".join(path.split("\\")[4:]))
+                print(path, base_url)
+                print(re.sub(f".*{base_url}", "", path.replace("\\", "/")))
+                print("\\".join(path.replace("\\", "/").replace(base_url, "").split("/")))
+                absolute_path = os.path.join(base_path,  "\\".join(path.replace("\\", "/").replace(base_url, "").split("/")))
+                print(absolute_path)
             else:
                 url_path = quote(os.path.join("/", os.path.dirname(path)).replace("\\", "/")).replace("/", "%2F")
                 url = f"{INDEX_URL}{poly_type}/{poly_id}/download?files={files}&path={url_path}"
