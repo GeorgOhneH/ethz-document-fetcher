@@ -11,6 +11,7 @@ ethz-document-fetcher is a program which can fetch and organise all files from e
  * nethz
  * ilias
  * moodle
+ * dropbox
  
  Existing files from other sites will **not** be updated.
 
