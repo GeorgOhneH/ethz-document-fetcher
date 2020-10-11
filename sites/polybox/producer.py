@@ -41,43 +41,13 @@ async def login_folder(session, poly_type, poly_id, password, **kwargs):
         pass
 
 
-async def login_user(session, site_settings):
-    async with session.get(LOGIN_USER_URL) as response:
-        auth_html = await response.text()
+async def _get_dire_path(session, site_settings, poly_type, poly_id):
+    url = INDEX_URL + poly_type + "/" + poly_id
+    auth = BasicAuth(login=site_settings.username, password=site_settings.password)
+    async with session.get(url=url, auth=auth) as response:
+        dir_path = response.url.query["dir"]
 
-    match = re.search("""<input type="hidden" name="requesttoken" value="(.*)">""", auth_html)
-    requesttoken = match.group(1)
-    data = {
-        "user": site_settings.username,
-        "password": site_settings.password,
-        "timezone-offset": "2",
-        "timezone": "Europe/Berlin",
-        "requesttoken": requesttoken,
-    }
-    async with session.post(LOGIN_USER_URL, data=data) as response:
-        pass
-
-
-async def _get_dire_path_unsafe(session, site_settings, poly_type, poly_id):
-    logger.debug("Calling _get_dire_path_unsafe")
-    async with MonitorSession(raise_for_status=True, signals=session.signals) as new_session:
-        await login_user(new_session, site_settings)
-
-        url = INDEX_URL + poly_type + "/" + poly_id
-        async with new_session.get(url=url) as response:
-            dir_path = response.url.query["dir"]
-
-        return dir_path
-
-
-async def _get_dir_path(session, site_settings, poly_type, poly_id):
-    identifier = poly_id + site_settings.username
-    return await call_function_or_cache(func=_get_dire_path_unsafe,
-                                        identifier=identifier,
-                                        session=session,
-                                        site_settings=site_settings,
-                                        poly_type=poly_type,
-                                        poly_id=poly_id)
+    return dir_path
 
 
 async def get_folder_name(session, site_settings, poly_id, poly_type="s", password=None):
@@ -116,12 +86,11 @@ async def _get_folder_name_s(session, poly_type, poly_id, password=None):
 
 
 async def _get_folder_name_f(session, site_settings, poly_type, poly_id):
-    await login_user(session, site_settings)
-
-    url = INDEX_URL + poly_type + "/" + poly_id
-
-    async with session.get(url=url) as response:
-        folder_name = response.url.query["dir"].split("/")[-1]
+    dire_path = await _get_dire_path(session=session,
+                                     site_settings=site_settings,
+                                     poly_type=poly_type,
+                                     poly_id=poly_id)
+    folder_name = dire_path.split("/")[-1]
 
     if folder_name:
         return folder_name
@@ -165,10 +134,10 @@ async def _producer_s(session, queue, base_path, poly_id, password):
 
 
 async def _producer_f(session, queue, base_path, site_settings, poly_type, poly_id):
-    dir_path = await _get_dir_path(session=session,
-                                   site_settings=site_settings,
-                                   poly_type=poly_type,
-                                   poly_id=poly_id)
+    dir_path = await _get_dire_path(session=session,
+                                    site_settings=site_settings,
+                                    poly_type=poly_type,
+                                    poly_id=poly_id)
 
     cut_parts_num = 5 + len([x for x in dir_path.split("/") if x.strip() != ""])
 
