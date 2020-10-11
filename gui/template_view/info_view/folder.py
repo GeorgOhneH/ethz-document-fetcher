@@ -116,8 +116,12 @@ class FolderInfoView(QTreeView, InfoView):
         if file_info.isFile():
             open_file_action = menu.addAction("Open File")
             open_file_action.triggered.connect(lambda: self.open_file(file_info.filePath()))
-        open_folder_action = menu.addAction("Open Folder")
-        open_folder_action.triggered.connect(lambda: self.open_folder(file_info.filePath()))
+            open_folder_action = menu.addAction("Open Folder")
+            open_folder_action.triggered.connect(lambda: self.open_folder(file_info.filePath()))
+        else:
+            open_folder_action = menu.addAction("Open Folder")
+            open_folder_action.triggered.connect(lambda: self.open_file(file_info.filePath()))
+
         menu.addSeparator()
 
         delete_action = menu.addAction("Delete")
