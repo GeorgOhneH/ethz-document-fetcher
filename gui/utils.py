@@ -1,3 +1,6 @@
+from PyQt5.QtCore import QSettings
+from PyQt5.QtWidgets import QApplication
+
 
 def format_bytes(size):
     power = 2 ** 10
@@ -7,3 +10,44 @@ def format_bytes(size):
         size /= power
         n += 1
     return f"{size:.1f} {power_labels[n] + 'B'}"
+
+
+def _get_name_from_widget(widget, name):
+    if name is None:
+        name = ""
+    monitor_size = QApplication.primaryScreen().availableVirtualSize()
+    dimensions = f"{monitor_size.width()}x{monitor_size.height()}"
+    name = widget.__class__.__module__ + widget.__class__.__name__ + dimensions + name
+
+    return name
+
+
+def widget_save_settings(widget, name=None, save_geometry=True, save_state=True):
+    name = _get_name_from_widget(widget, name)
+    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    if save_geometry:
+        qsettings.setValue(name + "/geometry", widget.saveGeometry())
+    if save_state:
+        qsettings.setValue(name + "/windowState", widget.saveState())
+
+
+def widget_read_settings(widget, name=None, save_geometry=True, save_state=True):
+    name = _get_name_from_widget(widget, name)
+    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    if save_geometry and qsettings.value(name + "/geometry") is not None:
+        widget.restoreGeometry(qsettings.value(name + "/geometry"))
+    if save_state and qsettings.value(name + "/windowState") is not None:
+        widget.restoreState(qsettings.value(name + "/windowState"))
+
+
+def widget_save_settings_func(widget, func, name=None):
+    name = _get_name_from_widget(widget, name)
+    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    qsettings.setValue(name, func())
+
+
+def widget_read_settings_func(widget, name=None):
+    name = _get_name_from_widget(widget, name)
+    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    variant = qsettings.value(name)
+    return variant

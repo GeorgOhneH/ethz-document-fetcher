@@ -7,7 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView
-from gui.utils import format_bytes
+from gui.utils import format_bytes, widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -176,13 +176,7 @@ class HistoryInfoView(QTreeView, InfoView):
         menu.exec_(self.mapToGlobal(point))
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("infoActivityView/geometry", self.header().saveGeometry())
-        qsettings.setValue("infoActivityView/windowState", self.header().saveState())
+        widget_save_settings(self.header(), name="infoActivityViewHeader")
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("infoActivityView/geometry") is not None:
-            self.header().restoreGeometry(qsettings.value("infoActivityView/geometry"))
-        if qsettings.value("infoActivityView/windowState") is not None:
-            self.header().restoreState(qsettings.value("infoActivityView/windowState"))
+        widget_read_settings(self.header(), name="infoActivityViewHeader")

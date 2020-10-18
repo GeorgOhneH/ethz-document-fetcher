@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 
 from gui.constants import EMPTY_FOLDER_PATH
 from gui.template_view.info_view.base import InfoView
+from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -130,13 +131,7 @@ class FolderInfoView(QTreeView, InfoView):
         menu.exec_(self.mapToGlobal(point))
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("infoFolderView/geometry", self.header().saveGeometry())
-        qsettings.setValue("infoFolderView/windowState", self.header().saveState())
+        widget_save_settings(self.header(), name="infoFolderViewHeader")
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("infoFolderView/geometry") is not None:
-            self.header().restoreGeometry(qsettings.value("infoFolderView/geometry"))
-        if qsettings.value("infoFolderView/windowState") is not None:
-            self.header().restoreState(qsettings.value("infoFolderView/windowState"))
+        widget_read_settings(self.header(), name="infoFolderViewHeader")

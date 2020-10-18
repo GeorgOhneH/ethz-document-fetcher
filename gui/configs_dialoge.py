@@ -5,6 +5,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from gui.utils import widget_save_settings, widget_read_settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -109,13 +111,10 @@ class ConfigsDialog(QDialog):
         ok_button.setDefault(valid_settings)
 
     def save_geometry(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("settingsDialog/geometry", self.saveGeometry())
+        widget_save_settings(self, save_state=False)
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("settingsDialog/geometry") is not None:
-            self.restoreGeometry(qsettings.value("settingsDialog/geometry"))
+        widget_read_settings(self, save_state=False)
 
 
 class ConfigsScrollArea(QScrollArea):

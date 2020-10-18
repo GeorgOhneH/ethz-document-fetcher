@@ -9,6 +9,7 @@ from core.template_parser.nodes import Folder, Site
 from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
 from gui.template_edit.view_tree_item import TreeEditWidgetItem
+from gui.utils import widget_read_settings, widget_save_settings
 from settings import gui_settings
 
 logger = logging.getLogger(__name__)
@@ -49,16 +50,10 @@ class TemplateEditViewTree(QTreeWidget):
         self.itemActivated.connect(self.edit_item)
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("templateEditViewTree/geometry", self.header().saveGeometry())
-        qsettings.setValue("templateEditViewTree/windowState", self.header().saveState())
+        widget_save_settings(self.header(), name="templateEditViewTreeHeader")
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("templateEditViewTree/geometry") is not None:
-            self.header().restoreGeometry(qsettings.value("templateEditViewTree/geometry"))
-        if qsettings.value("templateEditViewTree/windowState") is not None:
-            self.header().restoreState(qsettings.value("templateEditViewTree/windowState"))
+        widget_read_settings(self.header(), name="templateEditViewTreeHeader")
 
     def edit_item(self, item, column=None):
         item.open_dialog()

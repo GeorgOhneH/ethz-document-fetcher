@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 
 from core import template_parser
 from gui.template_view.view_tree_item import TreeWidgetItem
+from gui.utils import widget_read_settings, widget_save_settings
 from settings import gui_settings
 
 logger = logging.getLogger(__name__)
@@ -110,16 +111,10 @@ class TemplateViewTree(QTreeWidget):
             signal.disconnect(func)
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("templateViewTree/geometry", self.header().saveGeometry())
-        qsettings.setValue("templateViewTree/windowState", self.header().saveState())
+        widget_save_settings(self.header(), name="templateViewTreeHeader")
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("templateViewTree/geometry") is not None:
-            self.header().restoreGeometry(qsettings.value("templateViewTree/geometry"))
-        if qsettings.value("templateViewTree/windowState") is not None:
-            self.header().restoreState(qsettings.value("templateViewTree/windowState"))
+        widget_read_settings(self.header(), name="templateViewTreeHeader")
 
     def save_template_file(self):
         if self._template_load_error:

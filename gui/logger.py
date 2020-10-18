@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_save_settings, widget_read_settings
 from settings import advanced_settings
 from settings.logger import QtHandler
 
@@ -33,13 +34,12 @@ class Logger(QWidget):
         qApp.aboutToQuit.connect(self.save_state)
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("loggerWidget/windowState", self.isHidden())
+        widget_save_settings_func(self, self.isHidden)
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("loggerWidget/windowState") is not None:
-            self.setHidden(False if qsettings.value("loggerWidget/windowState") == "false" else True)
+        value = widget_read_settings_func(self)
+        if value is not None:
+            self.setHidden(False if value == "false" else True)
 
 
 class LoggerSplitter(QSplitter):
@@ -51,16 +51,10 @@ class LoggerSplitter(QSplitter):
         qApp.aboutToQuit.connect(self.save_state)
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("loggerSplitter/geometry", self.saveGeometry())
-        qsettings.setValue("loggerSplitter/windowState", self.saveState())
+        widget_save_settings(self)
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("loggerSplitter/geometry") is not None:
-            self.restoreGeometry(qsettings.value("loggerSplitter/geometry"))
-        if qsettings.value("loggerSplitter/windowState") is not None:
-            self.restoreState(qsettings.value("loggerSplitter/windowState"))
+        widget_read_settings(self)
 
 
 

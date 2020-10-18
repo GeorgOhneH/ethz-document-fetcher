@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import *
 from gui.template_view.info_view import FolderInfoView, GeneralInfoView, HistoryInfoView
 from gui.template_view.view_tree import TemplateViewTree
 
+from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_read_settings, widget_save_settings
+
 logger = logging.getLogger(__name__)
 
 
@@ -30,14 +32,13 @@ class ButtonGroup(QButtonGroup):
             btn.show()
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("buttonGroupView/id", self.checkedId())
+        widget_save_settings_func(self, self.checkedId, name="buttonGroupView/id")
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("buttonGroupView/id") is None:
+        button_id = widget_read_settings_func(self, name="buttonGroupView/id")
+        if button_id is None:
             return
-        button = self.button(qsettings.value("buttonGroupView/id"))
+        button = self.button(button_id)
         if button is not None:
             self.last_active_button = button
             button.setChecked(True)
@@ -52,16 +53,10 @@ class Splitter(QSplitter):
         qApp.aboutToQuit.connect(self.save_state)
 
     def save_state(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("mainSplitter/geometry", self.saveGeometry())
-        qsettings.setValue("mainSplitter/windowState", self.saveState())
+        widget_save_settings(self)
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("mainSplitter/geometry") is not None:
-            self.restoreGeometry(qsettings.value("mainSplitter/geometry"))
-        if qsettings.value("mainSplitter/windowState") is not None:
-            self.restoreState(qsettings.value("mainSplitter/windowState"))
+        widget_read_settings(self)
 
 
 class StackedWidgetView(QStackedWidget):

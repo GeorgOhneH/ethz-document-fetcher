@@ -8,6 +8,7 @@ from core.constants import VERSION
 from gui.constants import ROOT_PATH
 from gui.controller import CentralWidget
 from gui.startup_tasks import run_startup_tasks
+from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -107,9 +108,7 @@ class MainWindow(QMainWindow):
                                          self.central_widget.open_file(file_path=file_path))
 
     def closeEvent(self, event):
-        settings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        settings.setValue("mainWindow/geometry", self.saveGeometry())
-        settings.setValue("mainWindow/windowState", self.saveState())
+        widget_save_settings(self)
         self.central_widget.clean_up()
         self.central_widget.thread.finished.connect(qApp.quit)
         if not self.central_widget.thread.isRunning():
@@ -129,8 +128,4 @@ class MainWindow(QMainWindow):
             self.central_widget.thread.finished.disconnect(qApp.quit)
 
     def read_settings(self):
-        settings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if settings.value("mainWindow/geometry") is not None:
-            self.restoreGeometry(settings.value("mainWindow/geometry"))
-        if settings.value("mainWindow/windowState") is not None:
-            self.restoreState(settings.value("mainWindow/windowState"))
+        widget_read_settings(self)

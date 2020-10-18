@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 
 from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.template_edit.view_tree import TemplateEditViewTree
+from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -107,10 +108,7 @@ class TemplateEditDialog(QDialog):
         super().closeEvent(event)
 
     def save_geometry(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        qsettings.setValue("templateEditDialog/geometry", self.saveGeometry())
+        widget_save_settings(self, save_state=False)
 
     def read_settings(self):
-        qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
-        if qsettings.value("templateEditDialog/geometry") is not None:
-            self.restoreGeometry(qsettings.value("templateEditDialog/geometry"))
+        widget_read_settings(self, save_state=False)
