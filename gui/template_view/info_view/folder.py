@@ -65,11 +65,14 @@ class FolderInfoView(QTreeView, InfoView):
             return
 
         for path in paths:
-            if os.path.exists(path):
-                if os.path.isfile(path):
-                    os.remove(path)
-                else:
-                    shutil.rmtree(path, ignore_errors=True)
+            try:
+                if os.path.exists(path):
+                    if os.path.isfile(path):
+                        os.remove(path)
+                    else:
+                        shutil.rmtree(path, ignore_errors=True)
+            except Exception as e:
+                logger.warning(f"Could not delete file {path}. Error: {e}")
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path

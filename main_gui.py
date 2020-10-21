@@ -39,7 +39,6 @@ if __name__ == "__main__":
         sys.excepthook = except_hook
 
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-
     app = QApplication(sys.argv)
 
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
