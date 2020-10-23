@@ -66,9 +66,11 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    return html.unescape(string.replace("/", "-").replace("\\", "-")). \
+    path = html.unescape(string.replace("/", "-").replace("\\", "-")). \
         replace(":", ";").replace("|", "").replace("?", ""). \
         replace("<", "").replace(">", "").replace("*", "")
+
+    return path.strip()
 
 
 async def async_get_latest_version(session):
