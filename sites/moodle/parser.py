@@ -26,7 +26,8 @@ async def parse_main_page(session,
                           site_settings,
                           moodle_id,
                           process_external_links,
-                          keep_section_order):
+                          keep_section_order,
+                          password_mapper):
     sesskey = re.search(b"""sesskey":"([^"]+)""", html)[1].decode("utf-8")
     async with session.post(AJAX_SERVICE_URL, json=get_update_payload(moodle_id),
                             params={"sesskey": sesskey}) as response:
@@ -47,6 +48,7 @@ async def parse_main_page(session,
                                  moodle_id=moodle_id,
                                  process_external_links=process_external_links,
                                  last_updated_dict=last_updated_dict,
+                                 password_mapper=password_mapper,
                                  index=index,
                                  keep_section_order=keep_section_order)
                   for index, section in enumerate(sections)]
@@ -61,6 +63,7 @@ async def parse_sections(session,
                          moodle_id,
                          process_external_links,
                          last_updated_dict,
+                         password_mapper,
                          index=None,
                          keep_section_order=False):
     section_name = str(section["aria-label"])
@@ -78,7 +81,8 @@ async def parse_sections(session,
                                 module=module,
                                 last_updated_dict=last_updated_dict,
                                 moodle_id=moodle_id,
-                                process_external_links=process_external_links)
+                                process_external_links=process_external_links,
+                                password_mapper=password_mapper)
 
         tasks.append(asyncio.ensure_future(coroutine))
 
@@ -95,7 +99,8 @@ async def parse_sections(session,
                                          site_settings=site_settings,
                                          url=url,
                                          moodle_id=moodle_id,
-                                         name=str(name))
+                                         name=str(name),
+                                         password_mapper=password_mapper)
 
                 tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
 
@@ -109,7 +114,8 @@ async def parse_mtype(session,
                       module,
                       last_updated_dict,
                       moodle_id,
-                      process_external_links):
+                      process_external_links,
+                      password_mapper):
     mtype = module["class"][1]
     module_id = int(re.search("module-([0-9]+)", module["id"])[1])
     if mtype == MTYPE_FILE:
@@ -151,7 +157,8 @@ async def parse_mtype(session,
                            site_settings=site_settings,
                            url=driver_url,
                            moodle_id=moodle_id,
-                           name=name)
+                           name=name,
+                           password_mapper=password_mapper)
 
     elif mtype == MTYPE_ASSIGN:
         instance = module.find("div", class_="activityinstance")
@@ -243,20 +250,6 @@ async def parse_assign_files_tree(queue, soup, path):
             })
 
 
-def poly_box_wrapper(func, moodle_id):
-    async def wrapper(*args, **kwargs):
-        try:
-            await func(*args, **kwargs)
-        except ClientResponseError:
-            if "id" in kwargs:
-                poly_id = kwargs["id"]
-            else:
-                poly_id = args[4]
-            logger.warning(f"Couldn't access polybox with id: {poly_id} from moodle: {moodle_id}")
-
-    return wrapper
-
-
 async def exception_handler(coroutine, moodle_id, url):
     try:
         await coroutine
@@ -302,7 +295,7 @@ def parse_update_json(update_json):
     return result
 
 
-async def process_link(session, queue, base_path, site_settings, url, moodle_id, name):
+async def process_link(session, queue, base_path, site_settings, url, moodle_id, name, password_mapper):
     if "onedrive.live.com" in url:
         logger.debug(f"Starting one drive from moodle: {moodle_id}")
         await one_drive.producer(session,
@@ -313,17 +306,30 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
 
     elif "polybox" in url:
         logger.debug(f"Starting polybox from moodle: {moodle_id}")
-        poly_id = url.split("s/")[-1].split("/")[0]
-        await poly_box_wrapper(polybox.producer, moodle_id)(session,
-                                                            queue,
-                                                            safe_path_join(base_path, name),
-                                                            site_settings,
-                                                            poly_id)
+        poly_type, poly_id = [x.strip() for x in url.split("/") if x.strip() != ""][3:5]
+        password = match_password_to_password(name, password_mapper)
+        await polybox.producer(session,
+                               queue,
+                               safe_path_join(base_path, name),
+                               site_settings,
+                               poly_id,
+                               poly_type=poly_type,
+                               password=password)
 
     elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
+        password = match_password_to_password(name, password_mapper)
         await zoom.download(session=session,
                             queue=queue,
                             base_path=base_path,
                             url=url,
-                            file_name=name)
+                            file_name=name,
+                            password=password)
+
+
+def match_password_to_password(name, password_mapper):
+    if password_mapper:
+        for map_obj in password_mapper:
+            if re.search(map_obj["name"], name):
+                return map_obj["password"]
+    return None
