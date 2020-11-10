@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
+from core.exceptions import LoginError
 
 
 def _get_page_meta(html, keys):
@@ -51,7 +52,8 @@ async def download(session, queue, base_path, url, password=None, file_name=None
 
         data = {"id": meet_id,
                 "passwd": password,
-                "action": "viewdetailpage"}
+                "action": "viewdetailpage",
+                "recaptcha": ""}
 
         check_url = f"https://{domain}zoom.us/rec/validate_meet_passwd"
         async with session.post(check_url, data=data, headers=agent_header) as response:
@@ -64,7 +66,9 @@ async def download(session, queue, base_path, url, password=None, file_name=None
     if metadata is None:
         return None
 
-    vid_url = metadata.get("viewMp4Url")
+    vid_url = metadata.get("viewMp4Url", None)
+    if vid_url is None:
+        raise LoginError("Could not Login")
     extension = vid_url.split("?")[0].split("/")[-1].split(".")[1]
     name = file_name or metadata.get("topic")
 

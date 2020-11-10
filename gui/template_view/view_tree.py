@@ -246,6 +246,8 @@ class TemplateViewTree(QTreeWidget):
         else:
             open_folder_action.setEnabled(False)
 
+        menu.addSeparator()
+
         open_website_action = menu.addAction("Open Website")
         if widget.template_node.has_website_url():
             open_website_action.setEnabled(True)
