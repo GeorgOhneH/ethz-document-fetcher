@@ -11,7 +11,7 @@ locks = {}
 
 async def safe_login_module(session, site_settings, login_function, function_kwargs):
     if not callable(login_function):
-        logger.warning("login function was not callable: ", login_function)
+        logger.warning(f"login function was not callable: {login_function}")
         return
 
     func_name = login_function.__module__ + "." + login_function.__name__

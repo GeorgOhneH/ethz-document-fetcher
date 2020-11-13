@@ -17,11 +17,9 @@ PASSWORD_MAPPER_CONFIG = ConfigList(
         layout={
             "name": ConfigString(
                 gui_name="Name",
-                optional=True,
             ),
             "password": ConfigString(
                 gui_name="Password",
-                optional=True,
             ),
         }
     )
