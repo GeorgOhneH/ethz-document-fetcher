@@ -85,7 +85,9 @@ jobs:
 
     - name: Install dependencies (MacOS)
       if: startsWith(matrix.os, 'macos')
-      run: pip install wheel biplist dmgbuild -U
+      run: |
+        pip install wheel -U
+        pip install wheel biplist dmgbuild -U
 
     - name: Install dependencies (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
