@@ -78,10 +78,9 @@ if sys.platform == 'darwin':
              name='eth-document-fetcher.app',
              icon=os.path.join("gui", "assets", "logo", "logo.ico"),
              bundle_identifier=None,
-
              info_plist={
                      'NSHighResolutionCapable': 'True'
-                 },)
+                 })
 
 else:
     exe = EXE(pyz,
