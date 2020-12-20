@@ -4,4 +4,7 @@ children:
   - module: polybox
     use_folder: true
     folder_name: Polybox
-    id: YrFA3IT7FhemOAs
+    poly_id: YrFA3IT7FhemOAs
+    poly_type: s
+    allowed_extensions: []
+    forbidden_extensions: []
