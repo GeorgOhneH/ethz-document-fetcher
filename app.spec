@@ -57,24 +57,31 @@ pyz = PYZ(a.pure, a.zipped_data,
 
 if sys.platform == 'darwin':
     exe = EXE(pyz,
-              a.scripts,
-              a.binaries,
-              a.zipfiles,
-              a.datas,
-              name='eth-document-fetcher',
-              debug=False,
-              strip=False,
-              upx=True,
-              runtime_tmpdir=None,
-              console=False,
-              icon=os.path.join("gui", "assets", "logo", "logo.ico"))
+          a.scripts,
+          [],
+          exclude_binaries=True,
+          name='eth-document-fetcher',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          console=False )
+    coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='main_gui')
+    app = BUNDLE(coll,
+             name='eth-document-fetcher.app',
+             icon=os.path.join("gui", "assets", "logo", "logo.ico"),
+             bundle_identifier=None,
 
-    app = BUNDLE(exe,
-                 name='eth-document-fetcher.app',
-                 info_plist={
+             info_plist={
                      'NSHighResolutionCapable': 'True'
-                 },
-                 icon=os.path.join("gui", "assets", "logo", "logo.icns"))
+                 },)
 
 else:
     exe = EXE(pyz,
