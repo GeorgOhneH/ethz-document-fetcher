@@ -38,6 +38,7 @@ if __name__ == "__main__":
     if not IS_FROZEN and advanced_settings.loglevel == "DEBUG":
         sys.excepthook = except_hook
 
+    QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.RoundPreferFloor)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
 

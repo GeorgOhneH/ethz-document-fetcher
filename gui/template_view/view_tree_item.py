@@ -302,12 +302,16 @@ class TreeWidgetItemName(QWidget):
         self.text = QLabel(name)
         self.text.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-        size = self.fontMetrics().height()
+        size = self.check_box.sizeHint().width()
 
         self.icon = QLabel()
-        pixmap = icon.pixmap(QSize(size, size))
+        device_ratio = qApp.devicePixelRatio()
+        pixmap = icon.pixmap(QSize(size * device_ratio, size * device_ratio))
+
+        pixmap_mask = icon.pixmap(QSize(size, size))
+        pixmap.setDevicePixelRatio(device_ratio)
         self.icon.setPixmap(pixmap)
-        self.icon.setMask(pixmap.mask())
+        self.icon.setMask(pixmap_mask.mask())
         self.icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         self.stateWidget = QStackedWidget()
