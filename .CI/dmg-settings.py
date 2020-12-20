@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import os.path
 
-import biplist
+import plistlib
 
 #
 # Example settings file for dmgbuild
@@ -23,7 +23,8 @@ appname = os.path.basename(application)
 
 def icon_from_app(app_path):
     plist_path = os.path.join(app_path, 'Contents', 'Info.plist')
-    plist = biplist.readPlist(plist_path)
+    with open(plist_path, 'rb') as f:
+        plist = plistlib.load(f)
     icon_name = plist['CFBundleIconFile']
     icon_root,icon_ext = os.path.splitext(icon_name)
     if not icon_ext:
