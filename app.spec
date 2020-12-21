@@ -73,7 +73,7 @@ if sys.platform == 'darwin':
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='main_gui')
+               name='eth-document-fetcher.app')
     app = BUNDLE(coll,
              name='eth-document-fetcher.app',
              icon=os.path.join("gui", "assets", "logo", "logo.ico"),
