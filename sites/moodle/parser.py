@@ -9,6 +9,7 @@ from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer
 
 from core.constants import BEAUTIFUL_SOUP_PARSER
+from core.downloader import is_extension_forbidden
 from core.exceptions import ForbiddenError
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
@@ -318,6 +319,11 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
                                password=password)
 
     elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
+        if is_extension_forbidden("mp4",
+                                  site_settings.allowed_extensions + queue.consumer_kwargs["allowed_extensions"],
+                                  site_settings.forbidden_extensions + queue.consumer_kwargs["forbidden_extensions"]):
+            logger.debug(f"Skipped zoom download from moodle: {moodle_id}")
+            return
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
         password = match_name_to_password(name, password_mapper)
         await zoom.download(session=session,

@@ -2,6 +2,7 @@ import asyncio
 import functools
 import pathlib
 from urllib.parse import urlparse
+import itertools
 
 import aiohttp
 from aiohttp.client import URL
@@ -33,6 +34,27 @@ async def download_files(session: aiohttp.ClientSession, queue):
             queue.task_done()
 
 
+def merge_extension_filter(extensions):
+    merged_extensions = set([item.lower() for item in extensions])
+    if "video" in merged_extensions:
+        merged_extensions |= MOVIE_EXTENSIONS
+    return merged_extensions
+
+
+def is_extension_forbidden(extension, allowed_extensions, forbidden_extensions):
+    allowed_extensions = merge_extension_filter(allowed_extensions)
+    forbidden_extensions = merge_extension_filter(forbidden_extensions)
+
+    forbidden_extensions -= allowed_extensions
+
+    if allowed_extensions and extension.lower() not in allowed_extensions:
+        return True
+    if extension.lower() in forbidden_extensions:
+        return True
+
+    return False
+
+
 async def download_if_not_exist(session,
                                 path,
                                 url,
@@ -51,18 +73,11 @@ async def download_if_not_exist(session,
     if allowed_extensions is None:
         allowed_extensions = []
 
-    allowed_extensions = set([item.lower() for item in allowed_extensions + site_settings.allowed_extensions])
-    if "video" in allowed_extensions:
-        allowed_extensions |= MOVIE_EXTENSIONS
-
     if forbidden_extensions is None:
         forbidden_extensions = []
 
-    forbidden_extensions = set([item.lower() for item in forbidden_extensions + site_settings.forbidden_extensions])
-    if "video" in forbidden_extensions:
-        forbidden_extensions |= MOVIE_EXTENSIONS
-
-    forbidden_extensions -= allowed_extensions
+    allowed_extensions += site_settings.allowed_extensions
+    forbidden_extensions += site_settings.forbidden_extensions
 
     if isinstance(url, str):
         url = URL(url)
@@ -107,9 +122,9 @@ async def download_if_not_exist(session,
 
     file_name = os.path.basename(absolute_path)
     file_extension = get_extension(file_name)
-    if allowed_extensions and file_extension.lower() not in allowed_extensions:
-        return
-    if file_extension.lower() in forbidden_extensions:
+    if is_extension_forbidden(extension=file_extension,
+                              forbidden_extensions=forbidden_extensions,
+                              allowed_extensions=allowed_extensions):
         return
 
     async with session.get(url, timeout=timeout, **session_kwargs) as response:
