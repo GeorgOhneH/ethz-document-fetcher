@@ -3,9 +3,12 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
+from settings.config import ConfigString
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join
+
+URL_CONFIG = ConfigString(gui_name="Url")
 
 
 def get_api_url(parameters, children=True):
@@ -32,7 +35,7 @@ async def get_folder_name(session, url, **kwargs):
     return item_data["name"]
 
 
-async def producer(session, queue, base_path, site_settings, url):
+async def producer(session, queue, base_path, site_settings, url: URL_CONFIG):
     await _producer(session, queue, base_path, site_settings, url)
 
 
@@ -53,7 +56,8 @@ async def _producer(session, queue, base_path, site_settings, url, etag=None):
         elif "folder" in item:
             folder_url = await check_url_reference(session, item['webUrl']) + f"?authkey={authkey}"
             item_etag = item["lastModifiedDateTime"]
-            coroutine = _producer(session, queue, path, site_settings, f"{folder_url}?authkey={authkey}", etag=item_etag)
+            coroutine = _producer(session, queue, path, site_settings, f"{folder_url}?authkey={authkey}",
+                                  etag=item_etag)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

@@ -25,16 +25,21 @@ PASSWORD_MAPPER_CONFIG = ConfigList(
     )
 )
 
+MOODLE_ID_CONFIG = ConfigString(gui_name="ID")
+
+PROCESS_EXTERNAL_LINKS_CONFIG = ConfigBool(default=True, gui_name="Process External Links", optional=True)
+KEEP_SECTION_ORDER_CONFIG = ConfigBool(default=False, gui_name="Keep Section Order", optional=True)
+
 
 async def producer(session,
                    queue,
                    base_path,
                    site_settings,
-                   id,
-                   process_external_links=True,
-                   keep_section_order=False,
+                   moodle_id: MOODLE_ID_CONFIG,
+                   process_external_links: PROCESS_EXTERNAL_LINKS_CONFIG = True,
+                   keep_section_order: KEEP_SECTION_ORDER_CONFIG = False,
                    password_mapper: PASSWORD_MAPPER_CONFIG = None):
-    async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={id}") as response:
+    async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={moodle_id}") as response:
         html = await response.read()
         if str(response.url) == AUTH_URL:
             raise LoginError("Module moodle isn't logged in")
@@ -43,14 +48,14 @@ async def producer(session,
                                  html,
                                  base_path,
                                  site_settings,
-                                 id,
+                                 moodle_id,
                                  process_external_links,
                                  keep_section_order,
                                  password_mapper)
 
 
-async def get_folder_name(session, id, **kwargs):
-    async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={id}") as response:
+async def get_folder_name(session, moodle_id, **kwargs):
+    async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={moodle_id}") as response:
         html = await response.read()
     soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
 

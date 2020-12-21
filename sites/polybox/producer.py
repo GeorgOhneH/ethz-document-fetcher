@@ -20,8 +20,14 @@ from sites.polybox.constants import *
 
 logger = logging.getLogger(__name__)
 
-poly_type_config = ConfigOptions(default="s", options=["s", "f"], optional=True)
-poly_id_config = ConfigString(gui_name="Id")
+POLY_TYPE_CONFIG = ConfigOptions(default="s",
+                                 options=["s", "f"],
+                                 optional=True,
+                                 gui_name="Type",
+                                 hint_text="Type s: Shared folder.<br>"
+                                           "Type f: Private folder (your own polybox)")
+POLY_ID_CONFIG = ConfigString(gui_name="ID")
+PASSWORD_CONFIG = ConfigString(gui_name="Password", optional=True)
 
 
 async def login_folder(session, poly_type, poly_id, password, **kwargs):
@@ -102,9 +108,9 @@ async def producer(session,
                    queue,
                    base_path,
                    site_settings,
-                   poly_id: poly_id_config,
-                   poly_type: poly_type_config = "s",
-                   password=None):
+                   poly_id: POLY_ID_CONFIG,
+                   poly_type: POLY_TYPE_CONFIG = "s",
+                   password: PASSWORD_CONFIG = None):
     if poly_type == "f":
         await _producer_f(session=session,
                           queue=queue,

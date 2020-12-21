@@ -3,10 +3,13 @@ import re
 
 from bs4 import BeautifulSoup
 
+from settings.config import ConfigString
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
 
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, basic_auth_config_to_session_kwargs
+
+URL_CONFIG = ConfigString(gui_name="Url")
 
 
 async def get_folder_name(session, url, **kwargs):
@@ -20,7 +23,7 @@ async def get_folder_name(session, url, **kwargs):
     return name
 
 
-async def producer(session, queue, url, base_path, site_settings, basic_auth: BASIC_AUTH_CONFIG):
+async def producer(session, queue, base_path, site_settings, url: URL_CONFIG, basic_auth: BASIC_AUTH_CONFIG):
     session_kwargs = basic_auth_config_to_session_kwargs(basic_auth, site_settings)
     await _producer(session, queue, url, base_path, session_kwargs)
 

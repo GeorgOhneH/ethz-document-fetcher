@@ -9,6 +9,7 @@ from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer
 
 from core.constants import BEAUTIFUL_SOUP_PARSER
+from core.exceptions import ForbiddenError
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path
@@ -273,7 +274,7 @@ def get_update_payload(courseid, since=0):
 
 def parse_update_json(update_json):
     if update_json[0]["error"]:
-        raise ValueError("update json has an error")
+        raise ForbiddenError(update_json[0]["exception"]["errorcode"] + ", " + update_json[0]["exception"]["message"])
 
     result = {}
     for instance in update_json[0]["data"]["instances"]:
@@ -307,7 +308,7 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
     elif "polybox" in url:
         logger.debug(f"Starting polybox from moodle: {moodle_id}")
         poly_type, poly_id = [x.strip() for x in url.split("/") if x.strip() != ""][3:5]
-        password = match_password_to_password(name, password_mapper)
+        password = match_name_to_password(name, password_mapper)
         await polybox.producer(session,
                                queue,
                                safe_path_join(base_path, name),
@@ -318,7 +319,7 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
 
     elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
-        password = match_password_to_password(name, password_mapper)
+        password = match_name_to_password(name, password_mapper)
         await zoom.download(session=session,
                             queue=queue,
                             base_path=base_path,
@@ -327,7 +328,7 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
                             password=password)
 
 
-def match_password_to_password(name, password_mapper):
+def match_name_to_password(name, password_mapper):
     if password_mapper:
         for map_obj in password_mapper:
             if re.search(map_obj["name"], name):

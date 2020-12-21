@@ -25,7 +25,7 @@ children:
     forbidden_extensions: []
   - module: moodle
     use_folder: true
-    id: '13668'
+    moodle_id: '13668'
     keep_section_order: false
     process_external_links: true
     allowed_extensions: []
@@ -95,7 +95,7 @@ children:
         pattern: .*klausuren/klausur_([0-9]+)a_loes.pdf
       - file_name: "20\\1 Sommer L\xF6sungen"
         folder: null
-        pattern: .*klausuren/klausur_([0-9]+)a_loes.pdf
+        pattern: .*klausuren/klausur_([0-9]+)b_loes.pdf
       - file_name: Probeklausur \1
         folder: null
         pattern: .*klausuren/muster([0-9]+).pdf
@@ -107,14 +107,14 @@ children:
       forbidden_extensions: []
   - module: moodle
     use_folder: true
-    id: '13200'
+    moodle_id: '13200'
     keep_section_order: true
     process_external_links: true
     allowed_extensions: []
     forbidden_extensions: []
   - module: moodle
     use_folder: true
-    id: '13442'
+    moodle_id: '13442'
     keep_section_order: false
     process_external_links: true
     allowed_extensions: []

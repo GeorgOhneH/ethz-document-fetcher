@@ -19,14 +19,18 @@ children:
       use_folder: true
       course_id: 227-0002-00L
       department: d-itet
+      pwd_password: INSERT PASSWORD
       pwd_username: bie-20s
       semester: spring
-      year: 2020
+      year: '2020'
+      allowed_extensions: []
+      forbidden_extensions: []
     - module: video_portal
       use_folder: true
       course_id: 227-0002-00L
       department: d-itet
       pwd_username: bie-19s
+      pwd_password: INSERT PASSWORD
       semester: spring
       year: 2019
     - module: video_portal
@@ -34,6 +38,7 @@ children:
       course_id: 252-0848-00L
       department: d-infk
       pwd_username: scw-20s
+      pwd_password: INSERT PASSWORD
       semester: spring
       year: 2020
     - module: video_portal
@@ -41,45 +46,58 @@ children:
       course_id: 252-0847-00L
       department: d-infk
       pwd_username: scw-19s
+      pwd_password: INSERT PASSWORD
       semester: autumn
       year: 2019
-    - module: polybox
-      use_folder: true
-      folder_name: NuS2 Podcast
-      poly_id: SU2lkCtdoLH3X1w
   - module: moodle
     use_folder: true
-    id: 11838
     keep_section_order: false
+    moodle_id: '11838'
+    password_mapper:
+    - name: "Podcast f\xFCr \xDCbungen"
+      password: INSERT PASSWORD
     process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
     children:
     - module: polybox
       use_folder: true
       poly_id: 4YGUCHIXorTsvVL
+      poly_type: s
   - module: moodle
     use_folder: true
-    id: 12228
     keep_section_order: false
+    moodle_id: 12228
+    password_mapper: []
     process_external_links: true
     children:
     - module: polybox
       use_folder: true
       poly_id: iSYMs1nnDAzDWtU
+      poly_type: s
   - module: moodle
     use_folder: true
-    id: 12301
     keep_section_order: false
+    moodle_id: 12301
+    password_mapper: []
     process_external_links: true
     forbidden_extensions:
     - video
     children:
     - module: nethz
       use_folder: true
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: false
+        use_eth_credentials: false
       url: https://n.ethz.ch/~tiagos/download/2020/
   - module: moodle
     use_folder: true
-    id: 12611
     keep_section_order: false
+    moodle_id: 12611
+    password_mapper: []
     process_external_links: true
     children:
     - module: link_collector
@@ -104,13 +122,20 @@ children:
     - module: ilias
       use_folder: true
       folder_name: Notizen
-      id: 187834
+      ilias_id: 187834
     - module: nethz
       use_folder: true
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: false
+        use_eth_credentials: false
       url: https://n.ethz.ch/~cdirren/downloads/Analysis_2/
     - module: polybox
       use_folder: true
       poly_id: C8LWUyvLRUbh3zX
+      poly_type: s
   - module: custom
     use_folder: true
     folder_name: Computer Science  D-ITET  SS 20

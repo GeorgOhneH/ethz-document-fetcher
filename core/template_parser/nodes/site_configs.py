@@ -74,12 +74,13 @@ class FunctionKwargsConfigDict(ConfigDict):
                     continue
                 default_value = parameter.default if parameter.default is not parameter.empty else None
                 optional = parameter.default != parameter.empty
-                if parameter.annotation is bool or isinstance(default_value, bool):
+
+                if isinstance(parameter.annotation, ConfigString):
+                    config_obj = copy.deepcopy(parameter.annotation)
+                elif parameter.annotation is bool or isinstance(default_value, bool):
                     config_obj = ConfigBool(default=default_value, optional=optional)
                 elif parameter.annotation is list or isinstance(default_value, list):
                     config_obj = ConfigListString(default=default_value, optional=optional)
-                elif isinstance(parameter.annotation, ConfigString):
-                    config_obj = copy.deepcopy(parameter.annotation)
                 else:
                     config_obj = ConfigString(default=default_value, optional=optional)
                 result[name] = config_obj

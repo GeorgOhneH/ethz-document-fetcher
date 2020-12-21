@@ -36,12 +36,14 @@ REGREX_PATTERN_CONFIG = ConfigList(
     )
 )
 
+URL_CONFIG = ConfigString(gui_name="Url")
+
 
 async def producer(session,
                    queue,
                    base_path,
                    site_settings,
-                   url,
+                   url: URL_CONFIG,
                    regrex_patterns: REGREX_PATTERN_CONFIG,
                    headers: HEADERS_CONFIG,
                    basic_auth: BASIC_AUTH_CONFIG):

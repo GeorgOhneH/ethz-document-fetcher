@@ -2,8 +2,16 @@ import asyncio
 import os
 
 from core.utils import safe_path_join
+from settings.config import ConfigString
 from sites.video_portal.constants import BASE_URL
 from sites.video_portal.login import login_and_data
+
+DEPARTMENT_CONFIG = ConfigString(gui_name="Department")
+YEAR_CONFIG = ConfigString(gui_name="Year")
+SEMESTER_CONFIG = ConfigString(gui_name="Semester")
+COURSE_ID_CONFIG = ConfigString(gui_name="Course ID")
+PWD_USERNAME_CONFIG = ConfigString(gui_name="Series Username", optional=True)
+PWD_PASSWORD_CONFIG = ConfigString(gui_name="Series Password", optional=True)
 
 
 async def get_meta_data(session, course_url):
@@ -22,8 +30,16 @@ async def get_folder_name(session, department, year, semester, course_id, **kwar
     return meta_data["title"]
 
 
-async def producer(session, queue, base_path, site_settings, department, year, semester,
-                   course_id, pwd_username=None, pwd_password=None):
+async def producer(session,
+                   queue,
+                   base_path,
+                   site_settings,
+                   department: DEPARTMENT_CONFIG,
+                   year: YEAR_CONFIG,
+                   semester: SEMESTER_CONFIG,
+                   course_id: COURSE_ID_CONFIG,
+                   pwd_username: PWD_USERNAME_CONFIG = None,
+                   pwd_password: PWD_PASSWORD_CONFIG = None):
     absolute_path = os.path.join(site_settings.base_path, base_path)
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 

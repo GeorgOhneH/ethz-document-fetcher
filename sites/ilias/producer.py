@@ -8,12 +8,15 @@ from bs4 import SoupStrainer
 from core.constants import *
 from core.exceptions import LoginError
 from core.utils import *
+from settings.config import ConfigString
 from sites.ilias import login
 from sites.ilias.constants import *
 
+ILIAS_ID_CONFIG = ConfigString(gui_name="ID")
 
-async def get_folder_name(session, id, **kwargs):
-    url = GOTO_URL + str(id)
+
+async def get_folder_name(session, ilias_id, **kwargs):
+    url = GOTO_URL + str(ilias_id)
     async with session.get(url) as response:
         html = await response.text()
 
@@ -23,12 +26,12 @@ async def get_folder_name(session, id, **kwargs):
     return str(ol.find_all("li")[2].string)
 
 
-async def producer(session, queue, base_path, site_settings, id):
-    await search_tree(session, queue, base_path, site_settings, id)
+async def producer(session, queue, base_path, site_settings, ilias_id: ILIAS_ID_CONFIG):
+    await search_tree(session, queue, base_path, site_settings, ilias_id)
 
 
-async def search_tree(session, queue, base_path, site_settings, fold_id):
-    url = GOTO_URL + str(fold_id)
+async def search_tree(session, queue, base_path, site_settings, ilias_id):
+    url = GOTO_URL + str(ilias_id)
     async with session.get(url) as response:
         html = await response.text()
         if str(response.url) != url:

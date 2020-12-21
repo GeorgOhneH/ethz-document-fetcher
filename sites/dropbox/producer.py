@@ -2,8 +2,11 @@ import asyncio
 from urllib.parse import urlparse
 
 from core.utils import safe_path_join
+from settings.config import ConfigString
 
 from .constants import DEFAULT_COOKIE, LIST_ENTRIES_URL, TIME_COOKIE_VALUE
+
+URL_CONFIG = ConfigString(gui_name="Url")
 
 
 def _split_url(url):
@@ -38,7 +41,7 @@ def _get_data(key, secure_hash, sub_path=""):
     }
 
 
-async def producer(session, queue, base_path, site_settings, url):
+async def producer(session, queue, base_path, site_settings, url: URL_CONFIG):
     key, secure_hash, sub_path = _split_url(url=url)
 
     cut_path = len([x for x in sub_path.split("/") if x.strip() != ""])

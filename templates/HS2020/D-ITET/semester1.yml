@@ -77,7 +77,7 @@ children:
       folder_name: Vorlesungsnotizen
       basic_auth:
         custom:
-          password: null
+          password: INSERT PASSWORD
           username: student
         use: true
         use_eth_credentials: false
@@ -86,14 +86,14 @@ children:
       forbidden_extensions: []
   - module: moodle
     use_folder: true
-    id: '12747'
+    moodle_id: '12747'
     keep_section_order: false
     process_external_links: true
     allowed_extensions: []
     forbidden_extensions: []
   - module: moodle
     use_folder: true
-    id: '13280'
+    moodle_id: '13280'
     keep_section_order: false
     process_external_links: true
     allowed_extensions: []
