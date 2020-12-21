@@ -25,7 +25,8 @@ async def download_files(session: aiohttp.ClientSession, queue):
             return
         except Exception as e:
             logger.error(f"Consumer got an unexpected error: {type(e).__name__}: {e}", exc_info=True)
-            signal_handler.got_error(unique_key, f"Could not download file from url: {item['url']}. {type(e).__name__}: {e}")
+            signal_handler.got_error(unique_key,
+                                     f"Could not download file from url: {item['url']}. {type(e).__name__}: {e}")
 
         finally:
             signal_handler.finished(unique_key)
@@ -144,9 +145,9 @@ async def download_if_not_exist(session,
             logger.debug(f"Removed file {absolute_path}")
             raise e
 
-    if site_settings.highlight_difference and\
-            action == ACTION_REPLACE and\
-            site_settings.keep_replaced_files and\
+    if site_settings.highlight_difference and \
+            action == ACTION_REPLACE and \
+            site_settings.keep_replaced_files and \
             file_extension.lower() == "pdf":
         logger.debug(f"Adding highlights to {absolute_path}")
 
@@ -166,6 +167,10 @@ async def download_if_not_exist(session,
             os.replace(old_absolute_path, absolute_path)
             logger.debug(f"Reverted old file {absolute_path}")
             raise e
+        except Exception as e:
+            logger.warning(f"Could not add pdf highlight to {absolute_path}. {type(e).__name__}: {e}")
+            signal_handler.got_warning(unique_key,
+                                       f"Could not add pdf highlight to {absolute_path}. {type(e).__name__}: {e}")
         finally:
             if os.path.exists(temp_absolute_path):
                 logger.debug(f"Removed temp file {temp_absolute_path}")
@@ -179,7 +184,7 @@ async def download_if_not_exist(session,
     cache.save_checksum(absolute_path, checksum)
 
     if action == ACTION_REPLACE:
-        if site_settings.keep_replaced_files:
+        if site_settings.keep_replaced_files and os.path.exists(old_absolute_path):
             signal_handler.replaced_file(unique_key, absolute_path, old_absolute_path)
         else:
             signal_handler.replaced_file(unique_key, absolute_path)

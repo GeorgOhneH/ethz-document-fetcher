@@ -39,13 +39,15 @@ class GeneralGroupBox(GroupBox):
             ("State", None),
             ("Path", None),
             ("Selected", None),
-            ("Children", None),
+            ("Children Count", None),
+            ("Error/Warning Message", None),
         ]
         self.init()
 
     def init(self):
         for key, value in self.default_attributes:
             label = QLabel(f"{key}: {self.value_to_string(value)}")
+            label.setWordWrap(True)
             self.layout.addWidget(label)
 
     def set_attributes(self, attributes):
@@ -63,7 +65,8 @@ class GeneralGroupBox(GroupBox):
             ("State", selected_widget.state_text()),
             ("Path", selected_widget.template_node.base_path),
             ("Selected", "No" if selected_widget.get_check_state() == Qt.Unchecked else "Yes"),
-            ("Children", len(selected_widget.template_node.children)),
+            ("Children Count", len(selected_widget.template_node.children)),
+            ("Error/Warning Message", "\n".join(selected_widget.error_msgs + selected_widget.warning_msgs)),
         ]
         self.set_attributes(attributes)
 

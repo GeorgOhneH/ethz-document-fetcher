@@ -100,9 +100,15 @@ class SiteSettings(Settings):
     forbidden_extensions = ConfigListString(default=["video"], optional=True, gui_name="Forbidden Extensions",
                                             hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
-    highlight_difference = ConfigBool(default=True, active_func=highlight_difference_active, gray_out=True,
-                                      gui_name="Add Highlight Difference to Replaced Files (pdf only, can be cpu heavy)")
-    force_download = ConfigBool(default=False, gui_name="Force Download")
+    highlight_difference = ConfigBool(default=True,
+                                      active_func=highlight_difference_active,
+                                      gray_out=True,
+                                      gui_name="Add Highlight Difference to Replaced Files "
+                                               "(pdf only, can be cpu heavy)")
+    force_download = ConfigBool(default=False,
+                                gui_name="Force Download",
+                                hint_text="Be very careful when you turn this on! It will update EVERY file.<br>"
+                                          "This is VERY stressful for a servers and and should only be rarely used.")
     conn_limit = ConfigInt(minimum=0, default=50, gui_name="Maximum Number of Connections",
                            hint_text="0 for unlimited")
     conn_limit_per_host = ConfigInt(minimum=0, default=5, gui_name="Maximum Number of Connections per Host",
@@ -111,4 +117,3 @@ class SiteSettings(Settings):
 
 class GUISettings(Settings):
     NAME = "GUI"
-

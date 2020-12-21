@@ -279,7 +279,7 @@ class Site(TemplateNode):
             except Exception as e:
                 logger.error(f"Got an unexpected error from producer: {function_name_kwargs},"
                              f" Error: {type(e).__name__}: {e}", exc_info=True)
-                signal_handler.got_error(self.unique_key, f"Error: {type(e).__name__}: {e}")
+                signal_handler.got_error(self.unique_key, f"{type(e).__name__}: {e}")
                 return
             finally:
                 signal_handler.finished(unique_key)
