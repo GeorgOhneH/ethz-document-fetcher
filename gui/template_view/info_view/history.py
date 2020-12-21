@@ -95,7 +95,7 @@ class LazyStandardItemModel(QStandardItemModel):
         if "old_path" in file:
             items[self.COLUMN_NOTE] = QStandardItem("Replaced File")
             if file["old_path"] is None:
-                return
+                return get_values_sorted_after_key(items)
             children = self.prepare_items(path=file["old_path"])
             children[self.COLUMN_NOTE] = QStandardItem("Old File")
             items[0].appendRow(get_values_sorted_after_key(children))
