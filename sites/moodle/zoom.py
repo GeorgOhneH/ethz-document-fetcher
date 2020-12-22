@@ -1,5 +1,6 @@
 import re
 import asyncio
+import logging
 
 from aiohttp.client import URL
 from bs4 import BeautifulSoup
@@ -7,6 +8,8 @@ from bs4 import BeautifulSoup
 from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.utils import safe_path_join
 from core.exceptions import LoginError
+
+logger = logging.getLogger(__name__)
 
 
 def _get_page_meta(html, keys):
@@ -64,6 +67,7 @@ async def download(session, queue, base_path, url, password=None, file_name=None
 
     metadata = _get_page_meta(html, ("viewMp4Url", "topic"))
     if metadata is None:
+        logger.warning(f"Zoom url: {url} has no video")
         return None
 
     vid_url = metadata.get("viewMp4Url", None)
