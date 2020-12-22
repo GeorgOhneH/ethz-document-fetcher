@@ -8,7 +8,7 @@ from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBoo
 
 PASSWORD_MAPPER_CONFIG = ConfigList(
     gui_name="Password Mapper",
-    hint_text="If a polybox or zoom link requires a password, you can map the password with the name of the link.<br>"
+    hint_text="If a polybox or zoom link requires a password,<br> you can map the password with the name of the link.<br>"
               "The name parameter will be interpreted as a "
               "<a href=\"https://docs.python.org/3/library/re.html\">regrex expression</a>",
     optional=True,
