@@ -35,17 +35,10 @@ always check the website if the file has any importance.
  Due to limitation of specific websites, it's not always possible
  to update files.
  
- Files from these websites will be updated:
- * Polybox
- * one drive
- * nethz
- * ilias
- * moodle
- * dropbox
+See [this](./SITES.md) for a complete list, on which module support updates
  
-Files from other websites will **not** be updated.<br>
-But you can update these files by enabling force 
-download.<br>
+Files which won't get normally updated can still be updated
+by enabling force download.<br>
 **Caution:** Force download is very stressful for a website
 and should only be rarely used.
 
