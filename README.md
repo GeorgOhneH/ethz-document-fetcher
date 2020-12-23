@@ -52,4 +52,3 @@ and should only be rarely used.
 ## VPN
 If a websites require a vpn, the application will not be able
 to access this website, unless you enable your vpn.
-
