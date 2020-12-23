@@ -13,12 +13,12 @@ from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG,\
 
 from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 
-REGREX_PATTERN_CONFIG = ConfigList(
-    gui_name="Regrex Patterns",
+REGEX_PATTERN_CONFIG = ConfigList(
+    gui_name="Regex Patterns",
     hint_text="This uses the <a href=\"https://docs.python.org/3/library/re.html#re.sub\">re.sub</a>"
               " function. The replacements<br>are 'Folder Name' and 'File Name'",
     config_obj_default=ConfigDict(
-        gui_name="",
+        gui_name="Filters",
         layout={
             "pattern": ConfigString(
                 gui_name="Pattern"
@@ -30,7 +30,7 @@ REGREX_PATTERN_CONFIG = ConfigList(
             "file_name": ConfigString(
                 gui_name="File Name",
                 optional=True,
-                hint_text="<name> will be replaced with the file name from the website.",
+                hint_text="<name> will be replaced with the link name from the website.",
             )
         }
     )
@@ -44,7 +44,7 @@ async def producer(session,
                    base_path,
                    site_settings,
                    url: URL_CONFIG,
-                   regrex_patterns: REGREX_PATTERN_CONFIG,
+                   regex_patterns: REGEX_PATTERN_CONFIG,
                    headers: HEADERS_CONFIG,
                    basic_auth: BASIC_AUTH_CONFIG):
     session_kwargs = headers_config_to_session_kwargs(headers)
@@ -52,24 +52,24 @@ async def producer(session,
     session_kwargs.update(basic_auth_config_to_session_kwargs(basic_auth, site_settings))
 
     links = await get_all_file_links(session, url, session_kwargs)
-    for regrex_pattern in regrex_patterns:
-        pattern = regrex_pattern["pattern"]
-        folder_regrex = regrex_pattern["folder"]
-        if folder_regrex is None:
-            folder_regrex = ""
-        file_name_regrex = regrex_pattern["file_name"]
+    for regex_pattern in regex_patterns:
+        pattern = regex_pattern["pattern"]
+        folder_regex = regex_pattern["folder"]
+        if folder_regex is None:
+            folder_regex = ""
+        file_name_regex = regex_pattern["file_name"]
         for link, html_name in links:
 
             if re.search(pattern, link) is None:
                 continue
 
-            folder_name = re.sub(pattern, folder_regrex, link)
+            folder_name = re.sub(pattern, folder_regex, link)
 
             o = urlparse(link)
 
             file_name = _get_file_name(url_file_name=o.path.split("/")[-1],
                                        html_name=html_name,
-                                       file_name_regrex=file_name_regrex,
+                                       file_name_regex=file_name_regex,
                                        pattern=pattern,
                                        link=link)
 
@@ -84,13 +84,13 @@ def _get_file_name(url_file_name: str,
                    html_name: str,
                    pattern: str,
                    link: str,
-                   file_name_regrex: str) -> str:
+                   file_name_regex: str) -> str:
 
     extension = url_file_name.split(".")[-1]
 
-    if file_name_regrex:
-        modified_file_name_regrex = file_name_regrex.replace("<name>", html_name)
-        file_name = re.sub(pattern, modified_file_name_regrex, link)
+    if file_name_regex:
+        modified_file_name_regex = file_name_regex.replace("<name>", html_name)
+        file_name = re.sub(pattern, modified_file_name_regex, link)
         if not file_name.endswith("." + extension):
             file_name += f".{extension}"
         return file_name

@@ -112,10 +112,10 @@ children:
       regrex_patterns:
       - file_name: Serie \1
         folder: Woche \1
-        pattern: .*serie\/Serie[0]*([1-9]+)\.pdf
+        pattern: .*serie/Serie([0-9]+)\.pdf
       - file_name: "L\xF6sung \\1"
         folder: Woche \1
-        pattern: .*serie\/Loesung[0]*([1-9]+)\.pdf
+        pattern: .*serie/Loesung([0-9]+)\.pdf
       url: https://metaphor.ethz.ch/x/2020/fs/401-0232-10L/
       allowed_extensions: []
       forbidden_extensions: []
