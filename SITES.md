@@ -15,6 +15,8 @@
 
 > Note: Most urls on this page don't work. They are only there to show how they should look.
 
+> Note: It might help to look at more examples (File->Open Presets->...)
+
 ## Dropbox
 
 
@@ -39,36 +41,35 @@ The idea of the module:
 
 To understand how it exactly works let's look at an example:
 
-Consider this url https://metaphor.ethz.ch/x/2020/fs/401-0232-10L/
-and we want to download every exercise and there solutions.
+Consider this url https://metaphor.ethz.ch/x/2020/fs/401-0232-10L/.
+Our goal is it to download each exercise and solutions.
 
-If we click for an example on the first exercise, we will be directed to
+If we click on the first exercise, we will be directed to
 https://metaphor.ethz.ch/x/2020/fs/401-0232-10L/serie/Serie01.pdf,
 on the second to 
 https://metaphor.ethz.ch/x/2020/fs/401-0232-10L/serie/Serie02.pdf.
 
 We find out that only the number in the url changes.
-We could not apply a filter if this wasn't the case.
+If something like this does not exist, then we can't apply a filter and this module would be useless.
 
-Now we need a filter which let's only the exercise url through.
+Now we need a to filter the exercise links.
 The link collector uses regex for this. 
 If you are unfamiliar with regex you can look at [this](https://github.com/ziishaned/learn-regex).
 
 The regex expression which works for these urls looks like this `.*serie/Serie([0-9]+)\.pdf`.
-The parenthesis are python specified and are used to group specific string so we can reuse them
-in our naming scheme. In the example the parenthesis enclose the number of the exercise.
+The parentheses are python specified and are used to group a specific string so we can reuse them
+in our naming scheme. In the example the parentheses enclose the number of the current exercise.
 
-> Note: We use the `.*` at the beginning, because we want to match the whole link. 
-> Else the the beginning of the link get copied to the folder and file name.
+> Note: We use the `.*` at the beginning, because we want to match the whole link.
 
-Now it's time to chose how we should call our files and in which directory we should but them.
-In this example we want to but each exercise and solution in a separate Folder.
+Now it's time to choose how we should call our files and in which directory we should but them.
+In this example we but each exercise and solution in a separate Folder.
 
 We call this folder `Week \1`, where `\1` is the first group of the regex, which in this example
 is the number of the specific exercise. The link collector uses for this the [re.sub](https://docs.python.org/3/library/re.html#re.sub)
 function and is the reason why we write it like this.
 
-We call the file `Exercise \1`, where `\1` has the same reason as above.
+We call the file `Exercise \1`, where `\1` has the same meaning as above.
 We could also name it `<name>`, because `<name>` will be replaced with the name of the link, 
 which in our case would be more or less the same as the first option.
 
@@ -145,7 +146,7 @@ where the corresponding ids are bold
 |-------------|------------------|
 |ID| |
 |Type| Type s is for shared folder and Type f is for private folder|
-|Password| Some shared folders need a Password. You can ignore this field if it's a private folder |
+|Password| Some shared folders need a password. You can ignore this field if it's a private folder |
 
 > Note: To use the private folders you need to set your username and password in the settings
 
