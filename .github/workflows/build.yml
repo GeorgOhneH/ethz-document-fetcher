@@ -102,7 +102,7 @@ jobs:
 
     - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
-      run: pyinstaller app.spec --distpath ./distmac --workpath ./buildmac
+      run: pyinstaller app.spec --distpath ./distmac --workpath ./buildmac -y
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
