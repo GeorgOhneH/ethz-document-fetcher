@@ -96,13 +96,21 @@ jobs:
         sudo apt-get -y install p7zip-full
         sudo apt-get -y install -qq libegl1-mesa
 
-    - name: Build
+    - name: Build (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: pyinstaller app.spec --distpath .\distwin --workpath .\buildwin
+
+    - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
-      run: pyinstaller app.spec -y
+      run: pyinstaller app.spec --distpath .\distmac --workpath .\buildmac
+
+    - name: Build (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: pyinstaller app.spec --distpath .\distubu --workpath .\buildubu
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: 7z a eth-document-fetcher-windows-x86-64.zip ./dist/eth-document-fetcher/*
+      run: 7z a eth-document-fetcher-windows-x86-64.zip ./distwin/eth-document-fetcher/*
 
     - name: Upload artifact (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -145,7 +153,7 @@ jobs:
     - name: Package (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
-        dmgbuild --settings ./.CI/dmg-settings.py -D app=./dist/eth-document-fetcher.app eth-document-fetcher eth-document-fetcher-osx.dmg
+        dmgbuild --settings ./.CI/dmg-settings.py -D app=./distmac/eth-document-fetcher.app eth-document-fetcher eth-document-fetcher-osx.dmg
 
     - name: Upload artifact (MacOS)
       if: startsWith(matrix.os, 'macos')
