@@ -10,7 +10,7 @@ children:
       use: false
       use_eth_credentials: false
     headers: []
-    regrex_patterns:
+    regex_patterns:
     - file_name: null
       folder: Woche \1
       pattern: .*material/lecture[0-9]+/ex([0-9]+).pdf
@@ -39,7 +39,7 @@ children:
       use: false
       use_eth_credentials: false
     headers: []
-    regrex_patterns:
+    regex_patterns:
     - file_name: '[\1] <name>'
       folder: Slides
       pattern: .*slides/Info2-ITET-([0-9]+).pdf
@@ -59,7 +59,7 @@ children:
       use: true
       use_eth_credentials: false
     headers: []
-    regrex_patterns:
+    regex_patterns:
     - file_name: Script
       folder: null
       pattern: .*downloads/SST1-Vorlesung.pdf
@@ -83,7 +83,7 @@ children:
         use: false
         use_eth_credentials: false
       headers: []
-      regrex_patterns:
+      regex_patterns:
       - file_name: "20\\1 Fr\xFChjahr"
         folder: null
         pattern: .*klausuren/klausur_([0-9]+)a.pdf
@@ -130,7 +130,7 @@ children:
         use: false
         use_eth_credentials: false
       headers: []
-      regrex_patterns:
+      regex_patterns:
       - file_name: '[\1] <name>'
         folder: null
         pattern: .*/assets/ElectronicCircuits/lecture([0-9]+).pdf

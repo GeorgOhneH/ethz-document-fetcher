@@ -10,7 +10,7 @@ children:
       use: false
       use_eth_credentials: false
     headers: []
-    regrex_patterns:
+    regex_patterns:
     - file_name: Notes \3-\2-\1
       folder: Notes
       pattern: .*notes-([0-9]+)-([0-9]+)-([0-9]+).pdf
@@ -39,7 +39,7 @@ children:
       use: false
       use_eth_credentials: false
     headers: []
-    regrex_patterns:
+    regex_patterns:
     - file_name: null
       folder: "\xDCbung \\1"
       pattern: .*assets/Digitaltechnik/2020/Uebung/U([0-9]+).pdf
@@ -58,7 +58,7 @@ children:
       use: false
       use_eth_credentials: false
     headers: []
-    regrex_patterns:
+    regex_patterns:
     - file_name: null
       folder: Woche \1
       pattern: .*ex/serie([0-9]+).pdf

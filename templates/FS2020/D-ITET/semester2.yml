@@ -109,7 +109,7 @@ children:
         use: false
         use_eth_credentials: false
       headers: []
-      regrex_patterns:
+      regex_patterns:
       - file_name: Serie \1
         folder: Woche \1
         pattern: .*serie/Serie([0-9]+)\.pdf
