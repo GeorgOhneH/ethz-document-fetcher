@@ -98,15 +98,15 @@ jobs:
 
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: pyinstaller app.spec --distpath .\distwin --workpath .\buildwin
+      run: pyinstaller app.spec --distpath ./distwin --workpath ./buildwin
 
     - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
-      run: pyinstaller app.spec --distpath .\distmac --workpath .\buildmac
+      run: pyinstaller app.spec --distpath ./distmac --workpath ./buildmac
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: pyinstaller app.spec --distpath .\distubu --workpath .\buildubu
+      run: pyinstaller app.spec --distpath ./distubu --workpath ./buildubu
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
