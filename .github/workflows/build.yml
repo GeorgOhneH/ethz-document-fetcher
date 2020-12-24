@@ -96,17 +96,9 @@ jobs:
         sudo apt-get -y install p7zip-full
         sudo apt-get -y install -qq libegl1-mesa
 
-    - name: Build (Windows)
-      if: startsWith(matrix.os, 'windows')
-      run: pyinstaller app.spec
-
-    - name: Build (MacOS)
+    - name: Build
       if: startsWith(matrix.os, 'macos')
-      run: pyinstaller app.spec
-
-    - name: Build (Ubuntu)
-      if: startsWith(matrix.os, 'ubuntu')
-      run: pyinstaller app.spec
+      run: pyinstaller app.spec -y
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
