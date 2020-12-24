@@ -15,7 +15,7 @@
 
 > Note: Most urls on this page don't work. They are only there to show how they should look.
 
-> Note: It might help to look at more examples (File->Open Presets->...)
+> Note: It might help to look at more examples (Menu Bar->File->Open Presets->...)
 
 ## Dropbox
 
@@ -165,3 +165,9 @@ Example url: https://video.ethz.ch/lectures/d-itet/2019/spring/227-0002-00L.html
 
 > Note: Some videos require your ETH username and ETH password. 
 >To download these videos you need to set your username and password in the settings. 
+
+
+## Custom
+If a website is to complicated for the other modules, 
+you can code your own functions to handle it.
+  
