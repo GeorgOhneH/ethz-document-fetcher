@@ -1,0 +1,60 @@
+children:
+- folder: semester3
+  children:
+  - module: moodle
+    use_folder: true
+    folder_name: Systems Programming and Computer Architecture
+    keep_section_order: true
+    moodle_id: '13259'
+    password_mapper: []
+    process_external_links: true
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regex_patterns:
+    - file_name: <name>
+      folder: Notes
+      pattern: .*notes.*
+    - file_name: \1
+      folder: Exercises
+      pattern: .*exercises(.*)
+    - file_name: \1
+      folder: Handouts
+      pattern: .*handouts(.*)
+    url: https://metaphor.ethz.ch/x/2020/hs/401-0213-16L/
+    allowed_extensions: []
+    forbidden_extensions: []
+  - module: link_collector
+    use_folder: true
+    folder_name: Theoretische Informatik
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: []
+    regex_patterns:
+    - file_name: Aufgabe\1
+      folder: DeutschAufgaben
+      pattern: .*blatt([0-9]+)\.pdf
+    - file_name: Exercises\1
+      folder: EnglishExercises
+      pattern: .*blatt([0-9]+)e\.pdf
+    - file_name: Loesungen\1
+      folder: DeutschLoesungen
+      pattern: .*loesung([0-9]+)\.pdf
+    - file_name: Solution\1
+      folder: EnglishSolution
+      pattern: .*loesung([0-9]+)e\.pdf
+    url: https://courses.ite.inf.ethz.ch/theoInf20/
+    allowed_extensions: []
+    forbidden_extensions: []
