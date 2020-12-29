@@ -33,6 +33,8 @@ class SettingBase(ConfigBase):
 
 
 class Settings(Configs, metaclass=SettingBase):
+    NAME = "Setting"
+
     def __init__(self):
         super().__init__()
         current_settings = {}
