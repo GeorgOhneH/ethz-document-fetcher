@@ -25,10 +25,10 @@ children:
       pattern: .*notes.*
     - file_name: \1
       folder: Exercises
-      pattern: .*exercises(.*)
+      pattern: .*exercises/(.*)
     - file_name: \1
       folder: Handouts
-      pattern: .*handouts(.*)
+      pattern: .*handouts/(.*)
     url: https://metaphor.ethz.ch/x/2020/hs/401-0213-16L/
     allowed_extensions: []
     forbidden_extensions: []
