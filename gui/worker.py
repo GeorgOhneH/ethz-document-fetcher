@@ -58,6 +58,7 @@ class Worker(QObject):
             logger.error(f"Unexpected error. {type(e).__name__}: {e}", exc_info=True)
         finally:
             self.tasks = None
+            self.loop.run_until_complete(asyncio.sleep(0))
             for task in asyncio.all_tasks(loop=self.loop):  # clean up not finished tasks
                 task.cancel()
                 try:
