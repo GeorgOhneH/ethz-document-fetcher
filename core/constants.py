@@ -26,7 +26,12 @@ if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
 else:
     IS_FROZEN = False
 
-FORCE_DOWNLOAD_BLACKLIST = ["ilias-app2.let.ethz.ch", "polybox.ethz.ch", "ssrweb.zoom.us"]
+FORCE_DOWNLOAD_BLACKLIST = ["ilias-app2.let.ethz.ch",
+                            "polybox.ethz.ch",
+                            "ssrweb.zoom.us",
+                            "docs.google.com",
+                            "jamboard.google.com",
+                            "drive.google.com"]
 
 MOVIE_EXTENSIONS = {"mp4", "webm", "avi", "mkv", "mov", "m4v"}
 ACTION_NEW = 0
