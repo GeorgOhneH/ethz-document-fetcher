@@ -166,7 +166,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self._set_state(self.STATE_WARNING, msg)
 
     def got_warning(self, msg=None):
-        if msg is not None:
+        if msg is not None and self.state != self.STATE_SUCCESS:
             self.warning_msgs.append(msg)
 
     def set_success(self, msg=None):
