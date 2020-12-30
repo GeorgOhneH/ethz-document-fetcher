@@ -4,6 +4,7 @@ import logging
 import os
 import pickle
 import random
+from collections.abc import Iterable
 
 from core.storage import cache
 from core.storage.constants import FUNCTION_CACHE_PATH
@@ -72,4 +73,8 @@ def get_func_identifier(args, kwargs):
 def item_to_string(item):
     if isinstance(item, (str, int)):
         return str(item)
+    elif isinstance(item, dict):
+        return ",".join([str(k) + ":" + item_to_string(v) for k, v in item.items()])
+    elif isinstance(item, Iterable):
+        return ",".join([item_to_string(x) for x in item])
     return ""
