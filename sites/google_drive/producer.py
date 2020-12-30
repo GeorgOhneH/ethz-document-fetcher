@@ -1,7 +1,10 @@
 import asyncio
 
 from core.utils import safe_path_join
+from settings.config import ConfigString
 from .constants import *
+
+GDRIVE_ID_CONFIG = ConfigString(gui_name="ID")
 
 
 def _get_download_params(file_id):
@@ -84,7 +87,7 @@ async def producer(session,
                    queue,
                    base_path,
                    site_settings,
-                   file_id):
+                   file_id: GDRIVE_ID_CONFIG):
     await parse_folder(session, queue, base_path, file_id)
 
 

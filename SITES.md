@@ -5,6 +5,7 @@
 | Module Name | Requires Password | Has File Updates | Note   |
 |-------------|------------------|--------------| -----  |
 |[dropbox](#dropbox)|     :x:  |   :heavy_check_mark:  |        |
+|[google_drive](#google-drive)|     :x:  |   :heavy_check_mark:  |        |
 |[ilias](#ilias)| :heavy_check_mark: | :heavy_check_mark: |        |
 |[link_collector](#link-collector)| :x: | :x: |Is complicated, but very powerful|
 |[moodle](#moodle)| :heavy_check_mark: | :heavy_check_mark: |        |
@@ -19,16 +20,22 @@
 
 ## Dropbox
 
-
 | Parameter Name | Comment |
 |-------------|------------------|
 |Url| The url should look something like this:<br>https://www.dropbox.com/sh/maqgw1rp2utf89k/AACMGK0P8ltSwI9qxWZxz_WXa  |
+
+## Google Drive
+
+
+| Parameter Name | Comment |
+|-------------|------------------|
+|ID| Example url: https://drive.google.com/drive/folders/1bcHP2jqtMksjhEdpY2wdeH8MqziF4CQM <br>The id would be: 1bcHP2jqtMksjhEdpY2wdeH8MqziF4CQM |
 
 ## Ilias
 
 | Parameter Name | Comment |
 |-------------|------------------|
-|ID| Example url: https://ilias-app2.let.ethz.ch/ilias.php?ref_id=187834&cmd=view<br>The id would be: 187834 |
+|ID| Example url: https://ilias-app2.let.ethz.ch/ilias.php?ref_id=187834&cmd=view <br>The id would be: 187834 |
 
 ## Link Collector
 
