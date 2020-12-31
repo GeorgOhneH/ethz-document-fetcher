@@ -28,3 +28,8 @@ def _get_file_paths(path):
 
 TEMPLATE_PRESET_FILE_PATHS = _get_file_paths(os.path.join(ROOT_PATH, "templates"))
 TEMPLATE_PRESET_FOLDER_PATHS = [os.path.dirname(path) for path in TEMPLATE_PRESET_FILE_PATHS]
+
+THEME_NATIVE = "Native"
+THEME_FUSION_DARK = "Fusion Dark"
+THEME_FUSION_LIGHT = "Fusion Light"
+POSSIBLE_THEMES = [THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT]

@@ -10,6 +10,7 @@ from gui.button_container import ButtonContainer
 from gui.constants import ROOT_PATH
 from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.logger import Logger, LoggerSplitter
+from gui.theme_switcher import ThemeSwitcher
 from gui.settings import SettingsDialog
 from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.template_edit import TemplateEditDialog
@@ -17,7 +18,6 @@ from gui.template_view import TemplateView
 from gui.worker import Worker
 from settings.config_objs.path import open_file_picker
 from settings.settings import SiteSettings, TemplatePathSettings
-from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,8 @@ class CentralWidget(QWidget):
         self.start_time = time.time()
         self.thread_finished_open_file_func = None
         self.template_path_settings = TemplatePathSettings()
+
+        self.theme_switcher = ThemeSwitcher()
 
         self.status_bar = self.parent().statusBar()
         self.download_speed_widget = DownloadSpeedWidget()
@@ -97,6 +99,9 @@ class CentralWidget(QWidget):
         actions.open_file.triggered.connect(self.open_file)
 
         self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
+
+        self.settings_dialog.settings_saved.connect(self.theme_switcher.set_current_setting_theme)
+
         self.template_view = TemplateView(self.get_template_path(), self.worker.signals, self, parent=self)
         self.status_bar.showMessage(f"Opened file: {self.get_template_path()}")
 

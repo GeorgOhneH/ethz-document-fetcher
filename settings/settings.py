@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 
+from gui.constants import POSSIBLE_THEMES, THEME_NATIVE
 from settings.config import ConfigBase, Configs
 from settings.config_objs import ConfigPath, ConfigListString, ConfigBool, ConfigPassword, \
     ConfigOptions, ConfigString, ConfigInt
@@ -119,3 +120,7 @@ class SiteSettings(Settings):
 
 class GUISettings(Settings):
     NAME = "GUI"
+
+    theme = ConfigOptions(default=THEME_NATIVE,
+                          options=POSSIBLE_THEMES,
+                          gui_name="Theme")
