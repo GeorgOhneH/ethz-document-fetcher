@@ -4,30 +4,13 @@ import time
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import *
 
 from core.storage import cache
 from gui.constants import ASSETS_PATH
-from settings import gui_settings
+from gui.dynamic_widgets import DynamicIconLabel
 
 logger = logging.getLogger(__name__)
-
-
-class SVGWidget(QSvgWidget):
-    def __init__(self, path, width, height, parent):
-        super().__init__(parent=parent)
-        self.load(path)
-        self.setFixedSize(width, height)
-
-
-class ImageLabel(QLabel):
-    def __init__(self, path, width, height, parent=None):
-        super().__init__(parent=parent)
-        self.image = QPixmap(path)
-        self.image = self.image.scaled(width, height)
-        self.setFixedSize(width, height)
-        self.setPixmap(self.image)
 
 
 class MovieLabel(QLabel):
@@ -80,7 +63,7 @@ class TreeWidgetItem(QTreeWidgetItem):
 
     def init_widgets(self):
         self.name_widget = TreeWidgetItemName(name=self.template_node.get_gui_name(),
-                                              icon=self.template_node.get_gui_icon(),
+                                              icon_path=self.template_node.get_gui_icon_path(),
                                               check_state=self.template_node.meta_data.get("check_state", Qt.Checked))
         self.treeWidget().setItemWidget(self, self.COLUMN_NAME, self.name_widget)
 
@@ -282,7 +265,7 @@ class TreeWidgetItemName(QWidget):
     ERROR_SVG_PATH = os.path.join(ASSETS_PATH, "error.svg")
     SUCCESS_SVG_PATH = os.path.join(ASSETS_PATH, "success.svg")
 
-    def __init__(self, name, icon, check_state, parent=None):
+    def __init__(self, name, icon_path, check_state, parent=None):
         super().__init__(parent=parent)
         if isinstance(check_state, int):
             if check_state == 0:
@@ -304,15 +287,7 @@ class TreeWidgetItemName(QWidget):
 
         size = self.check_box.sizeHint().width()
 
-        self.icon = QLabel()
-        device_ratio = qApp.devicePixelRatio()
-        pixmap = icon.pixmap(QSize(size * device_ratio, size * device_ratio))
-
-        pixmap_mask = icon.pixmap(QSize(size, size))
-        pixmap.setDevicePixelRatio(device_ratio)
-        self.icon.setPixmap(pixmap)
-        self.icon.setMask(pixmap_mask.mask())
-        self.icon.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.icon = DynamicIconLabel(icon_path, size, size, self)
 
         self.stateWidget = QStackedWidget()
         self.stateWidget.setMaximumSize(size, size)
@@ -328,10 +303,10 @@ class TreeWidgetItemName(QWidget):
         self.setLayout(main_layout)
 
         self.loading_movie = MovieLabel(self.LOADING_GIF_PATH, size, size, self)
-        self.idle_image = ImageLabel(self.IDLE_IMAGE_PATH, size, size, self)
-        self.warning_svg = SVGWidget(self.WARNING_SVG_PATH, size, size, self)
-        self.error_svg = SVGWidget(self.ERROR_SVG_PATH, size, size, self)
-        self.success_svg = SVGWidget(self.SUCCESS_SVG_PATH, size, size, self)
+        self.idle_image = DynamicIconLabel(self.IDLE_IMAGE_PATH, size, size, self)
+        self.warning_svg = DynamicIconLabel(self.WARNING_SVG_PATH, size, size, self)
+        self.error_svg = DynamicIconLabel(self.ERROR_SVG_PATH, size, size, self)
+        self.success_svg = DynamicIconLabel(self.SUCCESS_SVG_PATH, size, size, self)
 
         self.stateWidget.addWidget(self.loading_movie)
         self.stateWidget.addWidget(self.idle_image)

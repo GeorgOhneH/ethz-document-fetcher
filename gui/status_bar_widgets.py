@@ -5,6 +5,7 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import *
 
 from gui.constants import ASSETS_PATH
+from gui.dynamic_widgets import DynamicIconLabel
 from gui.utils import format_bytes
 
 
@@ -26,9 +27,7 @@ class DownloadSpeedWidget(QWidget):
 
         size = self.text.fontMetrics().height()
 
-        self.icon = QSvgWidget()
-        self.icon.load(os.path.join(ASSETS_PATH, "speed_download.svg"))
-        self.icon.setFixedSize(size*0.7, size*0.7)
+        self.icon = DynamicIconLabel(os.path.join(ASSETS_PATH, "speed_download.svg"), size * 0.7, size * 0.7, self)
 
         self.layout.addWidget(self.icon)
         self.layout.addWidget(self.text)

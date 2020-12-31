@@ -4,8 +4,6 @@ import logging
 import os
 import copy
 
-from PyQt5.QtGui import *
-
 from core.constants import ROOT_PATH
 from core.exceptions import ParseTemplateError
 from core.template_parser import nodes
@@ -249,7 +247,7 @@ class SiteConfigs(NodeConfigs):
         kwargs = nodes.Site.get_unique_key_kwargs(**self.to_dict())
         return get_folder_name_from_kwargs(kwargs)
 
-    def get_icon(self):
+    def get_icon_path(self):
         image_files = os.listdir(SITE_ICON_PATH)
         file_name = None
         for image_file in image_files:
@@ -257,7 +255,7 @@ class SiteConfigs(NodeConfigs):
                 file_name = image_file
                 break
         if file_name is None:
-            return super(SiteConfigs, self).get_icon()
+            return super(SiteConfigs, self).get_icon_path()
 
         path = os.path.join(SITE_ICON_PATH, file_name)
-        return QIcon(path)
+        return path

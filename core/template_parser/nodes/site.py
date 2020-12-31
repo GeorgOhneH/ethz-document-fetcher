@@ -5,8 +5,6 @@ import os
 import re
 import time
 
-from PyQt5.QtGui import *
-
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
 from core.storage import cache
 from core.template_parser.nodes import site_configs
@@ -170,7 +168,7 @@ class Site(TemplateNode):
     def get_type_name(self):
         return self.raw_module_name
 
-    def get_gui_icon(self):
+    def get_gui_icon_path(self):
         image_files = os.listdir(SITE_ICON_PATH)
         file_name = None
         for image_file in image_files:
@@ -178,10 +176,10 @@ class Site(TemplateNode):
                 file_name = image_file
                 break
         if file_name is None:
-            return super(Site, self).get_gui_icon()
+            return super(Site, self).get_gui_icon_path()
 
         path = os.path.join(SITE_ICON_PATH, file_name)
-        return QIcon(path)
+        return path
 
     def get_configs(self):
         configs = site_configs.SiteConfigs()

@@ -19,8 +19,8 @@ class NodeConfigs(Configs):
     def get_folder_name(self):
         return None
 
-    def get_icon(self):
-        return QIcon(TemplateNode.DEFAULT_ICON_PATH)
+    def get_icon_path(self):
+        return TemplateNode.DEFAULT_ICON_PATH
 
 
 class TemplateNode(object):
@@ -110,8 +110,8 @@ class TemplateNode(object):
     def get_type_name(self):
         return "Base"
 
-    def get_gui_icon(self):
-        return QIcon(self.DEFAULT_ICON_PATH)
+    def get_gui_icon_path(self):
+        return self.DEFAULT_ICON_PATH
 
     def get_configs(self):
         return NodeConfigs()

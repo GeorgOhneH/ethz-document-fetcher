@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from gui.constants import POSSIBLE_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
+from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
 from settings import gui_settings
 
 logger = logging.getLogger(__name__)
@@ -84,14 +84,14 @@ def _init_light_palette():
     return light_palette
 
 
-class ThemeSwitcher(QObject):
+class Application(QApplication):
     theme_changed = pyqtSignal()
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, argv):
+        super().__init__(argv)
         self.current_theme = None
-        self.default_palette = qApp.palette()
-        self.default_style = qApp.style().objectName()
+        self.default_palette = self.palette()
+        self.default_style = self.style().objectName()
 
         self.dark_palette = _init_dark_pallet()
         self.light_palette = _init_light_palette()
@@ -100,16 +100,16 @@ class ThemeSwitcher(QObject):
 
     # IMPORTANT: Set style AFTER palette
     def _to_native(self):
-        qApp.setPalette(self.default_palette)
-        qApp.setStyle(self.default_style)
+        self.setPalette(self.default_palette)
+        self.setStyle(self.default_style)
 
     def _to_fusion_dark(self):
-        qApp.setPalette(self.dark_palette)
-        qApp.setStyle("Fusion")
+        self.setPalette(self.dark_palette)
+        self.setStyle("Fusion")
 
     def _to_fusion_light(self):
-        qApp.setPalette(self.light_palette)
-        qApp.setStyle("Fusion")
+        self.setPalette(self.light_palette)
+        self.setStyle("Fusion")
 
     def set_theme(self, theme):
         logger.debug(f"Setting Theme: {theme}")
@@ -124,7 +124,7 @@ class ThemeSwitcher(QObject):
         elif theme == THEME_FUSION_LIGHT:
             self._to_fusion_light()
         else:
-            raise ValueError(f"theme must be one of these {POSSIBLE_THEMES}, not ({theme})")
+            raise ValueError(f"theme must be one of these {ALL_THEMES}, not ({theme})")
 
         self.current_theme = theme
         self.theme_changed.emit()

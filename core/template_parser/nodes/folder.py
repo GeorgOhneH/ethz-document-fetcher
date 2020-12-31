@@ -1,7 +1,5 @@
 import os
 
-from PyQt5.QtGui import *
-
 from core.template_parser.nodes.base import TemplateNode, NodeConfigs
 from gui.constants import ASSETS_PATH
 from settings.config_objs import ConfigString
@@ -20,8 +18,8 @@ class FolderConfigs(NodeConfigs):
     def get_folder_name(self):
         return self.name
 
-    def get_icon(self):
-        return QIcon(Folder.FOLDER_ICON_PATH)
+    def get_icon_path(self):
+        return Folder.FOLDER_ICON_PATH
 
 
 class Folder(TemplateNode):
@@ -44,8 +42,8 @@ class Folder(TemplateNode):
     def get_gui_name(self):
         return self.name
 
-    def get_gui_icon(self):
-        return QIcon(self.FOLDER_ICON_PATH)
+    def get_gui_icon_path(self):
+        return self.FOLDER_ICON_PATH
 
     def get_type_name(self):
         return "Folder"
