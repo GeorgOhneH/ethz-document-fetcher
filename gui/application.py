@@ -112,7 +112,7 @@ class Application(QApplication):
         self.setStyle("Fusion")
 
     def set_theme(self, theme):
-        logger.debug(f"Setting Theme: {theme}")
+        logger.debug(f"Set Theme: {theme}")
 
         if self.current_theme == theme:
             return
