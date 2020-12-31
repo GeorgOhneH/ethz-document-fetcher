@@ -118,7 +118,7 @@ but on all Website which use Apache.
 |Url| see Url section |
 
 ### Url
-To find the right url is not always easy and sometimes even impossible.
+Finding the right url is not always easy and sometimes even impossible.
 
 You are looking for a url which returns something like this:
 
@@ -175,6 +175,6 @@ Example url: https://video.ethz.ch/lectures/d-itet/2019/spring/227-0002-00L.html
 
 
 ## Custom
-If a website is to complicated for the other modules, 
+If a website is too complicated for the other modules, 
 you can code your own functions to handle it.
   

@@ -18,7 +18,7 @@ REGEX_PATTERN_CONFIG = ConfigList(
     hint_text="This uses the <a href=\"https://docs.python.org/3/library/re.html#re.sub\">re.sub</a>"
               " function. The replacements<br>are 'Folder Name' and 'File Name'",
     config_obj_default=ConfigDict(
-        gui_name="Filters",
+        gui_name="Filter",
         layout={
             "pattern": ConfigString(
                 gui_name="Pattern"

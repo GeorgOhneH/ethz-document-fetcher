@@ -27,7 +27,7 @@ Click [here](./TUTORIAL.md) for a detailed tutorial on how to use the GUI and CL
 
 # Disclaimer
 I can not give any guarantees that the application will work properly.
-You should never rely on on the correctness of the application and 
+You should never rely on the correctness of the application and 
 always check the website if the file has any importance.
 
 # Limitations
@@ -35,7 +35,7 @@ always check the website if the file has any importance.
  Due to limitation of specific websites, it's not always possible
  to update files.
  
-See [this](./SITES.md) for a complete list, on which module support updates
+See [this](./SITES.md) for a complete list, on which modules support updates
  
 Files which won't get normally updated can still be updated
 by enabling force download.<br>
@@ -45,3 +45,11 @@ and should only be rarely used.
 ## VPN
 If a websites require a vpn, the application will not be able
 to access this website, unless you enable your vpn.
+
+# Contribution
+## Template
+You can upload your templates via a push request and 
+add them to the existing presets so other people can use them.
+
+## Issues
+If you have a feature request or have encountered a bug, you can open an issue.
