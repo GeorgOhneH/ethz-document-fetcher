@@ -66,7 +66,11 @@ class QtHandler(QObject, logging.Handler):
 
             if white_space_count != 0:
                 line = ("&nbsp;" * white_space_count) + line
-            self.new_record.emit(line)
+            try:
+                self.new_record.emit(line)
+            except RuntimeError:
+                # if the app closes and we still send lines, we get a runtime error
+                pass
 
 
 class HtmlColourFormatter(logging.Formatter):
