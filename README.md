@@ -52,4 +52,4 @@ You can upload your templates via a push request and
 add them to the existing presets so other people can use them.
 
 ## Issues
-If you have a feature request or have encountered a bug, you can open an issue.
+If you have feature requests or encountered a bug, you are welcome to open an issue.
