@@ -24,7 +24,7 @@ from gui.application import Application
 from gui.constants import ASSETS_PATH
 from core.constants import IS_FROZEN
 from settings.logger import setup_logger
-from settings import advanced_settings, gui_settings
+from settings import advanced_settings
 
 colorama.init()
 

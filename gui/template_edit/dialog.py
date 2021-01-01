@@ -26,6 +26,7 @@ class TemplateEditDialog(QDialog):
         self.save_as_btn = self.button_box.addButton("Save As...", QDialogButtonBox.YesRole)
         self.cancel_btn = self.button_box.addButton(QDialogButtonBox.Cancel)
 
+        # remove focus so you can press enter, without closing the dialog
         for button in self.button_box.buttons():
             button.setAutoDefault(False)
             button.setDefault(False)
@@ -48,6 +49,8 @@ class TemplateEditDialog(QDialog):
     def show(self):
         self.read_settings()
         super().show()
+        # to remove focus the the treewidget
+        self.save_btn.setFocus()
 
     def save_and_exit(self, button):
         if button is self.cancel_btn:
