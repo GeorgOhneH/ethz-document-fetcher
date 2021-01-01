@@ -76,7 +76,7 @@ if sys.platform == 'darwin':
                name='eth-document-fetcher.app')
     app = BUNDLE(coll,
              name='eth-document-fetcher.app',
-             icon=os.path.join("gui", "assets", "logo", "logo.ico"),
+             icon=os.path.join("gui", "assets", "logo", "logo.icns"),
              bundle_identifier=None,
              info_plist={
                      'NSHighResolutionCapable': 'True'
