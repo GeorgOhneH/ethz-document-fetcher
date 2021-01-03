@@ -81,8 +81,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install wheel -U
-        pip install poetry -U
-        poetry add -E all git+https://github.com/Digital-Sapphire/PyUpdater.git
+        pip install git+https://github.com/Digital-Sapphire/PyUpdater
         pip install -r requirements.txt -U
         pip install boto3 -U
 
