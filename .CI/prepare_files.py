@@ -56,9 +56,6 @@ if __name__ == "__main__":
         region_name="eu-central-1",
     ).client("s3")
 
-    print(os.environ.get("PYU_AWS_ID"))
-    print(os.environ.get("PYU_AWS_SECRET"))
-
     download_dir(sys.platform, CI_PATH, "ethz-document-fetcher-pyupdater", client)
 
     shutil.move(os.path.join(CI_PATH, "win32", ".pyupdater"), ROOT_PATH)
