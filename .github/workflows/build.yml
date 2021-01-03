@@ -81,13 +81,8 @@ jobs:
     - name: Install dependencies
       run: |
         pip install wheel -U
-        pip install appdirs>=1.4.3
-        pip install bsdiff4==1.1.5
-        pip install dsdev-utils>=1.0.4
-        pip install pynacl>=1.4.0
-        pip install stevedore>=1.30.1, <2.0
-        pip install urllib3>=1.24.1, <2.0
-        pip install PyUpdater==3.1.1 -U --no-deps
+        pip install poetry - U
+        poetry add -E all git+https://github.com/Digital-Sapphire/PyUpdater.git
         pip install -r requirements.txt -U
         pip install boto3 -U
 
