@@ -322,7 +322,6 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
         if is_extension_forbidden("mp4",
                                   site_settings.allowed_extensions + queue.consumer_kwargs["allowed_extensions"],
                                   site_settings.forbidden_extensions + queue.consumer_kwargs["forbidden_extensions"]):
-            logger.debug(f"Skipped zoom download from moodle: {moodle_id}")
             return
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
         password = match_name_to_password(name, password_mapper)
