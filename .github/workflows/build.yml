@@ -96,6 +96,9 @@ jobs:
         sudo apt-get -y install p7zip-full
         sudo apt-get -y install -qq libegl1-mesa
 
+    - name: Init PyUpdater
+      run: python ./.CI/prepare_files.py
+
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
       run: |
