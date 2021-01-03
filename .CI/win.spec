@@ -1,4 +1,4 @@
-# -*- mode: python -*-
+# -*- mode: python ; coding: utf-8 -*-
 import os
 import sys
 import site
@@ -32,7 +32,6 @@ def exclude_init_files(path):
 
     return result
 
-
 block_cipher = None
 
 a = Analysis([os.path.join(os.getcwd(), "main_gui.py")],
@@ -55,40 +54,11 @@ a = Analysis([os.path.join(os.getcwd(), "main_gui.py")],
              noarchive=False)
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
-
-if sys.platform == 'darwin':
-    exe = EXE(pyz,
-          a.scripts,
-          [],
-          exclude_binaries=True,
-          name='eth-document-fetcher',
-          debug=False,
-          bootloader_ignore_signals=False,
-          strip=False,
-          upx=True,
-          console=False )
-    coll = COLLECT(exe,
-               a.binaries,
-               a.zipfiles,
-               a.datas,
-               strip=False,
-               upx=True,
-               upx_exclude=[],
-               name='eth-document-fetcher.app')
-    app = BUNDLE(coll,
-             name='eth-document-fetcher.app',
-             icon=os.path.join("gui", "assets", "logo", "logo.icns"),
-             bundle_identifier=None,
-             info_plist={
-                     'NSHighResolutionCapable': 'True'
-                 })
-
-else:
-    exe = EXE(pyz,
+exe = EXE(pyz,
               a.scripts,
               [],
               exclude_binaries=True,
-              name='eth-document-fetcher',
+              name='win',
               debug=False,
               bootloader_ignore_signals=False,
               strip=False,
@@ -96,11 +66,11 @@ else:
               console=False,
               icon=os.path.join("gui", "assets", "logo", "logo.ico"))
 
-    coll = COLLECT(exe,
-                   a.binaries,
-                   a.zipfiles,
-                   a.datas,
-                   strip=False,
-                   upx=True,
-                   upx_exclude=[],
-                   name='eth-document-fetcher')
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='win')

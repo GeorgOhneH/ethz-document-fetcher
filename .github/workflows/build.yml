@@ -8,6 +8,7 @@ on:
 
 jobs:
   check_release:
+#    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
     name: Check Release
     runs-on: ubuntu-latest
     outputs:
@@ -32,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [windows-latest]
       fail-fast: false
 
     steps:
@@ -78,7 +79,9 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Install dependencies
-      run: pip install -r requirements.txt -U
+      run: |
+        pip install -r requirements.txt -U
+        pip install boto3 -U
 
     - name: Install dependencies (MacOS)
       if: startsWith(matrix.os, 'macos')
@@ -95,15 +98,36 @@ jobs:
 
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: pyinstaller app.spec --distpath ./distwin --workpath ./buildwin
+      run: |
+        set /p VERSION=<version.txt
+        pyupdater build --app-version=%VERSION:~1% win.spec --pyinstaller-log-info
 
     - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
-      run: pyinstaller app.spec --distpath ./distmac --workpath ./buildmac -y
+        run: |
+          VERSION="$(cat version.txt)"
+          pyupdater build --app-version=${VERSION:1} mac.spec --pyinstaller-log-info
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: pyinstaller app.spec --distpath ./distubu --workpath ./buildubu
+        run: |
+          VERSION="$(cat version.txt)"
+          pyupdater build --app-version=${VERSION:1} linux.spec --pyinstaller-log-info
+
+    - name: Unzip
+      run: python ./.CI/unzip.py
+
+    - name: Create patches
+      run: pyupdater pkg --process
+
+    - name: Cryptographically Sign
+      run: pyupdater pkg --sign --slit-version
+
+    - name: Upload Release
+      run: pyupdater upload --service s3
+
+    - name: Upload PyUpdater Data
+      run: python ./.Ci/upload_pyuppdate_data.py
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')

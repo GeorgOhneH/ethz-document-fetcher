@@ -46,6 +46,8 @@ VERSION_FILE_PATH = os.path.join(ROOT_PATH, "version.txt")
 with open(VERSION_FILE_PATH) as f:
     VERSION = f.read().strip()
 
+PYU_VERSION = VERSION[1:]
+
 ASSETS_PATH = os.path.join(CORE_PATH, "assets")
 
 EMPTY_TWO_COLUMN_LEFT_PDF_PATH = os.path.join(ASSETS_PATH, "empty_two_column_left.pdf")

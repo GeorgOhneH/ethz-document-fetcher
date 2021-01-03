@@ -3,8 +3,10 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from pyupdater.client import Client
 
-from core.constants import VERSION
+from core.client_config import ClientConfig
+from core.constants import VERSION, PYU_VERSION
 from core.utils import get_latest_version, user_statistics
 from settings import advanced_settings
 
@@ -70,3 +72,15 @@ class SendUserStats(QRunnable):
 
     def run(self):
         user_statistics(self.name)
+
+        client = Client(ClientConfig())
+        client.refresh()
+
+        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
+
+        if app_update is not None:
+            app_update.download()
+
+            if app_update.is_downloaded():
+                app_update.extract_restart()
+
