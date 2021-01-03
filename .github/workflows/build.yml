@@ -107,6 +107,7 @@ jobs:
 
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
+      shell: cmd
       run: |
         set /p VERSION=<version.txt
         pyupdater build --app-version=%VERSION:~1% win.spec --pyinstaller-log-info --archive-format zip
