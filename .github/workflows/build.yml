@@ -80,6 +80,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        pip install wheel -U
         pip install -r requirements.txt -U
         pip install boto3 -U
 
@@ -103,19 +104,19 @@ jobs:
       if: startsWith(matrix.os, 'windows')
       run: |
         set /p VERSION=<version.txt
-        pyupdater build --app-version=%VERSION:~1% win.spec --pyinstaller-log-info
+        pyupdater build --app-version=%VERSION:~1% win.spec --pyinstaller-log-info --archive-format zip
 
     - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
         VERSION="$(cat version.txt)"
-        pyupdater build --app-version=${VERSION:1} mac.spec --pyinstaller-log-info
+        pyupdater build --app-version=${VERSION:1} mac.spec --pyinstaller-log-info --archive-format zip
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
       run: |
         VERSION="$(cat version.txt)"
-        pyupdater build --app-version=${VERSION:1} linux.spec --pyinstaller-log-info
+        pyupdater build --app-version=${VERSION:1} linux.spec --pyinstaller-log-info --archive-format zip
 
     - name: Unzip
       run: python ./.CI/unzip.py
