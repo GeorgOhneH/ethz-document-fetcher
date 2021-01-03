@@ -99,6 +99,11 @@ jobs:
 
     - name: Init PyUpdater
       run: python ./.CI/prepare_files.py
+      env:
+        PYU_AWS_BUCKET: ${{ secrets.PYU_AWS_BUCKET }}
+        PYU_AWS_BUCKET_REGION: ${{ secrets.PYU_AWS_BUCKET_REGION }}
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -129,9 +134,19 @@ jobs:
 
     - name: Upload Release
       run: pyupdater upload --service s3
+      env:
+        PYU_AWS_BUCKET: ${{ secrets.PYU_AWS_BUCKET }}
+        PYU_AWS_BUCKET_REGION: ${{ secrets.PYU_AWS_BUCKET_REGION }}
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Upload PyUpdater Data
       run: python ./.Ci/upload_pyuppdate_data.py
+      env:
+        PYU_AWS_BUCKET: ${{ secrets.PYU_AWS_BUCKET }}
+        PYU_AWS_BUCKET_REGION: ${{ secrets.PYU_AWS_BUCKET_REGION }}
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')

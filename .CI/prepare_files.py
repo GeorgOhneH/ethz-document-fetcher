@@ -51,8 +51,8 @@ if __name__ == "__main__":
     CONFIG_PATH = os.path.join(ROOT_PATH, ".pyupdater", "config.pyu")
 
     client = boto3.Session(
-        aws_access_key_id=os.environ.get("PYU_AWS_ID"),
-        aws_secret_access_key=os.environ.get("PYU_AWS_SECRET"),
+        aws_access_key_id=os.environ["PYU_AWS_ID"],
+        aws_secret_access_key=os.environ["PYU_AWS_SECRET"],
         region_name="eu-central-1",
     ).client("s3")
 
