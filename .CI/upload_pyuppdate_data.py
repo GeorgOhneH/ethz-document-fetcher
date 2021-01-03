@@ -32,8 +32,8 @@ if __name__ == "__main__":
     bucket = "ethz-document-fetcher-pyupdater"
 
     client = boto3.Session(
-        aws_access_key_id=os.getenv("PYU_AWS_ID"),
-        aws_secret_access_key=os.getenv("PYU_AWS_SECRET"),
+        aws_access_key_id=os.environ.get("PYU_AWS_ID"),
+        aws_secret_access_key=os.environ.get("PYU_AWS_SECRET"),
         region_name="eu-central-1",
     ).client("s3")
 
