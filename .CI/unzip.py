@@ -21,5 +21,8 @@ if __name__ == "__main__":
         raise ValueError("Not supported platform")
 
     path_to_zip_file = os.path.join(ROOT, "pyu-data", "new", f"ethz-document-fetcher-{platform}-{PYU_VERSION}.zip")
+    to_path = os.path.join(ROOT, f"dist{platform_dist}")
     with zipfile.ZipFile(path_to_zip_file, 'r') as zip_ref:
-        zip_ref.extractall(os.path.join(ROOT, f"dist{platform_dist}"))
+        zip_ref.extractall(to_path)
+
+    print(f"Moved file from {path_to_zip_file} to {to_path}")
