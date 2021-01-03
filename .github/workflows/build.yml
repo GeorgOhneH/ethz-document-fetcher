@@ -29,7 +29,7 @@ jobs:
 
   build:
     needs: check_release
-    if: (needs.check_release.outputs.latest_release != needs.check_release.outputs.current_version)
+#    if: (needs.check_release.outputs.latest_release != needs.check_release.outputs.current_version)
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
