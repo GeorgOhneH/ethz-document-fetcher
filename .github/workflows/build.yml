@@ -69,18 +69,18 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-#    - name: Cache pip (Windows)
-#      uses: actions/cache@v2
-#      if: startsWith(runner.os, 'windows')
-#      with:
-#        path: ~\AppData\Local\pip\Cache
-#        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-#        restore-keys: |
-#          ${{ runner.os }}-pip-
+    - name: Cache pip (Windows)
+      uses: actions/cache@v2
+      if: startsWith(runner.os, 'windows')
+      with:
+        path: ~\AppData\Local\pip\Cache
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     - name: Install dependencies
       run: |
-        pip install PyUpdater==3.1.1 -U
+        pip install PyUpdater==3.1.1 -U --no-deps
         pip install -r requirements.txt -U
         pip install boto3 -U
 
