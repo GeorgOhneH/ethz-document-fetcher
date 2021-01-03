@@ -81,6 +81,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install wheel -U
+        pip install PyUpdater -U
         pip install -r requirements.txt -U
         pip install boto3 -U
 
