@@ -58,8 +58,8 @@ if __name__ == "__main__":
 
     download_dir(sys.platform, CI_PATH, "ethz-document-fetcher-pyupdater", client)
 
-    shutil.move(os.path.join(CI_PATH, "win32", ".pyupdater"), ROOT_PATH)
-    shutil.move(os.path.join(CI_PATH, "win32", "pyu-data"), ROOT_PATH)
+    shutil.move(os.path.join(CI_PATH, sys.platform, ".pyupdater"), ROOT_PATH)
+    shutil.move(os.path.join(CI_PATH, sys.platform, "pyu-data"), ROOT_PATH)
 
     if not os.path.exists(os.path.join(ROOT_PATH, ".pyupdater", "config-old.pyu")):
 
