@@ -22,8 +22,11 @@ def run_startup_tasks(site_settings):
         check_for_update = CheckForUpdate()
         QThreadPool.globalInstance().start(check_for_update)
 
+        check_for_update.signals.finished.connect(lambda latest_version: ask_update_pop_up(latest_version,
+                                                                                           check_for_update.app_update))
 
-def ask_update_pop_up(latest_version):
+
+def ask_update_pop_up(latest_version, app_update):
     # if latest_version == VERSION:
     #     return False
 
@@ -41,12 +44,23 @@ def ask_update_pop_up(latest_version):
     msg_box.exec()
 
     if msg_box.clickedButton() != download_button:
-        return False
+        logger.debug("User declined Update")
+        return
 
-    return True
+    QThreadPool.globalInstance().start(app_update)
+
+
+class Signals(QObject):
+    finished = pyqtSignal(str)
 
 
 class CheckForUpdate(QRunnable):
+    signals = Signals()
+
+    def __init__(self):
+        super().__init__()
+        self.app_update = None
+
     def run(self):
 
         client = Client(ClientConfig())
@@ -65,12 +79,23 @@ class CheckForUpdate(QRunnable):
             logger.warning(f"Could not get release data. Error {e}")
             return
 
-        if not ask_update_pop_up(latest_version):
-            logger.debug("User declined Update")
+        if latest_version == VERSION:
             return
 
-        if app_update.is_downloaded():
-            app_update.extract_restart()
+        self.app_update = app_update
+
+        self.signals.finished.emit(latest_version)
+
+
+class Update(QRunnable):
+    def __init__(self, app_update):
+        super().__init__()
+        self.app_update = app_update
+
+    def run(self):
+        if self.app_update.is_downloaded():
+            logger.debug("Update: Extract and Restart")
+            self.app_update.extract_restart()
 
 
 class SendUserStats(QRunnable):
