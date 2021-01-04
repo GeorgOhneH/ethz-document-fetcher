@@ -125,7 +125,7 @@ jobs:
         pyupdater build --app-version=${VERSION:1} linux.spec --pyinstaller-log-info --archive-format zip
 
     - name: Unzip
-      run: python ./.CI/unzip.py
+      run: python .CI/unzip.py
 
     - name: Create patches
       run: pyupdater pkg --process
@@ -143,7 +143,7 @@ jobs:
         PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Upload PyUpdater Data
-      run: python ./.Ci/upload_pyuppdate_data.py
+      run: python .Ci/upload_pyuppdate_data.py
       env:
         PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
         PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
