@@ -1,0 +1,8 @@
+[Desktop Entry]
+Categories=Utility;
+Type=Application
+Icon=ethz-document-fetcher
+Name=ethz-document-fetcher
+Exec=ethz-document-fetcher
+Terminal=false
+

@@ -18,14 +18,14 @@ chmod +x appimagetool-x86_64.AppImage
 # QtQuickApp does support "make install", but we don't use it because we want to show the manual packaging approach in this example
 # initialize AppDir, bundle shared libraries, add desktop file and icon, use Qt plugin to bundle additional resources, and build AppImage, all in one command
 ./linuxdeploy-x86_64.AppImage --appdir AppDir \
-  -e ./distubu/eth-document-fetcher/eth-document-fetcher \
-  -i ./distubu/eth-document-fetcher/gui/assets/logo/logo.svg \
-  --icon-filename eth-document-fetcher \
+  -e ./distubu/ethz-document-fetcher/ethz-document-fetcher \
+  -i ./distubu/ethz-document-fetcher/gui/assets/logo/logo.svg \
+  --icon-filename ethz-document-fetcher \
   --create-desktop-file
 
-cp ./.CI/eth-document-fetcher.desktop ./AppDir/usr/share/applications/eth-document-fetcher.desktop
-cp ./distubu/eth-document-fetcher/* ./AppDir -r
-rm ./AppDir/eth-document-fetcher
+cp ./.CI/ethz-document-fetcher.desktop ./AppDir/usr/share/applications/ethz-document-fetcher.desktop
+cp ./distubu/ethz-document-fetcher/* ./AppDir -r
+rm ./AppDir/ethz-document-fetcher
 
-./appimagetool-x86_64.AppImage ./AppDir eth-document-fetcher-linux-x86_64.AppImage
+./appimagetool-x86_64.AppImage ./AppDir ethz-document-fetcher-linux-x86_64.AppImage
 

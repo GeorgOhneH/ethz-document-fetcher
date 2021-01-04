@@ -149,14 +149,14 @@ jobs:
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: 7z a eth-document-fetcher-windows-x86-64.zip ./distwin/eth-document-fetcher/*
+      run: 7z a ethz-document-fetcher-windows-x86-64.zip ./distwin/ethz-document-fetcher/*
 
     - name: Upload artifact (Windows)
       if: startsWith(matrix.os, 'windows')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-windows-x86-64.zip
-        path: eth-document-fetcher-windows-x86-64.zip
+        name: ethz-document-fetcher-windows-x86-64.zip
+        path: ethz-document-fetcher-windows-x86-64.zip
 
     - name: Download ApplicationID plugin for NSIS (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -186,20 +186,20 @@ jobs:
       if: startsWith(matrix.os, 'windows')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-windows-x86-64-installer.exe
-        path: eth-document-fetcher-windows-x86-64-installer.exe
+        name: ethz-document-fetcher-windows-x86-64-installer.exe
+        path: ethz-document-fetcher-windows-x86-64-installer.exe
 
     - name: Package (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
-        dmgbuild --settings ./.CI/dmg-settings.py -D app=./distmac/eth-document-fetcher.app eth-document-fetcher eth-document-fetcher-osx.dmg
+        dmgbuild --settings ./.CI/dmg-settings.py -D app=./distmac/ethz-document-fetcher.app ethz-document-fetcher ethz-document-fetcher-osx.dmg
 
     - name: Upload artifact (MacOS)
       if: startsWith(matrix.os, 'macos')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-osx.dmg
-        path: eth-document-fetcher-osx.dmg
+        name: ethz-document-fetcher-osx.dmg
+        path: ethz-document-fetcher-osx.dmg
 
     - name: Package (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
@@ -210,8 +210,8 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-linux-x86_64.AppImage
-        path: eth-document-fetcher-linux-x86_64.AppImage
+        name: ethz-document-fetcher-linux-x86_64.AppImage
+        path: ethz-document-fetcher-linux-x86_64.AppImage
 
   create-release:
     needs: [build, check_release]
@@ -233,22 +233,22 @@ jobs:
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-windows-x86-64.zip
+          name: ethz-document-fetcher-windows-x86-64.zip
           path: windows/
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-windows-x86-64-installer.exe
+          name: ethz-document-fetcher-windows-x86-64-installer.exe
           path: windows/
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-linux-x86_64.AppImage
+          name: ethz-document-fetcher-linux-x86_64.AppImage
           path: linux/
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-osx.dmg
+          name: ethz-document-fetcher-osx.dmg
           path: macos/
 
       # - name: Read upload URL into output
@@ -262,8 +262,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/eth-document-fetcher-windows-x86-64.zip
-          asset_name: eth-document-fetcher-windows-x86-64.zip
+          asset_path: ./windows/ethz-document-fetcher-windows-x86-64.zip
+          asset_name: ethz-document-fetcher-windows-x86-64.zip
           asset_content_type: application/zip
 
       - name: Upload release asset exe (Windows)
@@ -272,8 +272,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/eth-document-fetcher-windows-x86-64-installer.exe
-          asset_name: eth-document-fetcher-windows-x86-64-installer.exe
+          asset_path: ./windows/ethz-document-fetcher-windows-x86-64-installer.exe
+          asset_name: ethz-document-fetcher-windows-x86-64-installer.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Upload release asset (Ubuntu)
@@ -282,8 +282,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/eth-document-fetcher-linux-x86_64.AppImage
-          asset_name: eth-document-fetcher-linux-x86_64.AppImage
+          asset_path: ./linux/ethz-document-fetcher-linux-x86_64.AppImage
+          asset_name: ethz-document-fetcher-linux-x86_64.AppImage
           asset_content_type: application/x-executable
 
       - name: Upload release asset (MacOS)
@@ -292,6 +292,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/eth-document-fetcher-osx.dmg
-          asset_name: eth-document-fetcher-osx.dmg
+          asset_path: ./macos/ethz-document-fetcher-osx.dmg
+          asset_name: ethz-document-fetcher-osx.dmg
           asset_content_type: application/x-bzip2
