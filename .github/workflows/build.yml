@@ -100,7 +100,7 @@ jobs:
         sudo apt-get -y install -qq libegl1-mesa
 
     - name: Init PyUpdater
-      run: python ./.CI/prepare_files.py
+      run: python .CI/prepare_files.py
       env:
         PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
         PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
