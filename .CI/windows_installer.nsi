@@ -11,7 +11,7 @@
   Unicode true
 
   ;Define name of the product
-  !define PRODUCT "eth-document-fetcher"
+  !define PRODUCT "ethz-document-fetcher"
 
 
   ;Define the main name of the installer
@@ -101,7 +101,7 @@ Section "Main Component"
   SetOutPath $INSTDIR
 
   ;Put the following file in the SetOutPath
-  File /r ".\..\distwin\eth-document-fetcher\*.*"
+  File /r ".\..\distwin\ethz-document-fetcher\*.*"
 
   ;Store installation folder in registry
   WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
@@ -114,10 +114,10 @@ Section "Main Component"
 
   ;Create optional start menu shortcut for uninstaller and Main component
   CreateDirectory "$SMPROGRAMS\${PRODUCT}"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT}\eth-document-fetcher.lnk" "$INSTDIR\eth-document-fetcher.exe" "" "$INSTDIR\eth-document-fetcher.exe " 0
+  CreateShortCut "$SMPROGRAMS\${PRODUCT}\ethz-document-fetcher.lnk" "$INSTDIR\ethz-document-fetcher.exe" "" "$INSTDIR\ethz-document-fetcher.exe " 0
 
 
-  ApplicationID::Set "$SMPROGRAMS\${PRODUCT}\eth-document-fetcher.lnk" "eth-document-fetcher.eth-document-fetcher"
+  ApplicationID::Set "$SMPROGRAMS\${PRODUCT}\ethz-document-fetcher.lnk" "ethz-document-fetcher.ethz-document-fetcher"
 
   ;Create uninstaller
   WriteUninstaller "${PRODUCT}-uninstaller.exe"

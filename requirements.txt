@@ -10,3 +10,5 @@ certifi
 PyMuPDF
 PyQt5==5.15.2
 pyinstaller
+git+https://github.com/Digital-Sapphire/PyUpdater
+PyUpdater-S3-plugin

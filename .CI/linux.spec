@@ -56,51 +56,24 @@ a = Analysis([os.path.join(os.getcwd(), "main_gui.py")],
 pyz = PYZ(a.pure, a.zipped_data,
           cipher=block_cipher)
 
-if sys.platform == 'darwin':
-    exe = EXE(pyz,
-              a.scripts,
-              [],
-              exclude_binaries=True,
-              name='ethz-document-fetcher',
-              debug=False,
-              bootloader_ignore_signals=False,
-              strip=False,
-              upx=True,
-              console=False)
-    coll = COLLECT(exe,
-                   a.binaries,
-                   a.zipfiles,
-                   a.datas,
-                   strip=False,
-                   upx=True,
-                   upx_exclude=[],
-                   name='ethz-document-fetcher.app')
-    app = BUNDLE(coll,
-                 name='ethz-document-fetcher.app',
-                 icon=os.path.join("gui", "assets", "logo", "logo.icns"),
-                 bundle_identifier=None,
-                 info_plist={
-                     'NSHighResolutionCapable': 'True'
-                 })
 
-else:
-    exe = EXE(pyz,
-              a.scripts,
-              [],
-              exclude_binaries=True,
-              name='ethz-document-fetcher',
-              debug=False,
-              bootloader_ignore_signals=False,
-              strip=False,
-              upx=True,
-              console=False,
-              icon=os.path.join("gui", "assets", "logo", "logo.ico"))
+exe = EXE(pyz,
+          a.scripts,
+          [],
+          exclude_binaries=True,
+          name='nix64',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          console=False,
+          icon=os.path.join("gui", "assets", "logo", "logo.ico"))
 
-    coll = COLLECT(exe,
-                   a.binaries,
-                   a.zipfiles,
-                   a.datas,
-                   strip=False,
-                   upx=True,
-                   upx_exclude=[],
-                   name='ethz-document-fetcher')
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='nix64')

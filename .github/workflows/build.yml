@@ -8,6 +8,7 @@ on:
 
 jobs:
   check_release:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
     name: Check Release
     runs-on: ubuntu-latest
     outputs:
@@ -78,7 +79,10 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Install dependencies
-      run: pip install -r requirements.txt -U
+      run: |
+        pip install wheel -U
+        pip install -r requirements.txt -U
+        pip install boto3 -U
 
     - name: Install dependencies (MacOS)
       if: startsWith(matrix.os, 'macos')
@@ -93,28 +97,83 @@ jobs:
         sudo apt-get -y install p7zip-full
         sudo apt-get -y install -qq libegl1-mesa
 
+    - name: Init PyUpdater
+      run: python .CI/prepare_files.py
+      env:
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: pyinstaller app.spec --distpath ./distwin --workpath ./buildwin
+      shell: cmd
+      run: |
+        set /p VERSION=<version.txt
+        pyupdater build --app-version=%VERSION:~1% win.spec --pyinstaller-log-info --archive-format zip
 
     - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
-      run: pyinstaller app.spec --distpath ./distmac --workpath ./buildmac -y
+      run: |
+        VERSION="$(cat version.txt)"
+        pyupdater build --app-version=${VERSION:1} mac.spec --pyinstaller-log-info --archive-format zip
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
-      run: pyinstaller app.spec --distpath ./distubu --workpath ./buildubu
+      run: |
+        VERSION="$(cat version.txt)"
+        pyupdater build --app-version=${VERSION:1} linux.spec --pyinstaller-log-info --archive-format zip
+
+    - name: Unzip
+      run: python .CI/unzip.py
+
+    - name: Create patches
+      run: pyupdater pkg --process
+
+    - name: Cryptographically Sign
+      run: pyupdater pkg --sign --slit-version
+
+    - name: Upload Release (Windows)
+      if: startsWith(matrix.os, 'windows')
+      run: pyupdater upload --service s3
+      env:
+        PYU_AWS_BUCKET: ethz-document-fetcher-win32
+        PYU_AWS_BUCKET_REGION: eu-central-1
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+
+    - name: Upload Release (MacOS)
+      if: startsWith(matrix.os, 'macos')
+      run: pyupdater upload --service s3
+      env:
+        PYU_AWS_BUCKET: ethz-document-fetcher-darwin
+        PYU_AWS_BUCKET_REGION: eu-central-1
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+
+    - name: Upload Release (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: pyupdater upload --service s3
+      env:
+        PYU_AWS_BUCKET: ethz-document-fetcher-linux
+        PYU_AWS_BUCKET_REGION: eu-central-1
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+
+    - name: Upload PyUpdater Data
+      run: python .CI/upload_pyuppdate_data.py
+      env:
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: 7z a eth-document-fetcher-windows-x86-64.zip ./distwin/eth-document-fetcher/*
+      run: 7z a ethz-document-fetcher-windows-x86-64.zip ./distwin/ethz-document-fetcher/*
 
     - name: Upload artifact (Windows)
       if: startsWith(matrix.os, 'windows')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-windows-x86-64.zip
-        path: eth-document-fetcher-windows-x86-64.zip
+        name: ethz-document-fetcher-windows-x86-64.zip
+        path: ethz-document-fetcher-windows-x86-64.zip
 
     - name: Download ApplicationID plugin for NSIS (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -144,20 +203,20 @@ jobs:
       if: startsWith(matrix.os, 'windows')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-windows-x86-64-installer.exe
-        path: eth-document-fetcher-windows-x86-64-installer.exe
+        name: ethz-document-fetcher-windows-x86-64-installer.exe
+        path: ethz-document-fetcher-windows-x86-64-installer.exe
 
     - name: Package (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
-        dmgbuild --settings ./.CI/dmg-settings.py -D app=./distmac/eth-document-fetcher.app eth-document-fetcher eth-document-fetcher-osx.dmg
+        dmgbuild --settings ./.CI/dmg-settings.py -D app=./distmac/ethz-document-fetcher.app ethz-document-fetcher ethz-document-fetcher-osx.dmg
 
     - name: Upload artifact (MacOS)
       if: startsWith(matrix.os, 'macos')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-osx.dmg
-        path: eth-document-fetcher-osx.dmg
+        name: ethz-document-fetcher-osx.dmg
+        path: ethz-document-fetcher-osx.dmg
 
     - name: Package (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
@@ -168,8 +227,8 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu')
       uses: actions/upload-artifact@v1
       with:
-        name: eth-document-fetcher-linux-x86_64.AppImage
-        path: eth-document-fetcher-linux-x86_64.AppImage
+        name: ethz-document-fetcher-linux-x86_64.AppImage
+        path: ethz-document-fetcher-linux-x86_64.AppImage
 
   create-release:
     needs: [build, check_release]
@@ -191,22 +250,22 @@ jobs:
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-windows-x86-64.zip
+          name: ethz-document-fetcher-windows-x86-64.zip
           path: windows/
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-windows-x86-64-installer.exe
+          name: ethz-document-fetcher-windows-x86-64-installer.exe
           path: windows/
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-linux-x86_64.AppImage
+          name: ethz-document-fetcher-linux-x86_64.AppImage
           path: linux/
 
       - uses: actions/download-artifact@v1
         with:
-          name: eth-document-fetcher-osx.dmg
+          name: ethz-document-fetcher-osx.dmg
           path: macos/
 
       # - name: Read upload URL into output
@@ -220,8 +279,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/eth-document-fetcher-windows-x86-64.zip
-          asset_name: eth-document-fetcher-windows-x86-64.zip
+          asset_path: ./windows/ethz-document-fetcher-windows-x86-64.zip
+          asset_name: ethz-document-fetcher-windows-x86-64.zip
           asset_content_type: application/zip
 
       - name: Upload release asset exe (Windows)
@@ -230,8 +289,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/eth-document-fetcher-windows-x86-64-installer.exe
-          asset_name: eth-document-fetcher-windows-x86-64-installer.exe
+          asset_path: ./windows/ethz-document-fetcher-windows-x86-64-installer.exe
+          asset_name: ethz-document-fetcher-windows-x86-64-installer.exe
           asset_content_type: application/vnd.microsoft.portable-executable
 
       - name: Upload release asset (Ubuntu)
@@ -240,8 +299,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/eth-document-fetcher-linux-x86_64.AppImage
-          asset_name: eth-document-fetcher-linux-x86_64.AppImage
+          asset_path: ./linux/ethz-document-fetcher-linux-x86_64.AppImage
+          asset_name: ethz-document-fetcher-linux-x86_64.AppImage
           asset_content_type: application/x-executable
 
       - name: Upload release asset (MacOS)
@@ -250,6 +309,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/eth-document-fetcher-osx.dmg
-          asset_name: eth-document-fetcher-osx.dmg
+          asset_path: ./macos/ethz-document-fetcher-osx.dmg
+          asset_name: ethz-document-fetcher-osx.dmg
           asset_content_type: application/x-bzip2
