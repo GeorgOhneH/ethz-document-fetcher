@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 if not QStandardPaths.writableLocation(QStandardPaths.AppDataLocation):
     raise ValueError("Could not find a AppData path")
 
-APP_DATA_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "eth-document-fetcher")
+APP_DATA_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "ethz-document-fetcher")
 
 
 try:

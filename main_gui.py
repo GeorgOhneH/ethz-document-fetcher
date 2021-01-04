@@ -14,7 +14,7 @@ from PyQt5.QtCore import *
 try:
     from PyQt5.QtWinExtras import QtWin
 
-    myappid = 'eth-document-fetcher.eth-document-fetcher'
+    myappid = 'ethz-document-fetcher.ethz-document-fetcher'
     QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
 except ImportError:
     pass
