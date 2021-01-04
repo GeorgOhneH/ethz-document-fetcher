@@ -44,7 +44,6 @@ def ask_update_pop_up(latest_version, check_for_update):
         msg_box.exec()
 
         if msg_box.clickedButton() != download_button:
-            logger.debug("User declined Update")
             return
 
         check_for_update.allowed_download = True
