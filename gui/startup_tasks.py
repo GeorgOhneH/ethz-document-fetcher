@@ -57,17 +57,6 @@ class CheckForUpdate(QRunnable):
     signals = Signals()
 
     def run(self):
-
-        client = Client(ClientConfig())
-        client.refresh()
-
-        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
-
-        if app_update is None:
-            return
-
-        app_update.download()
-
         try:
             latest_version = get_latest_version()
         except Exception as e:
