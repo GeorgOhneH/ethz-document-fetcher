@@ -24,8 +24,8 @@ def run_startup_tasks(site_settings):
 
 
 def ask_update_pop_up(latest_version):
-    if latest_version == VERSION:
-        return False
+    # if latest_version == VERSION:
+    #     return False
 
     msg_box = QMessageBox()
     msg_box.setIcon(QMessageBox.Question)
