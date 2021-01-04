@@ -1,7 +1,7 @@
 # -*- mode: python -*-
 import os
 import sys
-import site
+import pyupdater
 
 
 def collect_submodules(name):
@@ -46,7 +46,7 @@ a = Analysis([os.path.join(os.getcwd(), "main_gui.py")],
                  (os.path.join("core", "assets"), os.path.join("core", "assets")),
              ],
              hiddenimports=["encodings.idna"] + collect_submodules("sites"),
-             hookspath=[os.path.join(site.getsitepackages()[-1], "pyupdater", "hooks")],
+             hookspath=[os.path.join(pyupdater.__path__[0], "hooks")],
              runtime_hooks=[],
              excludes=[],
              win_no_prefer_redirects=False,
@@ -61,7 +61,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='nix64',
+          name='linux',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -76,4 +76,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='nix64')
+               name='linux')
