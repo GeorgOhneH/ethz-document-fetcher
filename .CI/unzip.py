@@ -13,7 +13,7 @@ if __name__ == "__main__":
         platform = "win"
         platform_dist = "win"
     elif sys.platform == "linux":
-        platform = "linux"
+        platform = "nix64"
         platform_dist = "ubu"
     elif sys.platform == "darwin":
         platform = "mac"
