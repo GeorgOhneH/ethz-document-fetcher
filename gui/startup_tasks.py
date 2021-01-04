@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 from pyupdater.client import Client
 
 from core.client_config import ClientConfig
-from core.constants import VERSION, PYU_VERSION
+from core.constants import VERSION, PYU_VERSION, IS_FROZEN
 from core.utils import get_latest_version, user_statistics
 from settings import advanced_settings
 
@@ -18,7 +18,7 @@ DOWNLOAD_RELEASE_URL = "https://github.com/GeorgOhneH/ethz-document-fetcher/rele
 def run_startup_tasks(site_settings):
     send_user_stats = SendUserStats(site_settings.username)
     QThreadPool.globalInstance().start(send_user_stats)
-    if advanced_settings.check_for_updates:
+    if advanced_settings.check_for_updates and IS_FROZEN:
         mutex = QMutex()
         cond = QWaitCondition()
         check_for_update = Update(mutex=mutex, cond=cond)
@@ -33,17 +33,16 @@ def ask_update_pop_up(latest_version, check_for_update):
         msg_box = QMessageBox()
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("A new Version is available")
-        msg_box.setText(f"Version {latest_version[1:]} is available.\n"
-                        f"Do you want to download it?\n"
-                        f"(This will open a website)")
+        msg_box.setText(f"Version {latest_version[1:]} is available. (Current: {VERSION})\n"
+                        f"Install and restart new version?\n")
         msg_box.addButton(QMessageBox.Cancel)
-        download_button = msg_box.addButton("Download", QMessageBox.AcceptRole)
+        install_button = msg_box.addButton("Install", QMessageBox.AcceptRole)
 
-        msg_box.setDefaultButton(download_button)
+        msg_box.setDefaultButton(install_button)
 
         msg_box.exec()
 
-        if msg_box.clickedButton() != download_button:
+        if msg_box.clickedButton() != install_button:
             return
 
         check_for_update.allowed_download = True

@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
 
         view_menu.addAction(self.actions.logger)
 
-        self.setWindowTitle(f"ethz-document-fetcher zifowoefboesfs {VERSION}")
+        self.setWindowTitle(f"ethz-document-fetcher {VERSION}")
         self.setCentralWidget(self.central_widget)
 
         self.read_settings()
