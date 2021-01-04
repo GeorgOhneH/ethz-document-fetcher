@@ -22,11 +22,10 @@ def run_startup_tasks(site_settings):
         check_for_update = CheckForUpdate()
         QThreadPool.globalInstance().start(check_for_update)
 
-        check_for_update.signals.finished.connect(lambda latest_version: ask_update_pop_up(latest_version,
-                                                                                           check_for_update.app_update))
+        check_for_update.signals.finished.connect(ask_update_pop_up)
 
 
-def ask_update_pop_up(latest_version, app_update):
+def ask_update_pop_up(latest_version):
     # if latest_version == VERSION:
     #     return False
 
@@ -47,7 +46,7 @@ def ask_update_pop_up(latest_version, app_update):
         logger.debug("User declined Update")
         return
 
-    QThreadPool.globalInstance().start(app_update)
+    QThreadPool.globalInstance().start()
 
 
 class Signals(QObject):
@@ -56,10 +55,6 @@ class Signals(QObject):
 
 class CheckForUpdate(QRunnable):
     signals = Signals()
-
-    def __init__(self):
-        super().__init__()
-        self.app_update = None
 
     def run(self):
 
@@ -82,20 +77,26 @@ class CheckForUpdate(QRunnable):
         if latest_version == VERSION:
             return
 
-        self.app_update = app_update
-
         self.signals.finished.emit(latest_version)
 
 
 class Update(QRunnable):
-    def __init__(self, app_update):
+    def __init__(self):
         super().__init__()
-        self.app_update = app_update
 
     def run(self):
-        if self.app_update.is_downloaded():
+        client = Client(ClientConfig())
+
+        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
+
+        if app_update is None:
+            return
+
+        app_update.download()
+
+        if app_update.is_downloaded():
             logger.debug("Update: Extract and Restart")
-            self.app_update.extract_restart()
+            app_update.extract_restart()
 
 
 class SendUserStats(QRunnable):
