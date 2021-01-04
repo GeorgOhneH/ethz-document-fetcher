@@ -140,6 +140,24 @@ jobs:
         PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
         PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
+    - name: Upload Release (MacOS)
+      if: startsWith(matrix.os, 'macos')
+      run: pyupdater upload --service s3
+      env:
+        PYU_AWS_BUCKET: ethz-document-fetcher-darwin
+        PYU_AWS_BUCKET_REGION: eu-central-1
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+
+    - name: Upload Release (Ubuntu)
+      if: startsWith(matrix.os, 'ubuntu')
+      run: pyupdater upload --service s3
+      env:
+        PYU_AWS_BUCKET: ethz-document-fetcher-linux
+        PYU_AWS_BUCKET_REGION: eu-central-1
+        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+
     - name: Upload PyUpdater Data
       run: python .CI/upload_pyuppdate_data.py
       env:
