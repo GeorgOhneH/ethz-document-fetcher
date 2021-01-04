@@ -142,7 +142,7 @@ jobs:
         PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Upload PyUpdater Data
-      run: python .Ci/upload_pyuppdate_data.py
+      run: python .CI/upload_pyuppdate_data.py
       env:
         PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
         PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
