@@ -22,12 +22,10 @@ def run_startup_tasks(site_settings):
         check_for_update = CheckForUpdate()
         QThreadPool.globalInstance().start(check_for_update)
 
-        check_for_update.signals.finished.connect(show_update_pop_up)
 
-
-def show_update_pop_up(latest_version):
+def ask_update_pop_up(latest_version):
     if latest_version == VERSION:
-        return
+        return False
 
     msg_box = QMessageBox()
     msg_box.setIcon(QMessageBox.Question)
@@ -43,26 +41,36 @@ def show_update_pop_up(latest_version):
     msg_box.exec()
 
     if msg_box.clickedButton() != download_button:
-        return
+        return False
 
-    QDesktopServices.openUrl(QUrl(DOWNLOAD_RELEASE_URL))
-
-
-class Signals(QObject):
-    finished = pyqtSignal(str)
+    return True
 
 
 class CheckForUpdate(QRunnable):
-    signals = Signals()
-
     def run(self):
+
+        client = Client(ClientConfig())
+        client.refresh()
+
+        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
+
+        if app_update is None:
+            return
+
+        app_update.download()
+
         try:
             latest_version = get_latest_version()
-            self.signals.finished.emit(latest_version)
-            return
         except Exception as e:
             logger.warning(f"Could not get release data. Error {e}")
-            self.signals.finished.emit(VERSION)
+            return
+
+        if not ask_update_pop_up(latest_version):
+            logger.debug("User declined Update")
+            return
+
+        if app_update.is_downloaded():
+            app_update.extract_restart()
 
 
 class SendUserStats(QRunnable):
@@ -72,15 +80,3 @@ class SendUserStats(QRunnable):
 
     def run(self):
         user_statistics(self.name)
-
-        client = Client(ClientConfig())
-        client.refresh()
-
-        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
-
-        if app_update is not None:
-            app_update.download()
-
-            if app_update.is_downloaded():
-                app_update.extract_restart()
-
