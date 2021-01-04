@@ -39,8 +39,8 @@ if __name__ == "__main__":
 
     upload_directory(bucket, os.path.join(sys.platform, "pyu-data"), local_directory_data, client)
 
-    s3_path = "win32/.pyupdater/config.pyu"
-    s3_path_old = "win32/.pyupdater/config-old.pyu"
+    s3_path = f"{sys.platform}/.pyupdater/config.pyu"
+    s3_path_old = f"{sys.platform}/.pyupdater/config-old.pyu"
 
     client.copy_object(Bucket=bucket, CopySource=f"{bucket}/{s3_path}", Key=s3_path_old)
     client.delete_object(Bucket=bucket, Key=s3_path)
