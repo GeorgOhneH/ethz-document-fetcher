@@ -46,7 +46,7 @@ def ask_update_pop_up(latest_version):
         logger.debug("User declined Update")
         return
 
-    QThreadPool.globalInstance().start()
+    QThreadPool.globalInstance().start(Update())
 
 
 class Signals(QObject):
