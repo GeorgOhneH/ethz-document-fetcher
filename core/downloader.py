@@ -164,7 +164,6 @@ async def download_if_not_exist(session,
             action == ACTION_REPLACE and \
             site_settings.keep_replaced_files and \
             file_extension.lower() == "pdf":
-        logger.debug(f"Adding highlights to {absolute_path}")
 
         temp_file_name = f"{pure_name}-temp.{extension}"
         temp_absolute_path = os.path.join(dir_path, temp_file_name)
