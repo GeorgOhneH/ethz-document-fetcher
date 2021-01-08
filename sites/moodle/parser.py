@@ -68,7 +68,7 @@ async def parse_sections(session,
                          password_mapper,
                          index=None,
                          keep_section_order=False):
-    section_name = str(section["aria-label"])
+    section_name = str(section.find("div", class_="content", recursive=False).h3.span.a.string).strip()
     if keep_section_order:
         section_name = f"[{index + 1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
