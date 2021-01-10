@@ -16,12 +16,9 @@ def upload_directory(bucket, destination, local_directory, client):
 
             try:
                 client.head_object(Bucket=bucket, Key=s3_path)
-                client.delete_object(Bucket=bucket, Key=s3_path)
-                print(f"Deleted {s3_path}")
             except botocore.exceptions.ClientError as e:
-                pass
-            client.upload_file(local_path, bucket, s3_path)
-            print(f"Uploaded {local_path}")
+                client.upload_file(local_path, bucket, s3_path)
+                print(f"Uploaded {local_path}")
 
 
 if __name__ == "__main__":

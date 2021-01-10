@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -64,14 +65,6 @@ class Update(QRunnable):
         self.allowed_download = False
 
     def run(self):
-        client = Client(ClientConfig())
-        client.refresh()
-
-        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
-
-        if app_update is None:
-            return
-
         try:
             latest_version = get_latest_version()
         except Exception as e:
@@ -79,6 +72,14 @@ class Update(QRunnable):
             return
 
         if latest_version == VERSION:
+            return
+
+        client = Client(ClientConfig())
+        client.refresh()
+
+        app_update = client.update_check(ClientConfig.APP_NAME, PYU_VERSION)
+
+        if app_update is None:
             return
 
         app_update.download()
