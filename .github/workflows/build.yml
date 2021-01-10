@@ -8,7 +8,7 @@ on:
 
 jobs:
   check_release:
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+#    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
     name: Check Release
     runs-on: ubuntu-latest
     outputs:
@@ -131,38 +131,46 @@ jobs:
     - name: Cryptographically Sign
       run: pyupdater pkg --sign --slit-version
 
-    - name: Upload Release (Windows)
-      if: startsWith(matrix.os, 'windows')
-      run: pyupdater upload --service s3
-      env:
-        PYU_AWS_BUCKET: ethz-document-fetcher-win32
-        PYU_AWS_BUCKET_REGION: eu-central-1
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
-    - name: Upload Release (MacOS)
+    - name: Upload debug artifact (MAc)
       if: startsWith(matrix.os, 'macos')
-      run: pyupdater upload --service s3
-      env:
-        PYU_AWS_BUCKET: ethz-document-fetcher-darwin
-        PYU_AWS_BUCKET_REGION: eu-central-1
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+      uses: actions/upload-artifact@v1
+      with:
+        name: mac-debug-app.tar
+        path: pyu-data/deploy/ethz-document-fetcher-mac-1.5.0.tar
 
-    - name: Upload Release (Ubuntu)
-      if: startsWith(matrix.os, 'ubuntu')
-      run: pyupdater upload --service s3
-      env:
-        PYU_AWS_BUCKET: ethz-document-fetcher-linux
-        PYU_AWS_BUCKET_REGION: eu-central-1
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+#    - name: Upload Release (Windows)
+#      if: startsWith(matrix.os, 'windows')
+#      run: pyupdater upload --service s3
+#      env:
+#        PYU_AWS_BUCKET: ethz-document-fetcher-win32
+#        PYU_AWS_BUCKET_REGION: eu-central-1
+#        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+#        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+#
+#    - name: Upload Release (MacOS)
+#      if: startsWith(matrix.os, 'macos')
+#      run: pyupdater upload --service s3
+#      env:
+#        PYU_AWS_BUCKET: ethz-document-fetcher-darwin
+#        PYU_AWS_BUCKET_REGION: eu-central-1
+#        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+#        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+#
+#    - name: Upload Release (Ubuntu)
+#      if: startsWith(matrix.os, 'ubuntu')
+#      run: pyupdater upload --service s3
+#      env:
+#        PYU_AWS_BUCKET: ethz-document-fetcher-linux
+#        PYU_AWS_BUCKET_REGION: eu-central-1
+#        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+#        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
-    - name: Upload PyUpdater Data
-      run: python .CI/upload_pyuppdate_data.py
-      env:
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+#    - name: Upload PyUpdater Data
+#      run: python .CI/upload_pyuppdate_data.py
+#      env:
+#        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
+#        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -230,85 +238,85 @@ jobs:
         name: ethz-document-fetcher-linux-x86_64.AppImage
         path: ethz-document-fetcher-linux-x86_64.AppImage
 
-  create-release:
-    needs: [build, check_release]
-    runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
-
-    steps:
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ needs.check_release.outputs.current_version }}
-          release_name: Release ${{ needs.check_release.outputs.current_version }}
-          body:
-          draft: false
-          prerelease: false
-
-      - uses: actions/download-artifact@v1
-        with:
-          name: ethz-document-fetcher-windows-x86-64.zip
-          path: windows/
-
-      - uses: actions/download-artifact@v1
-        with:
-          name: ethz-document-fetcher-windows-x86-64-installer.exe
-          path: windows/
-
-      - uses: actions/download-artifact@v1
-        with:
-          name: ethz-document-fetcher-linux-x86_64.AppImage
-          path: linux/
-
-      - uses: actions/download-artifact@v1
-        with:
-          name: ethz-document-fetcher-osx.dmg
-          path: macos/
-
-      # - name: Read upload URL into output
-      #   id: upload_url
-      #   run: |
-      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
-
-      - name: Upload release asset zip (Windows)
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/ethz-document-fetcher-windows-x86-64.zip
-          asset_name: ethz-document-fetcher-windows-x86-64.zip
-          asset_content_type: application/zip
-
-      - name: Upload release asset exe (Windows)
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./windows/ethz-document-fetcher-windows-x86-64-installer.exe
-          asset_name: ethz-document-fetcher-windows-x86-64-installer.exe
-          asset_content_type: application/vnd.microsoft.portable-executable
-
-      - name: Upload release asset (Ubuntu)
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./linux/ethz-document-fetcher-linux-x86_64.AppImage
-          asset_name: ethz-document-fetcher-linux-x86_64.AppImage
-          asset_content_type: application/x-executable
-
-      - name: Upload release asset (MacOS)
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./macos/ethz-document-fetcher-osx.dmg
-          asset_name: ethz-document-fetcher-osx.dmg
-          asset_content_type: application/x-bzip2
+#  create-release:
+#    needs: [build, check_release]
+#    runs-on: ubuntu-latest
+#    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+#
+#    steps:
+#      - name: Create release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ needs.check_release.outputs.current_version }}
+#          release_name: Release ${{ needs.check_release.outputs.current_version }}
+#          body:
+#          draft: false
+#          prerelease: false
+#
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: ethz-document-fetcher-windows-x86-64.zip
+#          path: windows/
+#
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: ethz-document-fetcher-windows-x86-64-installer.exe
+#          path: windows/
+#
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: ethz-document-fetcher-linux-x86_64.AppImage
+#          path: linux/
+#
+#      - uses: actions/download-artifact@v1
+#        with:
+#          name: ethz-document-fetcher-osx.dmg
+#          path: macos/
+#
+#      # - name: Read upload URL into output
+#      #   id: upload_url
+#      #   run: |
+#      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
+#
+#      - name: Upload release asset zip (Windows)
+#        uses: actions/upload-release-asset@v1.0.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./windows/ethz-document-fetcher-windows-x86-64.zip
+#          asset_name: ethz-document-fetcher-windows-x86-64.zip
+#          asset_content_type: application/zip
+#
+#      - name: Upload release asset exe (Windows)
+#        uses: actions/upload-release-asset@v1.0.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./windows/ethz-document-fetcher-windows-x86-64-installer.exe
+#          asset_name: ethz-document-fetcher-windows-x86-64-installer.exe
+#          asset_content_type: application/vnd.microsoft.portable-executable
+#
+#      - name: Upload release asset (Ubuntu)
+#        uses: actions/upload-release-asset@v1.0.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./linux/ethz-document-fetcher-linux-x86_64.AppImage
+#          asset_name: ethz-document-fetcher-linux-x86_64.AppImage
+#          asset_content_type: application/x-executable
+#
+#      - name: Upload release asset (MacOS)
+#        uses: actions/upload-release-asset@v1.0.1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: ./macos/ethz-document-fetcher-osx.dmg
+#          asset_name: ethz-document-fetcher-osx.dmg
+#          asset_content_type: application/x-bzip2
