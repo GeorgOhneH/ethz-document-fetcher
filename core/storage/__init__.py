@@ -5,8 +5,11 @@ import multiprocessing_logging
 from core.storage import cache
 
 
+from core import multiprocess_logger
+
+
 def _exit():
-    multiprocessing_logging.uninstall_mp_handler()
+    multiprocess_logger.uninstall_mp_handler()
     cache.save_jsons()
 
 

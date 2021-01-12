@@ -4,8 +4,8 @@ import sys
 
 from PyQt5.QtCore import *
 from colorama import Fore, Style
-import multiprocessing_logging
 
+from core import multiprocess_logger
 from settings import advanced_settings
 
 
@@ -24,7 +24,7 @@ def setup_logger():
 
     root.addHandler(console)
 
-    multiprocessing_logging.install_mp_handler()
+    multiprocess_logger.install_mp_handler()
 
 
 class ExcInfoStreamHandler(logging.StreamHandler):
