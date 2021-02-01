@@ -168,6 +168,8 @@ async def download_if_not_exist(session,
         temp_file_name = f"{pure_name}-temp.{extension}"
         temp_absolute_path = os.path.join(dir_path, temp_file_name)
 
+        logger.debug(f"Adding highlights to {absolute_path}")
+
         future = cancellable_pool.apply(
             functools.partial(pdf_highlighter.add_differ_highlight,
                               new_path=absolute_path,

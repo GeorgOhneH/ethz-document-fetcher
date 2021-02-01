@@ -3,7 +3,6 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from core.multiprocess_logger import MultiProcessingHandler
 
 from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_save_settings, widget_read_settings
 from settings import advanced_settings
@@ -23,8 +22,7 @@ class Logger(QWidget):
         self.log_text_box.setContentsMargins(0, 0, 0, 0)
         self.setContentsMargins(0, 0, 0, 0)
 
-        multi_p_handler = MultiProcessingHandler("mp-handler-gui", sub_handler=self.handler)
-        logging.getLogger().addHandler(multi_p_handler)
+        logging.getLogger().addHandler(self.handler)
         self.handler.new_record.connect(self.log_text_box.appendHtml)
 
         self.layout = QHBoxLayout()
