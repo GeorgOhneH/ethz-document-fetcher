@@ -63,7 +63,7 @@ exe = EXE(pyz,
               bootloader_ignore_signals=False,
               strip=False,
               upx=True,
-              console=True,
+              console=False,
               icon=os.path.join("gui", "assets", "logo", "logo.ico"))
 
 coll = COLLECT(exe,

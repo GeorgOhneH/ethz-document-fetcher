@@ -65,14 +65,14 @@ class Update(QRunnable):
         self.allowed_download = False
 
     def run(self):
-        # try:
-        #     latest_version = get_latest_version()
-        # except Exception as e:
-        #     logger.warning(f"Could not get release data. Error {e}")
-        #     return
-        #
-        # if latest_version == VERSION:
-        #     return
+        try:
+            latest_version = get_latest_version()
+        except Exception as e:
+            logger.warning(f"Could not get release data. Error {e}")
+            return
+
+        if latest_version == VERSION:
+            return
 
         client = Client(ClientConfig())
         client.refresh()
@@ -84,17 +84,17 @@ class Update(QRunnable):
 
         app_update.download()
 
-        # self.signals.ask_for_permission.emit(latest_version)
+        self.signals.ask_for_permission.emit(latest_version)
 
-        # self.mutex.lock()
-        # try:
-        #     self.cond.wait(self.mutex)
-        # finally:
-        #     self.mutex.unlock()
+        self.mutex.lock()
+        try:
+            self.cond.wait(self.mutex)
+        finally:
+            self.mutex.unlock()
 
-        # if not self.allowed_download:
-        #     logger.debug("Update declined")
-        #     return
+        if not self.allowed_download:
+            logger.debug("Update declined")
+            return
 
         if app_update.is_downloaded():
             logger.debug("Update: Extract and Restart")

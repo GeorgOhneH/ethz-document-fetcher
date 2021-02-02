@@ -230,85 +230,85 @@ jobs:
         name: ethz-document-fetcher-linux-x86_64.AppImage
         path: ethz-document-fetcher-linux-x86_64.AppImage
 
-#  create-release:
-#    needs: [build, check_release]
-#    runs-on: ubuntu-latest
-#    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
-#
-#    steps:
-#      - name: Create release
-#        id: create_release
-#        uses: actions/create-release@v1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          tag_name: ${{ needs.check_release.outputs.current_version }}
-#          release_name: Release ${{ needs.check_release.outputs.current_version }}
-#          body:
-#          draft: false
-#          prerelease: false
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: ethz-document-fetcher-windows-x86-64.zip
-#          path: windows/
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: ethz-document-fetcher-windows-x86-64-installer.exe
-#          path: windows/
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: ethz-document-fetcher-linux-x86_64.AppImage
-#          path: linux/
-#
-#      - uses: actions/download-artifact@v1
-#        with:
-#          name: ethz-document-fetcher-osx.dmg
-#          path: macos/
-#
-#      # - name: Read upload URL into output
-#      #   id: upload_url
-#      #   run: |
-#      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
-#
-#      - name: Upload release asset zip (Windows)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./windows/ethz-document-fetcher-windows-x86-64.zip
-#          asset_name: ethz-document-fetcher-windows-x86-64.zip
-#          asset_content_type: application/zip
-#
-#      - name: Upload release asset exe (Windows)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./windows/ethz-document-fetcher-windows-x86-64-installer.exe
-#          asset_name: ethz-document-fetcher-windows-x86-64-installer.exe
-#          asset_content_type: application/vnd.microsoft.portable-executable
-#
-#      - name: Upload release asset (Ubuntu)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./linux/ethz-document-fetcher-linux-x86_64.AppImage
-#          asset_name: ethz-document-fetcher-linux-x86_64.AppImage
-#          asset_content_type: application/x-executable
-#
-#      - name: Upload release asset (MacOS)
-#        uses: actions/upload-release-asset@v1.0.1
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          upload_url: ${{ steps.create_release.outputs.upload_url }}
-#          asset_path: ./macos/ethz-document-fetcher-osx.dmg
-#          asset_name: ethz-document-fetcher-osx.dmg
-#          asset_content_type: application/x-bzip2
+  create-release:
+    needs: [build, check_release]
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.check_release.outputs.current_version }}
+          release_name: Release ${{ needs.check_release.outputs.current_version }}
+          body:
+          draft: false
+          prerelease: false
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: ethz-document-fetcher-windows-x86-64.zip
+          path: windows/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: ethz-document-fetcher-windows-x86-64-installer.exe
+          path: windows/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: ethz-document-fetcher-linux-x86_64.AppImage
+          path: linux/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: ethz-document-fetcher-osx.dmg
+          path: macos/
+
+      # - name: Read upload URL into output
+      #   id: upload_url
+      #   run: |
+      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
+
+      - name: Upload release asset zip (Windows)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/ethz-document-fetcher-windows-x86-64.zip
+          asset_name: ethz-document-fetcher-windows-x86-64.zip
+          asset_content_type: application/zip
+
+      - name: Upload release asset exe (Windows)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/ethz-document-fetcher-windows-x86-64-installer.exe
+          asset_name: ethz-document-fetcher-windows-x86-64-installer.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+
+      - name: Upload release asset (Ubuntu)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux/ethz-document-fetcher-linux-x86_64.AppImage
+          asset_name: ethz-document-fetcher-linux-x86_64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: Upload release asset (MacOS)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./macos/ethz-document-fetcher-osx.dmg
+          asset_name: ethz-document-fetcher-osx.dmg
+          asset_content_type: application/x-bzip2
