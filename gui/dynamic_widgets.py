@@ -54,7 +54,7 @@ class DynamicIconLabel(QLabel):
         device_ratio = qApp.devicePixelRatio()
         pixmap = icon.pixmap(QSize(int(self.icon_width * device_ratio), int(self.icon_height * device_ratio)))
 
-        pixmap_mask = icon.pixmap(QSize(self.icon_width, self.icon_height))
+        pixmap_mask = icon.pixmap(QSize(int(self.icon_width), int(self.icon_height)))
         pixmap.setDevicePixelRatio(device_ratio)
         self.setPixmap(pixmap)
         self.setMask(pixmap_mask.mask())

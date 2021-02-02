@@ -86,15 +86,15 @@ class Update(QRunnable):
 
         # self.signals.ask_for_permission.emit(latest_version)
 
-        self.mutex.lock()
-        try:
-            self.cond.wait(self.mutex)
-        finally:
-            self.mutex.unlock()
+        # self.mutex.lock()
+        # try:
+        #     self.cond.wait(self.mutex)
+        # finally:
+        #     self.mutex.unlock()
 
-        if not self.allowed_download:
-            logger.debug("Update declined")
-            return
+        # if not self.allowed_download:
+        #     logger.debug("Update declined")
+        #     return
 
         if app_update.is_downloaded():
             logger.debug("Update: Extract and Restart")

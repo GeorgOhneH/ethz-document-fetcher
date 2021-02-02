@@ -14,8 +14,8 @@ class SpinBox(QWidget, AbstractConfigWidget):
         super().__init__()
         self.config_obj = config_obj
         self.spin_box = QSpinBox()
-        self.spin_box.setMaximum(config_obj.maximum)
-        self.spin_box.setMinimum(config_obj.minimum)
+        self.spin_box.setMaximum(int(config_obj.maximum))
+        self.spin_box.setMinimum(int(config_obj.minimum))
         self.data_changed_signal = self.spin_box.valueChanged
         if config_obj.get() is not None:
             self.set_value(config_obj.get())
