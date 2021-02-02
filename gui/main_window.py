@@ -129,3 +129,4 @@ class MainWindow(QMainWindow):
 
     def read_settings(self):
         widget_read_settings(self)
+

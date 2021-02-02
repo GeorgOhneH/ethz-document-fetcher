@@ -93,7 +93,7 @@ class Update(QRunnable):
             self.mutex.unlock()
 
         if not self.allowed_download:
-            logger.debug("Updated declined")
+            logger.debug("Update declined")
             return
 
         if app_update.is_downloaded():

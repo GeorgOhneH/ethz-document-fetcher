@@ -127,6 +127,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.state = state
         self.setText(self.COLUMN_STATE, self.state_to_string(state))
         self.name_widget.set_state(state, msg)
+        self.emit_data_changed()
 
     def set_idle(self):
         self.active_item_count = 0
@@ -182,6 +183,7 @@ class TreeWidgetItem(QTreeWidgetItem):
             "path": path,
             "timestamp": int(time.time()),
         })
+        self.emit_data_changed()
 
     def replaced_file(self, path, old_path=None):
         self.replaced_file_count += 1
@@ -192,6 +194,7 @@ class TreeWidgetItem(QTreeWidgetItem):
             "old_path": old_path,
             "timestamp": int(time.time()),
         })
+        self.emit_data_changed()
 
     def get_check_state(self):
         return self.name_widget.get_check_state()

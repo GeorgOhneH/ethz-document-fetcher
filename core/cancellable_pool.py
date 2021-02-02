@@ -6,7 +6,7 @@ from functools import partial
 class CancellablePool(object):
     def __init__(self, max_workers=None):
         if max_workers is None:
-            max_workers = multiprocessing.cpu_count()
+            max_workers = max(multiprocessing.cpu_count() - 1, 1)
         self.max_workers = max_workers
         self._free = set()
         self._working = set()

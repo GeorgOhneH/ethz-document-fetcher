@@ -63,7 +63,7 @@ class Box(object):
 
 
 def add_differ_highlight(new_path, old_path, out_path):
-    logger.debug(f"Adding highlights to {new_path}")
+    fitz.TOOLS.mupdf_display_errors(False)
     with fitz.open(new_path, filetype="pdf") as doc_new:
         with fitz.open(old_path, filetype="pdf") as doc_old:
 
@@ -173,7 +173,7 @@ def make_annotations(doc, boxes, similar_boxes):
             annot.setColors(stroke=box.colour)
             annot.update()
         except ValueError as e:  # Bad quads error
-            logger.debug(f"Error: {e}. Box: {box.get()}")
+            print(f"Error: {e}. Box: {box.get()}")
 
 
 def reduce_boxes(boxes):
