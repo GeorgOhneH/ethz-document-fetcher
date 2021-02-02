@@ -1,10 +1,13 @@
 import copy
 import difflib
 import os
+import logging
 
 import fitz
 
 from core.constants import EMPTY_TWO_COLUMN_LEFT_PDF_PATH
+
+logger = logging.getLogger(__name__)
 
 
 class Box(object):
