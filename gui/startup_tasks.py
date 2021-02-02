@@ -84,7 +84,7 @@ class Update(QRunnable):
 
         app_update.download()
 
-        self.signals.ask_for_permission.emit(latest_version)
+        # self.signals.ask_for_permission.emit(latest_version)
 
         self.mutex.lock()
         try:
