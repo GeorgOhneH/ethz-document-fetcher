@@ -35,9 +35,9 @@ def ask_update_pop_up(latest_version, check_for_update):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("A new Version is available")
         msg_box.setText(f"Version {latest_version[1:]} is available. (Current: {VERSION})\n"
-                        f"Install and restart new version?\n")
+                        f"Do you want to Upgrade?\n")
         msg_box.addButton(QMessageBox.Cancel)
-        install_button = msg_box.addButton("Install", QMessageBox.AcceptRole)
+        install_button = msg_box.addButton("Upgrade", QMessageBox.AcceptRole)
 
         msg_box.setDefaultButton(install_button)
 
@@ -65,14 +65,14 @@ class Update(QRunnable):
         self.allowed_download = False
 
     def run(self):
-        try:
-            latest_version = get_latest_version()
-        except Exception as e:
-            logger.warning(f"Could not get release data. Error {e}")
-            return
-
-        if latest_version == VERSION:
-            return
+        # try:
+        #     latest_version = get_latest_version()
+        # except Exception as e:
+        #     logger.warning(f"Could not get release data. Error {e}")
+        #     return
+        #
+        # if latest_version == VERSION:
+        #     return
 
         client = Client(ClientConfig())
         client.refresh()
