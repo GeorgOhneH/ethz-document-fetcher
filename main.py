@@ -12,7 +12,7 @@ from core import unique_queue
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
 from core.constants import VERSION
-from core.utils import async_user_statistics, async_get_latest_version
+from core.utils import async_user_statistics, async_get_latest_version, remove_all_temp_files
 from settings.logger import setup_logger
 from settings.settings import SiteSettings, TemplatePathSettings
 
@@ -31,6 +31,8 @@ async def main(signals=None, site_settings=None):
                         "Please run 'python main.py --help' for more info. "
                         "Exiting...")
         return
+
+    remove_all_temp_files()
 
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     conn = aiohttp.TCPConnector(ssl=ssl_context,

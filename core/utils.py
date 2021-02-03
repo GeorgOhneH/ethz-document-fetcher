@@ -9,6 +9,8 @@ from mimetypes import guess_extension
 
 import requests
 
+from core.constants import TEMP_PATH
+
 logger = logging.getLogger(__name__)
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/GeorgOhneH/ethz-document-fetcher/releases/latest"
@@ -51,6 +53,15 @@ def get_extension_from_response(response):
         return None
 
     return extension[1:]
+
+
+def remove_all_temp_files():
+    for file_name in os.listdir(TEMP_PATH):
+        path = os.path.join(TEMP_PATH, file_name)
+        if os.path.isfile(path):
+            os.remove(path)
+        else:
+            shutil.rmtree(path, ignore_errors=True)
 
 
 def get_extension(file):

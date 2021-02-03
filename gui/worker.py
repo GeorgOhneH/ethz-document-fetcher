@@ -10,6 +10,7 @@ from PyQt5.QtCore import *
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
 from core import unique_queue
+from core.utils import remove_all_temp_files
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +77,8 @@ class Worker(QObject):
         if not self.site_settings.check_if_valid():
             logger.critical("Settings are not correctly configured.")
             return
+
+        remove_all_temp_files()
 
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         conn = aiohttp.TCPConnector(ssl=ssl_context,

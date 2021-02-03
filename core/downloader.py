@@ -3,6 +3,8 @@ import functools
 import pathlib
 from urllib.parse import urlparse
 import itertools
+import random
+import shutil
 
 import aiohttp
 from aiohttp.client import URL
@@ -104,8 +106,8 @@ async def download_if_not_exist(session,
     dir_path = os.path.dirname(absolute_path)
     pure_name, extension = split_name_extension(file_name)
 
-    temp_file_name = f"{pure_name}-temp.{extension}"
-    temp_absolute_path = os.path.join(dir_path, temp_file_name)
+    temp_file_name = f"{random.getrandbits(64)}.{extension}"
+    temp_absolute_path = os.path.join(TEMP_PATH, temp_file_name)
 
     old_file_name = f"{pure_name}-old.{extension}"
     old_absolute_path = os.path.join(dir_path, old_file_name)
@@ -157,7 +159,7 @@ async def download_if_not_exist(session,
             pathlib.Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
 
             if action == ACTION_REPLACE:
-                os.replace(absolute_path, temp_absolute_path)
+                shutil.move(absolute_path, temp_absolute_path)
 
             try:
                 with open(absolute_path, 'wb') as f:
@@ -171,7 +173,7 @@ async def download_if_not_exist(session,
                 logger.debug(f"Removed file {absolute_path}")
                 if action == ACTION_REPLACE:
                     logger.debug(f"Reverting temp file to new file: {absolute_path}")
-                    os.replace(temp_absolute_path, absolute_path)
+                    shutil.move(temp_absolute_path, absolute_path)
                 raise e
 
         if site_settings.highlight_difference and \
@@ -186,7 +188,7 @@ async def download_if_not_exist(session,
                                       out_path=diff_absolute_path)
 
         if action == ACTION_REPLACE and site_settings.keep_replaced_files:
-            os.replace(temp_absolute_path, old_absolute_path)
+            shutil.move(temp_absolute_path, old_absolute_path)
 
         if "ETag" in response_headers:
             cache.save_etag(absolute_path, response.headers["ETag"])
