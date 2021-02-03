@@ -185,13 +185,14 @@ class TreeWidgetItem(QTreeWidgetItem):
         })
         self.emit_data_changed()
 
-    def replaced_file(self, path, old_path=None):
+    def replaced_file(self, path, old_path=None, diff_path=None):
         self.replaced_file_count += 1
         self.setText(self.COLUMN_REPLACED_FILE, str(self.replaced_file_count))
         added_files = self.load_from_cache("added_files")
         added_files.append({
             "path": path,
             "old_path": old_path,
+            "diff_path": diff_path,
             "timestamp": int(time.time()),
         })
         self.emit_data_changed()

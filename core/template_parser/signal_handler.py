@@ -46,8 +46,5 @@ class SignalHandler(object):
         self.signals.added_new_file[str, str].emit(unique_key, path)
 
     @ignore_if_signal_is_none
-    def replaced_file(self, unique_key, path, old_path=None):
-        if old_path is None:
-            self.signals.replaced_file[str, str].emit(unique_key, path)
-        else:
-            self.signals.replaced_file[str, str, str].emit(unique_key, path, old_path)
+    def replaced_file(self, unique_key, path, old_path, diff_path):
+        self.signals.replaced_file[str, str, str, str].emit(unique_key, path, old_path, diff_path)

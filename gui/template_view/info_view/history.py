@@ -91,14 +91,21 @@ class LazyStandardItemModel(QStandardItemModel):
 
     def get_items(self, file):
         items = self.prepare_items(path=file["path"], timestamp=file["timestamp"])
-        items[self.COLUMN_NOTE] = QStandardItem("Added New File")
         if "old_path" in file:
             items[self.COLUMN_NOTE] = QStandardItem("Replaced File")
-            if file["old_path"] is None:
-                return get_values_sorted_after_key(items)
+        else:
+            items[self.COLUMN_NOTE] = QStandardItem("Added New File")
+
+        if file.get("old_path", None) is not None:
             children = self.prepare_items(path=file["old_path"])
             children[self.COLUMN_NOTE] = QStandardItem("Old File")
             items[0].appendRow(get_values_sorted_after_key(children))
+
+        if file.get("diff_path", None) is not None:
+            children = self.prepare_items(path=file["diff_path"])
+            children[self.COLUMN_NOTE] = QStandardItem("Diff File")
+            items[0].appendRow(get_values_sorted_after_key(children))
+
         return get_values_sorted_after_key(items)
 
     def prepare_items(self, path, timestamp=None):

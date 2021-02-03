@@ -84,13 +84,13 @@ class TemplatePathSettings(Settings):
                                file_extensions=["yml"])
 
 
-def highlight_difference_active(instance, from_widget, parent):
+def highlight_size_limit_active(instance, from_widget, parent):
     if from_widget:
-        keep_replaced_files = instance.get_config_obj("keep_replaced_files").get_from_widget()
+        highlight_difference = instance.get_config_obj("highlight_difference").get_from_widget()
     else:
-        keep_replaced_files = instance.get_config_obj("keep_replaced_files").get()
+        highlight_difference = instance.get_config_obj("highlight_difference").get()
 
-    return keep_replaced_files
+    return highlight_difference
 
 
 class SiteSettings(Settings):
@@ -103,11 +103,20 @@ class SiteSettings(Settings):
     forbidden_extensions = ConfigListString(default=["video"], optional=True, gui_name="Forbidden Extensions",
                                             hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
+
     highlight_difference = ConfigBool(default=True,
-                                      active_func=highlight_difference_active,
                                       gray_out=True,
-                                      gui_name="Add Highlight Difference to Replaced Files "
-                                               "(pdf only, can be cpu heavy)")
+                                      gui_name="Highlight Difference between old and new Files (pdf only)",
+                                      hint_text="Creates a side-by-side view of the old and "
+                                                "new pdf and highlights the differences.")
+
+    highlight_page_limit = ConfigInt(default=50,
+                                     minimum=0,
+                                     active_func=highlight_size_limit_active,
+                                     gray_out=True,
+                                     gui_name="Page Limit for Highlights",
+                                     hint_text="Only creates highlights if the pdf page "
+                                               "count is below the limit. (0 for unlimited)")
     force_download = ConfigBool(default=False,
                                 gui_name="Force Download",
                                 hint_text="Be very careful when you turn this on! It will update EVERY file.<br>"

@@ -6,6 +6,7 @@ import itertools
 
 import aiohttp
 from aiohttp.client import URL
+import fitz
 
 from core import pdf_highlighter
 from core.constants import *
@@ -84,7 +85,6 @@ async def download_if_not_exist(session,
 
     domain = url.host
 
-    timeout = aiohttp.ClientTimeout(total=0)
     if os.path.isabs(path):
         raise ValueError("Absolutes paths are not allowed")
 
@@ -97,6 +97,21 @@ async def download_if_not_exist(session,
             return
 
         absolute_path += "." + guess_extension
+
+    file_name = os.path.basename(absolute_path)
+    file_extension = get_extension(file_name)
+
+    dir_path = os.path.dirname(absolute_path)
+    pure_name, extension = split_name_extension(file_name)
+
+    temp_file_name = f"{pure_name}-temp.{extension}"
+    temp_absolute_path = os.path.join(dir_path, temp_file_name)
+
+    old_file_name = f"{pure_name}-old.{extension}"
+    old_absolute_path = os.path.join(dir_path, old_file_name)
+
+    diff_file_name = f"{pure_name}-diff.{extension}"
+    diff_absolute_path = os.path.join(dir_path, diff_file_name)
 
     force = False
     if checksum is not None:
@@ -120,109 +135,140 @@ async def download_if_not_exist(session,
     else:
         action = ACTION_NEW
 
-    file_name = os.path.basename(absolute_path)
-    file_extension = get_extension(file_name)
     if is_extension_forbidden(extension=file_extension,
                               forbidden_extensions=forbidden_extensions,
                               allowed_extensions=allowed_extensions):
         return
 
-    async with session.get(url, timeout=timeout, **session_kwargs) as response:
-        response.raise_for_status()
-        response_headers = response.headers
+    try:
 
-        if response.status == 304:
-            logger.debug(f"File '{absolute_path}' not modified")
-            cache.save_checksum(absolute_path, checksum)
-            return
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=0), **session_kwargs) as response:
+            response.raise_for_status()
+            response_headers = response.headers
 
-        if file_extension.lower() in MOVIE_EXTENSIONS:
-            logger.info(f"Starting to download {file_name}")
+            if response.status == 304:
+                logger.debug(f"File '{absolute_path}' not modified")
+                cache.save_checksum(absolute_path, checksum)
+                return
 
-        pathlib.Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+            if file_extension.lower() in MOVIE_EXTENSIONS:
+                logger.info(f"Starting to download {file_name}")
+
+            pathlib.Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
+
+            if action == ACTION_REPLACE:
+                os.replace(absolute_path, temp_absolute_path)
+
+            try:
+                with open(absolute_path, 'wb') as f:
+                    while True:
+                        chunk = await response.content.read(8192)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+            except BaseException as e:
+                os.remove(absolute_path)
+                logger.debug(f"Removed file {absolute_path}")
+                if action == ACTION_REPLACE:
+                    logger.debug(f"Reverting temp file to new file: {absolute_path}")
+                    os.replace(temp_absolute_path, absolute_path)
+                raise e
+
+        if site_settings.highlight_difference and \
+                action == ACTION_REPLACE and \
+                file_extension.lower() == "pdf":
+            await _add_pdf_highlights(site_settings=site_settings,
+                                      cancellable_pool=cancellable_pool,
+                                      signal_handler=signal_handler,
+                                      unique_key=unique_key,
+                                      absolute_path=absolute_path,
+                                      old_absolute_path=temp_absolute_path,
+                                      out_path=diff_absolute_path)
 
         if action == ACTION_REPLACE and site_settings.keep_replaced_files:
-            dir_path = os.path.dirname(absolute_path)
-            pure_name, extension = split_name_extension(file_name)
-            old_file_name = f"{pure_name}-old.{extension}"
-            old_absolute_path = os.path.join(dir_path, old_file_name)
-            os.replace(absolute_path, old_absolute_path)
-
-        try:
-            with open(absolute_path, 'wb') as f:
-                while True:
-                    chunk = await response.content.read(8192)
-                    if not chunk:
-                        break
-                    f.write(chunk)
-        except BaseException as e:
-            os.remove(absolute_path)
-            logger.debug(f"Removed file {absolute_path}")
-            raise e
-
-    if site_settings.highlight_difference and \
-            action == ACTION_REPLACE and \
-            site_settings.keep_replaced_files and \
-            file_extension.lower() == "pdf":
-
-        temp_file_name = f"{pure_name}-temp.{extension}"
-        temp_absolute_path = os.path.join(dir_path, temp_file_name)
-
-        logger.debug(f"Adding highlights to {absolute_path}")
-
-        future = cancellable_pool.apply(
-            functools.partial(pdf_highlighter.add_differ_highlight,
-                              new_path=absolute_path,
-                              old_path=old_absolute_path,
-                              out_path=temp_absolute_path)
-        )
-        try:
-            await future
             os.replace(temp_absolute_path, old_absolute_path)
-        except asyncio.CancelledError as e:
-            os.replace(old_absolute_path, absolute_path)
-            logger.debug(f"Reverted old file {absolute_path}")
-            raise e
-        except Exception as e:
-            logger.warning(f"Could not add pdf highlight to {absolute_path}. {type(e).__name__}: {e}")
-            signal_handler.got_warning(unique_key,
-                                       f"Could not add pdf highlight to {absolute_path}. {type(e).__name__}: {e}")
-        finally:
-            if os.path.exists(temp_absolute_path):
-                logger.debug(f"Removed temp file {temp_absolute_path}")
-                os.remove(temp_absolute_path)
 
-    if "ETag" in response_headers:
-        cache.save_etag(absolute_path, response.headers["ETag"])
-    elif domain not in FORCE_DOWNLOAD_BLACKLIST:
-        logger.warning(f"url: {url} had not an etag and is not in the blacklist")
+        if "ETag" in response_headers:
+            cache.save_etag(absolute_path, response.headers["ETag"])
+        elif domain not in FORCE_DOWNLOAD_BLACKLIST:
+            logger.warning(f"url: {url} had not an etag and is not in the blacklist")
 
-    cache.save_checksum(absolute_path, checksum)
+        cache.save_checksum(absolute_path, checksum)
 
-    if action == ACTION_REPLACE:
-        if site_settings.keep_replaced_files and os.path.exists(old_absolute_path):
-            signal_handler.replaced_file(unique_key, absolute_path, old_absolute_path)
+        if action == ACTION_REPLACE:
+            signal_old_path, signal_diff_path = None, None
+            if os.path.exists(old_absolute_path) and site_settings.keep_replaced_files:
+                signal_old_path = old_absolute_path
+            if os.path.exists(diff_absolute_path) and site_settings.highlight_difference:
+                signal_diff_path = diff_absolute_path
+
+            signal_handler.replaced_file(unique_key,
+                                         absolute_path,
+                                         signal_old_path,
+                                         signal_diff_path)
+        elif action == ACTION_NEW:
+            signal_handler.added_new_file(unique_key, absolute_path)
+
+        if action == ACTION_REPLACE:
+            method_msg = "Replaced"
+        elif action == ACTION_NEW:
+            method_msg = "Added new"
         else:
-            signal_handler.replaced_file(unique_key, absolute_path)
-        method_msg = "Replaced"
-    elif action == ACTION_NEW:
-        signal_handler.added_new_file(unique_key, absolute_path)
-        method_msg = "Added new"
-    else:
-        method_msg = "Unexpected action"
+            method_msg = "Unexpected action"
 
-    start = {
-        "name": f"{method_msg} file: '{{}}'",
-        "var": file_name,
-        "priority": 100,
-        "cut": "back",
-    }
+        start = {
+            "name": f"{method_msg} file: '{{}}'",
+            "var": file_name,
+            "priority": 100,
+            "cut": "back",
+        }
 
-    end = {
-        "name": " in '{}'",
-        "var": os.path.dirname(absolute_path),
-        "priority": -100,
-        "cut": "front",
-    }
+        end = {
+            "name": " in '{}'",
+            "var": os.path.dirname(absolute_path),
+            "priority": -100,
+            "cut": "front",
+        }
 
-    logger.info(fit_sections_to_console(start, end, margin=1))
+        logger.info(fit_sections_to_console(start, end, margin=1))
+
+    finally:
+        if os.path.exists(temp_absolute_path):
+            os.remove(temp_absolute_path)
+
+
+async def _add_pdf_highlights(site_settings,
+                              cancellable_pool,
+                              signal_handler,
+                              unique_key,
+                              absolute_path,
+                              old_absolute_path,
+                              out_path):
+    if site_settings.highlight_page_limit != 0:
+        with fitz.Document(old_absolute_path, filetype="pdf") as doc:
+            if doc.pageCount > site_settings.highlight_page_limit:
+                logger.debug(f"Skipping highlights. File: {absolute_path}. Page Count: {doc.pageCount} is to large")
+                return
+
+    logger.debug(f"Adding highlights to {absolute_path}")
+
+    future = cancellable_pool.apply(
+        functools.partial(pdf_highlighter.add_differ_highlight,
+                          new_path=absolute_path,
+                          old_path=old_absolute_path,
+                          out_path=out_path)
+    )
+    try:
+        await future
+    except asyncio.CancelledError as e:
+        if os.path.exists(out_path):
+            logger.debug(f"Removed out file {out_path}")
+            os.remove(out_path)
+        raise e
+    except Exception as e:
+        if os.path.exists(out_path):
+            logger.debug(f"Removed out file {out_path}")
+            os.remove(out_path)
+        logger.warning(f"Could not add pdf highlight to {absolute_path}. {type(e).__name__}: {e}")
+        signal_handler.got_warning(unique_key,
+                                   f"Could not add pdf highlight to {absolute_path}. {type(e).__name__}: {e}")

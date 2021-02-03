@@ -71,8 +71,7 @@ class TemplateViewTree(QTreeWidget):
             (signals.update_folder_name, self.update_folder_name),
             (signals.update_base_path, self.update_base_path),
             (signals.added_new_file[str, str], self.added_new_file),
-            (signals.replaced_file[str, str], self.replaced_file),
-            (signals.replaced_file[str, str, str], self.replaced_file),
+            (signals.replaced_file[str, str, str, str], self.replaced_file),
             (signals.site_started[str], self.site_started),
             (signals.site_started[str, str], self.site_started),
             (signals.site_finished[str], self.site_finished),
@@ -153,10 +152,11 @@ class TemplateViewTree(QTreeWidget):
         self.widgets[unique_key].added_new_file(path)
         self.header_item.added_new_file()
 
-    @pyqtSlot(str, str)
-    @pyqtSlot(str, str, str)
-    def replaced_file(self, unique_key, path, old_path=None):
-        self.widgets[unique_key].replaced_file(path, old_path)
+    @pyqtSlot(str, str, str, str)
+    def replaced_file(self, unique_key, path, old_path, diff_path):
+        self.widgets[unique_key].replaced_file(path,
+                                               old_path if old_path else None,
+                                               diff_path if diff_path else None)
         self.header_item.replaced_file()
 
     @pyqtSlot(str)

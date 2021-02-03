@@ -27,7 +27,7 @@ class Signals(QObject):
     update_base_path = pyqtSignal([str, str])
 
     added_new_file = pyqtSignal([str, str])
-    replaced_file = pyqtSignal([str, str], [str, str, str])
+    replaced_file = pyqtSignal([str, str, str, str])
 
     downloaded_content_length = pyqtSignal(int)
 

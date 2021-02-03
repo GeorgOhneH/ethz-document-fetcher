@@ -38,8 +38,8 @@ class SpinBox(QWidget, AbstractConfigWidget):
 class ConfigInt(ConfigString):
     def __init__(self, minimum=-1e8, maximum=1e8, **kwargs):
         super().__init__(**kwargs)
-        self.minimum = minimum
-        self.maximum = maximum
+        self.minimum = int(minimum)
+        self.maximum = int(maximum)
 
     def init_widget(self):
         return SpinBox(self)
