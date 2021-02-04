@@ -49,8 +49,4 @@ if __name__ == "__main__":
     main_window = gui.main_window.MainWindow()
     main_window.show()
 
-    # from test import BaseWindow
-    # base = BaseWindow()
-    # base.show()
-
     sys.exit(app.exec_())

@@ -8,12 +8,11 @@ moodle, ilias, polybox and many others.
  # Features
  * Downloads all new and updated files from specified websites
  * Customisable folder structure
- * You can open files directly from the application
  * GUI and CLI support
  * Highlights difference between the updated and old file (pdf only) 
  
  # Installation
- ## Pre-Build Binaries
+ ## Download Binaries
  You can download the latest release [here](https://github.com/GeorgOhneH/ethz-document-fetcher/releases/latest).
 
 ## Running from source
@@ -22,7 +21,7 @@ moodle, ilias, polybox and many others.
 3) Install all dependencies `pip install -r requirements.txt`
 4) Run `python main_gui.py` for the gui version or `python main.py` for the cli version
 
-# How to use it
+# How to use
 Click [here](./TUTORIAL.md) for a detailed tutorial on how to use the GUI and CLI
 
 # Disclaimer

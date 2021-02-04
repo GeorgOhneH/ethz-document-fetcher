@@ -1,4 +1,4 @@
-# How to use it
+# Tutorial
 ## First Steps
 When you open the app for the first time you will see the minimal example.
 Try to run it by pressing the "Run All" button.

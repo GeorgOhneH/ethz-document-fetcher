@@ -16,7 +16,7 @@
 
 > Note: Most urls on this page don't work. They are only there to show how they should look.
 
-> Note: It might help to look at more examples (Menu Bar->File->Open Presets->...)
+> Note: It might help to look at the preset examples (Menu Bar->File->Open Presets->...)
 
 ## Dropbox
 
