@@ -142,6 +142,15 @@ class CentralWidget(QWidget):
             self.open_settings()
             return
 
+        if self.site_settings.force_download:
+            msg_box = QMessageBox()
+            msg_box.setWindowTitle("Run Confirmation")
+            msg_box.setText("Force Download is enabled.")
+            msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+            ret = msg_box.exec()
+            if ret == QMessageBox.Cancel:
+                return
+
         self.download_speed_widget.reset()
 
         self.start_time = time.time()
