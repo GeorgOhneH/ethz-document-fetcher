@@ -10,7 +10,6 @@ from PyQt5.QtCore import *
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
 from core import unique_queue
-from core.utils import remove_all_temp_files
 
 logger = logging.getLogger(__name__)
 
@@ -78,8 +77,6 @@ class Worker(QObject):
             logger.critical("Settings are not correctly configured.")
             return
 
-        remove_all_temp_files()
-
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         conn = aiohttp.TCPConnector(ssl=ssl_context,
                                     limit=self.site_settings.conn_limit,
@@ -124,6 +121,9 @@ class Worker(QObject):
                 return
 
             finally:
+                logger.debug("Shutting down worker pool")
+                cancellable_pool.shutdown()
+
                 logger.debug("Cancel producers")
                 for p in producers:
                     p.cancel()
@@ -138,5 +138,3 @@ class Worker(QObject):
                     queue.task_done()
                     signals.site_finished[str].emit(item["unique_key"])
 
-                logger.debug("Shutting down worker pool")
-                cancellable_pool.shutdown()

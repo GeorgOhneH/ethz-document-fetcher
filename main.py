@@ -12,14 +12,11 @@ from core import unique_queue
 from core import downloader, template_parser, monitor
 from core.cancellable_pool import CancellablePool
 from core.constants import VERSION
-from core.utils import async_user_statistics, async_get_latest_version, remove_all_temp_files
+from core.utils import async_user_statistics, async_get_latest_version, remove_old_files
 from settings.logger import setup_logger
 from settings.settings import SiteSettings, TemplatePathSettings
 
 colorama.init()
-
-setup_logger()
-logger = logging.getLogger(__name__)
 
 
 async def main(signals=None, site_settings=None):
@@ -32,7 +29,7 @@ async def main(signals=None, site_settings=None):
                         "Exiting...")
         return
 
-    remove_all_temp_files()
+    remove_old_files()
 
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     conn = aiohttp.TCPConnector(ssl=ssl_context,
@@ -91,6 +88,9 @@ async def main(signals=None, site_settings=None):
 
 
 if __name__ == '__main__':
+    setup_logger()
+    logger = logging.getLogger(__name__)
+
     start_t = time.time()
     startup_time = time.process_time()
     loop = asyncio.get_event_loop()

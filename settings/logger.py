@@ -1,10 +1,13 @@
 import copy
 import logging
 import sys
+import os
+import datetime
 
 from PyQt5.QtCore import *
 from colorama import Fore, Style
 
+from core.constants import LOGS_PATH
 from settings import advanced_settings
 
 
@@ -12,16 +15,25 @@ def setup_logger():
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
 
-    loglevel = advanced_settings.loglevel if advanced_settings.loglevel in ["ERROR", "WARNING", "INFO", "DEBUG"] else "INFO"
+    loglevel = advanced_settings.loglevel if advanced_settings.loglevel in ["ERROR", "WARNING", "INFO",
+                                                                            "DEBUG"] else "INFO"
 
-    console_basic_fmt = AnsiColouredFormatter("%(levelname)s: %(message)s")
-    console_debug_fmt = AnsiColouredFormatter("%(levelname)s: %(asctime)s - %(name)s - %(message)s")
+    basic_format_string = "%(levelname)s: %(message)s"
+    debug_format_string = "%(levelname)s: %(asctime)s - %(name)s - %(message)s"
+    console_basic_fmt = AnsiColouredFormatter(basic_format_string)
+    console_debug_fmt = AnsiColouredFormatter(debug_format_string)
 
     console = ExcInfoStreamHandler(stream=sys.stdout)
     console.setLevel(loglevel)
     console.setFormatter(console_debug_fmt if loglevel == "DEBUG" else console_basic_fmt)
 
+    log_path = os.path.join(LOGS_PATH, datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S") + ".log")
+    file_handler = logging.FileHandler(log_path)
+    file_handler.setLevel("DEBUG")
+    file_handler.setFormatter(logging.Formatter(debug_format_string))
+
     root.addHandler(console)
+    root.addHandler(file_handler)
 
 
 class ExcInfoStreamHandler(logging.StreamHandler):

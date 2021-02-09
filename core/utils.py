@@ -9,7 +9,7 @@ from mimetypes import guess_extension
 
 import requests
 
-from core.constants import TEMP_PATH
+from core.constants import TEMP_PATH, LOGS_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -55,13 +55,29 @@ def get_extension_from_response(response):
     return extension[1:]
 
 
+def remove_old_files():
+    remove_all_temp_files()
+    remove_old_log_files()
+
+
 def remove_all_temp_files():
     for file_name in os.listdir(TEMP_PATH):
         path = os.path.join(TEMP_PATH, file_name)
+        logger.debug(f"Removing temp file/folder: {path}")
         if os.path.isfile(path):
             os.remove(path)
         else:
             shutil.rmtree(path, ignore_errors=True)
+
+
+def remove_old_log_files(keep_count=10):
+    file_names = [file_name for file_name in os.listdir(LOGS_PATH) if file_name.endswith(".log")]
+    file_names.sort(reverse=True)
+    if len(file_names) <= keep_count:
+        return
+    for file_name in file_names[keep_count:]:
+        path = os.path.join(LOGS_PATH, file_name)
+        os.remove(path)
 
 
 def get_extension(file):

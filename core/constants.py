@@ -17,6 +17,9 @@ APP_DATA_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppD
 TEMP_PATH = os.path.join(APP_DATA_PATH, "temp")
 Path(TEMP_PATH).mkdir(parents=True, exist_ok=True)
 
+LOGS_PATH = os.path.join(APP_DATA_PATH, "logs")
+Path(LOGS_PATH).mkdir(parents=True, exist_ok=True)
+
 
 try:
     BeautifulSoup("", "lxml")
