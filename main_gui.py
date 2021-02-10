@@ -11,14 +11,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-try:
-    from PyQt5.QtWinExtras import QtWin
-
-    myappid = 'ethz-document-fetcher.ethz-document-fetcher'
-    QtWin.setCurrentProcessExplicitAppUserModelID(myappid)
-except ImportError:
-    pass
-
 import gui.main_window
 from gui.application import Application
 from gui.constants import ASSETS_PATH
@@ -26,7 +18,17 @@ from core.constants import IS_FROZEN, VERSION
 from settings.logger import setup_logger
 from settings import advanced_settings
 
+
+try:
+    from PyQt5.QtWinExtras import QtWin
+    app_id = 'ethz-document-fetcher.ethz-document-fetcher'
+    QtWin.setCurrentProcessExplicitAppUserModelID(app_id)
+except ImportError:
+    pass
+
 colorama.init()
+
+logger = logging.getLogger(__name__)
 
 
 def default_sys_except_hook(cls, exception, traceback):
@@ -40,7 +42,6 @@ def log_and_exit_except_hook(cls, exception, traceback):
 
 if __name__ == "__main__":
     setup_logger()
-    logger = logging.getLogger(__name__)
 
     if not IS_FROZEN and advanced_settings.loglevel == "DEBUG":
         sys.excepthook = default_sys_except_hook

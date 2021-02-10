@@ -18,6 +18,8 @@ from settings.settings import SiteSettings, TemplatePathSettings
 
 colorama.init()
 
+logger = logging.getLogger(__name__)
+
 
 async def main(signals=None, site_settings=None):
     template_path = TemplatePathSettings().template_path
@@ -89,7 +91,6 @@ async def main(signals=None, site_settings=None):
 
 if __name__ == '__main__':
     setup_logger()
-    logger = logging.getLogger(__name__)
 
     start_t = time.time()
     startup_time = time.process_time()
