@@ -51,7 +51,7 @@ class Worker(QObject):
         try:
             start_t = time.time()
             logger.info(f"Starting worker")
-            self.tasks = self.loop.create_task(self.run(self.signals))
+            self.tasks = self.loop.create_task(self._run(self.signals))
             self.loop.run_until_complete(self.tasks)
             logger.info(f"Finished in {(time.time() - start_t):.2f} seconds")
         except Exception as e:
@@ -70,9 +70,9 @@ class Worker(QObject):
     def stop(self):
         if self.tasks is not None:
             self.signals.stopped.emit()
-            self.tasks.cancel()
+            self.loop.call_soon_threadsafe(self.tasks.cancel)
 
-    async def run(self, signals=None):
+    async def _run(self, signals=None):
         if not self.site_settings.check_if_valid():
             logger.critical("Settings are not correctly configured.")
             return
