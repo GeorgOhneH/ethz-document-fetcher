@@ -53,6 +53,7 @@ class TemplateEditViewTree(QTreeWidget):
         widget_save_settings(self.header(), name="templateEditViewTreeHeader")
 
     def read_settings(self):
+        self.header().resizeSections(QHeaderView.ResizeToContents)
         widget_read_settings(self.header(), name="templateEditViewTreeHeader")
 
     def edit_item(self, item, column=None):

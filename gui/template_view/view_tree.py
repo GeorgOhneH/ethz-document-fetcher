@@ -113,6 +113,7 @@ class TemplateViewTree(QTreeWidget):
         widget_save_settings(self.header(), name="templateViewTreeHeader")
 
     def read_settings(self):
+        self.header().resizeSections(QHeaderView.ResizeToContents)
         widget_read_settings(self.header(), name="templateViewTreeHeader")
 
     def save_template_file(self):

@@ -128,5 +128,6 @@ class MainWindow(QMainWindow):
             self.central_widget.thread.finished.disconnect(qApp.quit)
 
     def read_settings(self):
+        self.resize(900, 600)
         widget_read_settings(self)
 
