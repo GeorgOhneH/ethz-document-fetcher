@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         widget_save_settings(self)
-        self.central_widget.clean_up()
+        self.central_widget.stop_thread()
         self.central_widget.thread.finished.connect(qApp.quit)
         if not self.central_widget.thread.isRunning():
             event.accept()

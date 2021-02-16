@@ -123,11 +123,6 @@ class CentralWidget(QWidget):
         self.grid.addWidget(logger_splitter)
         self.setLayout(self.grid)
 
-    def clean_up(self):
-        self.stop_thread()
-        if self.template_view.get_path() not in TEMPLATE_PRESET_FILE_PATHS:
-            self.template_view.save_template_file()
-
     def start_thread_checked(self):
         unique_keys = [widget.template_node.unique_key
                        for widget in self.template_view.get_checked()]
@@ -177,6 +172,7 @@ class CentralWidget(QWidget):
 
     def quit_thread(self):
         self.thread.quit()
+
         self.btn_run_all.setText("Run All")
         self.btn_run_all.setEnabled(True)
         self.actions.run.setEnabled(True)
