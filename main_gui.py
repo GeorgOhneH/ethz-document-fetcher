@@ -3,8 +3,6 @@ import os
 import sys
 from multiprocessing import freeze_support
 
-freeze_support()
-
 import colorama
 
 from PyQt5.QtWidgets import *
@@ -15,6 +13,7 @@ import gui.main_window
 from gui.application import Application
 from gui.constants import ASSETS_PATH
 from core.constants import IS_FROZEN, VERSION
+from core.utils import get_app_data_path
 from settings.logger import setup_logger
 
 
@@ -38,6 +37,8 @@ def log_and_exit_except_hook(cls, exception, traceback):
 
 
 if __name__ == "__main__":
+    freeze_support()
+
     colorama.init()
 
     if IS_FROZEN:
@@ -52,6 +53,7 @@ if __name__ == "__main__":
     setup_logger(app.behavior_settings.loglevel)
 
     logger.debug(f"Current Version: {VERSION}")
+    logger.debug(f"AppData Path: {get_app_data_path()}")
 
     app.set_current_setting_theme()
 

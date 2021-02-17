@@ -34,7 +34,7 @@ async def _producer(session, queue, url, base_path, session_kwargs):
     async with session.get(url, **session_kwargs) as response:
         html = await response.text()
 
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     links = soup.find_all("a")
     tasks = []

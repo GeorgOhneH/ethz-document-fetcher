@@ -3,6 +3,7 @@ import logging.config
 import os
 import ssl
 import time
+from multiprocessing import freeze_support
 
 import aiohttp
 import certifi
@@ -92,6 +93,7 @@ async def main(signals=None, site_settings=None):
 
 
 if __name__ == '__main__':
+    freeze_support()
     colorama.init()
 
     start_t = time.time()

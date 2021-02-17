@@ -6,3 +6,6 @@ cache/
 config/
 run.bat
 template.yml
+test_case/
+test_case_static/
+run_before_test_case.py
