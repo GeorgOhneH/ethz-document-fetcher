@@ -1,16 +1,16 @@
 import asyncio
 import datetime
 import locale
+import re
 
 import aiohttp
-from bs4 import SoupStrainer
+from bs4 import BeautifulSoup, SoupStrainer
 
-from core.constants import *
 from core.exceptions import LoginError
-from core.utils import *
+from core.utils import get_beautiful_soup_parser, safe_path_join
 from settings.config import ConfigString
 from sites.ilias import login
-from sites.ilias.constants import *
+from sites.ilias.constants import GOTO_URL
 
 ILIAS_ID_CONFIG = ConfigString(gui_name="ID")
 
@@ -20,7 +20,7 @@ async def get_folder_name(session, ilias_id, **kwargs):
     async with session.get(url) as response:
         html = await response.text()
 
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     ol = soup.find("ol", class_="breadcrumb")
     return str(ol.find_all("li")[2].string)
@@ -38,7 +38,7 @@ async def search_tree(session, queue, base_path, site_settings, ilias_id):
             raise LoginError("Module ilias isn't logged in")
 
     strainer = SoupStrainer("div", attrs={"class": "ilCLI ilObjListRow row"})
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER, parse_only=strainer)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser(), parse_only=strainer)
     rows = soup.find_all("div", attrs={"class": "ilCLI ilObjListRow row"})
     tasks = []
     for row in rows:

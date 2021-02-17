@@ -5,8 +5,7 @@ import logging
 from aiohttp.client import URL
 from bs4 import BeautifulSoup
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
-from core.utils import safe_path_join
+from core.utils import safe_path_join, get_beautiful_soup_parser
 from core.exceptions import LoginError
 
 logger = logging.getLogger(__name__)
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def _get_page_meta(html, keys):
     possible_keys = set(keys)
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
     result = {}
 
     for line in str(soup.findChildren("script")).split(','):

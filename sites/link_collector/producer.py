@@ -5,8 +5,7 @@ from urllib.parse import urlparse, urlunparse, urljoin
 from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
-from core.utils import safe_path_join
+from core.utils import safe_path_join, get_beautiful_soup_parser
 
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG,\
     basic_auth_config_to_session_kwargs, headers_config_to_session_kwargs
@@ -109,7 +108,7 @@ async def get_all_file_links(session, url, session_kwargs):
 
     all_links = set([])
 
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     links = soup.find_all("a")
     for link in links:
@@ -132,7 +131,7 @@ async def get_all_file_links(session, url, session_kwargs):
 async def get_folder_name(session, url, **kwargs):
     async with session.get(url) as response:
         html = await response.text()
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
     title = soup.find("title")
 
     return str(title.string)

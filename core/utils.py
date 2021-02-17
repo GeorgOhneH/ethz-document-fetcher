@@ -10,6 +10,8 @@ import functools
 from pathlib import Path
 
 import requests
+import bs4
+from bs4 import BeautifulSoup
 from appdirs import user_data_dir
 
 from settings.settings import Settings
@@ -168,3 +170,14 @@ def get_logs_path():
     logs_path = os.path.join(get_app_data_path(), "logs")
     Path(logs_path).mkdir(parents=True, exist_ok=True)
     return logs_path
+
+
+@functools.lru_cache(maxsize=None)
+def get_beautiful_soup_parser():
+    try:
+        BeautifulSoup("", "lxml")
+        return "lxml"
+    except bs4.FeatureNotFound:
+        logger.warning("Could not find 'lxml'. Falling back to html.parser")
+        return "html.parser"
+

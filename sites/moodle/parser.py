@@ -1,19 +1,13 @@
 import asyncio
 import logging
 import re
-import os
-import pprint
-from mimetypes import guess_extension
-
-from aiohttp.client_exceptions import ClientResponseError
 from bs4 import BeautifulSoup, SoupStrainer
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.downloader import is_extension_forbidden
 from core.exceptions import ForbiddenError
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
-from core.utils import safe_path_join, safe_path
+from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser
 from sites import polybox, one_drive
 from sites.moodle import zoom
 from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN
@@ -38,7 +32,7 @@ async def parse_main_page(session,
     last_updated_dict = parse_update_json(update_json)
 
     only_sections = SoupStrainer("li", id=re.compile("section-([0-9]+)"))
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER, parse_only=only_sections)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser(), parse_only=only_sections)
 
     sections = soup.find_all("li", id=re.compile("section-([0-9]+)"), recursive=False)
 
@@ -185,7 +179,7 @@ async def get_filemanager(session, href):
         text = await response.text()
 
     only_file_tree = SoupStrainer("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
-    return BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=only_file_tree)
+    return BeautifulSoup(text, get_beautiful_soup_parser(), parse_only=only_file_tree)
 
 
 async def get_assign_files_tree(session, href):
@@ -193,7 +187,7 @@ async def get_assign_files_tree(session, href):
         text = await response.text()
 
     assign_files_tree = SoupStrainer("div", id=re.compile("assign_files_tree[0-9a-f]*"))
-    return BeautifulSoup(text, BEAUTIFUL_SOUP_PARSER, parse_only=assign_files_tree)
+    return BeautifulSoup(text, get_beautiful_soup_parser(), parse_only=assign_files_tree)
 
 
 async def parse_folder(session, queue, site_settings, module, base_path, last_updated):

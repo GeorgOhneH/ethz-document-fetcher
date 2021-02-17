@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
-from settings import GUISettings, AdvancedSettings
+from settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -90,8 +90,8 @@ class Application(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.setApplicationName("ethz-document-fetcher")
-        self.behavior_settings = AdvancedSettings()
-        self.gui_settings = GUISettings()
+        self.behavior_settings = settings.AdvancedSettings()
+        self.gui_settings = settings.GUISettings()
 
         self.current_theme = None
         self.default_palette = self.palette()

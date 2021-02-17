@@ -2,17 +2,7 @@ import logging
 import os
 import sys
 
-import bs4
-from bs4 import BeautifulSoup
-
 logger = logging.getLogger(__name__)
-
-
-try:
-    BeautifulSoup("", "lxml")
-    BEAUTIFUL_SOUP_PARSER = "lxml"
-except bs4.FeatureNotFound:
-    BEAUTIFUL_SOUP_PARSER = "html.parser"
 
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
     IS_FROZEN = True
@@ -44,4 +34,3 @@ PYU_VERSION = VERSION[1:]
 ASSETS_PATH = os.path.join(CORE_PATH, "assets")
 
 EMPTY_TWO_COLUMN_LEFT_PDF_PATH = os.path.join(ASSETS_PATH, "empty_two_column_left.pdf")
-

@@ -1,12 +1,5 @@
-import os
-import re
-from urllib.parse import urlparse, urlunparse, urljoin
-
-from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
-from core.utils import safe_path_join
 
 from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 

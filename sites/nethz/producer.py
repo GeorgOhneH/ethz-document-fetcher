@@ -4,8 +4,7 @@ import re
 from bs4 import BeautifulSoup
 
 from settings.config import ConfigString
-from core.constants import BEAUTIFUL_SOUP_PARSER
-from core.utils import safe_path_join
+from core.utils import safe_path_join, get_beautiful_soup_parser
 
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, basic_auth_config_to_session_kwargs
 
@@ -15,7 +14,7 @@ URL_CONFIG = ConfigString(gui_name="Url")
 async def get_folder_name(session, url, **kwargs):
     async with session.get(url) as response:
         html = await response.text()
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     header_name = str(soup.head.title.string)
     name = re.search("/~([^/]+)/", header_name)[1]

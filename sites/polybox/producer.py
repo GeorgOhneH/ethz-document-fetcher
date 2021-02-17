@@ -11,9 +11,8 @@ from urllib.parse import unquote, quote, urlparse
 from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
 from core.monitor import MonitorSession
-from core.utils import safe_path_join
+from core.utils import safe_path_join, get_beautiful_soup_parser
 from core.storage.utils import call_function_or_cache
 from settings.config_objs import ConfigOptions, ConfigString
 from sites.polybox.constants import *
@@ -83,7 +82,7 @@ async def _get_folder_name_s(session, poly_type, poly_id, password=None):
     async with session.get(url=url) as response:
         html = await response.text()
 
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     data_info = soup.body.header.div
     author = " ".join(data_info["data-owner-display-name"].split(" ")[:2])

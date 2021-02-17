@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
+from core.utils import get_beautiful_soup_parser
 from core.exceptions import LoginError
 from sites.moodle.parser import parse_main_page
 from .constants import AUTH_URL
@@ -57,7 +57,7 @@ async def producer(session,
 async def get_folder_name(session, moodle_id, **kwargs):
     async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={moodle_id}") as response:
         html = await response.read()
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     header = soup.find("div", class_="page-header-headings")
     header_name = str(header.h1.string)

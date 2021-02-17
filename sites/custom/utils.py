@@ -2,15 +2,14 @@ import os
 
 from bs4 import BeautifulSoup
 
-from core.constants import BEAUTIFUL_SOUP_PARSER
-from core.utils import safe_path_join
+from core.utils import safe_path_join, get_beautiful_soup_parser
 
 
 async def validate_url(session, queue, links_to_pdf, base_url, base_path, **kwargs):
     async with session.get(base_url, **kwargs) as response:
         html = await response.text()
 
-    soup = BeautifulSoup(html, BEAUTIFUL_SOUP_PARSER)
+    soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     all_urls_from_site = set([])
 
