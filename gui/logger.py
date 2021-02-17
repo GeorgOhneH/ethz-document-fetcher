@@ -5,7 +5,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_save_settings, widget_read_settings
-from settings import advanced_settings
 from settings.logger import QtHandler
 
 
@@ -13,8 +12,9 @@ class Logger(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.setHidden(True)
+        behavior_settings = QApplication.instance().behavior_settings
         self.handler = QtHandler(self)
-        self.handler.setLevel(advanced_settings.loglevel if advanced_settings.loglevel else logging.INFO)
+        self.handler.setLevel(behavior_settings.loglevel if behavior_settings.loglevel else logging.INFO)
         self.log_text_box = QPlainTextEdit(self)
 
         self.log_text_box.setReadOnly(True)

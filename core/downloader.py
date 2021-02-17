@@ -13,7 +13,7 @@ import fitz
 from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
-from core.utils import get_extension, fit_sections_to_console, split_name_extension
+from core.utils import get_extension, fit_sections_to_console, split_name_extension, get_temp_path
 
 logger = logging.getLogger(__name__)
 
@@ -107,7 +107,7 @@ async def download_if_not_exist(session,
     pure_name, extension = split_name_extension(file_name)
 
     temp_file_name = f"{random.getrandbits(64)}.{extension}"
-    temp_absolute_path = os.path.join(TEMP_PATH, temp_file_name)
+    temp_absolute_path = os.path.join(get_temp_path(), temp_file_name)
 
     old_file_name = f"{pure_name}-old.{extension}"
     old_absolute_path = os.path.join(dir_path, old_file_name)

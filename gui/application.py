@@ -5,7 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
-from settings import gui_settings
+from settings import GUISettings, AdvancedSettings
 
 logger = logging.getLogger(__name__)
 
@@ -89,14 +89,16 @@ class Application(QApplication):
 
     def __init__(self, argv):
         super().__init__(argv)
+        self.setApplicationName("ethz-document-fetcher")
+        self.behavior_settings = AdvancedSettings()
+        self.gui_settings = GUISettings()
+
         self.current_theme = None
         self.default_palette = self.palette()
         self.default_style = self.style().objectName()
 
         self.dark_palette = _init_dark_pallet()
         self.light_palette = _init_light_palette()
-
-        self.set_current_setting_theme()
 
     # IMPORTANT: Set style AFTER palette
     def _to_native(self):
@@ -130,5 +132,5 @@ class Application(QApplication):
         self.theme_changed.emit()
 
     def set_current_setting_theme(self):
-        if gui_settings.theme:
-            self.set_theme(gui_settings.theme)
+        if self.gui_settings.theme:
+            self.set_theme(self.gui_settings.theme)

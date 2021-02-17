@@ -5,11 +5,34 @@ import os
 import pickle
 import random
 from collections.abc import Iterable
+from functools import lru_cache
+from pathlib import Path
 
+from core.utils import get_app_data_path
 from core.storage import cache
-from core.storage.constants import FUNCTION_CACHE_PATH
 
 logger = logging.getLogger(__name__)
+
+
+@lru_cache(maxsize=None)
+def get_cache_path():
+    cache_path = os.path.join(get_app_data_path(), "cache")
+    Path(cache_path).mkdir(parents=True, exist_ok=True)
+    return cache_path
+
+
+@lru_cache(maxsize=None)
+def get_json_cache_path():
+    json_path = os.path.join(get_cache_path(), "json")
+    Path(json_path).mkdir(parents=True, exist_ok=True)
+    return json_path
+
+
+@lru_cache(maxsize=None)
+def get_function_cache_path():
+    function_cache_path = os.path.join(get_cache_path(), "function_results")
+    Path(function_cache_path).mkdir(parents=True, exist_ok=True)
+    return function_cache_path
 
 
 def is_jsonable(x):
@@ -48,8 +71,8 @@ async def call_function_or_cache(func, identifier, *args, **kwargs):
         attributes["value"] = result
         attributes["pickle"] = False
     else:
-        file_name = str(random.randint(1e18, 1e19)) + ".pickle"
-        path = os.path.join(FUNCTION_CACHE_PATH, file_name)
+        file_name = str(random.randint(int(1e18), int(1e19))) + ".pickle"
+        path = os.path.join(get_function_cache_path(), file_name)
         attributes["value"] = path
         attributes["pickle"] = True
 

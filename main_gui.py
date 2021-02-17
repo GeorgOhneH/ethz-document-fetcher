@@ -16,7 +16,6 @@ from gui.application import Application
 from gui.constants import ASSETS_PATH
 from core.constants import IS_FROZEN, VERSION
 from settings.logger import setup_logger
-from settings import advanced_settings
 
 
 try:
@@ -25,8 +24,6 @@ try:
     QtWin.setCurrentProcessExplicitAppUserModelID(app_id)
 except ImportError:
     pass
-
-colorama.init()
 
 logger = logging.getLogger(__name__)
 
@@ -41,18 +38,22 @@ def log_and_exit_except_hook(cls, exception, traceback):
 
 
 if __name__ == "__main__":
-    setup_logger()
+    colorama.init()
 
-    if not IS_FROZEN and advanced_settings.loglevel == "DEBUG":
-        sys.excepthook = default_sys_except_hook
-    else:
+    if IS_FROZEN:
         sys.excepthook = log_and_exit_except_hook
-
-    logger.debug(f"Current Version: {VERSION}")
+    else:
+        sys.excepthook = default_sys_except_hook
 
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.RoundPreferFloor)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = Application(sys.argv)
+
+    setup_logger(app.behavior_settings.loglevel)
+
+    logger.debug(f"Current Version: {VERSION}")
+
+    app.set_current_setting_theme()
 
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 

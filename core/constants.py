@@ -1,24 +1,11 @@
 import logging
 import os
 import sys
-from pathlib import Path
 
 import bs4
-from PyQt5.QtCore import QStandardPaths
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
-
-if not QStandardPaths.writableLocation(QStandardPaths.AppDataLocation):
-    raise ValueError("Could not find a AppData path")
-
-APP_DATA_PATH = os.path.join(QStandardPaths.writableLocation(QStandardPaths.AppDataLocation), "ethz-document-fetcher")
-
-TEMP_PATH = os.path.join(APP_DATA_PATH, "temp")
-Path(TEMP_PATH).mkdir(parents=True, exist_ok=True)
-
-LOGS_PATH = os.path.join(APP_DATA_PATH, "logs")
-Path(LOGS_PATH).mkdir(parents=True, exist_ok=True)
 
 
 try:

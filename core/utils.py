@@ -6,10 +6,13 @@ import os
 import re
 import shutil
 from mimetypes import guess_extension
+import functools
+from pathlib import Path
 
 import requests
+from appdirs import user_data_dir
 
-from core.constants import TEMP_PATH, LOGS_PATH
+from settings.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +64,8 @@ def remove_old_files():
 
 
 def remove_all_temp_files():
-    for file_name in os.listdir(TEMP_PATH):
-        path = os.path.join(TEMP_PATH, file_name)
+    for file_name in os.listdir(get_temp_path()):
+        path = os.path.join(get_temp_path(), file_name)
         logger.debug(f"Removing temp file/folder: {path}")
         if os.path.isfile(path):
             os.remove(path)
@@ -71,12 +74,12 @@ def remove_all_temp_files():
 
 
 def remove_old_log_files(keep_count=10):
-    file_names = [file_name for file_name in os.listdir(LOGS_PATH) if file_name.endswith(".log")]
+    file_names = [file_name for file_name in os.listdir(get_logs_path()) if file_name.endswith(".log")]
     file_names.sort(reverse=True)
     if len(file_names) <= keep_count:
         return
     for file_name in file_names[keep_count:]:
-        path = os.path.join(LOGS_PATH, file_name)
+        path = os.path.join(get_logs_path(), file_name)
         os.remove(path)
 
 
@@ -140,3 +143,28 @@ def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
             free -= len(section["var"])
 
     return "".join([x["name"].format(x["var"]) for x in orig_sections])
+
+
+@functools.lru_cache(maxsize=None)
+def get_app_data_path():
+    args = Settings.parser.parse_args()
+    if args.app_data_path is not None:
+        app_data_path = args.app_data_path
+    else:
+        app_data_path = user_data_dir("ethz-document-fetcher", appauthor=False, roaming=True)
+    Path(app_data_path).mkdir(parents=True, exist_ok=True)
+    return app_data_path
+
+
+@functools.lru_cache(maxsize=None)
+def get_temp_path():
+    temp_path = os.path.join(get_app_data_path(), "temp")
+    Path(temp_path).mkdir(parents=True, exist_ok=True)
+    return temp_path
+
+
+@functools.lru_cache(maxsize=None)
+def get_logs_path():
+    logs_path = os.path.join(get_app_data_path(), "logs")
+    Path(logs_path).mkdir(parents=True, exist_ok=True)
+    return logs_path

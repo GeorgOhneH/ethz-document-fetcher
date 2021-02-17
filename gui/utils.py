@@ -1,5 +1,18 @@
+import functools
+import os
+from pathlib import Path
+
+from core.utils import get_app_data_path
+
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication
+
+
+@functools.lru_cache(maxsize=None)
+def get_empty_folder_path():
+    empty_folder_path = os.path.join(get_app_data_path(), "empty_folder")
+    Path(empty_folder_path).mkdir(parents=True, exist_ok=True)
+    return empty_folder_path
 
 
 def format_bytes(size):

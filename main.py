@@ -14,15 +14,17 @@ from core.cancellable_pool import CancellablePool
 from core.constants import VERSION
 from core.utils import async_user_statistics, async_get_latest_version, remove_old_files
 from settings.logger import setup_logger
-from settings.settings import SiteSettings, TemplatePathSettings
-
-colorama.init()
+from settings.settings import SiteSettings, TemplatePathSettings, AdvancedSettings
 
 logger = logging.getLogger(__name__)
 
 
 async def main(signals=None, site_settings=None):
+    behavior_settings = AdvancedSettings()
+    setup_logger(behavior_settings.loglevel)
+
     template_path = TemplatePathSettings().template_path
+
     if site_settings is None:
         site_settings = SiteSettings()
     if not site_settings.check_if_valid():
@@ -63,7 +65,7 @@ async def main(signals=None, site_settings=None):
 
         logger.debug(f"Checking for update")
         latest_version = await async_get_latest_version(session)
-        if latest_version != VERSION:
+        if latest_version != VERSION and behavior_settings.check_for_updates:
             logger.info(f"A new update is available. Update with 'git pull'."
                         f" New version: {latest_version}. Current version {VERSION}")
 
@@ -90,7 +92,7 @@ async def main(signals=None, site_settings=None):
 
 
 if __name__ == '__main__':
-    setup_logger()
+    colorama.init()
 
     start_t = time.time()
     startup_time = time.process_time()

@@ -2,7 +2,7 @@ import json
 import logging
 import os
 
-from core.storage.constants import JSON_CACHE_PATH
+from core.storage.utils import get_json_cache_path
 from core.utils import get_extension_from_response
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def set_json(name, value, path):
 
 def load_json(name):
     logger.debug(f"Loading {name} json")
-    path = os.path.join(JSON_CACHE_PATH, name + ".json")
+    path = os.path.join(get_json_cache_path(), name + ".json")
     if not os.path.exists(path):
         set_json(name, {}, path)
     else:

@@ -9,7 +9,6 @@ from pyupdater.client import Client
 from core.client_config import ClientConfig
 from core.constants import VERSION, PYU_VERSION, IS_FROZEN
 from core.utils import get_latest_version, user_statistics, remove_old_files
-from settings import advanced_settings
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +18,10 @@ DOWNLOAD_RELEASE_URL = "https://github.com/GeorgOhneH/ethz-document-fetcher/rele
 def run_startup_tasks(site_settings):
     background_tasks = BackgroundTasks(site_settings.username)
     QThreadPool.globalInstance().start(background_tasks)
-    if advanced_settings.check_for_updates and IS_FROZEN:
+
+    behavior_settings = QApplication.instance().behavior_settings
+
+    if behavior_settings.check_for_updates and IS_FROZEN:
         mutex = QMutex()
         cond = QWaitCondition()
         check_for_update = Update(mutex=mutex, cond=cond)

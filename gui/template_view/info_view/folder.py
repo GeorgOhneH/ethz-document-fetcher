@@ -6,9 +6,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from gui.constants import EMPTY_FOLDER_PATH
 from gui.template_view.info_view.base import InfoView
-from gui.utils import widget_read_settings, widget_save_settings
+from gui.utils import widget_read_settings, widget_save_settings, get_empty_folder_path
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ class FolderInfoView(QTreeView, InfoView):
 
     def change_root(self, path):
         if path is None or not os.path.exists(path):
-            index = self.model.setRootPath(EMPTY_FOLDER_PATH)
+            index = self.model.setRootPath(get_empty_folder_path())
         else:
             index = self.model.setRootPath(path)
         self.setRootIndex(index)

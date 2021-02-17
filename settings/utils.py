@@ -1,7 +1,18 @@
 import logging
+import functools
+import os
+from pathlib import Path
 
+from core.utils import get_app_data_path
 
 logger = logging.getLogger(__name__)
+
+
+@functools.lru_cache(maxsize=None)
+def get_config_path():
+    config_path = os.path.join(get_app_data_path(), "config")
+    Path(config_path).mkdir(parents=True, exist_ok=True)
+    return config_path
 
 
 def apply_value_from_widget(settings):
@@ -12,5 +23,3 @@ def apply_value_from_widget(settings):
     for value in settings:
         value.set_from_widget()
     settings.save()
-
-

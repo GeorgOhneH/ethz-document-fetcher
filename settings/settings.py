@@ -6,8 +6,8 @@ from gui.constants import ALL_THEMES, THEME_NATIVE
 from settings.config import ConfigBase, Configs
 from settings.config_objs import ConfigPath, ConfigListString, ConfigBool, ConfigPassword, \
     ConfigOptions, ConfigString, ConfigInt
-from settings.constants import ROOT_PATH
-from settings.constants import SEPARATOR, CONFIG_PATH
+from settings.constants import ROOT_PATH, SEPARATOR
+from settings.utils import get_config_path
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ def get_key_value(f):
 
 class SettingBase(ConfigBase):
     argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("--app-data-path")
 
     def __new__(mcs, name, bases, attrs, **kwargs):
         cls = super().__new__(mcs, name, bases, attrs, **kwargs)
@@ -58,7 +59,7 @@ class Settings(Configs, metaclass=SettingBase):
                 setattr(self, config_obj.name, arg_value)
 
     def get_file_path(self):
-        return os.path.join(CONFIG_PATH, self.__class__.__name__.lower() + ".config")
+        return os.path.join(get_config_path(), self.__class__.__name__.lower() + ".config")
 
     def save(self):
         logger.debug(f"Saving settings: {self.__class__.__name__}")
@@ -71,7 +72,7 @@ class Settings(Configs, metaclass=SettingBase):
 
 
 class AdvancedSettings(Settings):
-    NAME = "Advanced"
+    NAME = "Behavior"
     loglevel = ConfigOptions(default="DEBUG",
                              options=["ERROR", "WARNING", "INFO", "DEBUG"],
                              gui_name="Loglevel",

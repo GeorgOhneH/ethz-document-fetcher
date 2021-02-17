@@ -10,7 +10,6 @@ from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
 from gui.template_edit.view_tree_item import TreeEditWidgetItem
 from gui.utils import widget_read_settings, widget_save_settings
-from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 

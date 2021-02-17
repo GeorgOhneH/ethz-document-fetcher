@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import *
 from core import template_parser
 from gui.template_view.view_tree_item import TreeWidgetItem
 from gui.utils import widget_read_settings, widget_save_settings
-from settings import gui_settings
 
 logger = logging.getLogger(__name__)
 

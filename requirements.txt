@@ -3,6 +3,7 @@ requests
 beautifulsoup4
 lxml
 aiodns
+appdirs
 cchardet
 colorama
 pyyaml
