@@ -19,9 +19,9 @@ def queue_wrapper_put(obj, attr, **consumer_kwargs):
 
 
 class QueueWrapper:
-    def __init__(self, queue, signal_handler, unique_key, site_settings, **kwargs):
+    def __init__(self, queue, signal_handler, unique_key, download_settings, **kwargs):
         kwargs["signal_handler"] = signal_handler
         kwargs["unique_key"] = unique_key
-        kwargs["site_settings"] = site_settings
+        kwargs["download_settings"] = download_settings
         self.consumer_kwargs = kwargs
         setattr(self, "put", queue_wrapper_put(queue, "put", **kwargs))

@@ -1,16 +1,16 @@
 from sites.video_portal.constants import BASE_URL
 
 
-def get_eth_auth(site_settings):
+def get_eth_auth(download_settings):
     return {
         "_charset_": "utf-8",
-        "j_username": site_settings.username,
-        "j_password": site_settings.password,
+        "j_username": download_settings.username,
+        "j_password": download_settings.password,
         "j_validate": "true",
     }
 
 
-async def login_and_data(session, site_settings, department, year, semester, course_id, meta_video_url,
+async def login_and_data(session, download_settings, department, year, semester, course_id, meta_video_url,
                          pwd_username=None, pwd_password=None, depth=0):
     course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
 
@@ -27,7 +27,7 @@ async def login_and_data(session, site_settings, department, year, semester, cou
 
     if protection == "ETH":
         security_check_url = f"{BASE_URL}{department}/{year}/{semester}/j_security_check"
-        async with session.post(security_check_url, data=get_eth_auth(site_settings)) as response:
+        async with session.post(security_check_url, data=get_eth_auth(download_settings)) as response:
             await response.text()
 
     elif protection == "PWD":
@@ -42,5 +42,5 @@ async def login_and_data(session, site_settings, department, year, semester, cou
         async with session.post(series_url, data=pwd_data) as response:
             await response.text()
 
-    return await login_and_data(session, site_settings, department, year, semester, course_id, meta_video_url,
+    return await login_and_data(session, download_settings, department, year, semester, course_id, meta_video_url,
                                 pwd_username=pwd_username, pwd_password=pwd_password, depth=depth + 1)

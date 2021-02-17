@@ -15,8 +15,8 @@ logger = logging.getLogger(__name__)
 DOWNLOAD_RELEASE_URL = "https://github.com/GeorgOhneH/ethz-document-fetcher/releases/latest"
 
 
-def run_startup_tasks(site_settings):
-    background_tasks = BackgroundTasks(site_settings.username)
+def run_startup_tasks(download_settings):
+    background_tasks = BackgroundTasks(download_settings.username)
     QThreadPool.globalInstance().start(background_tasks)
 
     behavior_settings = QApplication.instance().behavior_settings

@@ -22,8 +22,8 @@ async def get_folder_name(session, url, **kwargs):
     return name
 
 
-async def producer(session, queue, base_path, site_settings, url: URL_CONFIG, basic_auth: BASIC_AUTH_CONFIG):
-    session_kwargs = basic_auth_config_to_session_kwargs(basic_auth, site_settings)
+async def producer(session, queue, base_path, download_settings, url: URL_CONFIG, basic_auth: BASIC_AUTH_CONFIG):
+    session_kwargs = basic_auth_config_to_session_kwargs(basic_auth, download_settings)
     await _producer(session, queue, url, base_path, session_kwargs)
 
 

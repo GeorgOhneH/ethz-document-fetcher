@@ -15,20 +15,20 @@ from core.cancellable_pool import CancellablePool
 from core.constants import VERSION
 from core.utils import async_user_statistics, async_get_latest_version, remove_old_files
 from settings.logger import setup_logger
-from settings.settings import SiteSettings, TemplatePathSettings, AdvancedSettings
+from settings.settings import DownloadSettings, TemplatePathSettings, BehaviorSettings
 
 logger = logging.getLogger(__name__)
 
 
-async def main(signals=None, site_settings=None):
-    behavior_settings = AdvancedSettings()
+async def main(signals=None, download_settings=None):
+    behavior_settings = BehaviorSettings()
     setup_logger(behavior_settings.loglevel)
 
     template_path = TemplatePathSettings().template_path
 
-    if site_settings is None:
-        site_settings = SiteSettings()
-    if not site_settings.check_if_valid():
+    if download_settings is None:
+        download_settings = DownloadSettings()
+    if not download_settings.check_if_valid():
         logger.critical("Settings are not correctly configured. "
                         "Please run 'python main.py --help' for more info. "
                         "Exiting...")
@@ -38,8 +38,8 @@ async def main(signals=None, site_settings=None):
 
     ssl_context = ssl.create_default_context(cafile=certifi.where())
     conn = aiohttp.TCPConnector(ssl=ssl_context,
-                                limit=site_settings.conn_limit,
-                                limit_per_host=site_settings.conn_limit_per_host)
+                                limit=download_settings.conn_limit,
+                                limit_per_host=download_settings.conn_limit_per_host)
 
     async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
                                       timeout=aiohttp.ClientTimeout(30)) as session:
@@ -59,10 +59,10 @@ async def main(signals=None, site_settings=None):
         await template.run_root(producers,
                                 session,
                                 queue,
-                                site_settings=site_settings,
+                                download_settings=download_settings,
                                 cancellable_pool=cancellable_pool)
 
-        user_statistic = asyncio.ensure_future(async_user_statistics(session, site_settings.username))
+        user_statistic = asyncio.ensure_future(async_user_statistics(session, download_settings.username))
 
         logger.debug(f"Checking for update")
         latest_version = await async_get_latest_version(session)

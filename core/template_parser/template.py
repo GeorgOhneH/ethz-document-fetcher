@@ -116,30 +116,30 @@ class Template(object):
 
         return site
 
-    async def run_root(self, producers, session, queue, site_settings, cancellable_pool):
+    async def run_root(self, producers, session, queue, download_settings, cancellable_pool):
         await self.run(self.root,
                        producers=producers,
                        session=session,
                        queue=queue,
-                       site_settings=site_settings,
+                       download_settings=download_settings,
                        cancellable_pool=cancellable_pool)
 
     async def run_from_unique_keys(self, unique_keys, producers, session, queue,
-                                   site_settings, cancellable_pool, recursive):
+                                   download_settings, cancellable_pool, recursive):
         tasks = []
         for unique_key in unique_keys:
             coroutine = self.run(node=self.nodes[unique_key],
                                  producers=producers,
                                  session=session,
                                  queue=queue,
-                                 site_settings=site_settings,
+                                 download_settings=download_settings,
                                  cancellable_pool=cancellable_pool,
                                  recursive=recursive)
             tasks.append(coroutine)
 
         await asyncio.gather(*tasks)
 
-    async def run(self, node, producers, session, queue, site_settings, cancellable_pool, recursive=True):
+    async def run(self, node, producers, session, queue, download_settings, cancellable_pool, recursive=True):
         if node.unique_key != "root":
             self.signal_handler.start(node.unique_key)  # finished signal in add_producer_exception_handler
 
@@ -152,7 +152,7 @@ class Template(object):
         coroutine = self.add_producer_exception_handler(node.add_producers, node)(producers,
                                                                                   session,
                                                                                   queue,
-                                                                                  site_settings,
+                                                                                  download_settings,
                                                                                   cancellable_pool,
                                                                                   self.signal_handler)
         if node.base_path is None:
@@ -162,7 +162,7 @@ class Template(object):
 
         if recursive and node.base_path is not None:
             for child in node.children:
-                tasks.append(self.run(child, producers, session, queue, site_settings, cancellable_pool))
+                tasks.append(self.run(child, producers, session, queue, download_settings, cancellable_pool))
         await asyncio.gather(*tasks)
 
     def add_producer_exception_handler(self, coroutine, node):

@@ -71,7 +71,7 @@ class Settings(Configs, metaclass=SettingBase):
                     f.write(f"{config_obj.name}{SEPARATOR}{string}\n")
 
 
-class AdvancedSettings(Settings):
+class BehaviorSettings(Settings):
     NAME = "Behavior"
     loglevel = ConfigOptions(default="DEBUG",
                              options=["ERROR", "WARNING", "INFO", "DEBUG"],
@@ -94,11 +94,11 @@ def highlight_size_limit_active(instance, from_widget, parent):
     return highlight_difference
 
 
-class SiteSettings(Settings):
+class DownloadSettings(Settings):
     NAME = "Download"
     username = ConfigString(optional=True, gui_name="Username")
     password = ConfigPassword(optional=True, gui_name="Password")
-    base_path = ConfigPath(only_folder=True, gui_name="Save Path")
+    save_path = ConfigPath(only_folder=True, gui_name="Save Path")
     allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
                                           hint_text="Add 'video' for all video types.")
     forbidden_extensions = ConfigListString(default=["video"], optional=True, gui_name="Forbidden Extensions",

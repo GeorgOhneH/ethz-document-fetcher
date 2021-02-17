@@ -16,7 +16,7 @@ from gui.template_edit import TemplateEditDialog
 from gui.template_view import TemplateView
 from gui.worker import Worker
 from settings.config_objs.path import open_file_picker
-from settings.settings import SiteSettings, TemplatePathSettings
+from settings.settings import DownloadSettings, TemplatePathSettings
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class CentralWidget(QWidget):
         self.download_speed_widget = DownloadSpeedWidget()
         self.status_bar.addPermanentWidget(self.download_speed_widget)
 
-        self.site_settings = SiteSettings()
+        self.download_settings = DownloadSettings()
 
         self.thread = QThread()
         self.worker = Worker()
@@ -95,7 +95,7 @@ class CentralWidget(QWidget):
         actions.new_file.triggered.connect(lambda: self.open_edit(new=True))
         actions.open_file.triggered.connect(self.open_file)
 
-        self.settings_dialog = SettingsDialog(parent=self, site_settings=self.site_settings)
+        self.settings_dialog = SettingsDialog(parent=self, download_settings=self.download_settings)
 
         self.settings_dialog.settings_saved.connect(QApplication.instance().set_current_setting_theme)
 
@@ -133,11 +133,11 @@ class CentralWidget(QWidget):
         if unique_keys is None:
             unique_keys = ["root"]
 
-        if not self.site_settings.check_if_valid():
+        if not self.download_settings.check_if_valid():
             self.open_settings()
             return
 
-        if self.site_settings.force_download:
+        if self.download_settings.force_download:
             msg_box = QMessageBox()
             msg_box.setWindowTitle("Run Confirmation")
             msg_box.setText("Force Download is enabled.")
@@ -163,7 +163,7 @@ class CentralWidget(QWidget):
 
         self.worker.unique_keys = unique_keys
         self.worker.recursive = recursive
-        self.worker.site_settings = copy.deepcopy(self.site_settings)
+        self.worker.download_settings = copy.deepcopy(self.download_settings)
         self.worker.template_path = self.get_template_path()
         self.thread.start()
 

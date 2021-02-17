@@ -61,7 +61,7 @@ def is_extension_forbidden(extension, allowed_extensions, forbidden_extensions):
 async def download_if_not_exist(session,
                                 path,
                                 url,
-                                site_settings,
+                                download_settings,
                                 cancellable_pool,
                                 with_extension=True,
                                 session_kwargs=None,
@@ -79,8 +79,8 @@ async def download_if_not_exist(session,
     if forbidden_extensions is None:
         forbidden_extensions = []
 
-    allowed_extensions += site_settings.allowed_extensions
-    forbidden_extensions += site_settings.forbidden_extensions
+    allowed_extensions += download_settings.allowed_extensions
+    forbidden_extensions += download_settings.forbidden_extensions
 
     if isinstance(url, str):
         url = URL(url)
@@ -90,7 +90,7 @@ async def download_if_not_exist(session,
     if os.path.isabs(path):
         raise ValueError("Absolutes paths are not allowed")
 
-    absolute_path = os.path.join(site_settings.base_path, path)
+    absolute_path = os.path.join(download_settings.save_path, path)
 
     if not with_extension:
         guess_extension = await cache.check_extension(session, str(url), session_kwargs=session_kwargs)
@@ -118,7 +118,7 @@ async def download_if_not_exist(session,
     force = False
     if checksum is not None:
         force = not cache.is_checksum_same(absolute_path, checksum)
-    elif site_settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
+    elif download_settings.force_download and domain not in FORCE_DOWNLOAD_BLACKLIST:
         force = True
 
     if os.path.exists(absolute_path) and not force:
@@ -176,10 +176,10 @@ async def download_if_not_exist(session,
                     shutil.move(temp_absolute_path, absolute_path)
                 raise e
 
-        if site_settings.highlight_difference and \
+        if download_settings.highlight_difference and \
                 action == ACTION_REPLACE and \
                 file_extension.lower() == "pdf":
-            await _add_pdf_highlights(site_settings=site_settings,
+            await _add_pdf_highlights(download_settings=download_settings,
                                       cancellable_pool=cancellable_pool,
                                       signal_handler=signal_handler,
                                       unique_key=unique_key,
@@ -187,7 +187,7 @@ async def download_if_not_exist(session,
                                       old_absolute_path=temp_absolute_path,
                                       out_path=diff_absolute_path)
 
-        if action == ACTION_REPLACE and site_settings.keep_replaced_files:
+        if action == ACTION_REPLACE and download_settings.keep_replaced_files:
             shutil.move(temp_absolute_path, old_absolute_path)
 
         if "ETag" in response_headers:
@@ -199,9 +199,9 @@ async def download_if_not_exist(session,
 
         if action == ACTION_REPLACE:
             signal_old_path, signal_diff_path = None, None
-            if os.path.exists(old_absolute_path) and site_settings.keep_replaced_files:
+            if os.path.exists(old_absolute_path) and download_settings.keep_replaced_files:
                 signal_old_path = old_absolute_path
-            if os.path.exists(diff_absolute_path) and site_settings.highlight_difference:
+            if os.path.exists(diff_absolute_path) and download_settings.highlight_difference:
                 signal_diff_path = diff_absolute_path
 
             signal_handler.replaced_file(unique_key,
@@ -239,16 +239,16 @@ async def download_if_not_exist(session,
             os.remove(temp_absolute_path)
 
 
-async def _add_pdf_highlights(site_settings,
+async def _add_pdf_highlights(download_settings,
                               cancellable_pool,
                               signal_handler,
                               unique_key,
                               absolute_path,
                               old_absolute_path,
                               out_path):
-    if site_settings.highlight_page_limit != 0:
+    if download_settings.highlight_page_limit != 0:
         with fitz.Document(old_absolute_path, filetype="pdf") as doc:
-            if doc.pageCount > site_settings.highlight_page_limit:
+            if doc.pageCount > download_settings.highlight_page_limit:
                 logger.debug(f"Skipping highlights. File: {absolute_path}. Page Count: {doc.pageCount} is to large")
                 return
 

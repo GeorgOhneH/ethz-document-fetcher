@@ -68,11 +68,11 @@ BASIC_AUTH_CONFIG = ConfigDict(
 )
 
 
-def basic_auth_config_to_session_kwargs(basic_auth, site_settings):
+def basic_auth_config_to_session_kwargs(basic_auth, download_settings):
     if basic_auth["use"]:
         if basic_auth["use_eth_credentials"]:
-            return dict(auth=BasicAuth(login=site_settings.username,
-                                       password=site_settings.password))
+            return dict(auth=BasicAuth(login=download_settings.username,
+                                       password=download_settings.password))
         else:
             return dict(auth=BasicAuth(login=basic_auth["custom"]["username"],
                                        password=basic_auth["custom"]["password"]))

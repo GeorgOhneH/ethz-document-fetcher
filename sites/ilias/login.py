@@ -2,7 +2,7 @@ from sites import aai_logon
 from sites.ilias.constants import *
 
 
-async def login(session, site_settings, **kwargs):
+async def login(session, download_settings, **kwargs):
     async with session.get(LOGIN_URL) as response:
         response_url = response.url
         # We read the response, because on some system we get
@@ -10,4 +10,4 @@ async def login(session, site_settings, **kwargs):
         # the whole program freezes for 20 seconds. (No idea why)
         await response.read()
 
-    await aai_logon.login(session, site_settings, response_url, IDP_DATA)
+    await aai_logon.login(session, download_settings, response_url, IDP_DATA)

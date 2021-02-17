@@ -90,7 +90,7 @@ class Application(QApplication):
     def __init__(self, argv):
         super().__init__(argv)
         self.setApplicationName("ethz-document-fetcher")
-        self.behavior_settings = settings.AdvancedSettings()
+        self.behavior_settings = settings.BehaviorSettings()
         self.gui_settings = settings.GUISettings()
 
         self.current_theme = None

@@ -39,7 +39,7 @@ class Worker(QObject):
 
         self.unique_keys = ["root"]
         self.recursive = True
-        self.site_settings = None
+        self.download_settings = None
         self.template_path = None
 
         self.loop = asyncio.new_event_loop()
@@ -73,14 +73,14 @@ class Worker(QObject):
             self.loop.call_soon_threadsafe(self.tasks.cancel)
 
     async def _run(self, signals=None):
-        if not self.site_settings.check_if_valid():
+        if not self.download_settings.check_if_valid():
             logger.critical("Settings are not correctly configured.")
             return
 
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         conn = aiohttp.TCPConnector(ssl=ssl_context,
-                                    limit=self.site_settings.conn_limit,
-                                    limit_per_host=self.site_settings.conn_limit_per_host)
+                                    limit=self.download_settings.conn_limit,
+                                    limit_per_host=self.download_settings.conn_limit_per_host)
 
         async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
                                           timeout=aiohttp.ClientTimeout(30)) as session:
@@ -107,7 +107,7 @@ class Worker(QObject):
                                                     producers=producers,
                                                     session=session,
                                                     queue=queue,
-                                                    site_settings=self.site_settings,
+                                                    download_settings=self.download_settings,
                                                     cancellable_pool=cancellable_pool,
                                                     recursive=self.recursive)
 

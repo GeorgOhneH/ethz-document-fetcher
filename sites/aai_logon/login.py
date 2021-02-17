@@ -10,19 +10,19 @@ from .constants import *
 locks = {}
 
 
-def get_sso_data(site_settings):
+def get_sso_data(download_settings):
     return {
         ":formid": "_content_main_de_jcr_content_par_start",
         ":formstart": "/content/main/de/jcr:content/par/start",
         "_charset_": "UTF-8",
         "form_flavour": "eth_form",
-        "j_username": site_settings.username,
-        "j_password": site_settings.password,
+        "j_username": download_settings.username,
+        "j_password": download_settings.password,
         "_eventId_proceed": "",
     }
 
 
-async def login(session: ClientSession, site_settings, url, data):
+async def login(session: ClientSession, download_settings, url, data):
     if id(session) not in locks:
         lock = asyncio.Lock()
         locks[id(session)] = lock
@@ -44,7 +44,7 @@ async def login(session: ClientSession, site_settings, url, data):
             sso_url = re.search(r"<form action=\"(.+)\" method=\"post\">", text)[1]
             sso_url = html.unescape(sso_url)
 
-            async with session.post(BASE_URL + sso_url, data=get_sso_data(site_settings)) as resp:
+            async with session.post(BASE_URL + sso_url, data=get_sso_data(download_settings)) as resp:
                 text = await resp.text()
 
         try:

@@ -68,7 +68,7 @@ class FunctionKwargsConfigDict(ConfigDict):
 
         try:
             for name, parameter in inspect.signature(producer_function).parameters.items():
-                if name in ["session", "queue", "base_path", "site_settings"]:
+                if name in ["session", "queue", "base_path", "download_settings"]:
                     continue
                 default_value = parameter.default if parameter.default is not parameter.empty else None
                 optional = parameter.default != parameter.empty

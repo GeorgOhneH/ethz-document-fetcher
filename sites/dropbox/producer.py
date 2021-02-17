@@ -41,7 +41,7 @@ def _get_data(key, secure_hash, sub_path=""):
     }
 
 
-async def producer(session, queue, base_path, site_settings, url: URL_CONFIG):
+async def producer(session, queue, base_path, download_settings, url: URL_CONFIG):
     key, secure_hash, sub_path = _split_url(url=url)
 
     cut_path = len([x for x in sub_path.split("/") if x.strip() != ""])
@@ -49,14 +49,14 @@ async def producer(session, queue, base_path, site_settings, url: URL_CONFIG):
     await parse_folder(session,
                        queue,
                        base_path,
-                       site_settings,
+                       download_settings,
                        key,
                        secure_hash,
                        sub_path=sub_path,
                        cut_path_num=cut_path)
 
 
-async def parse_folder(session, queue, base_path, site_settings, key, secure_hash, sub_path, cut_path_num=0):
+async def parse_folder(session, queue, base_path, download_settings, key, secure_hash, sub_path, cut_path_num=0):
     data = _get_data(key, secure_hash, sub_path)
 
     async with session.post(LIST_ENTRIES_URL, cookies=DEFAULT_COOKIE, data=data) as response:
@@ -69,7 +69,7 @@ async def parse_folder(session, queue, base_path, site_settings, key, secure_has
             coroutine = parse_folder(session=session,
                                      queue=queue,
                                      base_path=base_path,
-                                     site_settings=site_settings,
+                                     download_settings=download_settings,
                                      key=share_tokens["linkKey"],
                                      secure_hash=share_tokens["secureHash"],
                                      sub_path=share_tokens["subPath"],

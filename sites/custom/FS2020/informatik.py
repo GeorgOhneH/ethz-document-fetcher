@@ -5,7 +5,7 @@ from sites.custom.utils import validate_url
 BASE_URL = "https://lec.inf.ethz.ch/itet/informatik1/2020/"
 
 
-async def parse_main_page(session, queue, base_path, site_settings):
+async def parse_main_page(session, queue, base_path, download_settings):
     links_to_pdf = {
         "Overlays": lambda x: "slides/lecture{}.pdf".format(x + 1),
         "Handout": lambda x: "slides/lecture{}.handout.pdf".format(x + 1),
@@ -13,4 +13,4 @@ async def parse_main_page(session, queue, base_path, site_settings):
     }
 
     await validate_url(session, queue, links_to_pdf, BASE_URL, base_path,
-                       auth=BasicAuth(site_settings.username, site_settings.password))
+                       auth=BasicAuth(download_settings.username, download_settings.password))

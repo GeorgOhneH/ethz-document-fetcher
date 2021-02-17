@@ -116,7 +116,7 @@ class TemplateNode(object):
     def get_configs(self):
         return NodeConfigs()
 
-    async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
+    async def add_producers(self, producers, session, queue, download_settings, cancellable_pool, signal_handler):
         pass
 
     def has_website_url(self):

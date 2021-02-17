@@ -26,11 +26,11 @@ async def get_folder_name(session, ilias_id, **kwargs):
     return str(ol.find_all("li")[2].string)
 
 
-async def producer(session, queue, base_path, site_settings, ilias_id: ILIAS_ID_CONFIG):
-    await search_tree(session, queue, base_path, site_settings, ilias_id)
+async def producer(session, queue, base_path, download_settings, ilias_id: ILIAS_ID_CONFIG):
+    await search_tree(session, queue, base_path, download_settings, ilias_id)
 
 
-async def search_tree(session, queue, base_path, site_settings, ilias_id):
+async def search_tree(session, queue, base_path, download_settings, ilias_id):
     url = GOTO_URL + str(ilias_id)
     async with session.get(url) as response:
         html = await response.text()
@@ -65,7 +65,7 @@ async def search_tree(session, queue, base_path, site_settings, ilias_id):
             await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
         else:
             ref_id = re.search("ref_id=([0-9]+)&", href).group(1)
-            coroutine = search_tree(session, queue, path, site_settings, ref_id)
+            coroutine = search_tree(session, queue, path, download_settings, ref_id)
             tasks.append(asyncio.ensure_future(coroutine))
 
     await asyncio.gather(*tasks)

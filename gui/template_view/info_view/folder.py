@@ -75,8 +75,8 @@ class FolderInfoView(QTreeView, InfoView):
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path
-        if path is not None and self.controller.site_settings.base_path is not None:
-            absolute_path = os.path.join(self.controller.site_settings.base_path, path)
+        if path is not None and self.controller.download_settings.save_path is not None:
+            absolute_path = os.path.join(self.controller.download_settings.save_path, path)
             self.change_root(absolute_path)
         else:
             self.change_root(None)

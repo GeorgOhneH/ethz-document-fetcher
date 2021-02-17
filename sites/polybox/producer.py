@@ -46,16 +46,16 @@ async def login_folder(session, poly_type, poly_id, password, **kwargs):
         pass
 
 
-async def _get_dire_path(session, site_settings, poly_type, poly_id):
+async def _get_dire_path(session, download_settings, poly_type, poly_id):
     url = INDEX_URL + poly_type + "/" + poly_id
-    auth = BasicAuth(login=site_settings.username, password=site_settings.password)
+    auth = BasicAuth(login=download_settings.username, password=download_settings.password)
     async with session.get(url=url, auth=auth) as response:
         dir_path = response.url.query["dir"]
 
     return dir_path
 
 
-async def get_folder_name(session, site_settings, poly_id, poly_type="s", password=None):
+async def get_folder_name(session, download_settings, poly_id, poly_type="s", password=None):
     # We create a new session, because polybox doesn't work
     # when you jump around with the same session
     async with MonitorSession(raise_for_status=True, signals=session.signals) as session:
@@ -66,7 +66,7 @@ async def get_folder_name(session, site_settings, poly_id, poly_type="s", passwo
                                             password=password)
         elif poly_type == "f":
             return await _get_folder_name_f(session=session,
-                                            site_settings=site_settings,
+                                            download_settings=download_settings,
                                             poly_type=poly_type,
                                             poly_id=poly_id)
         else:
@@ -90,9 +90,9 @@ async def _get_folder_name_s(session, poly_type, poly_id, password=None):
     return f"Polybox - {author}"
 
 
-async def _get_folder_name_f(session, site_settings, poly_type, poly_id):
+async def _get_folder_name_f(session, download_settings, poly_type, poly_id):
     dire_path = await _get_dire_path(session=session,
-                                     site_settings=site_settings,
+                                     download_settings=download_settings,
                                      poly_type=poly_type,
                                      poly_id=poly_id)
     folder_name = dire_path.split("/")[-1]
@@ -106,7 +106,7 @@ async def _get_folder_name_f(session, site_settings, poly_type, poly_id):
 async def producer(session,
                    queue,
                    base_path,
-                   site_settings,
+                   download_settings,
                    poly_id: POLY_ID_CONFIG,
                    poly_type: POLY_TYPE_CONFIG = "s",
                    password: PASSWORD_CONFIG = None):
@@ -114,7 +114,7 @@ async def producer(session,
         await _producer_f(session=session,
                           queue=queue,
                           base_path=base_path,
-                          site_settings=site_settings,
+                          download_settings=download_settings,
                           poly_type=poly_type,
                           poly_id=poly_id)
     elif poly_type == "s":
@@ -138,18 +138,18 @@ async def _producer_s(session, queue, base_path, poly_id, password):
                       auth=auth)
 
 
-async def _producer_f(session, queue, base_path, site_settings, poly_type, poly_id):
+async def _producer_f(session, queue, base_path, download_settings, poly_type, poly_id):
     dir_path = await _get_dire_path(session=session,
-                                    site_settings=site_settings,
+                                    download_settings=download_settings,
                                     poly_type=poly_type,
                                     poly_id=poly_id)
 
     cut_parts_num = 5 + len([x for x in dir_path.split("/") if x.strip() != ""])
 
-    url = f"{USER_WEBDAV_URL}{site_settings.username}{dir_path}"
+    url = f"{USER_WEBDAV_URL}{download_settings.username}{dir_path}"
 
-    auth = BasicAuth(login=site_settings.username,
-                     password=site_settings.password)
+    auth = BasicAuth(login=download_settings.username,
+                     password=download_settings.password)
 
     await _parse_tree(session=session,
                       queue=queue,

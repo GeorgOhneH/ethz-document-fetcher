@@ -94,7 +94,7 @@ class MainWindow(QMainWindow):
 
         self.read_settings()
 
-        run_startup_tasks(self.central_widget.site_settings)
+        run_startup_tasks(self.central_widget.download_settings)
 
     def init_menu(self, menu, path):
         for file_name in os.listdir(path):

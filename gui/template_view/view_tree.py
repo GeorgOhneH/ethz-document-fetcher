@@ -237,8 +237,8 @@ class TemplateViewTree(QTreeWidget):
         menu.addSeparator()
 
         open_folder_action = menu.addAction("Open Folder")
-        if widget.template_node.base_path is not None and self.controller.site_settings.base_path is not None:
-            base_path = os.path.join(self.controller.site_settings.base_path, widget.template_node.base_path)
+        if widget.template_node.base_path is not None and self.controller.download_settings.save_path is not None:
+            base_path = os.path.join(self.controller.download_settings.save_path, widget.template_node.base_path)
             if not os.path.exists(base_path):
                 open_folder_action.setEnabled(False)
             url = QUrl.fromLocalFile(base_path)

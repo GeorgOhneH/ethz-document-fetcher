@@ -41,14 +41,14 @@ URL_CONFIG = ConfigString(gui_name="Url")
 async def producer(session,
                    queue,
                    base_path,
-                   site_settings,
+                   download_settings,
                    url: URL_CONFIG,
                    regex_patterns: REGEX_PATTERN_CONFIG,
                    headers: HEADERS_CONFIG,
                    basic_auth: BASIC_AUTH_CONFIG):
     session_kwargs = headers_config_to_session_kwargs(headers)
 
-    session_kwargs.update(basic_auth_config_to_session_kwargs(basic_auth, site_settings))
+    session_kwargs.update(basic_auth_config_to_session_kwargs(basic_auth, download_settings))
 
     links = await get_all_file_links(session, url, session_kwargs)
     for regex_pattern in regex_patterns:

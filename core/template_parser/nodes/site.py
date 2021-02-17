@@ -201,7 +201,7 @@ class Site(TemplateNode):
 
         return configs
 
-    async def add_producers(self, producers, session, queue, site_settings, cancellable_pool, signal_handler):
+    async def add_producers(self, producers, session, queue, download_settings, cancellable_pool, signal_handler):
         if check_if_null(self.function_kwargs):
             raise ParseTemplateRuntimeError("Found null field")
 
@@ -209,12 +209,12 @@ class Site(TemplateNode):
             login_module = importlib.import_module(self.login_module_name)
             login_function = getattr(login_module, self.login_function_name)
 
-            await safe_login_module(session, site_settings, login_function, self.function_kwargs)
+            await safe_login_module(session, download_settings, login_function, self.function_kwargs)
 
         if self.base_path is None:
             self.folder_name = await self.retrieve_folder_name(session=session,
                                                                signal_handler=signal_handler,
-                                                               site_settings=site_settings)
+                                                               download_settings=download_settings)
 
             self.base_path = safe_path_join(self.parent.base_path, self.folder_name)
             signal_handler.update_base_path(self.unique_key, self.base_path)
@@ -222,7 +222,7 @@ class Site(TemplateNode):
         queue_wrapper = QueueWrapper(queue,
                                      signal_handler=signal_handler,
                                      unique_key=self.unique_key,
-                                     site_settings=site_settings,
+                                     download_settings=download_settings,
                                      cancellable_pool=cancellable_pool,
                                      **self.consumer_kwargs)
 
@@ -232,11 +232,11 @@ class Site(TemplateNode):
         coroutine = self.exception_handler(producer_function, signal_handler)(session=session,
                                                                               queue=queue_wrapper,
                                                                               base_path=self.base_path,
-                                                                              site_settings=site_settings,
+                                                                              download_settings=download_settings,
                                                                               **self.function_kwargs)
         producers.append(asyncio.ensure_future(coroutine))
 
-    async def retrieve_folder_name(self, session, signal_handler, site_settings):
+    async def retrieve_folder_name(self, session, signal_handler, download_settings):
         if self.folder_name is not None or self.folder_module_name is None:
             return self.folder_name
 
@@ -244,7 +244,7 @@ class Site(TemplateNode):
         function = getattr(folder_module, self.folder_function_name)
         logger.debug(f"Calling folder function: {function.__module__}."
                      f"{function.__name__}<{dict_to_string(self.function_kwargs)}>")
-        folder_name = await function(session=session, site_settings=site_settings, **self.function_kwargs)
+        folder_name = await function(session=session, download_settings=download_settings, **self.function_kwargs)
 
         folder_name_cache = cache.get_json("folder_name")
         folder_name_cache[self.kwargs_hash] = folder_name
@@ -255,7 +255,7 @@ class Site(TemplateNode):
     def exception_handler(self, function, signal_handler):
         unique_key = self.unique_key
 
-        async def wrapper(session, queue, base_path, site_settings, *args, **kwargs):
+        async def wrapper(session, queue, base_path, download_settings, *args, **kwargs):
             function_name = f"{function.__module__}.{function.__name__}"
             function_name_kwargs = f"{function_name}<{dict_to_string(kwargs)}>"
             try:
@@ -263,7 +263,7 @@ class Site(TemplateNode):
                 signal_handler.start(unique_key)
                 t = time.time()
                 result = await function(session=session, queue=queue, base_path=base_path,
-                                        site_settings=site_settings, *args, **kwargs)
+                                        download_settings=download_settings, *args, **kwargs)
                 logger.debug(f"Finished: {function_name_kwargs}, time: {(time.time() - t):.2f}")
                 return result
             except asyncio.CancelledError as e:

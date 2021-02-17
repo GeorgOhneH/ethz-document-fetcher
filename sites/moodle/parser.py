@@ -19,7 +19,7 @@ async def parse_main_page(session,
                           queue,
                           html,
                           base_path,
-                          site_settings,
+                          download_settings,
                           moodle_id,
                           process_external_links,
                           keep_section_order,
@@ -40,7 +40,7 @@ async def parse_main_page(session,
                                  queue=queue,
                                  section=section,
                                  base_path=base_path,
-                                 site_settings=site_settings,
+                                 download_settings=download_settings,
                                  moodle_id=moodle_id,
                                  process_external_links=process_external_links,
                                  last_updated_dict=last_updated_dict,
@@ -55,7 +55,7 @@ async def parse_sections(session,
                          queue,
                          section,
                          base_path,
-                         site_settings,
+                         download_settings,
                          moodle_id,
                          process_external_links,
                          last_updated_dict,
@@ -72,7 +72,7 @@ async def parse_sections(session,
     for module in modules:
         coroutine = parse_mtype(session=session,
                                 queue=queue,
-                                site_settings=site_settings,
+                                download_settings=download_settings,
                                 base_path=base_path,
                                 module=module,
                                 last_updated_dict=last_updated_dict,
@@ -92,7 +92,7 @@ async def parse_sections(session,
                 coroutine = process_link(session=session,
                                          queue=queue,
                                          base_path=base_path,
-                                         site_settings=site_settings,
+                                         download_settings=download_settings,
                                          url=url,
                                          moodle_id=moodle_id,
                                          name=str(name),
@@ -105,7 +105,7 @@ async def parse_sections(session,
 
 async def parse_mtype(session,
                       queue,
-                      site_settings,
+                      download_settings,
                       base_path,
                       module,
                       last_updated_dict,
@@ -135,7 +135,7 @@ async def parse_mtype(session,
 
     elif mtype == MTYPE_DIRECTORY:
         last_updated = last_updated_dict[module_id]
-        await parse_folder(session, queue, site_settings, module, base_path, last_updated)
+        await parse_folder(session, queue, download_settings, module, base_path, last_updated)
 
     elif mtype == MTYPE_EXTERNAL_LINK:
         if not process_external_links:
@@ -150,7 +150,7 @@ async def parse_mtype(session,
         await process_link(session=session,
                            queue=queue,
                            base_path=base_path,
-                           site_settings=site_settings,
+                           download_settings=download_settings,
                            url=driver_url,
                            moodle_id=moodle_id,
                            name=name,
@@ -190,7 +190,7 @@ async def get_assign_files_tree(session, href):
     return BeautifulSoup(text, get_beautiful_soup_parser(), parse_only=assign_files_tree)
 
 
-async def parse_folder(session, queue, site_settings, module, base_path, last_updated):
+async def parse_folder(session, queue, download_settings, module, base_path, last_updated):
     folder_tree = module.find("div", id=re.compile("folder_tree[0-9]+"), class_="filemanager")
     if folder_tree is not None:
         await parse_folder_tree(queue, folder_tree.ul, base_path, last_updated)
@@ -291,13 +291,13 @@ def parse_update_json(update_json):
     return result
 
 
-async def process_link(session, queue, base_path, site_settings, url, moodle_id, name, password_mapper):
+async def process_link(session, queue, base_path, download_settings, url, moodle_id, name, password_mapper):
     if "onedrive.live.com" in url:
         logger.debug(f"Starting one drive from moodle: {moodle_id}")
         await one_drive.producer(session,
                                  queue,
                                  base_path + f"; {safe_path(name)}",
-                                 site_settings=site_settings,
+                                 download_settings=download_settings,
                                  url=url)
 
     elif "polybox" in url:
@@ -307,15 +307,15 @@ async def process_link(session, queue, base_path, site_settings, url, moodle_id,
         await polybox.producer(session,
                                queue,
                                safe_path_join(base_path, name),
-                               site_settings,
+                               download_settings,
                                poly_id,
                                poly_type=poly_type,
                                password=password)
 
     elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
         if is_extension_forbidden("mp4",
-                                  site_settings.allowed_extensions + queue.consumer_kwargs["allowed_extensions"],
-                                  site_settings.forbidden_extensions + queue.consumer_kwargs["forbidden_extensions"]):
+                                  download_settings.allowed_extensions + queue.consumer_kwargs["allowed_extensions"],
+                                  download_settings.forbidden_extensions + queue.consumer_kwargs["forbidden_extensions"]):
             return
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
         password = match_name_to_password(name, password_mapper)
