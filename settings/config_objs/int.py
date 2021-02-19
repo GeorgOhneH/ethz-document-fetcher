@@ -59,4 +59,4 @@ class ConfigInt(ConfigString):
             raise ValueError("To Big")
 
     def set_parser(self, parser):
-        parser.add_argument(f"--{self.name}", type=int)
+        parser.add_argument(f"--{self.name.replace('_', '-')}", type=int)

@@ -248,7 +248,7 @@ class ConfigString(object):
         return True
 
     def set_parser(self, parser):
-        parser.add_argument(f"--{self.name}")
+        parser.add_argument(f"--{self.name.replace('_', '-')}")
 
     def reset_widget(self):
         self.set_to_widget(self.get())

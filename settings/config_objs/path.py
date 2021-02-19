@@ -77,8 +77,8 @@ class ConfigPath(ConfigString):
                 raise ValueError("Path must be a file")
 
             if "." not in path:
-                raise ValueError("File must have a extension")
+                raise ValueError("File must have an extension")
 
             if path.split(".")[-1] not in self.file_extensions:
-                raise ValueError(f"File extension must be one of these: ({' '.join(self.file_extensions)})")
+                raise ValueError(f"File extension must be one of these: ({', '.join(self.file_extensions)})")
 

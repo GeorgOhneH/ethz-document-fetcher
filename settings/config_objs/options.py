@@ -53,4 +53,4 @@ class ConfigOptions(ConfigString):
             raise ValueError(f"Not one of the options: {self.options}")
 
     def set_parser(self, parser):
-        parser.add_argument(f"--{self.name}", choices=self.options)
+        parser.add_argument(f"--{self.name.replace('_', '-')}", choices=self.options)

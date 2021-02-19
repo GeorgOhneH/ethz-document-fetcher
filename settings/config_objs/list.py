@@ -57,7 +57,7 @@ class ConfigListString(ConfigString):
             raise ValueError("Value must be a list")
 
     def set_parser(self, parser):
-        parser.add_argument(f'--{self.name}', nargs='*')
+        parser.add_argument(f"--{self.name.replace('_', '-')}", nargs='*')
 
 
 class ListWidgetWrapper(QWidget):

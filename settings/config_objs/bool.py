@@ -41,6 +41,7 @@ class ConfigBool(ConfigString):
 
     def set_parser(self, parser):
         feature_parser = parser.add_mutually_exclusive_group(required=False)
-        feature_parser.add_argument(f'--{self.name}', dest=self.name, action='store_true')
-        feature_parser.add_argument(f'--no-{self.name}', dest=self.name, action='store_false')
+        name = self.name.replace('_', '-')
+        feature_parser.add_argument(f"--{name}", dest=self.name, action='store_true')
+        feature_parser.add_argument(f"--no-{name}", dest=self.name, action='store_false')
         parser.set_defaults(**{self.name: None})
