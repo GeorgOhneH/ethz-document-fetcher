@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import re
+
+import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
 
 from core.downloader import is_extension_forbidden
@@ -25,9 +27,10 @@ async def parse_main_page(session,
                           keep_section_order,
                           password_mapper):
     sesskey = re.search(b"""sesskey":"([^"]+)""", html)[1].decode("utf-8")
-    async with session.post(AJAX_SERVICE_URL, json=get_update_payload(moodle_id),
-                            params={"sesskey": sesskey}) as response:
-        update_json = await response.json()
+
+    update_json = await get_update_json(session=session,
+                                        moodle_id=moodle_id,
+                                        sesskey=sesskey)
 
     last_updated_dict = parse_update_json(update_json)
 
@@ -255,6 +258,22 @@ async def exception_handler(coroutine, moodle_id, url):
     except Exception as e:
         logger.error(f"Got an unexpected error from moodle: {moodle_id} "
                      f"while trying to access {url}, Error: {type(e).__name__}: {e}", exc_info=True)
+
+
+async def get_update_json(session, moodle_id, sesskey):
+    for i in range(5):
+        try:
+            async with session.post(AJAX_SERVICE_URL,
+                                    json=get_update_payload(moodle_id),
+                                    params={"sesskey": sesskey},
+                                    timeout=aiohttp.ClientTimeout(5)) as response:
+                return await response.json()
+        except asyncio.exceptions.TimeoutError:
+            logger.warning(f"Could not get update_json. Try: {i}")
+            pass
+
+    raise asyncio.exceptions.TimeoutError("Could not reach moodle. Try to lower your maximum "
+                                          "connection in the settings.")
 
 
 def get_update_payload(courseid, since=0):
