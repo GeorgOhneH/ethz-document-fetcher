@@ -79,8 +79,11 @@ async def download_if_not_exist(session,
     if forbidden_extensions is None:
         forbidden_extensions = []
 
-    allowed_extensions += download_settings.allowed_extensions
-    forbidden_extensions += download_settings.forbidden_extensions
+    if download_settings.allowed_extensions is not None:
+        allowed_extensions += download_settings.allowed_extensions
+
+    if download_settings.forbidden_extensions is not None:
+        forbidden_extensions += download_settings.forbidden_extensions
 
     if isinstance(url, str):
         url = URL(url)

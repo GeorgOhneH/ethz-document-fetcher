@@ -62,7 +62,8 @@ async def parse_sections(session,
                          password_mapper,
                          index=None,
                          keep_section_order=False):
-    section_name = str(section.find("div", class_="content", recursive=False).h3.span.a.string).strip()
+    section_title_id = str(section["aria-labelledby"])
+    section_name = str(section.find("h3", id=section_title_id).string).strip()
     if keep_section_order:
         section_name = f"[{index + 1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
@@ -313,10 +314,21 @@ async def process_link(session, queue, base_path, download_settings, url, moodle
                                password=password)
 
     elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
-        if is_extension_forbidden("mp4",
-                                  download_settings.allowed_extensions + queue.consumer_kwargs["allowed_extensions"],
-                                  download_settings.forbidden_extensions + queue.consumer_kwargs["forbidden_extensions"]):
+        allowed_extensions = []
+        if download_settings.allowed_extensions:
+            allowed_extensions += download_settings.allowed_extensions
+        if queue.consumer_kwargs["allowed_extensions"]:
+            allowed_extensions += queue.consumer_kwargs["allowed_extensions"]
+
+        forbidden_extensions = []
+        if download_settings.forbidden_extensions:
+            forbidden_extensions += download_settings.forbidden_extensions
+        if queue.consumer_kwargs["forbidden_extensions"]:
+            forbidden_extensions += queue.consumer_kwargs["forbidden_extensions"]
+
+        if is_extension_forbidden("mp4", allowed_extensions, forbidden_extensions):
             return
+
         logger.debug(f"Starting zoom download from moodle: {moodle_id}")
         password = match_name_to_password(name, password_mapper)
         await zoom.download(session=session,
