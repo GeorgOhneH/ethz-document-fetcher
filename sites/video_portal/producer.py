@@ -96,7 +96,14 @@ async def put_in_queue(session,
     meta_video_data = await login_and_data(session, download_settings, department, year, semester, course_id,
                                            meta_video_url, pwd_username, pwd_password)
 
-    url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
+    media = meta_video_data["selectedEpisode"]["media"]
+    if "presentations" in media:
+        url = media["presentations"][0]["url"]
+    elif "presenters" in media:
+        url = media["presenters"][0]["url"]
+    else:
+        raise NotImplementedError()
+
     await queue.put({"path": base_path, "url": url})
 
 
