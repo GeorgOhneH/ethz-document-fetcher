@@ -87,7 +87,7 @@ async def _get_folder_name_s(session, poly_type, poly_id, password=None):
     data_info = soup.body.header.div
     author = " ".join(data_info["data-owner-display-name"].split(" ")[:2])
     name = data_info["data-name"]
-    return f"Polybox - {author}"
+    return name
 
 
 async def _get_folder_name_f(session, download_settings, poly_type, poly_id):
