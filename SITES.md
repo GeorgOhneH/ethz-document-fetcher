@@ -96,11 +96,6 @@ And similar for the solution filter we get:
 |Pattern| `.*serie/Loesung([0-9]+)\.pdf`|
 |Folder Name|`Week \1`|
 |File Name|`Solution \1`|
-|Link Modifier||
-
-The 'Link Modifier' is an optional field, which can alter the link.
-It works exactly the same as the 'Folder Name' and 'File Name' fields and
-is not needed in this example.
 
 
 The Header options is for custom request headers, but it's not needed in most use cases.

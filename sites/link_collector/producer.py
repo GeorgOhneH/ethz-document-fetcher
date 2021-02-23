@@ -30,11 +30,7 @@ REGEX_PATTERN_CONFIG = ConfigList(
                 gui_name="File Name",
                 optional=True,
                 hint_text="<name> will be replaced with the link name from the website.",
-            ),
-            "link_regex": ConfigString(
-                gui_name="Link Modifier",
-                optional=True,
-            ),
+            )
         }
     )
 )
@@ -61,7 +57,6 @@ async def producer(session,
     for regex_pattern in regex_patterns:
         pattern = regex_pattern["pattern"]
         folder_regex = regex_pattern.get("folder", None)
-        link_regex = regex_pattern.get("link_regex", None)
         if folder_regex is None:
             folder_regex = ""
         file_name_regex = regex_pattern.get("file_name", None)
@@ -79,9 +74,6 @@ async def producer(session,
                                        file_name_regex=file_name_regex,
                                        pattern=pattern,
                                        link=link)
-
-            if link_regex:
-                link = re.sub(pattern, link_regex, link)
 
             await queue.put({
                 "url": link,
@@ -105,7 +97,7 @@ def _get_file_name(url_file_name: str or bytes,
         file_name = url_file_name
 
     if "." in file_name:
-        # This is not 100% correct. A file still can not have a extension,
+        # This is not 100% correct. A file does not necessarily have an extension,
         # but I think it should be fine, because the user can always explicit add an extension
         return file_name
     if "." in url_file_name:
