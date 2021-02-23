@@ -1,0 +1,2 @@
+class NotSingleFile(Exception):
+    pass

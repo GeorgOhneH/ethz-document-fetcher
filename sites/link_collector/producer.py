@@ -5,12 +5,14 @@ from urllib.parse import urlparse, urlunparse, urljoin
 from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
-from core.utils import safe_path_join, get_beautiful_soup_parser
+from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension
+from core.storage import cache
 
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG, \
     basic_auth_config_to_session_kwargs, headers_config_to_session_kwargs
 
 from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
+from sites.utils import process_single_file_url
 
 REGEX_PATTERN_CONFIG = ConfigList(
     gui_name="Regex Patterns",
@@ -67,44 +69,50 @@ async def producer(session,
 
             folder_name = re.sub(pattern, folder_regex, link)
 
-            o = urlparse(link)
+            guess_extension = await cache.check_extension(session, link, session_kwargs=session_kwargs)
 
-            file_name = _get_file_name(url_file_name=o.path.split("/")[-1],
+            file_name = _get_file_name(guess_extension=guess_extension if guess_extension != "html" else None,
                                        html_name=html_name,
                                        file_name_regex=file_name_regex,
                                        pattern=pattern,
-                                       link=link)
+                                       link=link,
+                                       link_name=urlparse(link).path.split("/")[-1])
 
-            await queue.put({
-                "url": link,
-                "path": safe_path_join(base_path, folder_name, file_name),
-                "session_kwargs": session_kwargs,
-                "with_extension": "." in file_name,
-            })
+            if guess_extension is None or guess_extension == "html":
+                await process_single_file_url(session=session,
+                                              queue=queue,
+                                              base_path=safe_path_join(base_path, folder_name),
+                                              download_settings=download_settings,
+                                              url=link,
+                                              name=file_name)
+            else:
+                await queue.put({
+                    "url": link,
+                    "path": safe_path_join(base_path, folder_name, file_name),
+                    "session_kwargs": session_kwargs,
+                })
 
 
-def _get_file_name(url_file_name: str or bytes,
+def _get_file_name(guess_extension: str,
                    html_name: str,
                    pattern: str,
                    link: str,
-                   file_name_regex: str) -> (str, bool):
+                   file_name_regex: str,
+                   link_name) -> str or None:
     if file_name_regex:
         modified_file_name_regex = file_name_regex.replace("<name>", html_name)
         file_name = re.sub(pattern, modified_file_name_regex, link)
     elif html_name:
         file_name = html_name
     else:
-        file_name = url_file_name
+        file_name = link_name
 
-    if "." in file_name:
-        # This is not 100% correct. A file does not necessarily have an extension,
-        # but I think it should be fine, because the user can always explicit add an extension
+    if guess_extension is None:
         return file_name
-    if "." in url_file_name:
-        default_extension = url_file_name.split(".")[-1]
-        file_name += f".{default_extension}"
+
+    if file_name.endswith("." + guess_extension):
         return file_name
-    return file_name  # Has no extension
+    return file_name + f".{guess_extension}"
 
 
 async def get_all_file_links(session, url, session_kwargs):

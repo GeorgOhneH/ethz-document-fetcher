@@ -6,12 +6,13 @@ import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
 
 from core.downloader import is_extension_forbidden
+from core.storage import cache
 from core.exceptions import ForbiddenError
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser
-from sites import polybox, one_drive
-from sites.moodle import zoom
+from sites.utils import process_single_file_url
+from sites.exceptions import NotSingleFile
 from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN
 
 logger = logging.getLogger(__name__)
@@ -317,50 +318,27 @@ def parse_update_json(update_json):
 
 
 async def process_link(session, queue, base_path, download_settings, url, moodle_id, name, password_mapper):
-    if "onedrive.live.com" in url:
-        logger.debug(f"Starting one drive from moodle: {moodle_id}")
-        await one_drive.producer(session,
-                                 queue,
-                                 base_path + f"; {safe_path(name)}",
-                                 download_settings=download_settings,
-                                 url=url)
-
-    elif "polybox" in url:
-        logger.debug(f"Starting polybox from moodle: {moodle_id}")
-        poly_type, poly_id = [x.strip() for x in url.split("/") if x.strip() != ""][3:5]
+    guess_extension = await cache.check_extension(session, url)
+    if guess_extension is None or guess_extension == "html":
         password = match_name_to_password(name, password_mapper)
-        await polybox.producer(session,
-                               queue,
-                               safe_path_join(base_path, name),
-                               download_settings,
-                               poly_id,
-                               poly_type=poly_type,
-                               password=password)
+        try:
+            await process_single_file_url(session=session,
+                                          queue=queue,
+                                          base_path=base_path,
+                                          download_settings=download_settings,
+                                          url=url,
+                                          name=name,
+                                          password=password)
+        except NotSingleFile:
+            pass
+    else:
+        if not name.endswith(f".{guess_extension}"):
+            name += f".{guess_extension}"
 
-    elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
-        allowed_extensions = []
-        if download_settings.allowed_extensions:
-            allowed_extensions += download_settings.allowed_extensions
-        if queue.consumer_kwargs["allowed_extensions"]:
-            allowed_extensions += queue.consumer_kwargs["allowed_extensions"]
-
-        forbidden_extensions = []
-        if download_settings.forbidden_extensions:
-            forbidden_extensions += download_settings.forbidden_extensions
-        if queue.consumer_kwargs["forbidden_extensions"]:
-            forbidden_extensions += queue.consumer_kwargs["forbidden_extensions"]
-
-        if is_extension_forbidden("mp4", allowed_extensions, forbidden_extensions):
-            return
-
-        logger.debug(f"Starting zoom download from moodle: {moodle_id}")
-        password = match_name_to_password(name, password_mapper)
-        await zoom.download(session=session,
-                            queue=queue,
-                            base_path=base_path,
-                            url=url,
-                            file_name=name,
-                            password=password)
+        await queue.put({
+            "url": url,
+            "path": safe_path_join(base_path, name)
+        })
 
 
 def match_name_to_password(name, password_mapper):
