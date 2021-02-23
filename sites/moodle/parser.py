@@ -65,8 +65,13 @@ async def parse_sections(session,
                          password_mapper,
                          index=None,
                          keep_section_order=False):
-    section_title_id = str(section["aria-labelledby"])
-    section_name = str(section.find("h3", id=section_title_id).string).strip()
+
+    if "aria-labelledby" in section.attrs:
+        section_title_id = str(section["aria-labelledby"])
+        section_name = str(section.find("h3", id=section_title_id).string).strip()
+    else:
+        section_name = str(section["aria-label"]).strip()
+
     if keep_section_order:
         section_name = f"[{index + 1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
@@ -268,7 +273,7 @@ async def get_update_json(session, moodle_id, sesskey):
                                     params={"sesskey": sesskey},
                                     timeout=aiohttp.ClientTimeout(5)) as response:
                 return await response.json()
-        except asyncio.exceptions.TimeoutError:
+        except asyncio.exceptions.TimeoutError or aiohttp.client_exceptions.ServerDisconnectedError:
             logger.warning(f"Could not get update_json. Try: {i}")
             pass
 
