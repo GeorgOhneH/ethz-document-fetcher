@@ -310,6 +310,7 @@ class TreeWidgetItemName(QWidget):
         self.idle_image = DynamicIconLabel(self.IDLE_IMAGE_PATH, size, size, self)
         self.warning_svg = DynamicIconLabel(self.WARNING_SVG_PATH, size, size, self)
         self.error_svg = DynamicIconLabel(self.ERROR_SVG_PATH, size, size, self)
+        self.error_svg.setToolTipDuration(10000000)
         self.success_svg = DynamicIconLabel(self.SUCCESS_SVG_PATH, size, size, self)
 
         self.stateWidget.addWidget(self.loading_movie)
@@ -359,6 +360,8 @@ class TreeWidgetItemName(QWidget):
     def set_error(self, msg=None):
         if msg is not None:
             self.error_svg.setToolTip(msg)
+            if not QToolTip.isVisible():
+                QToolTip.showText(self.error_svg.mapToGlobal(QPoint(0, 0)), msg)
         self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.error_svg)
 
