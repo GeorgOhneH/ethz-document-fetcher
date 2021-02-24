@@ -7,11 +7,26 @@ from core.template_parser.nodes.utils import get_kwargs_hash, get_folder_name_fr
 from core.utils import safe_path_join
 from gui.constants import ASSETS_PATH
 from settings.config import Configs
+from settings.config_objs import ConfigDict, ConfigString, ConfigList
 
 
 class NodeConfigs(Configs):
     TYPE = "base"
     TITLE_NAME = "Node"
+
+    link_collection = ConfigList(
+        config_obj_default=ConfigDict(layout={
+            "Url": ConfigString(),
+            "Name": ConfigString(optional=True),
+        }, gui_name="Link"),
+        gui_name="Link Collection"
+    )
+
+    def __init__(self, node_config=None):
+        super().__init__()
+        if node_config is not None:
+            for config_obj in node_config:
+                setattr(self, config_obj.name, config_obj.get())
 
     def get_name(self):
         raise NotImplementedError
@@ -31,13 +46,17 @@ class TemplateNode(object):
                  unique_key_kwargs=None,
                  use_folder=True,
                  is_producer=False,
-                 meta_data=None):
+                 meta_data=None,
+                 link_collection=None):
         if meta_data is None:
             meta_data = {}
+        if link_collection is None:
+            link_collection = []
         if unique_key_kwargs is None:
             unique_key_kwargs = {}
         self.unique_key_kwargs = unique_key_kwargs
         self.meta_data = meta_data
+        self.link_collection = link_collection
         self.is_producer = is_producer
         self.use_folder = use_folder
         self.parent = parent
@@ -99,6 +118,9 @@ class TemplateNode(object):
         if self.meta_data:
             result["meta_data"] = self.meta_data
 
+        if self.link_collection:
+            result["link_collection"] = self.link_collection
+
         if len(children) > 0:
             result["children"] = children
 
@@ -114,7 +136,13 @@ class TemplateNode(object):
         return self.DEFAULT_ICON_PATH
 
     def get_configs(self):
-        return NodeConfigs()
+        node_config = NodeConfigs()
+        try:
+            node_config.link_collection = self.link_collection
+        except ValueError:
+            pass
+
+        return node_config
 
     async def add_producers(self, producers, session, queue, download_settings, cancellable_pool, signal_handler):
         pass

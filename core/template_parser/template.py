@@ -81,9 +81,11 @@ class Template(object):
         name = data["folder"]
 
         meta_data = data.pop("meta_data", None)
+        link_collection = data.pop("link_collection", None)
 
         folder = Folder(name=name,
                         meta_data=meta_data,
+                        link_collection=link_collection,
                         parent=parent)
 
         return folder
@@ -100,6 +102,7 @@ class Template(object):
         raw_login_function = p_kwargs.pop("login_function", None)
 
         meta_data = p_kwargs.pop("meta_data", None)
+        link_collection = p_kwargs.pop("link_collection", None)
 
         site = Site(
             raw_module_name=raw_module_name,
@@ -111,6 +114,7 @@ class Template(object):
             function_kwargs=p_kwargs,
             consumer_kwargs=consumer_kwargs,
             meta_data=meta_data,
+            link_collection=link_collection,
             parent=parent
         )
 

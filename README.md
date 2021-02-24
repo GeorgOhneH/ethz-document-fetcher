@@ -9,7 +9,8 @@ moodle, ilias, polybox and many others.
  * Downloads all new and updated files from specified websites
  * Customisable folder structure
  * GUI and CLI support
- * Highlights difference between the updated and old file (pdf only) 
+ * Highlights difference between the updated and old file (pdf only)
+ * Save and open specified urls
  
  # Installation
  ## Download Binaries

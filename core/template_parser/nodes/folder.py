@@ -49,7 +49,7 @@ class Folder(TemplateNode):
         return "Folder"
 
     def get_configs(self):
-        folder_configs = FolderConfigs()
+        folder_configs = FolderConfigs(super().get_configs())
         try:
             folder_configs.name = self.name
         except ValueError:
