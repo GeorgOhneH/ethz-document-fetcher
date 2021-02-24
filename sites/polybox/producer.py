@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
 from core.monitor import MonitorSession
+from core.storage import cache
 from core.utils import safe_path_join, get_beautiful_soup_parser
 from core.storage.utils import call_function_or_cache
 from settings.config_objs import ConfigOptions, ConfigString
@@ -222,9 +223,11 @@ async def parse_single_file(session,
     auth = BasicAuth(login=poly_id,
                      password="null" if password is None else password)
     url = f"{INDEX_URL}s/{poly_id}/download"
-    async with session.head(url, auth=auth) as response:
-        disposition = response.headers['content-disposition']
-        orig_filename = re.search("""filename="(.+)\"""", disposition).group(1)
+
+    orig_filename = await cache.check_filename(session, url, session_kwargs={"auth": auth})
+
+    if orig_filename is None:
+        raise NotSingleFile()
 
     extension = orig_filename.split(".")[-1]
 

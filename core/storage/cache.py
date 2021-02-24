@@ -97,9 +97,6 @@ async def check_filename(session, url, session_kwargs=None):
     async with session.get(url, raise_for_status=True, **session_kwargs) as response:
         filename = get_filename_from_response(response)
 
-    if filename is None:
-        logger.warning(f"Could not retrieve the filename from {url}. {response.status}")
-
     table[url] = filename
     logger.debug(f"Called filename_cache, url: {url}, extension: {filename}")
 
