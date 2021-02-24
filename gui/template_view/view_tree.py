@@ -81,6 +81,7 @@ class TemplateViewTree(QTreeWidget):
             (signals.got_error[str], self.got_error),
             (signals.got_error[str, str], self.got_error),
             (qApp.aboutToQuit, self.save_state),
+            (qApp.aboutToQuit, self.save_template_file),
         ]
 
         self.setup_connections()
