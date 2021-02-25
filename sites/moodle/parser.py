@@ -359,7 +359,7 @@ async def get_update_json(session, moodle_id, sesskey):
                                     params={"sesskey": sesskey},
                                     timeout=aiohttp.ClientTimeout(5)) as response:
                 return await response.json()
-        except asyncio.exceptions.TimeoutError or aiohttp.client_exceptions.ServerDisconnectedError:
+        except (asyncio.exceptions.TimeoutError, aiohttp.client_exceptions.ServerDisconnectedError):
             logger.warning(f"Could not get update_json. Try: {i}")
             pass
 

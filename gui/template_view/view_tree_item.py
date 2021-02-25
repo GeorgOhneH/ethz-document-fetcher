@@ -360,7 +360,7 @@ class TreeWidgetItemName(QWidget):
     def set_error(self, msg=None):
         if msg is not None:
             self.error_svg.setToolTip(msg)
-            if not QToolTip.isVisible():
+            if not QToolTip.isVisible() and QApplication.activeWindow() is self.window():
                 QToolTip.showText(self.error_svg.mapToGlobal(QPoint(0, 0)), msg)
         self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.error_svg)
