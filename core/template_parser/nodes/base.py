@@ -16,8 +16,8 @@ class NodeConfigs(Configs):
 
     link_collection = ConfigList(
         config_obj_default=ConfigDict(layout={
-            "Url": ConfigString(),
-            "Name": ConfigString(optional=True),
+            "url": ConfigString(gui_name="Url"),
+            "name": ConfigString(optional=True, gui_name="Name"),
         }, gui_name="Link"),
         gui_name="Link Collection"
     )

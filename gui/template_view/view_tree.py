@@ -267,8 +267,8 @@ class TemplateViewTree(QTreeWidget):
         collection_link_menu = menu.addMenu("Link Collection")
         if template_node.link_collection:
             for name_url in template_node.link_collection:
-                c_name = name_url["Name"]
-                c_url = name_url["Url"]
+                c_name = name_url["name"]
+                c_url = name_url["url"]
 
                 name = f"{c_name} ({c_url})" if c_name else c_url
                 link_action = collection_link_menu.addAction(name)
