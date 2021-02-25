@@ -32,7 +32,11 @@ REGEX_PATTERN_CONFIG = ConfigList(
                 gui_name="File Name",
                 optional=True,
                 hint_text="<name> will be replaced with the link name from the website.",
-            )
+            ),
+            "link_regex": ConfigString(
+                gui_name="Link Modifier",
+                optional=True,
+            ),
         }
     )
 )
@@ -62,12 +66,18 @@ async def producer(session,
         if folder_regex is None:
             folder_regex = ""
         file_name_regex = regex_pattern.get("file_name", None)
-        for link, html_name in links.items():
+        link_regex = regex_pattern.get("link_regex", None)
+        for orig_link, html_name in links.items():
 
-            if re.search(pattern, link) is None:
+            if re.search(pattern, orig_link) is None:
                 continue
 
-            folder_name = re.sub(pattern, folder_regex, link)
+            folder_name = re.sub(pattern, folder_regex, orig_link)
+
+            if link_regex:
+                link = re.sub(pattern, link_regex, orig_link)
+            else:
+                link = orig_link
 
             guess_extension = await cache.check_extension(session, link, session_kwargs=session_kwargs)
 
@@ -75,7 +85,7 @@ async def producer(session,
                                        html_name=html_name,
                                        file_name_regex=file_name_regex,
                                        pattern=pattern,
-                                       link=link,
+                                       orig_link=orig_link,
                                        link_name=urlparse(link).path.split("/")[-1])
 
             if guess_extension is None or guess_extension == "html":
@@ -96,12 +106,12 @@ async def producer(session,
 def _get_file_name(guess_extension: str,
                    html_name: str,
                    pattern: str,
-                   link: str,
+                   orig_link: str,
                    file_name_regex: str,
                    link_name) -> str or None:
     if file_name_regex:
         modified_file_name_regex = file_name_regex.replace("<name>", html_name)
-        file_name = re.sub(pattern, modified_file_name_regex, link)
+        file_name = re.sub(pattern, modified_file_name_regex, orig_link)
     elif html_name:
         file_name = html_name
     else:
