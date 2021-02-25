@@ -72,7 +72,8 @@ class WidgetWrapper(QWidget):
         self.setLayout(self.layout)
 
         self.config_widget = config_widget
-        self.config_widget.data_changed_signal.connect(self.data_changed_emit)
+        if self.config_widget.data_changed_signal is not None:
+            self.config_widget.data_changed_signal.connect(self.data_changed_emit)
         self.layout.addWidget(self.config_widget)
 
         if hint_text is not None:

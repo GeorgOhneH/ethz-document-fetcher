@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView
-from settings.config_objs import ConfigDict, ConfigList
+from settings.config_objs import ConfigDict, ConfigList, ConfigDummy
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class OptionsGroupBox(GroupBox):
         self._update_layout(configs, self.layout)
 
     def _update_layout(self, config_objs, layout):
-        active_config_objs = list(filter(lambda x: x.is_active(), config_objs))
+        active_config_objs = list(filter(lambda x: x.is_active() and not isinstance(x, ConfigDummy), config_objs))
         for i, config_obj in enumerate(active_config_objs):
             layout_item = layout.itemAt(i)
 

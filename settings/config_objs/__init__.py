@@ -6,3 +6,4 @@ from settings.config_objs.options import ConfigOptions
 from settings.config_objs.password import ConfigPassword
 from settings.config_objs.path import ConfigPath
 from settings.config_objs.string import ConfigString
+from settings.config_objs.dummy import ConfigDummy

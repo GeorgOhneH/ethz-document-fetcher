@@ -7,7 +7,7 @@ from core.template_parser.nodes.utils import get_kwargs_hash, get_folder_name_fr
 from core.utils import safe_path_join
 from gui.constants import ASSETS_PATH
 from settings.config import Configs
-from settings.config_objs import ConfigDict, ConfigString, ConfigList
+from settings.config_objs import ConfigDict, ConfigString, ConfigList, ConfigDummy
 
 
 class NodeConfigs(Configs):
@@ -21,6 +21,8 @@ class NodeConfigs(Configs):
         }, gui_name="Link"),
         gui_name="Link Collection"
     )
+
+    meta_data = ConfigDummy()
 
     def __init__(self, node_config=None):
         super().__init__()
@@ -139,6 +141,11 @@ class TemplateNode(object):
         node_config = NodeConfigs()
         try:
             node_config.link_collection = self.link_collection
+        except ValueError:
+            pass
+
+        try:
+            node_config.meta_data = self.meta_data
         except ValueError:
             pass
 
