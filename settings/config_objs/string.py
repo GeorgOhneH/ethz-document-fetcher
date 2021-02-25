@@ -135,7 +135,7 @@ class ConfigString(object):
         self.widget = None
         self.parent = None
 
-    def _get_new_widget(self):
+    def _get_new_widget(self) -> WidgetWrapper:
         return WidgetWrapper(self.init_widget(), hint_text=self.hint_text)
 
     def get_widget(self) -> WidgetWrapper:
@@ -180,13 +180,13 @@ class ConfigString(object):
         value = self.widget.get_value()
         self.set(value)
 
-    def is_valid_from_widget(self):
+    def is_valid_from_widget(self) -> bool:
         if self.widget is None:
-            return None
+            return False
         value = self.widget.get_value()
         return self.is_valid(value, from_widget=True)
 
-    def test(self, value, from_widget=False):
+    def test(self, value, from_widget: bool = False) -> bool:
         if value is None:
             return True
         try:
@@ -196,7 +196,7 @@ class ConfigString(object):
             self.msg = str(e)
             return False
 
-    def _test(self, value, from_widget):
+    def _test(self, value, from_widget: bool) -> bool:
         return True
 
     def load(self, value):
@@ -221,7 +221,7 @@ class ConfigString(object):
     def _save(self):
         return self._value
 
-    def is_active(self, from_widget=False):
+    def is_active(self, from_widget: bool = False):
         return self.active_func(self.instance, from_widget, self.parent)
 
     def is_set(self, value=NotSet):
@@ -231,14 +231,14 @@ class ConfigString(object):
             value = None
         return value is not None or self.optional
 
-    def is_valid(self, value=NotSet, from_widget=False):
+    def is_valid(self, value=NotSet, from_widget: bool = False)-> bool:
         if value is NotSet:
             value = self._value
 
         result = self._is_valid(value, from_widget)
         return result
 
-    def _is_valid(self, value, from_widget):
+    def _is_valid(self, value, from_widget: bool) -> bool:
         if not self.is_active(from_widget):
             return True
         if not self.is_set(value):

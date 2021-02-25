@@ -50,19 +50,19 @@ class Configs(metaclass=ConfigBase):
     def get_config_obj(self, name: str) -> ConfigString:
         return self._config_objs[name]
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> ConfigString:
         return self.get_config_obj(key)
 
     def __iter__(self) -> Iterator[ConfigString]:
         return iter(self._config_objs.values())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._config_objs)
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, ConfigString]:
         return {config_obj.name: config_obj.get() for config_obj in self}
 
-    def check_if_valid(self):
+    def check_if_valid(self) -> bool:
         for config_obj in self:
             if not config_obj.is_valid():
                 logger.warning(f"Config object was not valid. Error Msg: {config_obj.msg}")

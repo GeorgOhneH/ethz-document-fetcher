@@ -58,7 +58,7 @@ class Settings(Configs, metaclass=SettingBase):
                     self.parser.error(f"{config_obj.name} was not valid")
                 setattr(self, config_obj.name, arg_value)
 
-    def get_file_path(self):
+    def get_file_path(self) -> str:
         return os.path.join(get_config_path(), self.__class__.__name__.lower() + ".config")
 
     def save(self):
