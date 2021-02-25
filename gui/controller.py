@@ -193,6 +193,7 @@ class CentralWidget(QWidget):
             template_path = None
         else:
             template_path = self.get_template_path()
+        self.template_view.save_template_file()
         template_edit_dialog = TemplateEditDialog(parent=self,
                                                   template_path=template_path,
                                                   template_path_settings=self.template_path_settings)
