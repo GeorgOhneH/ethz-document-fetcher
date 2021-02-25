@@ -182,7 +182,7 @@ async def download_if_not_exist(session,
                     shutil.move(temp_absolute_path, absolute_path)
                 raise e
 
-        if cache.is_own_checksum_same(absolute_path, file_hash.hexdigest()):
+        if action == ACTION_REPLACE and cache.is_own_checksum_same(absolute_path, file_hash.hexdigest()):
             logger.debug(f"own_checksum is same for {url}. Skipping processing")
             if "ETag" in response_headers:
                 cache.save_etag(absolute_path, response.headers["ETag"])

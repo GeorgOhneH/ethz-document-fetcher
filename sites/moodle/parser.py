@@ -13,7 +13,7 @@ from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser
 from sites.utils import process_single_file_url
 from sites.exceptions import NotSingleFile
-from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN
+from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN, BASE_URL
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,6 @@ async def parse_sections(session,
                          password_mapper,
                          index=None,
                          keep_section_order=False):
-
     if "aria-labelledby" in section.attrs:
         section_title_id = str(section["aria-labelledby"])
         section_name = str(section.find("h3", id=section_title_id).string).strip()
@@ -77,38 +76,124 @@ async def parse_sections(session,
         section_name = f"[{index + 1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
 
+    title_link = section.find("a", href=re.compile(r"id=[0-9]+&section=[0-9]+"))
+    if title_link is not None:
+        # Old moodle site where we have to call the section explicit with a request
+        await parse_single_section(session=session,
+                                   queue=queue,
+                                   download_settings=download_settings,
+                                   base_path=base_path,
+                                   href=title_link["href"],
+                                   moodle_id=moodle_id,
+                                   last_updated_dict=last_updated_dict,
+                                   process_external_links=process_external_links,
+                                   password_mapper=password_mapper)
+
+    await _parse_section(session=session,
+                         queue=queue,
+                         download_settings=download_settings,
+                         base_path=base_path,
+                         section=section,
+                         last_updated_dict=last_updated_dict,
+                         moodle_id=moodle_id,
+                         process_external_links=process_external_links,
+                         password_mapper=password_mapper)
+
+
+async def parse_single_section(session,
+                               queue,
+                               download_settings,
+                               base_path,
+                               href,
+                               moodle_id,
+                               last_updated_dict,
+                               process_external_links,
+                               password_mapper):
+    async with session.get(href) as response:
+        html = await response.read()
+
+    section_id = re.search(r"&section=([0-9]+)", href).group(1)
+
+    only_sections = SoupStrainer("li", id=f"section-{section_id}")
+    soup = BeautifulSoup(html, get_beautiful_soup_parser(), parse_only=only_sections)
+    section = soup.find("li", id=f"section-{section_id}")
+
+    await _parse_section(session=session,
+                         queue=queue,
+                         download_settings=download_settings,
+                         base_path=base_path,
+                         section=section,
+                         last_updated_dict=last_updated_dict,
+                         moodle_id=moodle_id,
+                         process_external_links=process_external_links,
+                         password_mapper=password_mapper)
+
+
+async def _parse_section(session,
+                         queue,
+                         download_settings,
+                         base_path,
+                         section,
+                         last_updated_dict,
+                         moodle_id,
+                         process_external_links,
+                         password_mapper):
     modules = section.find_all("li", id=re.compile("module-[0-9]+"))
     tasks = []
     for module in modules:
-        coroutine = parse_mtype(session=session,
-                                queue=queue,
-                                download_settings=download_settings,
-                                base_path=base_path,
-                                module=module,
-                                last_updated_dict=last_updated_dict,
-                                moodle_id=moodle_id,
-                                process_external_links=process_external_links,
-                                password_mapper=password_mapper)
+        coroutine = parse_module(session=session,
+                                 queue=queue,
+                                 download_settings=download_settings,
+                                 base_path=base_path,
+                                 module=module,
+                                 last_updated_dict=last_updated_dict,
+                                 moodle_id=moodle_id,
+                                 process_external_links=process_external_links,
+                                 password_mapper=password_mapper)
+        tasks.append(coroutine)
 
-        tasks.append(asyncio.ensure_future(coroutine))
+    await asyncio.gather(*tasks)
 
-        if process_external_links:
-            for text_link in module.find_all("a"):
-                url = text_link.get("href", None)
-                name = text_link.string
-                if url is None or name is None:
-                    continue
 
-                coroutine = process_link(session=session,
-                                         queue=queue,
-                                         base_path=base_path,
-                                         download_settings=download_settings,
-                                         url=url,
-                                         moodle_id=moodle_id,
-                                         name=str(name),
-                                         password_mapper=password_mapper)
+async def parse_module(session,
+                       queue,
+                       download_settings,
+                       base_path,
+                       module,
+                       last_updated_dict,
+                       moodle_id,
+                       process_external_links,
+                       password_mapper):
+    tasks = []
+    coroutine = parse_mtype(session=session,
+                            queue=queue,
+                            download_settings=download_settings,
+                            base_path=base_path,
+                            module=module,
+                            last_updated_dict=last_updated_dict,
+                            moodle_id=moodle_id,
+                            process_external_links=process_external_links,
+                            password_mapper=password_mapper)
 
-                tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
+    tasks.append(coroutine)
+
+    if process_external_links:
+        for text_link in module.find_all("a"):
+            url = text_link.get("href", None)
+            name = text_link.string
+            if url is None or name is None:
+                continue
+
+            coroutine = process_link(session=session,
+                                     queue=queue,
+                                     base_path=base_path,
+                                     download_settings=download_settings,
+                                     url=url,
+                                     moodle_id=moodle_id,
+                                     name=str(name),
+                                     password_mapper=password_mapper)
+
+            tasks.append(exception_handler(coroutine, moodle_id, url))
 
     await asyncio.gather(*tasks)
 
@@ -319,7 +404,7 @@ def parse_update_json(update_json):
 
 async def process_link(session, queue, base_path, download_settings, url, moodle_id, name, password_mapper):
     guess_extension = await cache.check_extension(session, url)
-    if guess_extension is None or guess_extension == "html":
+    if guess_extension is None or guess_extension in ["html", "json"]:
         password = match_name_to_password(name, password_mapper)
         try:
             await process_single_file_url(session=session,

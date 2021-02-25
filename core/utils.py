@@ -110,7 +110,7 @@ def safe_path_join(path, *paths):
 def safe_path(string):
     path = html.unescape(string.replace("/", "-").replace("\\", "-")). \
         replace(":", ";").replace("|", "").replace("?", ""). \
-        replace("<", "").replace(">", "").replace("*", "")
+        replace("<", "").replace(">", "").replace("*", "").replace("\"", "")
 
     return path.strip()
 
