@@ -5,7 +5,7 @@ import logging
 import os
 import re
 import shutil
-from mimetypes import guess_extension
+from mimetypes import guess_extension, add_type
 import functools
 from pathlib import Path
 
