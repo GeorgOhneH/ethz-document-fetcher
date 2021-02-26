@@ -23,6 +23,9 @@ class Dummy(QWidget, AbstractConfigWidget):
 
 
 class ConfigDummy(ConfigString):
+    def __init__(self):
+        super().__init__(optional=True)
+
     def init_widget(self):
         return Dummy(self)
 

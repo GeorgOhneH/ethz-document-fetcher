@@ -42,7 +42,7 @@ async def main(signals=None, download_settings=None):
                                 limit_per_host=download_settings.conn_limit_per_host)
 
     async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
-                                      timeout=aiohttp.ClientTimeout(30)) as session:
+                                      timeout=aiohttp.ClientTimeout(5)) as session:
         logger.debug(f"Loading template: {template_path}")
         queue = unique_queue.UniqueQueue()
         producers = []

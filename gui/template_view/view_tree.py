@@ -8,6 +8,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from core import template_parser
+from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.template_view.view_tree_item import TreeWidgetItem
 from gui.utils import widget_read_settings, widget_save_settings
 
@@ -121,6 +122,11 @@ class TemplateViewTree(QTreeWidget):
         if self._template_load_error:
             logger.warning("Error on load. Not saving template")
             return
+
+        # TODO: check for preset templates
+        # if self.template_view.get_path() in TEMPLATE_PRESET_FILE_PATHS:
+        #     logger.warning("Not saving Template. ")
+        #     return
 
         logger.debug("Saving Template")
         for widget in self.widgets.values():

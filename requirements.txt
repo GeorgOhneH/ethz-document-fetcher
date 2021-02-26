@@ -11,6 +11,7 @@ certifi
 PyMuPDF
 PyQt5==5.15.2
 pyinstaller
+tenacity
 git+https://github.com/Digital-Sapphire/PyUpdater
 PyUpdater-S3-plugin
 pywin32; sys_platform == 'win32'

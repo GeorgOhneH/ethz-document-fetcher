@@ -352,19 +352,10 @@ async def exception_handler(coroutine, moodle_id, url):
 
 
 async def get_update_json(session, moodle_id, sesskey):
-    for i in range(5):
-        try:
-            async with session.post(AJAX_SERVICE_URL,
-                                    json=get_update_payload(moodle_id),
-                                    params={"sesskey": sesskey},
-                                    timeout=aiohttp.ClientTimeout(5)) as response:
-                return await response.json()
-        except (asyncio.exceptions.TimeoutError, aiohttp.client_exceptions.ServerDisconnectedError):
-            logger.warning(f"Could not get update_json. Try: {i}")
-            pass
-
-    raise asyncio.exceptions.TimeoutError("Could not reach moodle. Try to lower your maximum "
-                                          "connection in the settings.")
+    async with session.post(AJAX_SERVICE_URL,
+                            json=get_update_payload(moodle_id),
+                            params={"sesskey": sesskey}) as response:
+        return await response.json()
 
 
 def get_update_payload(courseid, since=0):
