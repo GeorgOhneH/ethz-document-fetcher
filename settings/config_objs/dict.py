@@ -131,6 +131,11 @@ class ConfigDict(ConfigString):
 
     def set_to_widget(self, value):
         for name, config_obj in self._layout.items():
+
+            if not config_obj.is_active():
+                continue
+            if name not in value and config_obj.optional:
+                continue
             config_obj.set_to_widget(value[name])
 
     def reset_widget(self):

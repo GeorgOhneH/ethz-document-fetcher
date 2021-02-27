@@ -182,7 +182,7 @@ class Site(TemplateNode):
         return path
 
     def get_configs(self):
-        configs = site_configs.SiteConfigs()
+        configs = site_configs.SiteConfigs(super().get_configs())
         attributes = [
             "raw_module_name",
             "use_folder",

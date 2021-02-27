@@ -40,9 +40,9 @@ async def main(signals=None, download_settings=None):
     conn = aiohttp.TCPConnector(ssl=ssl_context,
                                 limit=download_settings.conn_limit,
                                 limit_per_host=download_settings.conn_limit_per_host)
-
+    timeout = aiohttp.ClientTimeout(total=30, sock_connect=5)
     async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
-                                      timeout=aiohttp.ClientTimeout(30)) as session:
+                                      timeout=timeout) as session:
         logger.debug(f"Loading template: {template_path}")
         queue = unique_queue.UniqueQueue()
         producers = []

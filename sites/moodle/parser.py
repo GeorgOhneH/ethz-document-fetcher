@@ -1,16 +1,19 @@
 import asyncio
 import logging
 import re
+
+import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
 
 from core.downloader import is_extension_forbidden
+from core.storage import cache
 from core.exceptions import ForbiddenError
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser
-from sites import polybox, one_drive
-from sites.moodle import zoom
-from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN
+from sites.utils import process_single_file_url
+from sites.exceptions import NotSingleFile
+from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN, BASE_URL
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +28,10 @@ async def parse_main_page(session,
                           keep_section_order,
                           password_mapper):
     sesskey = re.search(b"""sesskey":"([^"]+)""", html)[1].decode("utf-8")
-    async with session.post(AJAX_SERVICE_URL, json=get_update_payload(moodle_id),
-                            params={"sesskey": sesskey}) as response:
-        update_json = await response.json()
+
+    update_json = await get_update_json(session=session,
+                                        moodle_id=moodle_id,
+                                        sesskey=sesskey)
 
     last_updated_dict = parse_update_json(update_json)
 
@@ -62,43 +66,134 @@ async def parse_sections(session,
                          password_mapper,
                          index=None,
                          keep_section_order=False):
-    section_name = str(section.find("div", class_="content", recursive=False).h3.span.a.string).strip()
+    if "aria-labelledby" in section.attrs:
+        section_title_id = str(section["aria-labelledby"])
+        section_name = str(section.find("h3", id=section_title_id).string).strip()
+    else:
+        section_name = str(section["aria-label"]).strip()
+
     if keep_section_order:
         section_name = f"[{index + 1:02}] {section_name}"
     base_path = safe_path_join(base_path, section_name)
 
+    title_link = section.find("a", href=re.compile(r"id=[0-9]+&section=[0-9]+"))
+    if title_link is not None:
+        # Old moodle site where we have to call the section explicit with a request
+        await parse_single_section(session=session,
+                                   queue=queue,
+                                   download_settings=download_settings,
+                                   base_path=base_path,
+                                   href=title_link["href"],
+                                   moodle_id=moodle_id,
+                                   last_updated_dict=last_updated_dict,
+                                   process_external_links=process_external_links,
+                                   password_mapper=password_mapper)
+
+    await _parse_section(session=session,
+                         queue=queue,
+                         download_settings=download_settings,
+                         base_path=base_path,
+                         section=section,
+                         last_updated_dict=last_updated_dict,
+                         moodle_id=moodle_id,
+                         process_external_links=process_external_links,
+                         password_mapper=password_mapper)
+
+
+async def parse_single_section(session,
+                               queue,
+                               download_settings,
+                               base_path,
+                               href,
+                               moodle_id,
+                               last_updated_dict,
+                               process_external_links,
+                               password_mapper):
+    async with session.get(href) as response:
+        html = await response.read()
+
+    section_id = re.search(r"&section=([0-9]+)", href).group(1)
+
+    only_sections = SoupStrainer("li", id=f"section-{section_id}")
+    soup = BeautifulSoup(html, get_beautiful_soup_parser(), parse_only=only_sections)
+    section = soup.find("li", id=f"section-{section_id}")
+
+    await _parse_section(session=session,
+                         queue=queue,
+                         download_settings=download_settings,
+                         base_path=base_path,
+                         section=section,
+                         last_updated_dict=last_updated_dict,
+                         moodle_id=moodle_id,
+                         process_external_links=process_external_links,
+                         password_mapper=password_mapper)
+
+
+async def _parse_section(session,
+                         queue,
+                         download_settings,
+                         base_path,
+                         section,
+                         last_updated_dict,
+                         moodle_id,
+                         process_external_links,
+                         password_mapper):
     modules = section.find_all("li", id=re.compile("module-[0-9]+"))
     tasks = []
     for module in modules:
-        coroutine = parse_mtype(session=session,
-                                queue=queue,
-                                download_settings=download_settings,
-                                base_path=base_path,
-                                module=module,
-                                last_updated_dict=last_updated_dict,
-                                moodle_id=moodle_id,
-                                process_external_links=process_external_links,
-                                password_mapper=password_mapper)
+        coroutine = parse_module(session=session,
+                                 queue=queue,
+                                 download_settings=download_settings,
+                                 base_path=base_path,
+                                 module=module,
+                                 last_updated_dict=last_updated_dict,
+                                 moodle_id=moodle_id,
+                                 process_external_links=process_external_links,
+                                 password_mapper=password_mapper)
+        tasks.append(coroutine)
 
-        tasks.append(asyncio.ensure_future(coroutine))
+    await asyncio.gather(*tasks)
 
-        if process_external_links:
-            for text_link in module.find_all("a"):
-                url = text_link.get("href", None)
-                name = text_link.string
-                if url is None or name is None:
-                    continue
 
-                coroutine = process_link(session=session,
-                                         queue=queue,
-                                         base_path=base_path,
-                                         download_settings=download_settings,
-                                         url=url,
-                                         moodle_id=moodle_id,
-                                         name=str(name),
-                                         password_mapper=password_mapper)
+async def parse_module(session,
+                       queue,
+                       download_settings,
+                       base_path,
+                       module,
+                       last_updated_dict,
+                       moodle_id,
+                       process_external_links,
+                       password_mapper):
+    tasks = []
+    coroutine = parse_mtype(session=session,
+                            queue=queue,
+                            download_settings=download_settings,
+                            base_path=base_path,
+                            module=module,
+                            last_updated_dict=last_updated_dict,
+                            moodle_id=moodle_id,
+                            process_external_links=process_external_links,
+                            password_mapper=password_mapper)
 
-                tasks.append(asyncio.ensure_future(exception_handler(coroutine, moodle_id, url)))
+    tasks.append(coroutine)
+
+    if process_external_links:
+        for text_link in module.find_all("a"):
+            url = text_link.get("href", None)
+            name = text_link.string
+            if url is None or name is None:
+                continue
+
+            coroutine = process_link(session=session,
+                                     queue=queue,
+                                     base_path=base_path,
+                                     download_settings=download_settings,
+                                     url=url,
+                                     moodle_id=moodle_id,
+                                     name=str(name),
+                                     password_mapper=password_mapper)
+
+            tasks.append(exception_handler(coroutine, moodle_id, url))
 
     await asyncio.gather(*tasks)
 
@@ -256,6 +351,13 @@ async def exception_handler(coroutine, moodle_id, url):
                      f"while trying to access {url}, Error: {type(e).__name__}: {e}", exc_info=True)
 
 
+async def get_update_json(session, moodle_id, sesskey):
+    async with session.post(AJAX_SERVICE_URL,
+                            json=get_update_payload(moodle_id),
+                            params={"sesskey": sesskey}) as response:
+        return await response.json()
+
+
 def get_update_payload(courseid, since=0):
     return [{
         "index": 0,
@@ -292,39 +394,27 @@ def parse_update_json(update_json):
 
 
 async def process_link(session, queue, base_path, download_settings, url, moodle_id, name, password_mapper):
-    if "onedrive.live.com" in url:
-        logger.debug(f"Starting one drive from moodle: {moodle_id}")
-        await one_drive.producer(session,
-                                 queue,
-                                 base_path + f"; {safe_path(name)}",
-                                 download_settings=download_settings,
-                                 url=url)
-
-    elif "polybox" in url:
-        logger.debug(f"Starting polybox from moodle: {moodle_id}")
-        poly_type, poly_id = [x.strip() for x in url.split("/") if x.strip() != ""][3:5]
+    guess_extension = await cache.check_extension(session, url)
+    if guess_extension is None or guess_extension in ["html", "json"]:
         password = match_name_to_password(name, password_mapper)
-        await polybox.producer(session,
-                               queue,
-                               safe_path_join(base_path, name),
-                               download_settings,
-                               poly_id,
-                               poly_type=poly_type,
-                               password=password)
+        try:
+            await process_single_file_url(session=session,
+                                          queue=queue,
+                                          base_path=base_path,
+                                          download_settings=download_settings,
+                                          url=url,
+                                          name=name,
+                                          password=password)
+        except NotSingleFile:
+            pass
+    else:
+        if not name.endswith(f".{guess_extension}"):
+            name += f".{guess_extension}"
 
-    elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
-        if is_extension_forbidden("mp4",
-                                  download_settings.allowed_extensions + queue.consumer_kwargs["allowed_extensions"],
-                                  download_settings.forbidden_extensions + queue.consumer_kwargs["forbidden_extensions"]):
-            return
-        logger.debug(f"Starting zoom download from moodle: {moodle_id}")
-        password = match_name_to_password(name, password_mapper)
-        await zoom.download(session=session,
-                            queue=queue,
-                            base_path=base_path,
-                            url=url,
-                            file_name=name,
-                            password=password)
+        await queue.put({
+            "url": url,
+            "path": safe_path_join(base_path, name)
+        })
 
 
 def match_name_to_password(name, password_mapper):

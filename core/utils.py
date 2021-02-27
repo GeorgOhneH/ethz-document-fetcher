@@ -5,7 +5,7 @@ import logging
 import os
 import re
 import shutil
-from mimetypes import guess_extension
+from mimetypes import guess_extension, add_type
 import functools
 from pathlib import Path
 
@@ -46,12 +46,20 @@ def user_statistics(name):
         logger.warning(f"Error while tying to post user statistics. Error: {e}")
 
 
+def get_filename_from_response(response):
+    if "content-disposition" not in response.headers:
+        return None
+    disposition = response.headers['content-disposition']
+    resp_file_name_match = re.search("""filename="(.+)\"""", disposition)
+    if resp_file_name_match is None:
+        return None
+    return resp_file_name_match.group(1)
+
+
 def get_extension_from_response(response):
-    if "content-disposition" in response.headers:
-        disposition = response.headers['content-disposition']
-        resp_file_name_match = re.search("""filename="(.+)\"""", disposition)
-        if resp_file_name_match is not None:
-            return get_extension(resp_file_name_match[1])
+    filename = get_filename_from_response(response)
+    if filename is not None:
+        return get_extension(filename)
 
     extension = guess_extension(response.headers['content-type'].partition(';')[0].strip())
     if extension is None:
@@ -86,6 +94,8 @@ def remove_old_log_files(keep_count=10):
 
 
 def get_extension(file):
+    if "." not in file:
+        raise ValueError(f"file: {file} does not have an extension")
     return file.split(".")[-1]
 
 
@@ -100,7 +110,7 @@ def safe_path_join(path, *paths):
 def safe_path(string):
     path = html.unescape(string.replace("/", "-").replace("\\", "-")). \
         replace(":", ";").replace("|", "").replace("?", ""). \
-        replace("<", "").replace(">", "").replace("*", "")
+        replace("<", "").replace(">", "").replace("*", "").replace("\"", "")
 
     return path.strip()
 

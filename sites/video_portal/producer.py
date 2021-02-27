@@ -4,7 +4,6 @@ import os
 from core.utils import safe_path_join
 from settings.config import ConfigString
 from sites.video_portal.constants import BASE_URL
-from sites.video_portal.login import login_and_data
 
 DEPARTMENT_CONFIG = ConfigString(gui_name="Department")
 YEAR_CONFIG = ConfigString(gui_name="Year")
@@ -97,5 +96,65 @@ async def put_in_queue(session,
     meta_video_data = await login_and_data(session, download_settings, department, year, semester, course_id,
                                            meta_video_url, pwd_username, pwd_password)
 
-    url = meta_video_data["selectedEpisode"]["media"]["presentations"][0]["url"]
+    media = meta_video_data["selectedEpisode"]["media"]
+    if "presentations" in media:
+        url = media["presentations"][0]["url"]
+    elif "presenters" in media:
+        url = media["presenters"][0]["url"]
+    else:
+        raise NotImplementedError()
+
     await queue.put({"path": base_path, "url": url})
+
+
+async def login_and_data(session, download_settings, department, year, semester, course_id, meta_video_url,
+                         pwd_username=None, pwd_password=None, depth=0):
+    course_url = f"{BASE_URL}{department}/{year}/{semester}/{course_id}"
+
+    async with session.get(meta_video_url) as response:
+        meta_data = await response.json()
+
+    if meta_data["authorized"]:
+        return meta_data
+
+    if depth >= 4:
+        raise Exception("could not log in after 4 tries")
+
+    protection = meta_data["protection"]
+
+    if protection == "ETH":
+        security_check_url = f"{BASE_URL}{department}/{year}/{semester}/j_security_check"
+        async with session.post(security_check_url, data=get_eth_auth(download_settings)) as response:
+            await response.text()
+
+    elif protection == "PWD":
+        if not pwd_username or not pwd_username:
+            raise ValueError("pwd_username and pwd_password must be set")
+        pwd_data = {
+            "_charset_": "utf-8",
+            "username": pwd_username,
+            "password": pwd_password,
+        }
+        series_url = course_url + ".series-login.json"
+        async with session.post(series_url, data=pwd_data) as response:
+            await response.text()
+
+    return await login_and_data(session,
+                                download_settings,
+                                department,
+                                year,
+                                semester,
+                                course_id,
+                                meta_video_url,
+                                pwd_username=pwd_username,
+                                pwd_password=pwd_password,
+                                depth=depth + 1)
+
+
+def get_eth_auth(download_settings):
+    return {
+        "_charset_": "utf-8",
+        "j_username": download_settings.username,
+        "j_password": download_settings.password,
+        "j_validate": "true",
+    }

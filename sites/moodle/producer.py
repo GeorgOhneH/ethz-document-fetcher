@@ -1,3 +1,5 @@
+import re
+
 from bs4 import BeautifulSoup
 
 from core.utils import get_beautiful_soup_parser
@@ -61,4 +63,5 @@ async def get_folder_name(session, moodle_id, **kwargs):
 
     header = soup.find("div", class_="page-header-headings")
     header_name = str(header.h1.string)
-    return header_name
+    header_name = re.sub("[0-9]{3}-[0-9]{4}-[0-9]{2}L", "", header_name)
+    return header_name.strip()

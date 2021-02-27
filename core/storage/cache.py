@@ -3,7 +3,7 @@ import logging
 import os
 
 from core.storage.utils import get_json_cache_path
-from core.utils import get_extension_from_response
+from core.utils import get_extension_from_response, get_filename_from_response
 
 logger = logging.getLogger(__name__)
 
@@ -74,24 +74,33 @@ async def check_extension(session, url, session_kwargs=None):
         session_kwargs = {}
 
     table = get_json("extensions")
-    extension = table.get(url, None)
+    if url in table:
+        return table[url]
 
-    if extension == "error":
-        return None
+    async with session.get(url, raise_for_status=True, **session_kwargs) as response:
+        extension = get_extension_from_response(response)
 
-    if extension is None:
-        async with session.get(url, raise_for_status=True, **session_kwargs) as response:
-            extension = get_extension_from_response(response)
-
-        if extension is None:
-            table[url] = "error"
-            logger.warning(f"Could not retrieve from {url}. {response.status}")
-            return None
-
-        table[url] = extension
-        logger.debug(f"Called extension_cache, url: {url}, extension: {extension}")
+    table[url] = extension
+    logger.debug(f"Called filename_cache, url: {url}, extension: {extension}")
 
     return extension
+
+
+async def check_filename(session, url, session_kwargs=None):
+    if session_kwargs is None:
+        session_kwargs = {}
+
+    table = get_json("filenames")
+    if url in table:
+        return table[url]
+
+    async with session.get(url, raise_for_status=True, **session_kwargs) as response:
+        filename = get_filename_from_response(response)
+
+    table[url] = filename
+    logger.debug(f"Called filename_cache, url: {url}, extension: {filename}")
+
+    return filename
 
 
 def is_checksum_same(path, checksum):
@@ -101,6 +110,23 @@ def is_checksum_same(path, checksum):
     meta_data = get_file_meta_data(path)
 
     old_checksum = meta_data.get("checksum", None)
+
+    if old_checksum is None:
+        return False
+
+    if old_checksum == checksum:
+        return True
+
+    return False
+
+
+def is_own_checksum_same(path, checksum):
+    if not isinstance(checksum, str):
+        raise ValueError(f"own_checksum must be a string. Not {type(checksum)}")
+
+    meta_data = get_file_meta_data(path)
+
+    old_checksum = meta_data.get("own_checksum", None)
 
     if old_checksum is None:
         return False
@@ -128,6 +154,25 @@ def save_checksum(path, checksum):
         logger.debug(f"Replaced old checksum, path: {path}, new: {checksum}, old: {old_checksum}")
 
     meta_data["checksum"] = checksum
+
+
+def save_own_checksum(path, checksum):
+    if not isinstance(checksum, str):
+        raise ValueError(f"checksum must be a string. Not {type(checksum)}")
+
+    meta_data = get_file_meta_data(path)
+
+    old_checksum = meta_data.get("own_checksum", None)
+
+    if old_checksum == checksum:
+        return
+
+    if old_checksum is None:
+        logger.debug(f"Added new own_checksum, path: {path}, checksum: {checksum}")
+    else:
+        logger.debug(f"Replaced old own_checksum, path: {path}, new: {checksum}, old: {old_checksum}")
+
+    meta_data["own_checksum"] = checksum
 
 
 def get_etag(path):

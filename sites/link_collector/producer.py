@@ -5,17 +5,19 @@ from urllib.parse import urlparse, urlunparse, urljoin
 from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
-from core.utils import safe_path_join, get_beautiful_soup_parser
+from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension
+from core.storage import cache
 
-from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG,\
+from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG, \
     basic_auth_config_to_session_kwargs, headers_config_to_session_kwargs
 
 from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
+from sites.utils import process_single_file_url
 
 REGEX_PATTERN_CONFIG = ConfigList(
     gui_name="Regex Patterns",
     hint_text="This uses the <a href=\"https://docs.python.org/3/library/re.html#re.sub\">re.sub</a>"
-              " function. The replacements<br>are 'Folder Name' and 'File Name'",
+              " function. The replacements<br>are 'Folder Name', 'File Name' and 'Link Modifier'",
     config_obj_default=ConfigDict(
         gui_name="Filter",
         layout={
@@ -30,7 +32,11 @@ REGEX_PATTERN_CONFIG = ConfigList(
                 gui_name="File Name",
                 optional=True,
                 hint_text="<name> will be replaced with the link name from the website.",
-            )
+            ),
+            "link_regex": ConfigString(
+                gui_name="Link Modifier",
+                optional=True,
+            ),
         }
     )
 )
@@ -50,63 +56,80 @@ async def producer(session,
 
     session_kwargs.update(basic_auth_config_to_session_kwargs(basic_auth, download_settings))
 
+    if url and url[-1] != "/" and "." not in url.split("/")[-1]:
+        url += "/"
+
     links = await get_all_file_links(session, url, session_kwargs)
     for regex_pattern in regex_patterns:
         pattern = regex_pattern["pattern"]
-        folder_regex = regex_pattern["folder"]
+        folder_regex = regex_pattern.get("folder", None)
         if folder_regex is None:
             folder_regex = ""
-        file_name_regex = regex_pattern["file_name"]
-        for link, html_name in links:
+        file_name_regex = regex_pattern.get("file_name", None)
+        link_regex = regex_pattern.get("link_regex", None)
+        for orig_link, html_name in links.items():
 
-            if re.search(pattern, link) is None:
+            if re.search(pattern, orig_link) is None:
                 continue
 
-            folder_name = re.sub(pattern, folder_regex, link)
+            folder_name = re.sub(pattern, folder_regex, orig_link)
 
-            o = urlparse(link)
+            if link_regex:
+                link = re.sub(pattern, link_regex, orig_link)
+            else:
+                link = orig_link
 
-            file_name = _get_file_name(url_file_name=o.path.split("/")[-1],
+            guess_extension = await cache.check_extension(session, link, session_kwargs=session_kwargs)
+
+            file_name = _get_file_name(guess_extension=guess_extension if guess_extension != "html" else None,
                                        html_name=html_name,
                                        file_name_regex=file_name_regex,
                                        pattern=pattern,
-                                       link=link)
+                                       orig_link=orig_link,
+                                       link_name=urlparse(link).path.split("/")[-1])
 
-            await queue.put({
-                "url": link,
-                "path": safe_path_join(base_path, folder_name, file_name),
-                "session_kwargs": session_kwargs,
-            })
+            if guess_extension is None or guess_extension == "html":
+                await process_single_file_url(session=session,
+                                              queue=queue,
+                                              base_path=safe_path_join(base_path, folder_name),
+                                              download_settings=download_settings,
+                                              url=link,
+                                              name=file_name)
+            else:
+                await queue.put({
+                    "url": link,
+                    "path": safe_path_join(base_path, folder_name, file_name),
+                    "session_kwargs": session_kwargs,
+                })
 
 
-def _get_file_name(url_file_name: str,
+def _get_file_name(guess_extension: str,
                    html_name: str,
                    pattern: str,
-                   link: str,
-                   file_name_regex: str) -> str:
-
-    extension = url_file_name.split(".")[-1]
-
+                   orig_link: str,
+                   file_name_regex: str,
+                   link_name) -> str or None:
     if file_name_regex:
         modified_file_name_regex = file_name_regex.replace("<name>", html_name)
-        file_name = re.sub(pattern, modified_file_name_regex, link)
-        if not file_name.endswith("." + extension):
-            file_name += f".{extension}"
+        file_name = re.sub(pattern, modified_file_name_regex, orig_link)
+    elif html_name:
+        file_name = html_name
+    else:
+        file_name = link_name
+
+    if guess_extension is None:
         return file_name
 
-    if html_name:
-        if html_name.endswith("." + extension):
-            return html_name
-        return f"{html_name}.{extension}"
-
-    return url_file_name
+    if file_name.endswith("." + guess_extension):
+        return file_name
+    return file_name + f".{guess_extension}"
 
 
 async def get_all_file_links(session, url, session_kwargs):
     async with session.get(url, **session_kwargs) as response:
         html = await response.text()
 
-    all_links = set([])
+    all_links = dict()
 
     soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
@@ -123,7 +146,7 @@ async def get_all_file_links(session, url, session_kwargs):
 
         result = urljoin(url, href)
 
-        all_links.add((result, str(link.string)))
+        all_links[result] = str(link.text)
 
     return all_links
 

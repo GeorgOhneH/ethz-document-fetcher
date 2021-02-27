@@ -58,7 +58,7 @@ class Settings(Configs, metaclass=SettingBase):
                     self.parser.error(f"{config_obj.name} was not valid")
                 setattr(self, config_obj.name, arg_value)
 
-    def get_file_path(self):
+    def get_file_path(self) -> str:
         return os.path.join(get_config_path(), self.__class__.__name__.lower() + ".config")
 
     def save(self):
@@ -101,7 +101,7 @@ class DownloadSettings(Settings):
     save_path = ConfigPath(only_folder=True, gui_name="Save Path")
     allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
                                           hint_text="Add 'video' for all video types.")
-    forbidden_extensions = ConfigListString(default=["video"], optional=True, gui_name="Forbidden Extensions",
+    forbidden_extensions = ConfigListString(default=[], optional=True, gui_name="Forbidden Extensions",
                                             hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
 

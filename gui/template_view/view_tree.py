@@ -1,12 +1,14 @@
 import logging
 import os
 import importlib
+import functools
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from core import template_parser
+from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.template_view.view_tree_item import TreeWidgetItem
 from gui.utils import widget_read_settings, widget_save_settings
 
@@ -80,6 +82,7 @@ class TemplateViewTree(QTreeWidget):
             (signals.got_error[str], self.got_error),
             (signals.got_error[str, str], self.got_error),
             (qApp.aboutToQuit, self.save_state),
+            (qApp.aboutToQuit, self.save_template_file),
         ]
 
         self.setup_connections()
@@ -119,6 +122,11 @@ class TemplateViewTree(QTreeWidget):
         if self._template_load_error:
             logger.warning("Error on load. Not saving template")
             return
+
+        # TODO: check for preset templates
+        # if self.template_view.get_path() in TEMPLATE_PRESET_FILE_PATHS:
+        #     logger.warning("Not saving Template. ")
+        #     return
 
         logger.debug("Saving Template")
         for widget in self.widgets.values():
@@ -213,32 +221,36 @@ class TemplateViewTree(QTreeWidget):
         if widget is None:
             return
 
+        thread = self.controller.thread
+        template_node = widget.template_node
+        download_settings = self.controller.download_settings
+
         menu = QMenu(self)
 
         run_action_recursive = menu.addAction("Run recursive")
-        run_action_recursive.setEnabled(not self.controller.thread.isRunning() and
-                                        widget.template_node.parent.base_path is not None)
-        if self.controller.thread.isRunning():
-            self.controller.thread.finished.connect(lambda template_node=widget.template_node:
-                                                    run_action_recursive.setEnabled(
-                                                        template_node.parent.base_path is not None))
+        run_action_recursive.setEnabled(not thread.isRunning() and
+                                        template_node.parent.base_path is not None)
+        if thread.isRunning():
+            thread.finished.connect(lambda temp_node=template_node:
+                                    run_action_recursive.setEnabled(
+                                        temp_node.parent.base_path is not None))
         run_action_recursive.triggered.connect(
-            lambda: self.controller.start_thread([widget.template_node.unique_key], True))
+            lambda: self.controller.start_thread([template_node.unique_key], True))
 
         run_action = menu.addAction("Run")
-        run_action.setEnabled(not self.controller.thread.isRunning()
-                              and widget.template_node.parent.base_path is not None)
-        if self.controller.thread.isRunning():
-            self.controller.thread.finished.connect(lambda template_node=widget.template_node:
-                                                    run_action_recursive.setEnabled(
-                                                        template_node.parent.base_path is not None))
-        run_action.triggered.connect(lambda: self.controller.start_thread([widget.template_node.unique_key], False))
+        run_action.setEnabled(not thread.isRunning()
+                              and template_node.parent.base_path is not None)
+        if thread.isRunning():
+            thread.finished.connect(lambda temp_node=template_node:
+                                    run_action_recursive.setEnabled(
+                                        temp_node.parent.base_path is not None))
+        run_action.triggered.connect(lambda: self.controller.start_thread([template_node.unique_key], False))
 
         menu.addSeparator()
 
         open_folder_action = menu.addAction("Open Folder")
-        if widget.template_node.base_path is not None and self.controller.download_settings.save_path is not None:
-            base_path = os.path.join(self.controller.download_settings.save_path, widget.template_node.base_path)
+        if template_node.base_path is not None and download_settings.save_path is not None:
+            base_path = os.path.join(download_settings.save_path, template_node.base_path)
             if not os.path.exists(base_path):
                 open_folder_action.setEnabled(False)
             url = QUrl.fromLocalFile(base_path)
@@ -249,12 +261,26 @@ class TemplateViewTree(QTreeWidget):
         menu.addSeparator()
 
         open_website_action = menu.addAction("Open Website")
-        if widget.template_node.has_website_url():
+        if template_node.has_website_url():
             open_website_action.setEnabled(True)
             open_website_action.triggered.connect(
-                lambda: QDesktopServices.openUrl(QUrl(widget.template_node.get_website_url())))
+                lambda: QDesktopServices.openUrl(QUrl(template_node.get_website_url())))
         else:
             open_website_action.setEnabled(False)
+
+        menu.addSeparator()
+
+        collection_link_menu = menu.addMenu("Link Collection")
+        if template_node.link_collection:
+            for name_url in template_node.link_collection:
+                c_name = name_url["name"]
+                c_url = name_url["url"]
+
+                name = f"{c_name} ({c_url})" if c_name else c_url
+                link_action = collection_link_menu.addAction(name)
+                link_action.triggered.connect(lambda _, x=c_url: QDesktopServices.openUrl(QUrl(x)))
+        else:
+            collection_link_menu.setEnabled(False)
 
         menu.exec_(self.mapToGlobal(point))
 

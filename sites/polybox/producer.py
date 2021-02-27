@@ -6,16 +6,18 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
-from urllib.parse import unquote, quote, urlparse
+from urllib.parse import unquote, quote, urlparse, urljoin
 
 from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
 from core.monitor import MonitorSession
+from core.storage import cache
 from core.utils import safe_path_join, get_beautiful_soup_parser
 from core.storage.utils import call_function_or_cache
 from settings.config_objs import ConfigOptions, ConfigString
 from sites.polybox.constants import *
+from sites.exceptions import NotSingleFile
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +89,7 @@ async def _get_folder_name_s(session, poly_type, poly_id, password=None):
     data_info = soup.body.header.div
     author = " ".join(data_info["data-owner-display-name"].split(" ")[:2])
     name = data_info["data-name"]
-    return f"Polybox - {author}"
+    return name
 
 
 async def _get_folder_name_f(session, download_settings, poly_type, poly_id):
@@ -206,3 +208,37 @@ def go_down_tree(tree, *args, to_text=False):
     if to_text:
         return tree.text
     return tree
+
+
+async def parse_single_file(session,
+                            queue,
+                            base_path,
+                            poly_id,
+                            poly_type="s",
+                            name=None,
+                            password=None):
+    if poly_type != "s":
+        raise NotSingleFile()
+
+    auth = BasicAuth(login=poly_id,
+                     password="null" if password is None else password)
+    url = f"{INDEX_URL}s/{poly_id}/download"
+
+    orig_filename = await cache.check_filename(session, url, session_kwargs={"auth": auth})
+
+    if orig_filename is None:
+        raise NotSingleFile()
+
+    extension = orig_filename.split(".")[-1]
+
+    if name:
+        filename = name
+        if not filename.endswith(f".{extension}"):
+            filename += f".{extension}"
+    else:
+        filename = orig_filename
+
+    await queue.put({"url": url,
+                     "path": safe_path_join(base_path, filename),
+                     "session_kwargs": {"auth": auth},
+                     })

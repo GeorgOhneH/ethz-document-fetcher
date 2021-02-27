@@ -35,7 +35,7 @@ async def search_tree(session, queue, base_path, download_settings, ilias_id):
     async with session.get(url) as response:
         html = await response.text()
         if str(response.url) != url:
-            raise LoginError("Module ilias isn't logged in")
+            raise LoginError("Module ilias isn't logged in or you are not allowed to access these files")
 
     strainer = SoupStrainer("div", attrs={"class": "ilCLI ilObjListRow row"})
     soup = BeautifulSoup(html, get_beautiful_soup_parser(), parse_only=strainer)

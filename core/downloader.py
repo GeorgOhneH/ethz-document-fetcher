@@ -3,6 +3,7 @@ import functools
 import pathlib
 from urllib.parse import urlparse
 import itertools
+import hashlib
 import random
 import shutil
 
@@ -79,8 +80,11 @@ async def download_if_not_exist(session,
     if forbidden_extensions is None:
         forbidden_extensions = []
 
-    allowed_extensions += download_settings.allowed_extensions
-    forbidden_extensions += download_settings.forbidden_extensions
+    if download_settings.allowed_extensions is not None:
+        allowed_extensions += download_settings.allowed_extensions
+
+    if download_settings.forbidden_extensions is not None:
+        forbidden_extensions += download_settings.forbidden_extensions
 
     if isinstance(url, str):
         url = URL(url)
@@ -161,6 +165,7 @@ async def download_if_not_exist(session,
             if action == ACTION_REPLACE:
                 shutil.move(absolute_path, temp_absolute_path)
 
+            file_hash = hashlib.md5()
             try:
                 with open(absolute_path, 'wb') as f:
                     while True:
@@ -168,6 +173,7 @@ async def download_if_not_exist(session,
                         if not chunk:
                             break
                         f.write(chunk)
+                        file_hash.update(chunk)
             except BaseException as e:
                 os.remove(absolute_path)
                 logger.debug(f"Removed file {absolute_path}")
@@ -175,6 +181,15 @@ async def download_if_not_exist(session,
                     logger.debug(f"Reverting temp file to new file: {absolute_path}")
                     shutil.move(temp_absolute_path, absolute_path)
                 raise e
+
+        if action == ACTION_REPLACE and cache.is_own_checksum_same(absolute_path, file_hash.hexdigest()):
+            logger.debug(f"own_checksum is same for {url}. Skipping processing")
+            if "ETag" in response_headers:
+                cache.save_etag(absolute_path, response.headers["ETag"])
+            elif domain not in FORCE_DOWNLOAD_BLACKLIST:
+                logger.warning(f"url: {url} had not an etag and is not in the blacklist")
+            cache.save_checksum(absolute_path, checksum)
+            return
 
         if download_settings.highlight_difference and \
                 action == ACTION_REPLACE and \
@@ -189,6 +204,8 @@ async def download_if_not_exist(session,
 
         if action == ACTION_REPLACE and download_settings.keep_replaced_files:
             shutil.move(temp_absolute_path, old_absolute_path)
+
+        cache.save_own_checksum(absolute_path, file_hash.hexdigest())
 
         if "ETag" in response_headers:
             cache.save_etag(absolute_path, response.headers["ETag"])

@@ -81,9 +81,9 @@ class Worker(QObject):
         conn = aiohttp.TCPConnector(ssl=ssl_context,
                                     limit=self.download_settings.conn_limit,
                                     limit_per_host=self.download_settings.conn_limit_per_host)
-
+        timeout = aiohttp.ClientTimeout(total=30, sock_connect=5)
         async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
-                                          timeout=aiohttp.ClientTimeout(30)) as session:
+                                          timeout=timeout) as session:
 
             try:
                 logger.debug(f"Loading template: {self.template_path}")
