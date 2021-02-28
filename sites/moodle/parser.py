@@ -193,7 +193,7 @@ async def parse_module(session,
                                      name=str(name),
                                      password_mapper=password_mapper)
 
-            tasks.append(exception_handler(coroutine, moodle_id, url))
+            tasks.append(coroutine)
 
     await asyncio.gather(*tasks)
 
