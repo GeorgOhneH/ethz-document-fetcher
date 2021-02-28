@@ -50,10 +50,9 @@ class HeaderItem(QTreeWidgetItem):
 
 
 class TemplateViewTree(QTreeWidget):
-    def __init__(self, template_path, signals, controller, parent):
+    def __init__(self, template_path, parent):
         super().__init__(parent=parent)
         self.widgets = {}
-        self.controller = controller
         self.setColumnCount(5)
         self.header_item = HeaderItem()
         self.setHeaderItem(self.header_item)
@@ -66,24 +65,36 @@ class TemplateViewTree(QTreeWidget):
 
         self.read_settings()
 
+        app = QApplication.instance()
+
         self.connection_map = [
-            (signals.stopped, self.stop_widgets),
-            (signals.finished, self.quit_widgets),
-            (signals.update_folder_name, self.update_folder_name),
-            (signals.update_base_path, self.update_base_path),
-            (signals.added_new_file[str, str], self.added_new_file),
-            (signals.replaced_file[str, str, str, str], self.replaced_file),
-            (signals.site_started[str], self.site_started),
-            (signals.site_started[str, str], self.site_started),
-            (signals.site_finished[str], self.site_finished),
-            (signals.site_finished[str, str], self.site_finished),
-            (signals.got_warning[str], self.got_warning),
-            (signals.got_warning[str, str], self.got_warning),
-            (signals.got_error[str], self.got_error),
-            (signals.got_error[str, str], self.got_error),
+            (app.worker_thread.stopped, self.stop_widgets),
+            (app.worker_thread.finished, self.quit_widgets),
+            (app.worker_thread.update_folder_name, self.update_folder_name),
+            (app.worker_thread.update_base_path, self.update_base_path),
+            (app.worker_thread.added_new_file[str, str], self.added_new_file),
+            (app.worker_thread.replaced_file[str, str, str, str], self.replaced_file),
+            (app.worker_thread.site_started[str], self.site_started),
+            (app.worker_thread.site_started[str, str], self.site_started),
+            (app.worker_thread.site_finished[str], self.site_finished),
+            (app.worker_thread.site_finished[str, str], self.site_finished),
+            (app.worker_thread.got_warning[str], self.got_warning),
+            (app.worker_thread.got_warning[str, str], self.got_warning),
+            (app.worker_thread.got_error[str], self.got_error),
+            (app.worker_thread.got_error[str, str], self.got_error),
             (qApp.aboutToQuit, self.save_state),
             (qApp.aboutToQuit, self.save_template_file),
         ]
+
+        app = QApplication.instance()
+        app.worker_thread.started.connect(self.reset_widgets)
+        app.edit_opened.connect(self.save_template_file)
+        app.file_opened.connect(lambda new_template_path: self.init(new_template_path))
+        app.before_file_open.connect(lambda: self.save_template_file())
+
+        app.actions.select_all.triggered.connect(lambda: self.set_check_state_to_all(Qt.Checked))
+        app.actions.select_none.triggered.connect(lambda: self.set_check_state_to_all(Qt.Unchecked))
+        app.actions.run_checked.triggered.connect(self.start_thread_checked)
 
         self.setup_connections()
 
@@ -123,10 +134,9 @@ class TemplateViewTree(QTreeWidget):
             logger.warning("Error on load. Not saving template")
             return
 
-        # TODO: check for preset templates
-        # if self.template_view.get_path() in TEMPLATE_PRESET_FILE_PATHS:
-        #     logger.warning("Not saving Template. ")
-        #     return
+        if self.template.path in TEMPLATE_PRESET_FILE_PATHS:
+            logger.debug("Tried to save preset Template. Not saving")
+            return
 
         logger.debug("Saving Template")
         for widget in self.widgets.values():
@@ -144,6 +154,12 @@ class TemplateViewTree(QTreeWidget):
 
     def get_checked(self):
         return [widget for widget in self.widgets.values() if widget.get_check_state() != Qt.Unchecked]
+
+    def start_thread_checked(self):
+        unique_keys = [widget.template_node.unique_key
+                       for widget in self.get_checked()]
+        app = QApplication.instance()
+        app.start_thread(unique_keys=unique_keys, recursive=False)
 
     @pyqtSlot(str, str)
     def update_folder_name(self, unique_key, folder_name):
@@ -207,7 +223,7 @@ class TemplateViewTree(QTreeWidget):
                 widget.set_error("Site did not give a finish Signal. (You should never see this message)")
 
     def add_item_widget(self, template_node, unique_key, widget_parent=None):
-        widget = TreeWidgetItem(template_node, self.controller)
+        widget = TreeWidgetItem(template_node)
         if widget_parent is None:
             self.addTopLevelItem(widget)
         else:
@@ -221,30 +237,32 @@ class TemplateViewTree(QTreeWidget):
         if widget is None:
             return
 
-        thread = self.controller.thread
+        app = QApplication.instance()
+
+        worker_thread = app.worker_thread
         template_node = widget.template_node
-        download_settings = self.controller.download_settings
+        download_settings = app.download_settings
 
         menu = QMenu(self)
 
         run_action_recursive = menu.addAction("Run recursive")
-        run_action_recursive.setEnabled(not thread.isRunning() and
+        run_action_recursive.setEnabled(not worker_thread.isRunning() and
                                         template_node.parent.base_path is not None)
-        if thread.isRunning():
-            thread.finished.connect(lambda temp_node=template_node:
-                                    run_action_recursive.setEnabled(
-                                        temp_node.parent.base_path is not None))
+        if worker_thread.isRunning():
+            worker_thread.finished.connect(lambda temp_node=template_node:
+                                           run_action_recursive.setEnabled(
+                                               temp_node.parent.base_path is not None))
         run_action_recursive.triggered.connect(
-            lambda: self.controller.start_thread([template_node.unique_key], True))
+            lambda: app.start_thread([template_node.unique_key], True))
 
         run_action = menu.addAction("Run")
-        run_action.setEnabled(not thread.isRunning()
+        run_action.setEnabled(not worker_thread.isRunning()
                               and template_node.parent.base_path is not None)
-        if thread.isRunning():
-            thread.finished.connect(lambda temp_node=template_node:
-                                    run_action_recursive.setEnabled(
-                                        temp_node.parent.base_path is not None))
-        run_action.triggered.connect(lambda: self.controller.start_thread([template_node.unique_key], False))
+        if worker_thread.isRunning():
+            worker_thread.finished.connect(lambda temp_node=template_node:
+                                           run_action.setEnabled(
+                                               temp_node.parent.base_path is not None))
+        run_action.triggered.connect(lambda: app.start_thread([template_node.unique_key], False))
 
         menu.addSeparator()
 

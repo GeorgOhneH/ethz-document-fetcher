@@ -140,8 +140,8 @@ class OptionsGroupBox(GroupBox):
 
 
 class GeneralInfoView(QScrollArea, InfoView):
-    def __init__(self, controller, parent=None):
-        super().__init__(parent=parent, name="General", controller=controller)
+    def __init__(self, parent=None):
+        super().__init__(parent=parent, name="General")
         self.setWidgetResizable(True)
         self.main_widget = QWidget()
         self.main_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)

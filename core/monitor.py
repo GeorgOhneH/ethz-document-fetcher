@@ -25,7 +25,7 @@ class MonitorSession(aiohttp.ClientSession):
            wait=wait_fixed(1),
            stop=stop_after_attempt(4),
            after=after_log(),
-           retry=retry_if_exception_type((asyncio.exceptions.TimeoutError,
+           retry=retry_if_exception_type((asyncio.TimeoutError,
                                           aiohttp.client_exceptions.ServerDisconnectedError)))
     async def _request(self, *args, **kwargs):
         response = await super()._request(*args, **kwargs)

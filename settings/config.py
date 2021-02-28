@@ -1,6 +1,6 @@
 import copy
 import logging
-from typing import Iterator
+from typing import Iterator, Dict
 
 from settings.config_objs import ConfigString
 
@@ -59,7 +59,7 @@ class Configs(metaclass=ConfigBase):
     def __len__(self) -> int:
         return len(self._config_objs)
 
-    def to_dict(self) -> dict[str, ConfigString]:
+    def to_dict(self) -> Dict[str, ConfigString]:
         return {config_obj.name: config_obj.get() for config_obj in self}
 
     def check_if_valid(self) -> bool:

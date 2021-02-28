@@ -42,10 +42,9 @@ class TreeWidgetItem(QTreeWidgetItem):
     COLUMN_STATE = 3
     COLUMN_TYPE = 4
 
-    def __init__(self, template_node, controller):
+    def __init__(self, template_node):
         super().__init__()
         self.template_node = template_node
-        self.controller = controller
         self.name_widget = None
 
         self.added_new_file_count = 0
@@ -59,7 +58,9 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.children = []
         self.custom_parent = None
 
-        self.controller.settings_dialog.accepted.connect(self.emit_data_changed)
+        app = QApplication.instance()
+
+        app.settings_dialog.accepted.connect(self.emit_data_changed)
 
     def init_widgets(self):
         self.name_widget = TreeWidgetItemName(name=self.template_node.get_gui_name(),
@@ -81,9 +82,10 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
 
     def load_from_cache(self, name):
-        if self.controller.download_settings.save_path is None:
+        download_settings = QApplication.instance().download_settings
+        if download_settings.save_path is None:
             return []
-        path_name = self.controller.download_settings.save_path.replace("\\", "").replace("/", "").replace(":", "").replace(
+        path_name = download_settings.save_path.replace("\\", "").replace("/", "").replace(":", "").replace(
             ".", "")
         json = cache.get_json(name + path_name)
         if self.template_node.unique_key not in json:

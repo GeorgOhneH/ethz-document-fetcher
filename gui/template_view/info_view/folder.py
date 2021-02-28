@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class FolderInfoView(QTreeView, InfoView):
-    def __init__(self, controller, parent=None):
-        super().__init__(parent=parent, name="Folder", controller=controller)
+    def __init__(self, parent=None):
+        super().__init__(parent=parent, name="Folder")
         self.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.setExpandsOnDoubleClick(False)
         self.model = QFileSystemModel()
@@ -75,8 +75,9 @@ class FolderInfoView(QTreeView, InfoView):
 
     def update_view(self, selected_widget):
         path = selected_widget.template_node.base_path
-        if path is not None and self.controller.download_settings.save_path is not None:
-            absolute_path = os.path.join(self.controller.download_settings.save_path, path)
+        download_settings = QApplication.instance().download_settings
+        if path is not None and download_settings.save_path is not None:
+            absolute_path = os.path.join(download_settings.save_path, path)
             self.change_root(absolute_path)
         else:
             self.change_root(None)

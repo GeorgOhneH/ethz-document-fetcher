@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 class SettingsDialog(ConfigsDialog):
     settings_saved = pyqtSignal()
 
-    def __init__(self, parent, download_settings):
-        super().__init__(parent=parent)
+    def __init__(self, download_settings):
+        super().__init__(parent=None)
         behavior_settings = QApplication.instance().behavior_settings
         gui_settings = QApplication.instance().gui_settings
 

@@ -203,8 +203,3 @@ def reduce_boxes(boxes):
 
     return reduced_boxes
 
-
-if __name__ == "__main__":
-    base = "D:\ethz\semester2\\227-0002-00L Netzwerke und Schaltungen II FS2020\Skript-Bücher"
-    add_differ_highlight(os.path.join(base, "Zusammenfassung-old.pdf"), os.path.join(base, "Zusammenfassung-old.pdf"),
-                         os.path.join(base, "test-test-new.pdf"))

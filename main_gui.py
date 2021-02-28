@@ -10,6 +10,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 import gui.main_window
+from gui.startup_tasks import run_startup_tasks
 from gui.application import Application
 from gui.constants import ASSETS_PATH
 from core.constants import IS_FROZEN, VERSION
@@ -61,5 +62,7 @@ if __name__ == "__main__":
 
     main_window = gui.main_window.MainWindow()
     main_window.show()
+
+    run_startup_tasks(app.download_settings)
 
     sys.exit(app.exec_())

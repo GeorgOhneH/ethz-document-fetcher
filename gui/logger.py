@@ -33,6 +33,10 @@ class Logger(QWidget):
 
         qApp.aboutToQuit.connect(self.save_state)
 
+        actions = QApplication.instance().actions
+        actions.logger.setChecked(not self.isHidden())
+        actions.logger.triggered.connect(lambda checked: self.setVisible(checked))
+
     def save_state(self):
         widget_save_settings_func(self, self.isHidden)
 
@@ -48,13 +52,5 @@ class LoggerSplitter(QSplitter):
         self.setChildrenCollapsible(False)
         self.setOrientation(Qt.Vertical)
         self.setHandleWidth(1)
-        qApp.aboutToQuit.connect(self.save_state)
-
-    def save_state(self):
-        widget_save_settings(self)
-
-    def read_settings(self):
+        qApp.aboutToQuit.connect(lambda: widget_save_settings(self))
         widget_read_settings(self)
-
-
-

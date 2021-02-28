@@ -132,8 +132,8 @@ class LazyStandardItemModel(QStandardItemModel):
 
 
 class HistoryInfoView(QTreeView, InfoView):
-    def __init__(self, controller, parent=None):
-        super().__init__(parent=parent, name="History", controller=controller)
+    def __init__(self, parent=None):
+        super().__init__(parent=parent, name="History")
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.setExpandsOnDoubleClick(False)
         self.model = LazyStandardItemModel()

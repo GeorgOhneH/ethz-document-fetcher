@@ -6,8 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class InfoView(object):
-    def __init__(self, name, controller):
-        self.controller = controller
+    def __init__(self, name):
         self.name = name
         self.selected_widget = None
         self.button = QPushButton(name)

@@ -50,17 +50,19 @@ class Splitter(QSplitter):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setChildrenCollapsible(False)
         self.setOrientation(Qt.Vertical)
-        qApp.aboutToQuit.connect(self.save_state)
-
-    def save_state(self):
-        widget_save_settings(self)
-
-    def read_settings(self):
         widget_read_settings(self)
+        qApp.aboutToQuit.connect(lambda: widget_save_settings(self))
+
+        actions = QApplication.instance().actions
+
+        actions.info_position_group.triggered.connect(
+            lambda action: self.setOrientation(Qt.Horizontal if action.text() == "Right" else Qt.Vertical))
+        actions.info_position_bottom.setChecked(self.orientation() == Qt.Vertical)
+        actions.info_position_right.setChecked(self.orientation() == Qt.Horizontal)
 
 
 class StackedWidgetView(QStackedWidget):
-    def __init__(self, view_tree, controller, parent):
+    def __init__(self, view_tree, parent):
         super().__init__(parent=parent)
         self.view_tree = view_tree
         self.button_group = ButtonGroup(parent=self)
@@ -71,9 +73,9 @@ class StackedWidgetView(QStackedWidget):
         self.button_widget.setLayout(self.layout_button)
 
         self.views = [
-            GeneralInfoView(controller=controller, parent=self),
-            FolderInfoView(controller=controller, parent=self),
-            HistoryInfoView(controller=controller, parent=self),
+            GeneralInfoView(parent=self),
+            FolderInfoView(parent=self),
+            HistoryInfoView(parent=self),
         ]
 
         self.init_views()
@@ -82,6 +84,9 @@ class StackedWidgetView(QStackedWidget):
         self.view_tree.itemSelectionChanged.connect(self.only_if_one_selected)
 
         self.change_state_widget()
+
+        app = QApplication.instance()
+        app.file_opened.connect(lambda new_template_path: self.reset_widget())
 
     def init_views(self):
         for view in self.views:
@@ -120,50 +125,21 @@ class StackedWidgetView(QStackedWidget):
 
 
 class TemplateView(QWidget):
-    def __init__(self, template_path, signals, controller, parent=None):
+    def __init__(self, template_path, parent=None):
         super().__init__(parent=parent)
-        self.template_view_tree = TemplateViewTree(template_path, signals, controller, self)
+        self.template_view_tree = TemplateViewTree(template_path, self)
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 6, 0, 0)
 
         self.splitter = Splitter()
-        self.state_widget = StackedWidgetView(self.template_view_tree, controller, parent=self)
+        self.state_widget = StackedWidgetView(self.template_view_tree, parent=self)
 
         self.splitter.addWidget(self.template_view_tree)
         self.splitter.addWidget(self.state_widget)
-        self.splitter.read_settings()
 
         self.layout.addWidget(self.splitter)
 
         self.layout.addWidget(self.state_widget.button_widget)
 
         self.setLayout(self.layout)
-
-    def reset(self, template_path):
-        self.template_view_tree.init(template_path)
-        self.state_widget.reset_widget()
-
-    def reset_state(self):
-        self.template_view_tree.reset_widgets()
-
-    def get_path(self):
-        return self.template_view_tree.template.path
-
-    def get_splitter_orientation(self):
-        return self.splitter.orientation()
-
-    def set_splitter_orientation(self, orientation):
-        self.splitter.setOrientation(orientation)
-
-    def set_check_state_to_all(self, state):
-        self.template_view_tree.set_check_state_to_all(state)
-
-    def get_checked(self):
-        return self.template_view_tree.get_checked()
-
-    def save_template_file(self):
-        self.template_view_tree.save_template_file()
-
-    def disconnect_connections(self):
-        self.template_view_tree.disconnect_connections()

@@ -14,8 +14,7 @@ from core import unique_queue
 logger = logging.getLogger(__name__)
 
 
-class Signals(QObject):
-    finished = pyqtSignal()
+class WorkerThread(QThread):
     stopped = pyqtSignal()
 
     site_started = pyqtSignal([str], [str, str])
@@ -31,11 +30,8 @@ class Signals(QObject):
 
     downloaded_content_length = pyqtSignal(int)
 
-
-class Worker(QObject):
     def __init__(self):
         super().__init__()
-        self.signals = Signals()
 
         self.unique_keys = ["root"]
         self.recursive = True
@@ -46,12 +42,11 @@ class Worker(QObject):
         asyncio.set_event_loop(self.loop)
         self.tasks = None
 
-    @pyqtSlot()
-    def main(self):
+    def run(self):
         try:
             start_t = time.time()
             logger.info(f"Starting worker")
-            self.tasks = self.loop.create_task(self._run(self.signals))
+            self.tasks = self.loop.create_task(self._run(self))
             self.loop.run_until_complete(self.tasks)
             logger.info(f"Finished in {(time.time() - start_t):.2f} seconds")
         except Exception as e:
@@ -65,11 +60,10 @@ class Worker(QObject):
                     self.loop.run_until_complete(task)
                 except BaseException as e:
                     pass
-            self.signals.finished.emit()
 
     def stop(self):
         if self.tasks is not None:
-            self.signals.stopped.emit()
+            self.stopped.emit()
             self.loop.call_soon_threadsafe(self.tasks.cancel)
 
     async def _run(self, signals=None):
@@ -137,4 +131,3 @@ class Worker(QObject):
                     item = queue.get_nowait()
                     queue.task_done()
                     signals.site_finished[str].emit(item["unique_key"])
-

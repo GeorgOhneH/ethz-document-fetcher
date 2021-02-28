@@ -32,6 +32,10 @@ class DownloadSpeedWidget(QWidget):
         self.layout.addWidget(self.icon)
         self.layout.addWidget(self.text)
 
+        app = QApplication.instance()
+        app.worker_thread.downloaded_content_length.connect(self.monitor_download)
+        app.worker_thread.started.connect(self.reset)
+
     def set_text(self):
         self.text.setText(f"{format_bytes(self.downloaded_bytes)}/s ({format_bytes(self.total_bytes)})")
 
