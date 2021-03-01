@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 
 from core.utils import get_app_data_path
+from core.constants import APP_NAME
 from gui.constants import ROOT_PATH
 from gui.application import Application
 
@@ -48,7 +49,7 @@ def _get_name_from_widget(widget, name):
 
 def widget_save_settings(widget, name=None, save_geometry=True, save_state=True):
     name = _get_name_from_widget(widget, name)
-    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    qsettings = QSettings(APP_NAME, APP_NAME)
     if save_geometry:
         qsettings.setValue(name + "/geometry", widget.saveGeometry())
     if save_state:
@@ -57,7 +58,7 @@ def widget_save_settings(widget, name=None, save_geometry=True, save_state=True)
 
 def widget_read_settings(widget, name=None, save_geometry=True, save_state=True):
     name = _get_name_from_widget(widget, name)
-    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    qsettings = QSettings(APP_NAME, APP_NAME)
     if save_geometry and qsettings.value(name + "/geometry") is not None:
         widget.restoreGeometry(qsettings.value(name + "/geometry"))
     if save_state and qsettings.value(name + "/windowState") is not None:
@@ -66,12 +67,12 @@ def widget_read_settings(widget, name=None, save_geometry=True, save_state=True)
 
 def widget_save_settings_func(widget, func, name=None):
     name = _get_name_from_widget(widget, name)
-    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    qsettings = QSettings(APP_NAME, APP_NAME)
     qsettings.setValue(name, func())
 
 
 def widget_read_settings_func(widget, name=None):
     name = _get_name_from_widget(widget, name)
-    qsettings = QSettings("eth-document-fetcher", "eth-document-fetcher")
+    qsettings = QSettings(APP_NAME, APP_NAME)
     variant = qsettings.value(name)
     return variant

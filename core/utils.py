@@ -14,6 +14,7 @@ import bs4
 from bs4 import BeautifulSoup
 from appdirs import user_data_dir
 
+from core.constants import APP_NAME
 from settings.settings import Settings
 
 logger = logging.getLogger(__name__)
@@ -163,7 +164,7 @@ def get_app_data_path():
     if args.app_data_path is not None:
         app_data_path = args.app_data_path
     else:
-        app_data_path = user_data_dir("ethz-document-fetcher", appauthor=False, roaming=True)
+        app_data_path = user_data_dir(APP_NAME, appauthor=False, roaming=True)
     Path(app_data_path).mkdir(parents=True, exist_ok=True)
     return app_data_path
 

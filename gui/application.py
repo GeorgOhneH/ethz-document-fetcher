@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from core.constants import APP_NAME
 import gui
 from gui.actions import Actions
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
@@ -25,7 +26,7 @@ class Application(QApplication):
 
     def __init__(self, argv):
         super().__init__(argv)
-        self.setApplicationName("ethz-document-fetcher")
+        self.setApplicationName(APP_NAME)
         self.behavior_settings = settings.BehaviorSettings()
         self.gui_settings = settings.GUISettings()
         self.download_settings = settings.DownloadSettings()
@@ -74,19 +75,25 @@ class Application(QApplication):
             count = f.read().count("INSERT PASSWORD")
             if count:
                 msg_box = QMessageBox()
+                msg_box.setIcon(QMessageBox.Warning)
                 msg_box.setWindowTitle("Run Confirmation")
                 if count == 1:
                     msg_box.setText(f"A password is not set in your template.")
                 else:
                     msg_box.setText(f"{count} passwords are not set in your template.")
-                msg_box.addButton("Run Anyway", QMessageBox.AcceptRole)
+                msg_box.addButton("Open Edit", QMessageBox.AcceptRole)
+                msg_box.addButton("Run Anyway", QMessageBox.NoRole)
                 msg_box.setStandardButtons(QMessageBox.Cancel)
                 ret = msg_box.exec()
                 if ret == QMessageBox.Cancel:
                     return
+                if ret == QMessageBox.AcceptRole:
+                    self.open_edit()
+                    return
 
         if self.download_settings.force_download:
             msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Information)
             msg_box.setWindowTitle("Run Confirmation")
             msg_box.setText("Force Download is enabled.")
             msg_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)

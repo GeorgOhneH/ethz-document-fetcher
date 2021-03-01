@@ -5,7 +5,7 @@ import time
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from core.constants import VERSION
+from core.constants import VERSION, APP_NAME
 from gui.constants import ROOT_PATH, TUTORIAL_URL
 from gui.controller import CentralWidget
 from gui.application import Application
@@ -66,7 +66,7 @@ class MainWindow(QMainWindow):
 
         view_menu.addAction(actions.logger)
 
-        self.setWindowTitle(f"ethz-document-fetcher {VERSION}")
+        self.setWindowTitle(f"{APP_NAME} {VERSION}")
         self.setCentralWidget(self.central_widget)
 
         self.read_settings()

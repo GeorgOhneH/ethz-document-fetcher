@@ -22,8 +22,8 @@ class TemplateEditViewTree(QTreeWidget):
         self.setDropIndicatorShown(True)
         self.viewport().setAcceptDrops(True)
 
-        self.setColumnCount(2)
-        self.setHeaderLabels(["Name", "Folder Name"])
+        self.setColumnCount(3)
+        self.setHeaderLabels(["Name", "Folder Name", "Note"])
 
         size = self.fontMetrics().height()
 

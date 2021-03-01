@@ -1,5 +1,6 @@
 import sys
 
+
 class ClientConfig(object):
     PUBLIC_KEY = 'yIEWDP2+1xuGrk1NBKIBfFMzxpwEo+6jrsOyWMM9rS8'
     APP_NAME = 'ethz-document-fetcher'

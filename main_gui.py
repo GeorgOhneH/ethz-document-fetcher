@@ -5,10 +5,11 @@ from multiprocessing import freeze_support
 
 import colorama
 
-from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+from core.constants import APP_NAME
 import gui.main_window
 from gui.startup_tasks import run_startup_tasks
 from gui.application import Application
@@ -21,7 +22,7 @@ from settings.logger import setup_logger
 try:
     from PyQt5.QtWinExtras import QtWin
 
-    app_id = 'ethz-document-fetcher.ethz-document-fetcher'
+    app_id = f"{APP_NAME}.{APP_NAME}"
     QtWin.setCurrentProcessExplicitAppUserModelID(app_id)
 except ImportError:
     pass

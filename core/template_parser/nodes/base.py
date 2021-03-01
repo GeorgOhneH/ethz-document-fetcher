@@ -36,6 +36,9 @@ class NodeConfigs(Configs):
     def get_folder_name(self):
         return None
 
+    def get_note(self):
+        return ""
+
     def get_icon_path(self):
         return TemplateNode.DEFAULT_ICON_PATH
 

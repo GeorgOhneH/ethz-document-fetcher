@@ -4,7 +4,7 @@ import logging
 import os
 import copy
 
-from core.constants import ROOT_PATH
+from core.constants import ROOT_PATH, PASSWORD_MISSING_WORD
 from core.exceptions import ParseTemplateError
 from core.template_parser import nodes
 from core.template_parser.nodes.base import NodeConfigs
@@ -246,6 +246,11 @@ class SiteConfigs(NodeConfigs):
 
         kwargs = nodes.Site.get_unique_key_kwargs(**self.to_dict())
         return get_folder_name_from_kwargs(kwargs)
+
+    def get_note(self):
+        if PASSWORD_MISSING_WORD in str(self.to_dict()):
+            return "Password is missing"
+        return super().get_note()
 
     def get_icon_path(self):
         image_files = os.listdir(SITE_ICON_PATH)

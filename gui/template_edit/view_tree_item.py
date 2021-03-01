@@ -41,6 +41,7 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         self.setText(0, self.node_configs.get_name())
         self.setIcon(0, DynamicIcon(self.node_configs.get_icon_path()))
         self.setText(1, self.node_configs.get_folder_name())
+        self.setText(2, self.node_configs.get_note())
 
     def open_dialog(self):
         self.dialog.show()
