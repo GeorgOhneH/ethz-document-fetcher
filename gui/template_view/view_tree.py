@@ -1,7 +1,11 @@
 import logging
 import os
+import re
+import sys
 import importlib
 import functools
+import subprocess
+from urllib import parse
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -297,7 +301,7 @@ class TemplateViewTree(QTreeWidget):
 
                 name = f"{c_name} ({c_url})" if c_name else c_url
                 link_action = collection_link_menu.addAction(name)
-                link_action.triggered.connect(lambda _, x=c_url: QDesktopServices.openUrl(QUrl(x)))
+                link_action.triggered.connect(lambda _, x=c_url: open_url(x))
         else:
             collection_link_menu.setEnabled(False)
 
@@ -318,3 +322,21 @@ class TemplateViewTree(QTreeWidget):
 
         for child in node.children:
             self.init_widgets(child, parent=widget)
+
+
+def open_url(url):
+    o = parse.urlparse(url)
+    if o.netloc == "ethz.zoom.us" and o.path.startswith("/j/"):
+        zoom_id = o.path.replace("/j/", "")
+        query_pwd = parse.parse_qs(o.query).get("pwd", None)
+        pwd = query_pwd[0] if query_pwd else None
+        if sys.platform == 'win32':
+            zoom_path = os.path.join(os.getenv("APPDATA"), "Zoom\\bin\\Zoom.exe")
+            arg = f"--url=zoommtg://zoom.us/join?action=join&confno={zoom_id}"
+            if pwd:
+                arg += f"&pwd={pwd}"
+            if os.path.exists(zoom_path):
+                subprocess.run([zoom_path, arg])
+                return
+
+    QDesktopServices.openUrl(QUrl(url))
