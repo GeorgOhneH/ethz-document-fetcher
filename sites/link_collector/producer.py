@@ -7,7 +7,7 @@ from aiohttp import BasicAuth
 
 from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension
 from core.storage import cache
-
+from sites.exceptions import NotSingleFile
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG, \
     basic_auth_config_to_session_kwargs, headers_config_to_session_kwargs
 
@@ -89,12 +89,15 @@ async def producer(session,
                                        link_name=urlparse(link).path.split("/")[-1])
 
             if guess_extension is None or guess_extension == "html":
-                await process_single_file_url(session=session,
-                                              queue=queue,
-                                              base_path=safe_path_join(base_path, folder_name),
-                                              download_settings=download_settings,
-                                              url=link,
-                                              name=file_name)
+                try:
+                    await process_single_file_url(session=session,
+                                                  queue=queue,
+                                                  base_path=safe_path_join(base_path, folder_name),
+                                                  download_settings=download_settings,
+                                                  url=link,
+                                                  name=file_name)
+                except NotSingleFile:
+                    pass
             else:
                 await queue.put({
                     "url": link,
