@@ -41,7 +41,8 @@ def ask_update_pop_up(latest_version, check_for_update):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("A new Version is available")
         msg_box.setText(f"Version {latest_version[1:]} is available. (Current: {VERSION})\n"
-                        f"Do you want to Upgrade?\n")
+                        f"Do you want to Upgrade?\n"
+                        f"(This will close and restart the app. May take some time)")
         msg_box.addButton(QMessageBox.Cancel)
         install_button = msg_box.addButton("Upgrade", QMessageBox.AcceptRole)
 
