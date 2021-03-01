@@ -6,23 +6,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+import gui
 from gui.actions import Actions
-from gui.utils import get_template_path
-from gui.worker import WorkerThread
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
-from settings import settings
-
-from gui.button_container import ButtonContainer
-from gui.constants import ROOT_PATH
-from gui.constants import TEMPLATE_PRESET_FILE_PATHS
-from gui.logger import Logger, LoggerSplitter
-from gui.settings import SettingsDialog
-from gui.status_bar_widgets import DownloadSpeedWidget
-from gui.template_edit import TemplateEditDialog
-from gui.template_view import TemplateView
 from gui.worker import WorkerThread
+from settings import settings
 from settings.config_objs.path import open_file_picker
-from settings.settings import DownloadSettings, TemplatePathSettings
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +48,7 @@ class Application(QApplication):
         self.worker_thread.started.connect(self._thread_started)
         self.worker_thread.finished.connect(self._thread_finished)
 
-        self.settings_dialog = SettingsDialog(download_settings=self.download_settings)
+        self.settings_dialog = gui.settings.SettingsDialog(download_settings=self.download_settings)
         self.settings_dialog.settings_saved.connect(self.set_current_setting_theme)
         self.template_edit_dialog = None
 
@@ -94,7 +83,7 @@ class Application(QApplication):
         self.worker_thread.unique_keys = unique_keys
         self.worker_thread.recursive = recursive
         self.worker_thread.download_settings = copy.deepcopy(self.download_settings)
-        self.worker_thread.template_path = get_template_path()
+        self.worker_thread.template_path = gui.utils.get_template_path()
         self.worker_thread.start()
 
     def stop_worker(self):
@@ -119,17 +108,17 @@ class Application(QApplication):
         if new:
             template_path = None
         else:
-            template_path = get_template_path()
+            template_path = gui.utils.get_template_path()
 
-        self.template_edit_dialog = TemplateEditDialog(parent=None,
-                                                       template_path=template_path)
+        self.template_edit_dialog = gui.template_edit.TemplateEditDialog(parent=None,
+                                                                         template_path=template_path)
         self.template_edit_dialog.accepted.connect(lambda: self._open_file())
         self.template_edit_dialog.show()
 
     def open_file(self, file_path=None):
         if file_path is None:
             config_obj = self.template_path_settings.get_config_obj("template_path")
-            current_template_path = get_template_path()
+            current_template_path = gui.utils.get_template_path()
             file_path = open_file_picker(config_obj.only_folder,
                                          config_obj.file_extensions,
                                          os.path.dirname(current_template_path))
@@ -163,7 +152,7 @@ class Application(QApplication):
             self.worker_thread.finished.disconnect(self._thread_finished_open_file)
         except TypeError:
             pass
-        self.file_opened.emit(get_template_path())
+        self.file_opened.emit(gui.utils.get_template_path())
 
     def _thread_finished_open_file(self):
         self._emit_open_file()
