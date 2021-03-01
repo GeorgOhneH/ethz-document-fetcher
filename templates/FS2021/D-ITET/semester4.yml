@@ -1,0 +1,220 @@
+children:
+- folder: semester4
+  children:
+  - module: moodle
+    use_folder: true
+    keep_section_order: true
+    moodle_id: '14708'
+    password_mapper: [ ]
+    process_external_links: true
+    allowed_extensions: [ ]
+    forbidden_extensions: [ ]
+  - module: link_collector
+    use_folder: true
+    folder_name: Technische Informatik
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: [ ]
+    regex_patterns:
+    - file_name: <name>.pdf
+      folder: Slides
+      link_regex: null
+      pattern: .*ti1/slides/([0-9]+)\.pdf
+    - file_name: \1.pdf
+      folder: "Pr\xFCfungen"
+      link_regex: null
+      pattern: .*/ti1/exams/(.*)\.pdf
+    - file_name: Vorlesung \2
+      folder: Aufzeichnungen
+      link_regex: \1.mp4
+      pattern: (.*recordings/TI([0-9]+)/TI[0-9]+)\.html
+    - file_name: Serie\1
+      folder: Woche\1
+      link_regex: null
+      pattern: .*/ti1/exercises/exercise([0-9]+)\.pdf
+    - file_name: Slides\1
+      folder: Woche\1
+      link_regex: null
+      pattern: .*/ti1/exercises/exercise([0-9]+)_slides\.pdf
+    - file_name: Code\1
+      folder: Woche\1
+      link_regex: null
+      pattern: .*/ti1/exercises/exercise([0-9]+)\.zip
+    - file_name: "L\xF6sungen\\1"
+      folder: Woche\1
+      link_regex: null
+      pattern: .*/ti1/exercises/exercise([0-9]+)_solution\.pdf
+    - file_name: "Code L\xF6sungen\\1"
+      folder: Woche\1
+      link_regex: null
+      pattern: .*/ti1/exercises/exercise([0-9]+)_solution\.zip
+    url: https://tec.ee.ethz.ch/education/lectures/computer-engineering-1.html
+    allowed_extensions: [ ]
+    forbidden_extensions: [ ]
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: false
+      use_eth_credentials: false
+    headers: [ ]
+    regex_patterns:
+    - file_name: <name>.pdf
+      folder: Allgemeine Informationen
+      link_regex: null
+      pattern: .*files/info_num\.pdf
+    - file_name: Notizen.pdf
+      folder: Kapitel \1
+      link_regex: null
+      pattern: .*files/Kap([0-9]+)_Notizen.pdf
+    - file_name: Slides.pdf
+      folder: Kapitel \1
+      link_regex: null
+      pattern: .*files/Kap([0-9]+)_Slides.pdf
+    - file_name: "Abk\xFCrzungen.pdf"
+      folder: Kapitel \1
+      link_regex: null
+      pattern: .*files/Kap([0-9]+)_Abkuerzungen.pdf
+    - file_name: <name>.pdf
+      folder: "Alte Pr\xFCfungen"
+      link_regex: null
+      pattern: .*files/alte_pruefungen/.*
+    - file_name: <name>
+      folder: Woche \1
+      link_regex: null
+      pattern: .*files/Uebungen/S([0-9]+)/.*
+    url: https://metaphor.ethz.ch/x/2021/fs/401-0654-00L
+    allowed_extensions: [ ]
+    forbidden_extensions: [ ]
+    children:
+    - module: link_collector
+      use_folder: true
+      folder_name: Vorlesungen
+      basic_auth:
+        custom:
+          password: INSERT PASSWORD
+          username: student
+        use: true
+        use_eth_credentials: false
+      headers: [ ]
+      regex_patterns:
+      - file_name: <name> Vorlesung
+        folder: null
+        link_regex: null
+        pattern: https://ethz.zoom.us/rec/play.*
+      url: https://metaphor.ethz.ch/x/2021/fs/401-0654-00L/auth/gdbm/
+      allowed_extensions: [ ]
+      forbidden_extensions: [ ]
+  - module: link_collector
+    use_folder: true
+    basic_auth:
+      custom:
+        password: null
+        username: null
+      use: true
+      use_eth_credentials: true
+    headers: [ ]
+    regex_patterns:
+    - file_name: Skript.pdf
+      folder: null
+      link_regex: null
+      pattern: .*auth/nethz/WS2021_Lecture_Notes.pdf
+    - file_name: Serie \1
+      folder: Woche \1
+      link_regex: null
+      pattern: .*ex/ex([0-9]+)\.pdf
+    - file_name: "L\xF6sung \\1"
+      folder: Woche \1
+      link_regex: null
+      pattern: .*ex/sol([0-9]+)\.pdf
+    url: https://metaphor.ethz.ch/x/2021/fs/401-0604-00L/
+    allowed_extensions: [ ]
+    forbidden_extensions: [ ]
+    children:
+    - module: link_collector
+      use_folder: true
+      folder_name: Video Lectures
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: true
+        use_eth_credentials: true
+      headers: [ ]
+      regex_patterns:
+      - file_name: <name>
+        folder: null
+        link_regex: null
+        pattern: https://polybox.ethz.ch/index.php/s/.*
+      url: https://metaphor.ethz.ch/x/2021/fs/401-0604-00L/auth/nethz/videosAndLectureNotes.htm
+      allowed_extensions: [ ]
+      forbidden_extensions: [ ]
+  - module: moodle
+    use_folder: true
+    keep_section_order: false
+    moodle_id: '14525'
+    password_mapper: [ ]
+    process_external_links: true
+    allowed_extensions: [ ]
+    forbidden_extensions: [ ]
+  - module: moodle
+    use_folder: true
+    keep_section_order: true
+    moodle_id: '713'
+    password_mapper: [ ]
+    process_external_links: true
+    allowed_extensions: [ ]
+    forbidden_extensions: [ ]
+    children:
+    - module: link_collector
+      use_folder: true
+      folder_name: Past Exams
+      basic_auth:
+        custom:
+          password: null
+          username: null
+        use: false
+        use_eth_credentials: false
+      headers: [ ]
+      regex_patterns:
+      - file_name: \1 Summer Solution
+        folder: null
+        link_regex: null
+        pattern: .*/past_exams/MULO_Aug([0-9]{2})\.pdf
+      - file_name: \1 Summer Solution
+        folder: null
+        link_regex: null
+        pattern: .*/past_exams/MULO_Sep([0-9]{2})\.pdf
+      - file_name: \1 Winter Solution
+        folder: null
+        link_regex: null
+        pattern: .*/past_exams/MULO_Jan([0-9]{2})\.pdf
+      - file_name: \1 Winter Solution
+        folder: null
+        link_regex: null
+        pattern: .*/past_exams/MULO_Feb([0-9]{2})\.pdf
+      - file_name: \1 Summer
+        folder: null
+        link_regex: null
+        pattern: .*past_exams/SHORT_Aug([0-9]{2})_EN\.pdf
+      - file_name: \1 Summer
+        folder: null
+        link_regex: null
+        pattern: .*past_exams/SHORT_Sep([0-9]{2})_EN\.pdf
+      - file_name: \1 Winter
+        folder: null
+        link_regex: null
+        pattern: .*past_exams/SHORT_Feb([0-9]{2})_EN\.pdf
+      - file_name: \1 Winter
+        folder: null
+        link_regex: null
+        pattern: .*past_exams/SHORT_Jan([0-9]{2})_EN\.pdf
+      url: http://people.ee.ethz.ch/~sigsys/
+      allowed_extensions: [ ]
+      forbidden_extensions: [ ]

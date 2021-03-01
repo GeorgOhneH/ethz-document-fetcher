@@ -394,7 +394,11 @@ def parse_update_json(update_json):
 
 
 async def process_link(session, queue, base_path, download_settings, url, moodle_id, name, password_mapper):
-    guess_extension = await cache.check_extension(session, url)
+    try:
+        guess_extension = await cache.check_extension(session, url)
+    except aiohttp.client_exceptions.ClientResponseError:
+        return
+
     if guess_extension is None or guess_extension in ["html", "json"]:
         password = match_name_to_password(name, password_mapper)
         try:
