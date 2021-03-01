@@ -223,17 +223,22 @@ async def parse_single_file(session,
     auth = BasicAuth(login=poly_id,
                      password="null" if password is None else password)
 
-    url = f"{INDEX_URL}s/{poly_id}"
-
-    async with session.request("PROPFIND", url=WEBDAV_PUBLIC_URL, data=PROPFIND_DATA, headers=BASIC_HEADER, auth=auth) as response:
+    async with session.request("PROPFIND", url=WEBDAV_PUBLIC_URL, data=PROPFIND_DATA, headers=BASIC_HEADER,
+                               auth=auth) as response:
         xml = await response.text()
 
     tree = ET.fromstring(xml)
     if len(tree) != 1:
         raise NotSingleFile()
 
-    url = f"{url}/download"
+    response = tree[0]
 
+    status = go_down_tree(response, "d:propstat", "d:status", to_text=True)
+
+    if status != "HTTP/1.1 200 OK":
+        return
+
+    url = f"{INDEX_URL}s/{poly_id}/download"
     orig_filename = await cache.check_filename(session, url, session_kwargs={"auth": auth})
 
     if orig_filename is None:
