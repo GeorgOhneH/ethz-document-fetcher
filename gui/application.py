@@ -71,6 +71,21 @@ class Application(QApplication):
             self.invalid_settings.emit()
             return
 
+        with open(gui.utils.get_template_path()) as f:
+            count = f.read().count("INSERT PASSWORD")
+            if count:
+                msg_box = QMessageBox()
+                msg_box.setWindowTitle("Run Confirmation")
+                if count == 1:
+                    msg_box.setText(f"In your template is {count} password not set.")
+                else:
+                    msg_box.setText(f"In your template are {count} passwords not set.")
+                msg_box.addButton("Run Anyway", QMessageBox.AcceptRole)
+                msg_box.setStandardButtons(QMessageBox.Cancel)
+                ret = msg_box.exec()
+                if ret == QMessageBox.Cancel:
+                    return
+
         if self.download_settings.force_download:
             msg_box = QMessageBox()
             msg_box.setWindowTitle("Run Confirmation")

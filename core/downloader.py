@@ -105,6 +105,9 @@ async def download_if_not_exist(session,
         absolute_path += "." + guess_extension
 
     file_name = os.path.basename(absolute_path)
+    if "." not in file_name:
+        logger.warning(f"Download {url} with path: {absolute_path} does not have an extension. Skipping")
+        return
     file_extension = get_extension(file_name)
 
     dir_path = os.path.dirname(absolute_path)
