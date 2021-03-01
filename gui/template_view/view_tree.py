@@ -331,7 +331,7 @@ def open_url(url):
         query_pwd = parse.parse_qs(o.query).get("pwd", None)
         pwd = query_pwd[0] if query_pwd else None
         if sys.platform == 'win32':
-            zoom_path = os.path.join(os.getenv("APPDATA"), "Zoom\\bin\\Zoom.exe")
+            zoom_path = os.path.join(os.getenv("APPDATA"), "Zoom", "bin", "Zoom.exe")
             arg = f"--url=zoommtg://zoom.us/join?action=join&confno={zoom_id}"
             if pwd:
                 arg += f"&pwd={pwd}"

@@ -5,6 +5,7 @@ import re
 
 import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
+from babel.dates import format_datetime
 
 from core.exceptions import LoginError
 from core.utils import get_beautiful_soup_parser, safe_path_join
@@ -52,14 +53,16 @@ async def search_tree(session, queue, base_path, download_settings, ilias_id):
             checksum = "".join([str(x.string).strip() for x in
                                 content.find_all("span", attrs={"class": "il_ItemProperty"})])
 
-            locale.setlocale(locale.LC_TIME, "en_US.utf8")
             if "Today" in checksum:
                 today_date = datetime.datetime.now()
-                checksum = checksum.replace("Today", today_date.strftime("%d. %b %Y"))
+                checksum = checksum.replace("Today", format_datetime(today_date,
+                                                                     locale='en',
+                                                                     format="dd. MMM YYYY"))
             elif "Yesterday" in checksum:
                 yesterday_date = datetime.datetime.now() - datetime.timedelta(days=1)
-                yesterday_date.strftime("%d.%b %Y")
-                checksum = checksum.replace("Yesterday", yesterday_date.strftime("%d. %b %Y"))
+                checksum = checksum.replace("Yesterday", format_datetime(yesterday_date,
+                                                                         locale='en',
+                                                                         format="dd. MMM YYYY"))
             locale.setlocale(locale.LC_TIME, "")
 
             await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
