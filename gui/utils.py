@@ -4,6 +4,7 @@ from pathlib import Path
 
 from core.utils import get_app_data_path
 from gui.constants import ROOT_PATH
+from gui.application import Application
 
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication
@@ -17,7 +18,7 @@ def get_empty_folder_path():
 
 
 def get_template_path():
-    app = QApplication.instance()
+    app = Application.instance()
     template_path = app.template_path_settings.template_path
     if os.path.isabs(template_path):
         return template_path

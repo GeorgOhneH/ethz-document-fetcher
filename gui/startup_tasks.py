@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -9,6 +10,9 @@ from pyupdater.client import Client
 from core.client_config import ClientConfig
 from core.constants import VERSION, PYU_VERSION, IS_FROZEN
 from core.utils import get_latest_version, user_statistics, remove_old_files
+from gui.application import Application
+from gui.utils import get_template_path
+from gui.constants import ROOT_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +23,7 @@ def run_startup_tasks(download_settings):
     background_tasks = BackgroundTasks(download_settings.username)
     QThreadPool.globalInstance().start(background_tasks)
 
-    behavior_settings = QApplication.instance().behavior_settings
+    behavior_settings = Application.instance().behavior_settings
 
     if behavior_settings.check_for_updates and IS_FROZEN:
         mutex = QMutex()

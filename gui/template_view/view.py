@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from gui.application import Application
 from gui.template_view.info_view import FolderInfoView, GeneralInfoView, HistoryInfoView
 from gui.template_view.view_tree import TemplateViewTree
 
@@ -53,7 +54,7 @@ class Splitter(QSplitter):
         widget_read_settings(self)
         qApp.aboutToQuit.connect(lambda: widget_save_settings(self))
 
-        actions = QApplication.instance().actions
+        actions = Application.instance().actions
 
         actions.info_position_group.triggered.connect(
             lambda action: self.setOrientation(Qt.Horizontal if action.text() == "Right" else Qt.Vertical))
@@ -85,7 +86,7 @@ class StackedWidgetView(QStackedWidget):
 
         self.change_state_widget()
 
-        app = QApplication.instance()
+        app = Application.instance()
         app.file_opened.connect(lambda new_template_path: self.reset_widget())
 
     def init_views(self):

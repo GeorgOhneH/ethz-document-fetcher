@@ -4,6 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import *
 
+from gui.application import Application
 from gui.constants import ASSETS_PATH
 from gui.dynamic_widgets import DynamicIconLabel
 from gui.utils import format_bytes
@@ -32,7 +33,7 @@ class DownloadSpeedWidget(QWidget):
         self.layout.addWidget(self.icon)
         self.layout.addWidget(self.text)
 
-        app = QApplication.instance()
+        app = Application.instance()
         app.worker_thread.downloaded_content_length.connect(self.monitor_download)
         app.worker_thread.started.connect(self.reset)
 

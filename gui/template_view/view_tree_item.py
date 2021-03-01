@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from core.storage import cache
+from gui.application import Application
 from gui.constants import ASSETS_PATH
 from gui.dynamic_widgets import DynamicIconLabel
 
@@ -58,7 +59,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.children = []
         self.custom_parent = None
 
-        app = QApplication.instance()
+        app = Application.instance()
 
         app.settings_dialog.accepted.connect(self.emit_data_changed)
 
@@ -82,7 +83,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
 
     def load_from_cache(self, name):
-        download_settings = QApplication.instance().download_settings
+        download_settings = Application.instance().download_settings
         if download_settings.save_path is None:
             return []
         path_name = download_settings.save_path.replace("\\", "").replace("/", "").replace(":", "").replace(

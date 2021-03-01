@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from gui.constants import DARK_THEMES
+from gui.application import Application
 
 
 def path_to_dark_path(path):
@@ -21,13 +22,13 @@ class DynamicIcon(QIcon):
 
         self.set_icon()
 
-        QApplication.instance().theme_changed.connect(self.set_icon)
+        Application.instance().theme_changed.connect(self.set_icon)
 
     def _set_icon(self, path):
         self.swap(QIcon(path))
 
     def set_icon(self):
-        gui_settings = QApplication.instance().gui_settings
+        gui_settings = Application.instance().gui_settings
 
         if gui_settings.theme in DARK_THEMES:
             if os.path.exists(self.path_dark):
@@ -47,7 +48,7 @@ class DynamicIconLabel(QLabel):
 
         self.set_pixmap()
 
-        QApplication.instance().theme_changed.connect(self.set_pixmap)
+        Application.instance().theme_changed.connect(self.set_pixmap)
 
     def _set_pixmap(self, path):
         icon = QIcon(path)
@@ -62,7 +63,7 @@ class DynamicIconLabel(QLabel):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def set_pixmap(self):
-        gui_settings = QApplication.instance().gui_settings
+        gui_settings = Application.instance().gui_settings
 
         if gui_settings.theme in DARK_THEMES:
             if os.path.exists(self.path_dark):

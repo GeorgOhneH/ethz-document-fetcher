@@ -122,8 +122,7 @@ class Application(QApplication):
             template_path = get_template_path()
 
         self.template_edit_dialog = TemplateEditDialog(parent=None,
-                                                       template_path=template_path,
-                                                       template_path_settings=self.template_path_settings)
+                                                       template_path=template_path)
         self.template_edit_dialog.accepted.connect(lambda: self._open_file())
         self.template_edit_dialog.show()
 
@@ -199,6 +198,10 @@ class Application(QApplication):
 
         self._current_theme = theme
         self.theme_changed.emit()
+
+    @staticmethod
+    def instance() -> 'Application':
+        return QApplication.instance()
 
 
 def _init_dark_pallet():

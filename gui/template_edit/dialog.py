@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.constants import TEMPLATE_PRESET_FILE_PATHS
+from gui.application import Application
 from gui.template_edit.view_tree import TemplateEditViewTree
 from gui.utils import widget_read_settings, widget_save_settings
 
@@ -14,11 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class TemplateEditDialog(QDialog):
-    def __init__(self, parent, template_path, template_path_settings):
+    def __init__(self, parent, template_path):
         super().__init__(parent=parent, flags=Qt.Window)
         self.setWindowTitle("Edit")
         self.setWindowModality(Qt.ApplicationModal)
-        self.template_path_settings = template_path_settings
         self.is_new = template_path is None
 
         self.button_box = QDialogButtonBox()
@@ -58,12 +58,14 @@ class TemplateEditDialog(QDialog):
 
         template_dict = self.template_view.convert_to_dict()
 
-        path = self.template_path_settings.template_path
-        if self.is_new or\
-                path in TEMPLATE_PRESET_FILE_PATHS or\
+        template_path_settings = Application.instance().template_path_settings
+
+        path = template_path_settings.template_path
+        if self.is_new or \
+                path in TEMPLATE_PRESET_FILE_PATHS or \
                 button is self.save_as_btn:
-            if self.template_path_settings.template_path not in TEMPLATE_PRESET_FILE_PATHS:
-                directory = os.path.dirname(self.template_path_settings.template_path)
+            if template_path_settings.template_path not in TEMPLATE_PRESET_FILE_PATHS:
+                directory = os.path.dirname(template_path_settings.template_path)
             else:
                 directory = QStandardPaths.writableLocation(QStandardPaths.DesktopLocation)
 
@@ -72,7 +74,7 @@ class TemplateEditDialog(QDialog):
                 caption="Save File",
                 directory=directory,
                 filter=" ".join([f"*.{extension}" for extension
-                                 in self.template_path_settings['template_path'].file_extensions])
+                                 in template_path_settings['template_path'].file_extensions])
             )[0]
 
         if not path:
@@ -89,7 +91,7 @@ class TemplateEditDialog(QDialog):
             return
 
         try:
-            self.template_path_settings.template_path = path
+            template_path_settings.template_path = path
         except ValueError:
             os.remove(path)
             error_dialog = QErrorMessage(self)
@@ -98,7 +100,7 @@ class TemplateEditDialog(QDialog):
             error_dialog.raise_()
             return
 
-        self.template_path_settings.save()
+        template_path_settings.save()
 
         self.accept()
 

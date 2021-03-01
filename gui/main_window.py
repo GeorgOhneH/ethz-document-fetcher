@@ -6,8 +6,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from core.constants import VERSION
-from gui.constants import ROOT_PATH
+from gui.constants import ROOT_PATH, TUTORIAL_URL
 from gui.controller import CentralWidget
+from gui.application import Application
 from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.utils import widget_read_settings, widget_save_settings, get_template_path
 
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        app = QApplication.instance()
+        app = Application.instance()
 
         self.central_widget = CentralWidget(parent=self)
 
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
                                            )
 
         menu_bar = self.menuBar()
-        actions = QApplication.instance().actions
+        actions = Application.instance().actions
         file_menu = menu_bar.addMenu("&File")
 
         file_menu.addAction(actions.new_file)
@@ -71,7 +72,7 @@ class MainWindow(QMainWindow):
         self.read_settings()
 
     def init_menu(self, menu, path):
-        app = QApplication.instance()
+        app = Application.instance()
         for file_name in os.listdir(path):
             sub_path = os.path.join(path, file_name)
             if not os.path.isfile(sub_path):
@@ -84,7 +85,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         widget_save_settings(self)
-        app = QApplication.instance()
+        app = Application.instance()
         app.stop_worker()
         app.worker_thread.finished.connect(app.quit)
         if not app.worker_thread.isRunning():
@@ -94,7 +95,7 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(100, lambda: self._force_quit_prompt())
 
     def _force_quit_prompt(self):
-        app = QApplication.instance()
+        app = Application.instance()
         r = QMessageBox.question(self,
                                  "Are you sure?",
                                  "Force Quit",

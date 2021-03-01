@@ -15,6 +15,7 @@ from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.template_edit import TemplateEditDialog
 from gui.template_view import TemplateView
 from gui.utils import get_template_path
+from gui.application import Application
 from gui.action_button import ActionButton
 from settings.config_objs.path import open_file_picker
 from settings.settings import DownloadSettings, TemplatePathSettings
@@ -26,7 +27,7 @@ class CentralWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
 
-        app = QApplication.instance()
+        app = Application.instance()
         actions = app.actions
 
         self.grid = QGridLayout()
