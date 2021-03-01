@@ -12,14 +12,15 @@ from PyQt5.QtCore import *
 import gui.main_window
 from gui.startup_tasks import run_startup_tasks
 from gui.application import Application
-from gui.constants import ASSETS_PATH
+from gui.constants import ASSETS_PATH, ROOT_PATH, TUTORIAL_URL
+from gui.utils import get_template_path
 from core.constants import IS_FROZEN, VERSION
 from core.utils import get_app_data_path
 from settings.logger import setup_logger
 
-
 try:
     from PyQt5.QtWinExtras import QtWin
+
     app_id = 'ethz-document-fetcher.ethz-document-fetcher'
     QtWin.setCurrentProcessExplicitAppUserModelID(app_id)
 except ImportError:
@@ -62,6 +63,17 @@ if __name__ == "__main__":
 
     main_window = gui.main_window.MainWindow()
     main_window.show()
+
+    if get_template_path() == os.path.join(ROOT_PATH, "templates", "example.yml"):
+        msg_box = QMessageBox(main_window)
+        msg_box.setWindowTitle("Getting Started")
+        msg_box.setText(f"Are you unsure how to use this program? "
+                        f"Have a look at this quick guide."
+                        f"(This will open a website in your browser)")
+        msg_box.setStandardButtons(QMessageBox.Open | QMessageBox.Close)
+        ret = msg_box.exec()
+        if ret == QMessageBox.Open:
+            QDesktopServices.openUrl(QUrl(TUTORIAL_URL))
 
     run_startup_tasks(app.download_settings)
 
