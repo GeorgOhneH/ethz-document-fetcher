@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 
 class Application(QApplication):
     theme_changed = pyqtSignal()
-    invalid_settings = pyqtSignal()
     edit_opened = pyqtSignal()
     settings_opened = pyqtSignal()
     before_file_open = pyqtSignal()
@@ -68,7 +67,7 @@ class Application(QApplication):
             unique_keys = ["root"]
 
         if not self.download_settings.check_if_valid():
-            self.invalid_settings.emit()
+            self.open_settings()
             return
 
         with open(gui.utils.get_template_path()) as f:
