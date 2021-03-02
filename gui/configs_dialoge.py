@@ -114,7 +114,7 @@ class ConfigsDialog(QDialog):
         widget_save_settings(self, save_state=False)
 
     def read_settings(self):
-        self.resize(500, 500)
+        self.resize(self.sizeHint() + QSize(20, 20))
         widget_read_settings(self, save_state=False)
 
 

@@ -65,7 +65,7 @@ if __name__ == "__main__":
     main_window = gui.main_window.MainWindow()
     main_window.show()
 
-    if get_template_path() == os.path.join(ROOT_PATH, "templates", "example.yml"):
+    if os.path.join("templates", "example.yml") in get_template_path():
         msg_box = QMessageBox(main_window)
         msg_box.setWindowTitle("Getting Started")
         msg_box.setText(f"Are you unsure how to use this program?<br>"

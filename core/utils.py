@@ -96,7 +96,7 @@ def remove_old_log_files(keep_count=10):
 
 def get_extension(file):
     if "." not in file:
-        raise ValueError(f"file: {file} does not have an extension")
+        return None
     return file.split(".")[-1]
 
 

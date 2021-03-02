@@ -46,6 +46,8 @@ def merge_extension_filter(extensions):
 
 
 def is_extension_forbidden(extension, allowed_extensions, forbidden_extensions):
+    if extension is None:
+        return False
     allowed_extensions = merge_extension_filter(allowed_extensions)
     forbidden_extensions = merge_extension_filter(forbidden_extensions)
 
@@ -105,21 +107,24 @@ async def download_if_not_exist(session,
         absolute_path += "." + guess_extension
 
     file_name = os.path.basename(absolute_path)
-    if "." not in file_name:
-        logger.warning(f"Download {url} with path: {absolute_path} does not have an extension. Skipping")
-        return
     file_extension = get_extension(file_name)
 
     dir_path = os.path.dirname(absolute_path)
-    pure_name, extension = split_name_extension(file_name)
+    pure_name, _ = split_name_extension(file_name)
 
-    temp_file_name = f"{random.getrandbits(64)}.{extension}"
+    temp_file_name = f"{random.getrandbits(64)}"
+    if file_extension:
+        temp_file_name += f".{file_extension}"
     temp_absolute_path = os.path.join(get_temp_path(), temp_file_name)
 
-    old_file_name = f"{pure_name}-old.{extension}"
+    old_file_name = f"{pure_name}-old"
+    if file_extension:
+        old_file_name += f".{file_extension}"
     old_absolute_path = os.path.join(dir_path, old_file_name)
 
-    diff_file_name = f"{pure_name}-diff.{extension}"
+    diff_file_name = f"{pure_name}-diff"
+    if file_extension:
+        diff_file_name += f".{file_extension}"
     diff_absolute_path = os.path.join(dir_path, diff_file_name)
 
     force = False
@@ -160,7 +165,7 @@ async def download_if_not_exist(session,
                 cache.save_checksum(absolute_path, checksum)
                 return
 
-            if file_extension.lower() in MOVIE_EXTENSIONS:
+            if file_extension and file_extension.lower() in MOVIE_EXTENSIONS:
                 logger.info(f"Starting to download {file_name}")
 
             pathlib.Path(os.path.dirname(absolute_path)).mkdir(parents=True, exist_ok=True)
@@ -196,6 +201,7 @@ async def download_if_not_exist(session,
 
         if download_settings.highlight_difference and \
                 action == ACTION_REPLACE and \
+                file_extension and \
                 file_extension.lower() == "pdf":
             await _add_pdf_highlights(download_settings=download_settings,
                                       cancellable_pool=cancellable_pool,

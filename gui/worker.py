@@ -64,6 +64,7 @@ class WorkerThread(QThread):
     def stop(self):
         if self.tasks is not None:
             self.stopped.emit()
+            logger.debug("User canceled worker")
             self.loop.call_soon_threadsafe(self.tasks.cancel)
 
     async def _run(self, signals=None):
@@ -76,8 +77,11 @@ class WorkerThread(QThread):
                                     limit=self.download_settings.conn_limit,
                                     limit_per_host=self.download_settings.conn_limit_per_host)
         timeout = aiohttp.ClientTimeout(total=30, sock_connect=5)
-        async with monitor.MonitorSession(signals=signals, raise_for_status=True, connector=conn,
-                                          timeout=timeout) as session:
+        async with monitor.MonitorSession(signals=signals,
+                                          raise_for_status=True,
+                                          connector=conn,
+                                          headers={'Connection': 'keep-alive'},
+                                          timeout=timeout, ) as session:
 
             try:
                 logger.debug(f"Loading template: {self.template_path}")

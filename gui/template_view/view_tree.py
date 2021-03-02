@@ -325,6 +325,7 @@ class TemplateViewTree(QTreeWidget):
 
 
 def open_url(url):
+    # TODO: for all platforms and other installation paths
     o = parse.urlparse(url)
     if o.netloc == "ethz.zoom.us" and o.path.startswith("/j/"):
         zoom_id = o.path.replace("/j/", "")
@@ -336,7 +337,7 @@ def open_url(url):
             if pwd:
                 arg += f"&pwd={pwd}"
             if os.path.exists(zoom_path):
-                subprocess.run([zoom_path, arg])
+                subprocess.Popen([zoom_path, arg])
                 return
 
     QDesktopServices.openUrl(QUrl(url))
