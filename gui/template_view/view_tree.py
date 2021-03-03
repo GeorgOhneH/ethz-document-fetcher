@@ -331,13 +331,36 @@ def open_url(url):
         zoom_id = o.path.replace("/j/", "")
         query_pwd = parse.parse_qs(o.query).get("pwd", None)
         pwd = query_pwd[0] if query_pwd else None
-        if sys.platform == 'win32':
-            zoom_path = os.path.join(os.getenv("APPDATA"), "Zoom", "bin", "Zoom.exe")
+        if sys.platform == "win32":
+            zoom_path = get_zoom_path_win()
             arg = f"--url=zoommtg://zoom.us/join?action=join&confno={zoom_id}"
             if pwd:
                 arg += f"&pwd={pwd}"
-            if os.path.exists(zoom_path):
+            if zoom_path is not None:
                 subprocess.Popen([zoom_path, arg])
                 return
+        elif sys.platform == "darwin" and is_zoom_installed_mac():
+            arg = f"zoommtg://zoom.us/join?action=join&confno={zoom_id}"
+            if pwd:
+                arg += f"&pwd={pwd}"
+            subprocess.Popen(["open", arg])
+            return
 
     QDesktopServices.openUrl(QUrl(url))
+
+
+def get_zoom_path_win():
+    relative_zoom_path = os.path.join("Zoom", "bin", "Zoom.exe")
+    possible_paths = [os.getenv("APPDATA"), os.getenv("PROGRAMFILES"), os.getenv("PROGRAMFILES(X86)")]
+    for possible_path in possible_paths:
+        if possible_path is not None:
+            path = os.path.join(possible_path, relative_zoom_path)
+            if os.path.exists(path) and os.access(path, os.X_OK):
+                return path
+
+    return None
+
+
+def is_zoom_installed_mac():
+    path = "/Applications/zoom.us.app"
+    return os.path.exists(path)

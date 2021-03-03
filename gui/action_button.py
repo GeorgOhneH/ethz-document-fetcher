@@ -13,6 +13,8 @@ class ActionButton(QPushButton):
             self.action_owner.changed.disconnect(self.updateButtonStatusFromAction)
             self.clicked.disconnect(self.action_owner.trigger)
         self.action_owner = action
+        if not self.text():
+            self.setText(self.action_owner.text())
         self.update_button_status_from_action()
 
         self.action_owner.changed.connect(self.update_button_status_from_action)
@@ -22,7 +24,6 @@ class ActionButton(QPushButton):
         if self.action_owner is None:
             return
 
-        self.setText(self.action_owner.text())
         self.setStatusTip(self.action_owner.statusTip())
         self.setIcon(self.action_owner.icon())
         self.setEnabled(self.action_owner.isEnabled())
