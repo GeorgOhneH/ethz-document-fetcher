@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import locale
 import re
 
 import aiohttp
@@ -63,7 +62,6 @@ async def search_tree(session, queue, base_path, download_settings, ilias_id):
                 checksum = checksum.replace("Yesterday", format_datetime(yesterday_date,
                                                                          locale='en',
                                                                          format="dd. MMM YYYY"))
-            locale.setlocale(locale.LC_TIME, "")
 
             await queue.put({"url": href, "path": f"{path}.{extension}", "checksum": checksum})
         else:
