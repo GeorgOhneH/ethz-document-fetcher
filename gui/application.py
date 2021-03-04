@@ -77,11 +77,8 @@ class Application(QApplication):
                 msg_box = QMessageBox()
                 msg_box.setIcon(QMessageBox.Warning)
                 msg_box.setWindowTitle("Run Confirmation")
-                if count == 1:
-                    msg_box.setText(f"A password is not set in your template.")
-                else:
-                    msg_box.setText(f"{count} passwords are not set in your template.")
-                msg_box.addButton("Open Edit", QMessageBox.AcceptRole)
+                msg_box.setText(f"In this preset template are specific passwords missing")
+                msg_box.addButton("Edit Template", QMessageBox.AcceptRole)
                 msg_box.addButton("Run Anyway", QMessageBox.NoRole)
                 msg_box.setStandardButtons(QMessageBox.Cancel)
                 ret = msg_box.exec()
