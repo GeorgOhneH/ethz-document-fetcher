@@ -148,10 +148,10 @@ children:
         use_eth_credentials: true
       headers: [ ]
       regex_patterns:
-      - file_name: <name>
-        folder: null
-        link_regex: null
-        pattern: https://polybox.ethz.ch/index.php/s/.*
+        - file_name: <name>
+          folder: null
+          link_regex: \1
+          pattern: (https://polybox.ethz.ch/index.php/s/.*)\s*
       url: https://metaphor.ethz.ch/x/2021/fs/401-0604-00L/auth/nethz/videosAndLectureNotes.htm
       allowed_extensions: [ ]
       forbidden_extensions: [ ]
