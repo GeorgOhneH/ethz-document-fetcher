@@ -1,5 +1,6 @@
 import asyncio
 import re
+from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 
@@ -40,7 +41,7 @@ async def _producer(session, queue, url, base_path, session_kwargs):
     tasks = []
     for link in links:
         href = link.get("href")
-        if href != str(link.string).strip():
+        if unquote(href) != str(link.string).strip():
             continue
 
         if href[-1] == "/":

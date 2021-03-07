@@ -7,6 +7,7 @@ import re
 import shutil
 from mimetypes import guess_extension, add_type
 import functools
+from urllib.parse import unquote
 from pathlib import Path
 
 import requests
@@ -109,7 +110,7 @@ def safe_path_join(path, *paths):
 
 
 def safe_path(string):
-    path = html.unescape(string.replace("/", "-").replace("\\", "-")). \
+    path = unquote(html.unescape(string.replace("/", "-").replace("\\", "-"))). \
         replace(":", ";").replace("|", "").replace("?", ""). \
         replace("<", "").replace(">", "").replace("*", "").replace("\"", "")
 
