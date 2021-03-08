@@ -4,7 +4,7 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.constants import TEMPLATE_PRESET_FOLDER_PATHS
+from gui.constants import ROOT_PATH
 from settings.config_objs.string import ConfigString, LineEdit
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,9 @@ def open_file_picker(only_folder=False, file_extensions=None, current_path=None)
         file_dialog.setNameFilter(" ".join([f"*.{extension}" for extension in file_extensions]))
     file_dialog.setViewMode(QFileDialog.Detail)
 
-    if current_path is not None and os.path.exists(current_path) and current_path not in TEMPLATE_PRESET_FOLDER_PATHS:
+    if current_path is not None and\
+            os.path.exists(current_path) and\
+            os.path.normcase(ROOT_PATH) not in os.path.normcase(current_path):
         file_dialog.setDirectory(current_path)
     else:
         file_dialog.setDirectory(QStandardPaths.writableLocation(QStandardPaths.DesktopLocation))

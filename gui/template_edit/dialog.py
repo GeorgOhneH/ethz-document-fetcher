@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from gui.constants import TEMPLATE_PRESET_FILE_PATHS
+from gui.constants import ROOT_PATH
 from gui.application import Application
 from gui.template_edit.view_tree import TemplateEditViewTree
 from gui.utils import widget_read_settings, widget_save_settings
@@ -62,9 +62,10 @@ class TemplateEditDialog(QDialog):
 
         path = template_path_settings.template_path
         if self.is_new or \
-                path in TEMPLATE_PRESET_FILE_PATHS or \
+                os.path.normcase(ROOT_PATH) in os.path.normcase(path) or \
                 button is self.save_as_btn:
-            if template_path_settings.template_path not in TEMPLATE_PRESET_FILE_PATHS:
+
+            if os.path.normcase(ROOT_PATH) not in os.path.normcase(template_path_settings.template_path):
                 directory = os.path.dirname(template_path_settings.template_path)
             else:
                 directory = QStandardPaths.writableLocation(QStandardPaths.DesktopLocation)
@@ -78,6 +79,14 @@ class TemplateEditDialog(QDialog):
             )[0]
 
         if not path:
+            return
+
+        path = os.path.normcase(path)
+        if os.path.normcase(ROOT_PATH) in path:
+            error_dialog = QErrorMessage(self)
+            error_dialog.setWindowTitle("Error")
+            error_dialog.showMessage(f"Saving file in the installation folder is not allowed")
+            error_dialog.raise_()
             return
 
         try:

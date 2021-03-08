@@ -10,7 +10,7 @@ from gui.constants import ROOT_PATH, TUTORIAL_URL
 from gui.controller import CentralWidget
 from gui.application import Application
 from gui.status_bar_widgets import DownloadSpeedWidget
-from gui.utils import widget_read_settings, widget_save_settings, get_template_path
+from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,10 @@ class MainWindow(QMainWindow):
 
         status_bar = self.statusBar()
 
-        status_bar.showMessage(f"Opened file: {get_template_path()}")
+        status_bar.showMessage(f"Opened file: {app.get_template_path()}")
         status_bar.addPermanentWidget(DownloadSpeedWidget(parent=status_bar))
         app.file_opened.connect(lambda new_template_path:
-                                status_bar.showMessage(f"Opened file: {get_template_path()}"))
+                                status_bar.showMessage(f"Opened file: {app.get_template_path()}"))
 
         self.start_time = time.time()
         app.worker_thread.started.connect(lambda: self.set_start_time())

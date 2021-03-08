@@ -4,8 +4,6 @@ from pathlib import Path
 
 from core.utils import get_app_data_path
 from core.constants import APP_NAME
-from gui.constants import ROOT_PATH
-from gui.application import Application
 
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication
@@ -16,15 +14,6 @@ def get_empty_folder_path():
     empty_folder_path = os.path.join(get_app_data_path(), "empty_folder")
     Path(empty_folder_path).mkdir(parents=True, exist_ok=True)
     return empty_folder_path
-
-
-def get_template_path():
-    app = Application.instance()
-    template_path = app.template_path_settings.template_path
-    if os.path.isabs(template_path):
-        return template_path
-
-    return os.path.join(ROOT_PATH, template_path)
 
 
 def format_bytes(size):

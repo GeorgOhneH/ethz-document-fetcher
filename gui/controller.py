@@ -7,18 +7,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from gui.button_container import ButtonContainer
-from gui.constants import ROOT_PATH
-from gui.constants import TEMPLATE_PRESET_FILE_PATHS
 from gui.logger import Logger, LoggerSplitter
-from gui.settings import SettingsDialog
-from gui.status_bar_widgets import DownloadSpeedWidget
-from gui.template_edit import TemplateEditDialog
 from gui.template_view import TemplateView
-from gui.utils import get_template_path
 from gui.application import Application
 from gui.action_button import ActionButton
-from settings.config_objs.path import open_file_picker
-from settings.settings import DownloadSettings, TemplatePathSettings
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +64,7 @@ class CentralWidget(QWidget):
         self.button_container.right_layout.addWidget(self.btn_edit)
         self.button_container.right_layout.addWidget(self.btn_settings)
 
-        self.template_view = TemplateView(get_template_path(), parent=self)
+        self.template_view = TemplateView(app.get_template_path(), parent=self)
 
         self.logger_widget = Logger(parent=self)
 
