@@ -13,7 +13,7 @@ from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser, add_extension
 from sites.utils import process_single_file_url
 from sites.exceptions import NotSingleFile
-from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN, BASE_URL
+from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN, MTYPE_LABEL
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +26,7 @@ async def parse_main_page(session,
                           moodle_id,
                           process_external_links,
                           keep_section_order,
+                          keep_file_order,
                           password_mapper):
     sesskey = re.search(b"""sesskey":"([^"]+)""", html)[1].decode("utf-8")
 
@@ -50,7 +51,8 @@ async def parse_main_page(session,
                                  last_updated_dict=last_updated_dict,
                                  password_mapper=password_mapper,
                                  index=index,
-                                 keep_section_order=keep_section_order)
+                                 keep_section_order=keep_section_order,
+                                 keep_file_order=keep_file_order)
                   for index, section in enumerate(sections)]
     await asyncio.gather(*coroutines)
 
@@ -65,7 +67,8 @@ async def parse_sections(session,
                          last_updated_dict,
                          password_mapper,
                          index=None,
-                         keep_section_order=False):
+                         keep_section_order=False,
+                         keep_file_order=False):
     if "aria-labelledby" in section.attrs:
         section_title_id = str(section["aria-labelledby"])
         section_name = str(section.find("h3", id=section_title_id).string).strip()
@@ -87,6 +90,7 @@ async def parse_sections(session,
                                    moodle_id=moodle_id,
                                    last_updated_dict=last_updated_dict,
                                    process_external_links=process_external_links,
+                                   keep_file_order=keep_file_order,
                                    password_mapper=password_mapper)
 
     await _parse_section(session=session,
@@ -97,6 +101,7 @@ async def parse_sections(session,
                          last_updated_dict=last_updated_dict,
                          moodle_id=moodle_id,
                          process_external_links=process_external_links,
+                         keep_file_order=keep_file_order,
                          password_mapper=password_mapper)
 
 
@@ -108,6 +113,7 @@ async def parse_single_section(session,
                                moodle_id,
                                last_updated_dict,
                                process_external_links,
+                               keep_file_order,
                                password_mapper):
     async with session.get(href) as response:
         html = await response.read()
@@ -126,6 +132,7 @@ async def parse_single_section(session,
                          last_updated_dict=last_updated_dict,
                          moodle_id=moodle_id,
                          process_external_links=process_external_links,
+                         keep_file_order=keep_file_order,
                          password_mapper=password_mapper)
 
 
@@ -137,18 +144,21 @@ async def _parse_section(session,
                          last_updated_dict,
                          moodle_id,
                          process_external_links,
+                         keep_file_order,
                          password_mapper):
     modules = section.find_all("li", id=re.compile("module-[0-9]+"))
     tasks = []
-    for module in modules:
+    for idx, module in enumerate(modules):
         coroutine = parse_module(session=session,
                                  queue=queue,
                                  download_settings=download_settings,
                                  base_path=base_path,
                                  module=module,
+                                 module_idx=idx,
                                  last_updated_dict=last_updated_dict,
                                  moodle_id=moodle_id,
                                  process_external_links=process_external_links,
+                                 keep_file_order=keep_file_order,
                                  password_mapper=password_mapper)
         tasks.append(coroutine)
 
@@ -160,53 +170,12 @@ async def parse_module(session,
                        download_settings,
                        base_path,
                        module,
+                       module_idx,
                        last_updated_dict,
                        moodle_id,
                        process_external_links,
+                       keep_file_order,
                        password_mapper):
-    tasks = []
-    coroutine = parse_mtype(session=session,
-                            queue=queue,
-                            download_settings=download_settings,
-                            base_path=base_path,
-                            module=module,
-                            last_updated_dict=last_updated_dict,
-                            moodle_id=moodle_id,
-                            process_external_links=process_external_links,
-                            password_mapper=password_mapper)
-
-    tasks.append(coroutine)
-
-    if process_external_links:
-        for text_link in module.find_all("a"):
-            url = text_link.get("href", None)
-            name = text_link.string
-            if url is None or name is None:
-                continue
-
-            coroutine = process_link(session=session,
-                                     queue=queue,
-                                     base_path=base_path,
-                                     download_settings=download_settings,
-                                     url=url,
-                                     moodle_id=moodle_id,
-                                     name=str(name),
-                                     password_mapper=password_mapper)
-
-            tasks.append(coroutine)
-
-    await asyncio.gather(*tasks)
-
-
-async def parse_mtype(session,
-                      queue,
-                      download_settings,
-                      base_path,
-                      module,
-                      last_updated_dict,
-                      moodle_id,
-                      process_external_links,
-                      password_mapper):
     mtype = module["class"][1]
     module_id = int(re.search("module-([0-9]+)", module["id"])[1])
     if mtype == MTYPE_FILE:
@@ -221,6 +190,9 @@ async def parse_mtype(session,
         if "pdf-24" in instance.a.img["src"]:
             file_name += ".pdf"
             with_extension = True
+
+        if keep_file_order:
+            file_name = f"[{module_idx + 1:02}] {file_name}"
 
         url = instance.a["href"] + "&redirect=1"
         await queue.put({"path": safe_path_join(base_path, file_name),
@@ -240,6 +212,9 @@ async def parse_mtype(session,
         url = instance.a["href"] + "&redirect=1"
         name = str(instance.a.span.contents[0])
 
+        if keep_file_order:
+            name = f"[{module_idx + 1:02}] {name}"
+
         driver_url = await check_url_reference(session, url)
 
         await process_link(session=session,
@@ -254,19 +229,45 @@ async def parse_mtype(session,
     elif mtype == MTYPE_ASSIGN:
         instance = module.find("div", class_="activityinstance")
         link = instance.a
-        if link is not None:
-            href = instance.a["href"]
-            last_updated = last_updated_dict[module_id]
-            name = str(instance.a.span.contents[0])
+        if link is None:
+            return
+        href = instance.a["href"]
+        last_updated = last_updated_dict[module_id]
+        name = str(instance.a.span.contents[0])
 
-            assign_file_tree_soup_soup = await call_function_or_cache(get_assign_files_tree,
-                                                                      last_updated,
-                                                                      session,
-                                                                      href)
+        assign_file_tree_soup_soup = await call_function_or_cache(get_assign_files_tree,
+                                                                  last_updated,
+                                                                  session,
+                                                                  href)
 
-            await parse_assign_files_tree(queue=queue,
-                                          soup=assign_file_tree_soup_soup,
-                                          path=safe_path_join(base_path, name))
+        if keep_file_order:
+            name = f"[{module_idx + 1:02}] {name}"
+
+        await parse_assign_files_tree(queue=queue,
+                                      soup=assign_file_tree_soup_soup,
+                                      path=safe_path_join(base_path, name))
+    elif mtype == MTYPE_LABEL:
+        if not process_external_links:
+            return
+
+        for text_link in module.find_all("a"):
+            url = text_link.get("href", None)
+            name = text_link.text
+            if url is None or not name:
+                continue
+
+            name = str(name)
+            if keep_file_order:
+                name = f"[{module_idx + 1:02}] {name}"
+
+            await process_link(session=session,
+                               queue=queue,
+                               base_path=base_path,
+                               download_settings=download_settings,
+                               url=url,
+                               moodle_id=moodle_id,
+                               name=name,
+                               password_mapper=password_mapper)
 
 
 async def get_filemanager(session, href):
@@ -339,16 +340,6 @@ async def parse_assign_files_tree(queue, soup, path):
                 "url": url,
                 "checksum": date_time,
             })
-
-
-async def exception_handler(coroutine, moodle_id, url):
-    try:
-        await coroutine
-    except asyncio.CancelledError:
-        raise asyncio.CancelledError()
-    except Exception as e:
-        logger.error(f"Got an unexpected error from moodle: {moodle_id} "
-                     f"while trying to access {url}, Error: {type(e).__name__}: {e}", exc_info=True)
 
 
 async def get_update_json(session, moodle_id, sesskey):

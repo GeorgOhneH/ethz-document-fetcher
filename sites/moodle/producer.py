@@ -31,6 +31,7 @@ MOODLE_ID_CONFIG = ConfigString(gui_name="ID")
 
 PROCESS_EXTERNAL_LINKS_CONFIG = ConfigBool(default=True, gui_name="Process External Links", optional=True)
 KEEP_SECTION_ORDER_CONFIG = ConfigBool(default=False, gui_name="Keep Section Order", optional=True)
+KEEP_FILE_ORDER_CONFIG = ConfigBool(default=False, gui_name="Keep File Order", optional=True)
 
 
 async def producer(session,
@@ -40,20 +41,22 @@ async def producer(session,
                    moodle_id: MOODLE_ID_CONFIG,
                    process_external_links: PROCESS_EXTERNAL_LINKS_CONFIG = True,
                    keep_section_order: KEEP_SECTION_ORDER_CONFIG = False,
+                   keep_file_order: KEEP_FILE_ORDER_CONFIG = False,
                    password_mapper: PASSWORD_MAPPER_CONFIG = None):
     async with session.get(f"https://moodle-app2.let.ethz.ch/course/view.php?id={moodle_id}") as response:
         html = await response.read()
         if str(response.url) == AUTH_URL:
             raise LoginError("Module moodle isn't logged in")
-    return await parse_main_page(session,
-                                 queue,
-                                 html,
-                                 base_path,
-                                 download_settings,
-                                 moodle_id,
-                                 process_external_links,
-                                 keep_section_order,
-                                 password_mapper)
+    return await parse_main_page(session=session,
+                                 queue=queue,
+                                 html=html,
+                                 base_path=base_path,
+                                 download_settings=download_settings,
+                                 moodle_id=moodle_id,
+                                 process_external_links=process_external_links,
+                                 keep_section_order=keep_section_order,
+                                 keep_file_order=keep_file_order,
+                                 password_mapper=password_mapper)
 
 
 async def get_folder_name(session, moodle_id, **kwargs):

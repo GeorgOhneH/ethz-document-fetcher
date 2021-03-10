@@ -6,6 +6,7 @@ MTYPE_FILE = "resource"
 MTYPE_EXTERNAL_LINK = "url"
 MTYPE_DIRECTORY = "folder"
 MTYPE_ASSIGN = "assign"
+MTYPE_LABEL = "label"
 
 UPDATE_REQUEST_PAYLOAD = [{
     "index": 0,
