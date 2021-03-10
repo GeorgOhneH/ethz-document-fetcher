@@ -10,15 +10,21 @@ def get_kwargs_hash(kwargs: dict):
 
 def get_kwargs_string(kwargs):
     result = ""
-    for key in sorted(kwargs.keys()):
-        value = kwargs[key]
-        if value is None:
-            continue
+    if isinstance(kwargs, dict):
+        for key in sorted(list(kwargs.keys())):
+            value = kwargs[key]
+            if value is None:
+                continue
 
-        if isinstance(value, dict):
+            result += f"{key}:{get_kwargs_string(value)}"
+    elif isinstance(kwargs, list):
+        for value in kwargs:
+            if value is None:
+                continue
+
             result += get_kwargs_string(value)
-        else:
-            result += f"{key}:{value}"
+    else:
+        result += str(kwargs)
 
     return result
 
