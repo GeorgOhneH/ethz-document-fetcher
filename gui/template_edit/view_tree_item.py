@@ -46,7 +46,7 @@ class TreeEditWidgetItem(QTreeWidgetItem):
     def open_dialog(self):
         self.dialog = NodeDialog(node_configs=self.node_configs, parent=self.treeWidget())
         self.dialog.accepted.connect(self.update)
-        self.dialog.open()
+        self.dialog.exec()
 
     def update(self):
         self._init_widgets()
