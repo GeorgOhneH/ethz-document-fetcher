@@ -325,7 +325,6 @@ class TemplateViewTree(QTreeWidget):
 
 
 def open_url(url):
-    # TODO: for all platforms and other installation paths
     o = parse.urlparse(url)
     if o.netloc == "ethz.zoom.us" and o.path.startswith("/j/"):
         zoom_id = o.path.replace("/j/", "")

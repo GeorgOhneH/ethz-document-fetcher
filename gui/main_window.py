@@ -10,6 +10,8 @@ from gui.constants import ROOT_PATH, TUTORIAL_URL
 from gui.controller import CentralWidget
 from gui.application import Application
 from gui.status_bar_widgets import DownloadSpeedWidget
+from gui.settings import SettingsDialog
+from gui.template_edit import TemplateEditDialog
 from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
@@ -66,10 +68,23 @@ class MainWindow(QMainWindow):
 
         view_menu.addAction(actions.logger)
 
+        self.settings_dialog = SettingsDialog(download_settings=app.download_settings, parent=self)
+        actions.settings.triggered.connect(lambda: self.settings_dialog.open())
+
+        self.template_edit_dialog = TemplateEditDialog(parent=self, template_path=None)
+        actions.new_file.triggered.connect(lambda: self.open_edit(template_path=None))
+        actions.edit_file.triggered.connect(lambda: self.open_edit(template_path=app.get_template_path()))
+
         self.setWindowTitle(f"{APP_NAME} {VERSION}")
         self.setCentralWidget(self.central_widget)
 
         self.read_settings()
+
+    def open_edit(self, template_path=None):
+        app = Application.instance()
+        app.edit_opened.emit()
+        self.template_edit_dialog.reset_template(template_path=template_path)
+        self.template_edit_dialog.open()
 
     def init_menu(self, menu, path):
         app = Application.instance()

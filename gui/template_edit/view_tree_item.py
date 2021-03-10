@@ -21,9 +21,8 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         super().__init__()
         self.node_configs = node_configs
         self.item_status = item_status
+        self.dialog = None
         self.set_flags()
-        self.dialog = NodeDialog(node_configs=node_configs, parent=self.treeWidget())
-        self.dialog.accepted.connect(self.update)
 
     def set_flags(self):
         standard_flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable
@@ -45,7 +44,9 @@ class TreeEditWidgetItem(QTreeWidgetItem):
         self.setForeground(2, QBrush(Qt.red))
 
     def open_dialog(self):
-        self.dialog.show()
+        self.dialog = NodeDialog(node_configs=self.node_configs, parent=self.treeWidget())
+        self.dialog.accepted.connect(self.update)
+        self.dialog.open()
 
     def update(self):
         self._init_widgets()

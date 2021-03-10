@@ -32,10 +32,21 @@ class TemplateEditViewTree(QTreeWidget):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.prepare_menu)
         self.setDragDropMode(QAbstractItemView.InternalMove)
+
+        self.itemActivated.connect(self.edit_item)
+
         self.widgets = []
-        self.template = template_parser.Template(path=template_path)
+        self.reset_template(template_path=template_path)
+
+    def reset_template(self, template_path):
+        self.widgets = []
+        root = self.invisibleRootItem()
+        for i in reversed(range(root.childCount())):
+            root.removeChild(root.child(i))
+
+        template = template_parser.Template(path=template_path)
         try:
-            self.template.load()
+            template.load()
         except Exception as e:
             msg = f"Error while loading the file. {e.__class__.__name__}: {e}"
             logger.error(msg, exc_info=True)
@@ -43,10 +54,8 @@ class TemplateEditViewTree(QTreeWidget):
             error_dialog.setWindowTitle("Error")
             error_dialog.showMessage(msg)
             error_dialog.raise_()
-        self.init_view_tree()
+        self.init_view_tree(template)
         self.read_settings()
-
-        self.itemActivated.connect(self.edit_item)
 
     def save_state(self):
         widget_save_settings(self.header(), name="templateEditViewTreeHeader")
@@ -110,8 +119,8 @@ class TemplateEditViewTree(QTreeWidget):
             item_above = parent.takeChild(index-1)
             parent.insertChild(index, item_above)
 
-    def init_view_tree(self):
-        for child in self.template.root.children:
+    def init_view_tree(self, template):
+        for child in template.root.children:
             self.init_widgets(child, parent=None)
         self.add_item_widget(FolderConfigs(), TreeEditWidgetItem.STATUS_NEW)
         self.add_item_widget(SiteConfigs(), TreeEditWidgetItem.STATUS_NEW)

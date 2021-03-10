@@ -61,7 +61,7 @@ class TreeWidgetItem(QTreeWidgetItem):
 
         app = Application.instance()
 
-        app.settings_dialog.accepted.connect(self.emit_data_changed)
+        app.settings_saved.connect(self.emit_data_changed)
 
     def init_widgets(self):
         self.name_widget = TreeWidgetItemName(name=self.template_node.get_gui_name(),

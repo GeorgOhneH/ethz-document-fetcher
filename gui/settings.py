@@ -10,12 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class SettingsDialog(ConfigsDialog):
-    settings_saved = pyqtSignal()
-
-    def __init__(self, download_settings):
-        super().__init__(parent=None)
-        behavior_settings = Application.instance().behavior_settings
-        gui_settings = Application.instance().gui_settings
+    def __init__(self, download_settings, parent=None):
+        super().__init__(parent=parent)
+        app = Application.instance()
+        behavior_settings = app.behavior_settings
+        gui_settings = app.gui_settings
 
         settings_areas = [
             ConfigsScrollArea(download_settings, parent=self),
@@ -29,5 +28,5 @@ class SettingsDialog(ConfigsDialog):
         self.accepted.connect(lambda: behavior_settings.save())
         self.accepted.connect(lambda: gui_settings.save())
 
-        self.accepted.connect(lambda: self.settings_saved.emit())
+        self.accepted.connect(lambda: app.settings_saved.emit())
 

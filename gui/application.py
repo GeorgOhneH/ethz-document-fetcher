@@ -19,8 +19,9 @@ logger = logging.getLogger(__name__)
 
 class Application(QApplication):
     theme_changed = pyqtSignal()
+    settings_saved = pyqtSignal()
     edit_opened = pyqtSignal()
-    settings_opened = pyqtSignal()
+    edit_saved = pyqtSignal()
     before_file_open = pyqtSignal()
     file_opened = pyqtSignal(str)
 
@@ -34,12 +35,10 @@ class Application(QApplication):
 
         self.actions = Actions()
 
-        self.actions.new_file.triggered.connect(lambda: self.open_edit(new=True))
         self.actions.open_file.triggered.connect(lambda: self.open_file())
+        self.edit_saved.connect(lambda: self._open_file())
 
         self.actions.run.triggered.connect(lambda: self.start_thread())
-        self.actions.edit_file.triggered.connect(lambda: self.open_edit())
-        self.actions.settings.triggered.connect(lambda: self.open_settings())
         self.actions.stop.triggered.connect(lambda: self.stop_worker())
         self.actions.stop.setEnabled(False)
 
@@ -47,9 +46,6 @@ class Application(QApplication):
 
         self.worker_thread.started.connect(self._thread_started)
         self.worker_thread.finished.connect(self._thread_finished)
-        self.settings_dialog = gui.settings.SettingsDialog(download_settings=self.download_settings)
-        self.settings_dialog.settings_saved.connect(self.set_current_setting_theme)
-        self.template_edit_dialog = None
 
         self._current_theme = None
         self.default_palette = self.palette()
@@ -57,6 +53,7 @@ class Application(QApplication):
 
         self.dark_palette = _init_dark_pallet()
         self.light_palette = _init_light_palette()
+        self.settings_saved.connect(self.set_current_setting_theme)
 
     def set_current_setting_theme(self):
         if self.gui_settings.theme:
@@ -67,7 +64,7 @@ class Application(QApplication):
             unique_keys = ["root"]
 
         if not self.download_settings.check_if_valid():
-            self.open_settings()
+            self.actions.settings.trigger()
             return
 
         with open(self.get_template_path()) as f:
@@ -115,22 +112,6 @@ class Application(QApplication):
         self.actions.run.setEnabled(True)
         self.actions.run_checked.setEnabled(True)
         self.actions.stop.setEnabled(False)
-
-    def open_settings(self):
-        self.settings_opened.emit()
-        self.settings_dialog.open()
-
-    def open_edit(self, new=False):
-        self.edit_opened.emit()
-        if new:
-            template_path = None
-        else:
-            template_path = self.get_template_path()
-
-        self.template_edit_dialog = gui.template_edit.TemplateEditDialog(parent=None,
-                                                                         template_path=template_path)
-        self.template_edit_dialog.accepted.connect(lambda: self._open_file())
-        self.template_edit_dialog.show()
 
     def open_file(self, file_path=None):
         if file_path is None:

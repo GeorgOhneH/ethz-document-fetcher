@@ -19,7 +19,6 @@ class TemplateEditDialog(QDialog):
         super().__init__(parent=parent, flags=Qt.Window)
         self.setWindowTitle("Edit")
         self.setWindowModality(Qt.ApplicationModal)
-        self.is_new = template_path is None
 
         self.button_box = QDialogButtonBox()
         self.save_btn = self.button_box.addButton("Save", QDialogButtonBox.YesRole)
@@ -38,7 +37,6 @@ class TemplateEditDialog(QDialog):
         self.setLayout(self.layout)
 
         self.template_view = TemplateEditViewTree(template_path=template_path, parent=self)
-        self.template_dict = None
 
         self.layout.addWidget(self.template_view)
         self.layout.addWidget(self.button_box)
@@ -46,9 +44,18 @@ class TemplateEditDialog(QDialog):
         self.finished.connect(self.save_geometry)
         self.finished.connect(self.template_view.save_state)
 
-    def show(self):
+        app = Application.instance()
+        self.accepted.connect(lambda: app.edit_saved.emit())
+
+        self.is_new = template_path is None
+
+    def reset_template(self, template_path):
+        self.is_new = template_path is None
+        self.template_view.reset_template(template_path=template_path)
+
+    def open(self):
         self.read_settings()
-        super().show()
+        super().open()
         # to remove focus the the treewidget
         self.save_btn.setFocus()
 
@@ -65,8 +72,8 @@ class TemplateEditDialog(QDialog):
                 os.path.normcase(ROOT_PATH) in os.path.normcase(path) or \
                 button is self.save_as_btn:
 
-            if os.path.normcase(ROOT_PATH) not in os.path.normcase(template_path_settings.template_path):
-                directory = os.path.dirname(template_path_settings.template_path)
+            if os.path.normcase(ROOT_PATH) not in os.path.normcase(path):
+                directory = os.path.dirname(path)
             else:
                 directory = QStandardPaths.writableLocation(QStandardPaths.DesktopLocation)
 
