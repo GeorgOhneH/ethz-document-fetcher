@@ -14,7 +14,7 @@ import fitz
 from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
-from core.utils import get_extension, fit_sections_to_console, split_name_extension, get_temp_path
+from core.utils import get_extension, fit_sections_to_console, split_name_extension, get_temp_path, add_extension, insert_text_before_extension
 
 logger = logging.getLogger(__name__)
 
@@ -107,24 +107,16 @@ async def download_if_not_exist(session,
         absolute_path += "." + guess_extension
 
     file_name = os.path.basename(absolute_path)
+    dir_path = os.path.dirname(absolute_path)
     file_extension = get_extension(file_name)
 
-    dir_path = os.path.dirname(absolute_path)
-    pure_name, _ = split_name_extension(file_name)
-
-    temp_file_name = f"{random.getrandbits(64)}"
-    if file_extension:
-        temp_file_name += f".{file_extension}"
+    temp_file_name = add_extension(f"{random.getrandbits(64)}", file_extension)
     temp_absolute_path = os.path.join(get_temp_path(), temp_file_name)
 
-    old_file_name = f"{pure_name}-old"
-    if file_extension:
-        old_file_name += f".{file_extension}"
+    old_file_name = insert_text_before_extension(file_name, "-old")
     old_absolute_path = os.path.join(dir_path, old_file_name)
 
-    diff_file_name = f"{pure_name}-diff"
-    if file_extension:
-        diff_file_name += f".{file_extension}"
+    diff_file_name = insert_text_before_extension(file_name, "-diff")
     diff_absolute_path = os.path.join(dir_path, diff_file_name)
 
     force = False

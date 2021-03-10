@@ -10,7 +10,7 @@ from core.storage import cache
 from core.exceptions import ForbiddenError
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
-from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser
+from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser, add_extension
 from sites.utils import process_single_file_url
 from sites.exceptions import NotSingleFile
 from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN, BASE_URL
@@ -412,9 +412,7 @@ async def process_link(session, queue, base_path, download_settings, url, moodle
         except NotSingleFile:
             pass
     else:
-        if not name.endswith(f".{guess_extension}"):
-            name += f".{guess_extension}"
-
+        name = add_extension(name, guess_extension)
         await queue.put({
             "url": url,
             "path": safe_path_join(base_path, name)

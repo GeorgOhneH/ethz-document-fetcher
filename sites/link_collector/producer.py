@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urlunparse, urljoin
 from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
 
-from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension
+from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension, add_extension
 from core.storage import cache
 from sites.exceptions import NotSingleFile
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG, \
@@ -111,7 +111,7 @@ def _get_file_name(guess_extension: str,
                    pattern: str,
                    orig_link: str,
                    file_name_regex: str,
-                   link_name) -> str or None:
+                   link_name) -> str:
     if file_name_regex:
         modified_file_name_regex = file_name_regex.replace("<name>", html_name)
         file_name = re.sub(pattern, modified_file_name_regex, orig_link)
@@ -120,12 +120,7 @@ def _get_file_name(guess_extension: str,
     else:
         file_name = link_name
 
-    if guess_extension is None:
-        return file_name
-
-    if file_name.endswith("." + guess_extension):
-        return file_name
-    return file_name + f".{guess_extension}"
+    return add_extension(file_name, guess_extension)
 
 
 async def get_all_file_links(session, url, session_kwargs):

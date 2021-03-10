@@ -1,5 +1,7 @@
 import asyncio
 
+from core.utils import insert_text_before_extension
+
 
 class UniqueQueue(asyncio.Queue):
     def __init__(self):
@@ -17,9 +19,7 @@ class UniqueQueue(asyncio.Queue):
             return item
 
         if with_extension:
-            path_without_extension = path.split(".")[:-1]
-            extension = path.split(".")[-1]
-            item["path"] = ".".join(path_without_extension) + f"({self.paths[path]})." + extension
+            item["path"] = insert_text_before_extension(item["path"], f"({self.paths[path]})")
         else:
             item["path"] += f"({self.paths[path]})"
 

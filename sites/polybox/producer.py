@@ -13,7 +13,7 @@ from aiohttp import BasicAuth
 
 from core.monitor import MonitorSession
 from core.storage import cache
-from core.utils import safe_path_join, get_beautiful_soup_parser
+from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension, add_extension
 from core.storage.utils import call_function_or_cache
 from settings.config_objs import ConfigOptions, ConfigString
 from sites.polybox.constants import *
@@ -244,12 +244,10 @@ async def parse_single_file(session,
     if orig_filename is None:
         raise NotSingleFile()
 
-    extension = orig_filename.split(".")[-1]
+    extension = get_extension(orig_filename)
 
     if name:
-        filename = name
-        if not filename.endswith(f".{extension}"):
-            filename += f".{extension}"
+        filename = add_extension(name, extension)
     else:
         filename = orig_filename
 

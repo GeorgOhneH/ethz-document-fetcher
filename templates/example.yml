@@ -8,7 +8,7 @@ children:
     folder_name: Polybox
     poly_id: YrFA3IT7FhemOAs
     poly_type: s
-    allowed_extensions: [ ]
-    forbidden_extensions: [ ]
+    allowed_extensions: []
+    forbidden_extensions: []
     meta_data:
       check_state: 2

@@ -102,7 +102,22 @@ def get_extension(file):
 
 
 def split_name_extension(file_name):
+    if "." not in file_name:
+        return file_name, None
     return "".join(file_name.split(".")[:-1]), file_name.split(".")[-1]
+
+
+def insert_text_before_extension(file_name, text):
+    name, extension = split_name_extension(file_name)
+    if extension is None:
+        return file_name + text
+    return f"{name}{text}.{extension}"
+
+
+def add_extension(file_name, extension):
+    if extension and not file_name.endswith(f".{extension}"):
+        return f"{file_name}.{extension}"
+    return file_name
 
 
 def safe_path_join(path, *paths):
@@ -192,4 +207,3 @@ def get_beautiful_soup_parser():
     except bs4.FeatureNotFound:
         logger.warning("Could not find 'lxml'. Falling back to html.parser")
         return "html.parser"
-

@@ -4,6 +4,7 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from core import utils
 from gui.constants import ROOT_PATH
 from settings.config_objs.string import ConfigString, LineEdit
 
@@ -81,6 +82,6 @@ class ConfigPath(ConfigString):
             if "." not in path:
                 raise ValueError("File must have an extension")
 
-            if path.split(".")[-1] not in self.file_extensions:
+            if utils.get_extension(path) not in self.file_extensions:
                 raise ValueError(f"File extension must be one of these: ({', '.join(self.file_extensions)})")
 
