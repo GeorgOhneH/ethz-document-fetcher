@@ -6,11 +6,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
 from core.constants import VERSION, APP_NAME
-from gui.constants import ROOT_PATH, TUTORIAL_URL
-from gui.controller import CentralWidget
 from gui.application import Application
-from gui.status_bar_widgets import DownloadSpeedWidget
+from gui.constants import ROOT_PATH
+from gui.controller import CentralWidget
 from gui.settings import SettingsDialog
+from gui.status_bar_widgets import DownloadSpeedWidget
 from gui.template_edit import TemplateEditDialog
 from gui.utils import widget_read_settings, widget_save_settings
 

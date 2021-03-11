@@ -8,8 +8,8 @@ import certifi
 from PyQt5.QtCore import *
 
 from core import downloader, template_parser, monitor
-from core.cancellable_pool import CancellablePool
 from core import unique_queue
+from core.cancellable_pool import CancellablePool
 
 logger = logging.getLogger(__name__)
 

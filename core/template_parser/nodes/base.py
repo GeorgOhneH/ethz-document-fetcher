@@ -1,8 +1,6 @@
 import hashlib
 import os
 
-from PyQt5.QtGui import *
-
 from core.template_parser.nodes.utils import get_kwargs_hash, get_folder_name_from_hash
 from core.utils import safe_path_join
 from gui.constants import ASSETS_PATH

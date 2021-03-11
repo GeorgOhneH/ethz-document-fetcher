@@ -1,8 +1,7 @@
-import logging
 import copy
+import logging
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.template_view.info_view.base import InfoView

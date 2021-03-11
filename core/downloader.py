@@ -1,20 +1,19 @@
 import asyncio
 import functools
-import pathlib
-from urllib.parse import urlparse
-import itertools
 import hashlib
+import pathlib
 import random
 import shutil
 
 import aiohttp
-from aiohttp.client import URL
 import fitz
+from aiohttp.client import URL
 
 from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
-from core.utils import get_extension, fit_sections_to_console, split_name_extension, get_temp_path, add_extension, insert_text_before_extension
+from core.utils import get_extension, fit_sections_to_console, get_temp_path, add_extension, \
+    insert_text_before_extension
 
 logger = logging.getLogger(__name__)
 

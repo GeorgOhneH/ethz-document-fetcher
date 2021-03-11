@@ -5,14 +5,13 @@ import re
 import aiohttp
 from bs4 import BeautifulSoup, SoupStrainer
 
-from core.downloader import is_extension_forbidden
-from core.storage import cache
 from core.exceptions import ForbiddenError
+from core.storage import cache
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
-from core.utils import safe_path_join, safe_path, get_beautiful_soup_parser, add_extension
-from sites.utils import process_single_file_url
+from core.utils import safe_path_join, get_beautiful_soup_parser, add_extension
 from sites.exceptions import NotSingleFile
+from sites.utils import process_single_file_url
 from .constants import AJAX_SERVICE_URL, MTYPE_DIRECTORY, MTYPE_FILE, MTYPE_EXTERNAL_LINK, MTYPE_ASSIGN, MTYPE_LABEL
 
 logger = logging.getLogger(__name__)

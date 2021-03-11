@@ -1,13 +1,12 @@
-import logging
 import copy
+import logging
 import os
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
 from core.constants import APP_NAME
-import gui.settings
 from gui.actions import Actions
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
 from gui.worker import WorkerThread

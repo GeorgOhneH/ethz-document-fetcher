@@ -1,9 +1,6 @@
 import logging
-import sys
-import os
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from pyupdater.client import Client
 
@@ -39,10 +36,10 @@ def ask_update_pop_up(latest_version, check_for_update):
         msg_box.setIcon(QMessageBox.Question)
         msg_box.setWindowTitle("A new Version is available")
         msg_box.setText(f"Version {latest_version[1:]} is available. (Current: {VERSION})\n"
-                        f"Do you want to Upgrade?\n"
-                        f"(This will close and restart the app. May take some time)")
+                        f"Do you want to Update?\n"
+                        f"(This will close and restart the app. It may take some time)")
         msg_box.addButton(QMessageBox.Cancel)
-        install_button = msg_box.addButton("Upgrade", QMessageBox.AcceptRole)
+        install_button = msg_box.addButton("Update", QMessageBox.AcceptRole)
 
         msg_box.setDefaultButton(install_button)
 

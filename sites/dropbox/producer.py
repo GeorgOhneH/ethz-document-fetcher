@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 
 from core.utils import safe_path_join
 from settings.config import ConfigString
-
 from .constants import DEFAULT_COOKIE, LIST_ENTRIES_URL, TIME_COOKIE_VALUE
 
 URL_CONFIG = ConfigString(gui_name="Url")

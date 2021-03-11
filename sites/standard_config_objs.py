@@ -1,6 +1,5 @@
 from aiohttp import BasicAuth
 
-
 from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 
 HEADERS_CONFIG = ConfigList(

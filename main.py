@@ -9,8 +9,8 @@ import aiohttp
 import certifi
 import colorama
 
-from core import unique_queue
 from core import downloader, template_parser, monitor
+from core import unique_queue
 from core.cancellable_pool import CancellablePool
 from core.constants import VERSION
 from core.utils import async_user_statistics, async_get_latest_version, remove_old_files

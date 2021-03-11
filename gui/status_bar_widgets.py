@@ -1,7 +1,6 @@
 import os
 
 from PyQt5.QtCore import *
-from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import *
 
 from gui.application import Application

@@ -4,9 +4,8 @@ from urllib.parse import unquote
 
 from bs4 import BeautifulSoup
 
-from settings.config import ConfigString
 from core.utils import safe_path_join, get_beautiful_soup_parser
-
+from settings.config import ConfigString
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, basic_auth_config_to_session_kwargs
 
 URL_CONFIG = ConfigString(gui_name="Url")

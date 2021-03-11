@@ -1,11 +1,11 @@
-import logging
 import copy
+import logging
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from settings.config_objs.string import ConfigString, WidgetWrapper, AbstractConfigWidget, LineEdit
 from settings.config_objs.dict import DictWidgetWrapper
+from settings.config_objs.string import ConfigString, AbstractConfigWidget, LineEdit
 
 logger = logging.getLogger(__name__)
 

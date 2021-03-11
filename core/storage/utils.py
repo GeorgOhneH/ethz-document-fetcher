@@ -8,8 +8,8 @@ from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
 
-from core.utils import get_app_data_path
 from core.storage import cache
+from core.utils import get_app_data_path
 
 logger = logging.getLogger(__name__)
 

@@ -4,18 +4,17 @@ import sys
 from multiprocessing import freeze_support
 
 import colorama
-
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 
 from core.constants import APP_NAME
-import gui.main_window
-from gui.startup_tasks import run_startup_tasks
-from gui.application import Application
-from gui.constants import ASSETS_PATH, TUTORIAL_URL
 from core.constants import IS_FROZEN, VERSION
 from core.utils import get_app_data_path
+from gui.application import Application
+from gui.constants import ASSETS_PATH, TUTORIAL_URL
+from gui.main_window import MainWindow
+from gui.startup_tasks import run_startup_tasks
 from settings.logger import setup_logger
 
 try:
@@ -61,7 +60,7 @@ if __name__ == "__main__":
 
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 
-    main_window = gui.main_window.MainWindow()
+    main_window = MainWindow()
     main_window.show()
 
     if os.path.normcase(os.path.join("templates", "example.yml")) in os.path.normcase(app.get_template_path()):

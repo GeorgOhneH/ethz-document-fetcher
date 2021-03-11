@@ -1,8 +1,5 @@
 import logging
 
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
-
 from gui.application import Application
 from gui.configs_dialoge import ConfigsDialog, ConfigsScrollArea
 

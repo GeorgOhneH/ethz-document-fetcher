@@ -1,5 +1,5 @@
-import logging
 import functools
+import logging
 import os
 from pathlib import Path
 

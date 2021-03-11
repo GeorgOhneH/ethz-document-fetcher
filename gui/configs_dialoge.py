@@ -1,8 +1,6 @@
 import logging
-import time
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.utils import widget_save_settings, widget_read_settings

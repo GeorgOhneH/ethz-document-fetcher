@@ -2,11 +2,11 @@ import functools
 import os
 from pathlib import Path
 
-from core.utils import get_app_data_path
-from core.constants import APP_NAME
-
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication
+
+from core.constants import APP_NAME
+from core.utils import get_app_data_path
 
 
 @functools.lru_cache(maxsize=None)

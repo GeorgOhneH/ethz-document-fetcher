@@ -1,7 +1,6 @@
 import logging
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.application import Application

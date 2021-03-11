@@ -7,8 +7,8 @@ from PyQt5.QtWidgets import *
 from core.template_parser.nodes.base import NodeConfigs
 from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
-from gui.template_edit.node_dialog import NodeDialog
 from gui.dynamic_widgets import DynamicIcon
+from gui.template_edit.node_dialog import NodeDialog
 
 logger = logging.getLogger(__name__)
 

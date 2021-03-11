@@ -1,11 +1,11 @@
 import os
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
-from gui.constants import DARK_THEMES
 from gui.application import Application
+from gui.constants import DARK_THEMES
 
 
 def path_to_dark_path(path):

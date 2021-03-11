@@ -1,8 +1,8 @@
+import copy
 import importlib
 import inspect
 import logging
 import os
-import copy
 
 from core.constants import ROOT_PATH, PASSWORD_MISSING_WORD
 from core.exceptions import ParseTemplateError

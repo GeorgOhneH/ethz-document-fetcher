@@ -1,5 +1,5 @@
-import logging
 import asyncio
+import logging
 
 import aiohttp.client_exceptions
 from tenacity import retry, stop_after_attempt, retry_if_exception_type, wait_fixed

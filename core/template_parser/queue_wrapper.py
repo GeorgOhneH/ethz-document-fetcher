@@ -1,7 +1,3 @@
-import asyncio
-import inspect
-
-
 def queue_wrapper_put(obj, attr, **consumer_kwargs):
     signal_handler = consumer_kwargs["signal_handler"]
     unique_key = consumer_kwargs["unique_key"]

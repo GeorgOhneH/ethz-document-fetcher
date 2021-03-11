@@ -1,8 +1,8 @@
 import copy
-import logging
-import sys
-import os
 import datetime
+import logging
+import os
+import sys
 
 from PyQt5.QtCore import *
 from colorama import Fore, Style

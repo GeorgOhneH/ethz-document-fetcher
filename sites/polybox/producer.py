@@ -1,23 +1,20 @@
 import asyncio
-import base64
-import copy
 import logging
 import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import PurePath
-from urllib.parse import unquote, quote, urlparse, urljoin
+from urllib.parse import unquote
 
-from bs4 import BeautifulSoup
 from aiohttp import BasicAuth
+from bs4 import BeautifulSoup
 
 from core.monitor import MonitorSession
 from core.storage import cache
 from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension, add_extension
-from core.storage.utils import call_function_or_cache
 from settings.config_objs import ConfigOptions, ConfigString
-from sites.polybox.constants import *
 from sites.exceptions import NotSingleFile
+from sites.polybox.constants import *
 
 logger = logging.getLogger(__name__)
 

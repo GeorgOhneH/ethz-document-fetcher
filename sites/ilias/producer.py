@@ -3,8 +3,8 @@ import datetime
 import re
 
 import aiohttp
-from bs4 import BeautifulSoup, SoupStrainer
 from babel.dates import format_datetime
+from bs4 import BeautifulSoup, SoupStrainer
 
 from core.exceptions import LoginError
 from core.utils import get_beautiful_soup_parser, safe_path_join

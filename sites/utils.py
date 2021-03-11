@@ -1,7 +1,6 @@
 import logging
 
 from core.downloader import is_extension_forbidden
-from core.utils import safe_path_join
 from sites import zoom, polybox
 
 logger = logging.getLogger(__name__)

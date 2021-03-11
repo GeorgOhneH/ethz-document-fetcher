@@ -1,16 +1,13 @@
-import copy
 import logging.config
-import os
-import time
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+from gui.action_button import ActionButton
+from gui.application import Application
 from gui.button_container import ButtonContainer
 from gui.logger import Logger, LoggerSplitter
 from gui.template_view import TemplateView
-from gui.application import Application
-from gui.action_button import ActionButton
 
 logger = logging.getLogger(__name__)
 

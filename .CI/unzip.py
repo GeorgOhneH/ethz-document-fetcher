@@ -1,8 +1,7 @@
-import zipfile
-import tarfile
 import os
 import sys
-
+import tarfile
+import zipfile
 
 if __name__ == "__main__":
     ROOT = os.path.dirname(os.path.dirname(__file__))

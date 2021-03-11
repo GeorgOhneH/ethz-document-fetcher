@@ -3,10 +3,10 @@ from urllib.parse import parse_qs, urlparse
 
 import aiohttp
 
-from settings.config import ConfigString
 from core.storage.cache import check_url_reference
 from core.storage.utils import call_function_or_cache
 from core.utils import safe_path_join
+from settings.config import ConfigString
 
 URL_CONFIG = ConfigString(gui_name="Url")
 

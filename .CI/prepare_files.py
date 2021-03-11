@@ -1,9 +1,9 @@
-import boto3
-import os
-import sys
-import shutil
-from pprint import pprint
 import json
+import os
+import shutil
+import sys
+
+import boto3
 
 
 def download_dir(prefix, local, bucket, client):

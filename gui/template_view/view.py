@@ -1,13 +1,11 @@
 import logging
 
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from gui.application import Application
 from gui.template_view.info_view import FolderInfoView, GeneralInfoView, HistoryInfoView
 from gui.template_view.view_tree import TemplateViewTree
-
 from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)

@@ -1,12 +1,11 @@
-import re
-import asyncio
 import logging
+import re
 
 from aiohttp.client import URL
 from bs4 import BeautifulSoup
 
-from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension, add_extension
 from core.exceptions import LoginError
+from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension, add_extension
 
 logger = logging.getLogger(__name__)
 

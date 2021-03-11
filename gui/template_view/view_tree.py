@@ -1,10 +1,7 @@
 import logging
 import os
-import re
-import sys
-import importlib
-import functools
 import subprocess
+import sys
 from urllib import parse
 
 from PyQt5.QtCore import *
@@ -12,9 +9,9 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from core import template_parser
+from gui.application import Application
 from gui.constants import ROOT_PATH
 from gui.template_view.view_tree_item import TreeWidgetItem
-from gui.application import Application
 from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)

@@ -2,11 +2,11 @@ import re
 
 from bs4 import BeautifulSoup
 
-from core.utils import get_beautiful_soup_parser
 from core.exceptions import LoginError
+from core.utils import get_beautiful_soup_parser
+from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 from sites.moodle.parser import parse_main_page
 from .constants import AUTH_URL
-from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 
 PASSWORD_MAPPER_CONFIG = ConfigList(
     gui_name="Password Mapper",

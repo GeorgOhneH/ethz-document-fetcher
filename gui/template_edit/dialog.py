@@ -3,11 +3,10 @@ import os
 
 import yaml
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from gui.constants import ROOT_PATH
 from gui.application import Application
+from gui.constants import ROOT_PATH
 from gui.template_edit.view_tree import TemplateEditViewTree
 from gui.utils import widget_read_settings, widget_save_settings
 

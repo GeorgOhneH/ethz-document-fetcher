@@ -1,19 +1,19 @@
 import copy
+import functools
 import hashlib
 import html
 import logging
 import os
 import re
 import shutil
-from mimetypes import guess_extension, add_type
-import functools
-from urllib.parse import unquote
+from mimetypes import guess_extension
 from pathlib import Path
+from urllib.parse import unquote
 
-import requests
 import bs4
-from bs4 import BeautifulSoup
+import requests
 from appdirs import user_data_dir
+from bs4 import BeautifulSoup
 
 from core.constants import APP_NAME
 from settings.settings import Settings

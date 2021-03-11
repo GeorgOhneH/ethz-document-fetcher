@@ -1,17 +1,14 @@
-import os
 import re
-from urllib.parse import urlparse, urlunparse, urljoin
+from urllib.parse import urlparse, urljoin
 
 from bs4 import BeautifulSoup
-from aiohttp import BasicAuth
 
-from core.utils import safe_path_join, get_beautiful_soup_parser, get_extension, add_extension
 from core.storage import cache
+from core.utils import safe_path_join, get_beautiful_soup_parser, add_extension
+from settings.config_objs import ConfigList, ConfigDict, ConfigString
 from sites.exceptions import NotSingleFile
 from sites.standard_config_objs import BASIC_AUTH_CONFIG, HEADERS_CONFIG, \
     basic_auth_config_to_session_kwargs, headers_config_to_session_kwargs
-
-from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 from sites.utils import process_single_file_url
 
 REGEX_PATTERN_CONFIG = ConfigList(

@@ -1,6 +1,5 @@
 import copy
 import difflib
-import os
 import logging
 
 import fitz
