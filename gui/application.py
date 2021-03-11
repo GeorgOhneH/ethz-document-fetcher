@@ -6,12 +6,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui
+import settings
 from core.constants import APP_NAME
-from gui.actions import Actions
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
-from gui.worker import WorkerThread
 from settings import settings
-from settings.config_objs.path import open_file_picker
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ class Application(QApplication):
         self.download_settings = settings.DownloadSettings()
         self.template_path_settings = settings.TemplatePathSettings()
 
-        self.actions = Actions()
+        self.actions = gui.Actions()
 
         self.actions.open_file.triggered.connect(lambda: self.open_file())
         self.edit_saved.connect(lambda: self._open_file())
@@ -40,8 +39,7 @@ class Application(QApplication):
         self.actions.run.triggered.connect(lambda: self.start_thread())
         self.actions.stop.triggered.connect(lambda: self.stop_worker())
         self.actions.stop.setEnabled(False)
-
-        self.worker_thread = WorkerThread()
+        self.worker_thread = gui.WorkerThread()
 
         self.worker_thread.started.connect(self._thread_started)
         self.worker_thread.finished.connect(self._thread_finished)
@@ -116,7 +114,7 @@ class Application(QApplication):
         if file_path is None:
             config_obj = self.template_path_settings.get_config_obj("template_path")
             current_template_path = self.get_template_path()
-            file_path = open_file_picker(config_obj.only_folder,
+            file_path = settings.config_objs.path.open_file_picker(config_obj.only_folder,
                                          config_obj.file_extensions,
                                          os.path.dirname(current_template_path))
         if file_path is None:

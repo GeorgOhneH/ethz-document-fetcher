@@ -1,7 +1,7 @@
 import logging
 
-from gui.application import Application
-from gui.configs_dialoge import ConfigsDialog, ConfigsScrollArea
+import gui
+from gui import ConfigsDialog
 
 logger = logging.getLogger(__name__)
 
@@ -9,14 +9,14 @@ logger = logging.getLogger(__name__)
 class SettingsDialog(ConfigsDialog):
     def __init__(self, download_settings, parent=None):
         super().__init__(parent=parent)
-        app = Application.instance()
+        app = gui.Application.instance()
         behavior_settings = app.behavior_settings
         gui_settings = app.gui_settings
 
         settings_areas = [
-            ConfigsScrollArea(download_settings, parent=self),
-            ConfigsScrollArea(behavior_settings, parent=self),
-            ConfigsScrollArea(gui_settings, parent=self),
+            gui.ConfigsScrollArea(download_settings, parent=self),
+            gui.ConfigsScrollArea(behavior_settings, parent=self),
+            gui.ConfigsScrollArea(gui_settings, parent=self),
         ]
         self.init(settings_areas)
         self.setWindowTitle("Settings")

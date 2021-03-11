@@ -5,13 +5,13 @@ import os
 import re
 import time
 
+import core.utils
 from core.exceptions import ParseTemplateError, ParseTemplateRuntimeError
 from core.storage import cache
 from core.template_parser.nodes import site_configs
 from core.template_parser.nodes.base import TemplateNode
 from core.template_parser.queue_wrapper import QueueWrapper
 from core.template_parser.utils import get_module_function, check_if_null, dict_to_string, safe_login_module
-from core.utils import safe_path_join
 from gui.constants import SITE_ICON_PATH
 
 logger = logging.getLogger(__name__)
@@ -216,7 +216,7 @@ class Site(TemplateNode):
                                                                signal_handler=signal_handler,
                                                                download_settings=download_settings)
 
-            self.base_path = safe_path_join(self.parent.base_path, self.folder_name)
+            self.base_path = core.utils.safe_path_join(self.parent.base_path, self.folder_name)
             signal_handler.update_base_path(self.unique_key, self.base_path)
 
         queue_wrapper = QueueWrapper(queue,

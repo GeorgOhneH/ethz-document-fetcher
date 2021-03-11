@@ -9,6 +9,7 @@ ASSETS_PATH = os.path.join(GUI_PATH, "assets")
 SITE_ICON_PATH = os.path.join(ASSETS_PATH, "site_icons")
 
 TUTORIAL_URL = "https://github.com/GeorgOhneH/ethz-document-fetcher/blob/master/TUTORIAL.md"
+SITES_URL = "https://github.com/GeorgOhneH/ethz-document-fetcher/blob/master/SITES.md"
 
 THEME_NATIVE = "Native"
 THEME_FUSION_DARK = "Fusion Dark"

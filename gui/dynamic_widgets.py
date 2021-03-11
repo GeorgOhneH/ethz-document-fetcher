@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from gui.application import Application
+import gui
 from gui.constants import DARK_THEMES
 
 
@@ -22,13 +22,13 @@ class DynamicIcon(QIcon):
 
         self.set_icon()
 
-        Application.instance().theme_changed.connect(self.set_icon)
+        gui.Application.instance().theme_changed.connect(self.set_icon)
 
     def _set_icon(self, path):
         self.swap(QIcon(path))
 
     def set_icon(self):
-        gui_settings = Application.instance().gui_settings
+        gui_settings = gui.Application.instance().gui_settings
 
         if gui_settings.theme in DARK_THEMES:
             if os.path.exists(self.path_dark):
@@ -48,7 +48,7 @@ class DynamicIconLabel(QLabel):
 
         self.set_pixmap()
 
-        Application.instance().theme_changed.connect(self.set_pixmap)
+        gui.Application.instance().theme_changed.connect(self.set_pixmap)
 
     def _set_pixmap(self, path):
         icon = QIcon(path)
@@ -63,7 +63,7 @@ class DynamicIconLabel(QLabel):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def set_pixmap(self):
-        gui_settings = Application.instance().gui_settings
+        gui_settings = gui.Application.instance().gui_settings
 
         if gui_settings.theme in DARK_THEMES:
             if os.path.exists(self.path_dark):
@@ -71,3 +71,18 @@ class DynamicIconLabel(QLabel):
                 return
 
         self._set_pixmap(self.path)
+
+
+class DynamicRichLabel(QLabel):
+    def __init__(self, text):
+        super().__init__(text)
+        self.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        self.setOpenExternalLinks(True)
+        self.setText(text)
+
+        app = gui.Application.instance()
+        app.theme_changed.connect(lambda: self._set_text_new(text))
+
+    def _set_text_new(self, text):
+        self.setText("")
+        self.setText(text)

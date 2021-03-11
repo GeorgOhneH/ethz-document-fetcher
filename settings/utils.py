@@ -3,14 +3,14 @@ import logging
 import os
 from pathlib import Path
 
-from core import utils
+import core.utils
 
 logger = logging.getLogger(__name__)
 
 
 @functools.lru_cache(maxsize=None)
 def get_config_path():
-    config_path = os.path.join(utils.get_app_data_path(), "config")
+    config_path = os.path.join(core.utils.get_app_data_path(), "config")
     Path(config_path).mkdir(parents=True, exist_ok=True)
     return config_path
 

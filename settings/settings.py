@@ -2,12 +2,12 @@ import argparse
 import logging
 import os
 
-from gui.constants import ALL_THEMES, THEME_NATIVE
+import settings.utils
+from gui.constants import ALL_THEMES, THEME_NATIVE, SITES_URL
 from settings.config import ConfigBase, Configs
 from settings.config_objs import ConfigPath, ConfigListString, ConfigBool, ConfigPassword, \
     ConfigOptions, ConfigString, ConfigInt
 from settings.constants import ROOT_PATH, SEPARATOR
-from settings.utils import get_config_path
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class Settings(Configs, metaclass=SettingBase):
                 setattr(self, config_obj.name, arg_value)
 
     def get_file_path(self) -> str:
-        return os.path.join(get_config_path(), self.__class__.__name__.lower() + ".config")
+        return os.path.join(settings.utils.get_config_path(), self.__class__.__name__.lower() + ".config")
 
     def save(self):
         logger.debug(f"Saving settings: {self.__class__.__name__}")
@@ -96,20 +96,16 @@ def highlight_size_limit_active(instance, from_widget, parent):
 
 class DownloadSettings(Settings):
     NAME = "Download"
+    save_path = ConfigPath(only_folder=True, gui_name="Save Path")
     username = ConfigString(optional=True, gui_name="Username")
     password = ConfigPassword(optional=True, gui_name="Password")
-    save_path = ConfigPath(only_folder=True, gui_name="Save Path")
-    allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
-                                          hint_text="Add 'video' for all video types.")
-    forbidden_extensions = ConfigListString(default=[], optional=True, gui_name="Forbidden Extensions",
-                                            hint_text="Add 'video' for all video types.")
     keep_replaced_files = ConfigBool(default=True, gui_name="Keep Replaced Files")
 
     highlight_difference = ConfigBool(default=True,
                                       gray_out=True,
                                       gui_name="Highlight Difference between old and new Files (pdf only)",
                                       hint_text="Creates a side-by-side view of the old and "
-                                                "new pdf and highlights the differences.")
+                                                "new pdf, where the differences are highlighted.")
 
     highlight_page_limit = ConfigInt(default=50,
                                      minimum=0,
@@ -120,8 +116,13 @@ class DownloadSettings(Settings):
                                                "count is below the limit. (0 for unlimited)")
     force_download = ConfigBool(default=False,
                                 gui_name="Force Download",
-                                hint_text="Be very careful when you turn this on! It will update EVERY file.<br>"
-                                          "This is VERY stressful for a servers and and should only be rarely used.")
+                                hint_text=f"This will update every file, which doesn't normally support updates.<br>"
+                                          f"See <a href=\"{SITES_URL}\">this</a> for a list "
+                                          f"on which modules are affected.")
+    allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
+                                          hint_text="Add 'video' for all video types.")
+    forbidden_extensions = ConfigListString(default=[], optional=True, gui_name="Forbidden Extensions",
+                                            hint_text="Add 'video' for all video types.")
     conn_limit = ConfigInt(minimum=0, default=50, gui_name="Maximum Number of Connections",
                            hint_text="0 for unlimited")
     conn_limit_per_host = ConfigInt(minimum=0, default=5, gui_name="Maximum Number of Connections per Host",

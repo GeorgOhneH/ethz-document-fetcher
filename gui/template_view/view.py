@@ -3,10 +3,10 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.application import Application
+import gui
+import gui.utils
 from gui.template_view.info_view import FolderInfoView, GeneralInfoView, HistoryInfoView
 from gui.template_view.view_tree import TemplateViewTree
-from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +31,10 @@ class ButtonGroup(QButtonGroup):
             btn.show()
 
     def save_state(self):
-        widget_save_settings_func(self, self.checkedId, name="buttonGroupView/id")
+        gui.utils.widget_save_settings_func(self, self.checkedId, name="buttonGroupView/id")
 
     def read_settings(self):
-        button_id = widget_read_settings_func(self, name="buttonGroupView/id")
+        button_id = gui.utils.widget_read_settings_func(self, name="buttonGroupView/id")
         if button_id is None:
             return
         button = self.button(button_id)
@@ -49,10 +49,10 @@ class Splitter(QSplitter):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setChildrenCollapsible(False)
         self.setOrientation(Qt.Vertical)
-        widget_read_settings(self)
-        qApp.aboutToQuit.connect(lambda: widget_save_settings(self))
+        gui.utils.widget_read_settings(self)
+        qApp.aboutToQuit.connect(lambda: gui.utils.widget_save_settings(self))
 
-        actions = Application.instance().actions
+        actions = gui.Application.instance().actions
 
         actions.info_position_group.triggered.connect(
             lambda action: self.setOrientation(Qt.Horizontal if action.text() == "Right" else Qt.Vertical))
@@ -84,7 +84,7 @@ class StackedWidgetView(QStackedWidget):
 
         self.change_state_widget()
 
-        app = Application.instance()
+        app = gui.Application.instance()
         app.file_opened.connect(lambda new_template_path: self.reset_widget())
 
     def init_views(self):

@@ -8,11 +8,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui
+import gui.utils
 from core import template_parser
-from gui.application import Application
 from gui.constants import ROOT_PATH
 from gui.template_view.view_tree_item import TreeWidgetItem
-from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class TemplateViewTree(QTreeWidget):
 
         self.read_settings()
 
-        app = Application.instance()
+        app = gui.Application.instance()
 
         self.connection_map = [
             (app.worker_thread.stopped, self.stop_widgets),
@@ -88,7 +88,7 @@ class TemplateViewTree(QTreeWidget):
             (qApp.aboutToQuit, self.save_template_file),
         ]
 
-        app = Application.instance()
+        app = gui.Application.instance()
         app.worker_thread.started.connect(self.reset_widgets)
         app.edit_opened.connect(self.save_template_file)
         app.file_opened.connect(lambda new_template_path: self.init(new_template_path))
@@ -125,11 +125,11 @@ class TemplateViewTree(QTreeWidget):
             signal.disconnect(func)
 
     def save_state(self):
-        widget_save_settings(self.header(), name="templateViewTreeHeader")
+        gui.utils.widget_save_settings(self.header(), name="templateViewTreeHeader")
 
     def read_settings(self):
         self.header().resizeSections(QHeaderView.ResizeToContents)
-        widget_read_settings(self.header(), name="templateViewTreeHeader")
+        gui.utils.widget_read_settings(self.header(), name="templateViewTreeHeader")
 
     def save_template_file(self):
         if self._template_load_error:
@@ -160,7 +160,7 @@ class TemplateViewTree(QTreeWidget):
     def start_thread_checked(self):
         unique_keys = [widget.template_node.unique_key
                        for widget in self.get_checked()]
-        app = Application.instance()
+        app = gui.Application.instance()
         app.start_thread(unique_keys=unique_keys, recursive=False)
 
     @pyqtSlot(str, str)
@@ -239,7 +239,7 @@ class TemplateViewTree(QTreeWidget):
         if widget is None:
             return
 
-        app = Application.instance()
+        app = gui.Application.instance()
 
         worker_thread = app.worker_thread
         template_node = widget.template_node

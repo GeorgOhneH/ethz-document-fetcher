@@ -7,7 +7,7 @@ import sys
 from PyQt5.QtCore import *
 from colorama import Fore, Style
 
-from core.utils import get_logs_path
+import core.utils
 
 
 def setup_logger(loglevel):
@@ -25,7 +25,7 @@ def setup_logger(loglevel):
     console.setLevel(loglevel)
     console.setFormatter(console_debug_fmt if loglevel == "DEBUG" else console_basic_fmt)
 
-    log_path = os.path.join(get_logs_path(), datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S") + ".log")
+    log_path = os.path.join(core.utils.get_logs_path(), datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S") + ".log")
     file_handler = logging.FileHandler(log_path)
     file_handler.setLevel("DEBUG")
     file_handler.setFormatter(logging.Formatter(debug_format_string))

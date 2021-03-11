@@ -6,8 +6,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui.utils
 from gui.template_view.info_view.base import InfoView
-from gui.utils import widget_read_settings, widget_save_settings, get_empty_folder_path
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class FolderInfoView(QTreeView, InfoView):
 
     def change_root(self, path):
         if path is None or not os.path.exists(path):
-            index = self.model.setRootPath(get_empty_folder_path())
+            index = self.model.setRootPath(gui.utils.get_empty_folder_path())
         else:
             index = self.model.setRootPath(path)
         self.setRootIndex(index)
@@ -134,7 +134,7 @@ class FolderInfoView(QTreeView, InfoView):
         menu.exec_(self.mapToGlobal(point))
 
     def save_state(self):
-        widget_save_settings(self.header(), name="infoFolderViewHeader")
+        gui.utils.widget_save_settings(self.header(), name="infoFolderViewHeader")
 
     def read_settings(self):
-        widget_read_settings(self.header(), name="infoFolderViewHeader")
+        gui.utils.widget_read_settings(self.header(), name="infoFolderViewHeader")

@@ -1,6 +1,6 @@
 import logging
 
-from gui.configs_dialoge import ConfigsDialog, ConfigsScrollArea
+from gui import ConfigsDialog, ConfigsScrollArea
 
 logger = logging.getLogger(__name__)
 

@@ -8,13 +8,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import core.utils
+import gui
 from core.constants import APP_NAME
 from core.constants import IS_FROZEN, VERSION
-from core.utils import get_app_data_path
-from gui.application import Application
 from gui.constants import ASSETS_PATH, TUTORIAL_URL
-from gui.main_window import MainWindow
-from gui.startup_tasks import run_startup_tasks
 from settings.logger import setup_logger
 
 try:
@@ -49,18 +47,18 @@ if __name__ == "__main__":
 
     QGuiApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.RoundPreferFloor)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app = Application(sys.argv)
+    app = gui.Application(sys.argv)
 
     setup_logger(app.behavior_settings.loglevel)
 
     logger.debug(f"Current Version: {VERSION}")
-    logger.debug(f"AppData Path: {get_app_data_path()}")
+    logger.debug(f"AppData Path: {core.utils.get_app_data_path()}")
 
     app.set_current_setting_theme()
 
     app.setWindowIcon(QIcon(os.path.join(ASSETS_PATH, "logo", "logo.ico")))
 
-    main_window = MainWindow()
+    main_window = gui.MainWindow()
     main_window.show()
 
     if os.path.normcase(os.path.join("templates", "example.yml")) in os.path.normcase(app.get_template_path()):
@@ -74,6 +72,6 @@ if __name__ == "__main__":
         if ret == QMessageBox.Open:
             QDesktopServices.openUrl(QUrl(TUTORIAL_URL))
 
-    run_startup_tasks(app.download_settings)
+    gui.run_startup_tasks(app.download_settings)
 
     sys.exit(app.exec_())

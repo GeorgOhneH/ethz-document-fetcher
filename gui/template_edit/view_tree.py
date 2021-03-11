@@ -4,12 +4,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui.utils
 from core import template_parser
 from core.template_parser.nodes import Folder, Site
 from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
 from gui.template_edit.view_tree_item import TreeEditWidgetItem
-from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -58,11 +58,11 @@ class TemplateEditViewTree(QTreeWidget):
         self.read_settings()
 
     def save_state(self):
-        widget_save_settings(self.header(), name="templateEditViewTreeHeader")
+        gui.utils.widget_save_settings(self.header(), name="templateEditViewTreeHeader")
 
     def read_settings(self):
         self.header().resizeSections(QHeaderView.ResizeToContents)
-        widget_read_settings(self.header(), name="templateEditViewTreeHeader")
+        gui.utils.widget_read_settings(self.header(), name="templateEditViewTreeHeader")
 
     def edit_item(self, item, column=None):
         item.open_dialog()

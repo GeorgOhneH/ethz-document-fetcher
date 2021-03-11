@@ -4,10 +4,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui
 from core.template_parser.nodes.base import NodeConfigs
 from core.template_parser.nodes.folder import FolderConfigs
 from core.template_parser.nodes.site_configs import SiteConfigs
-from gui.dynamic_widgets import DynamicIcon
 from gui.template_edit.node_dialog import NodeDialog
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ class TreeEditWidgetItem(QTreeWidgetItem):
 
     def _init_widgets(self):
         self.setText(0, self.node_configs.get_name())
-        self.setIcon(0, DynamicIcon(self.node_configs.get_icon_path()))
+        self.setIcon(0, gui.DynamicIcon(self.node_configs.get_icon_path()))
         self.setText(1, self.node_configs.get_folder_name())
         self.setText(2, self.node_configs.get_note())
         self.setForeground(2, QBrush(Qt.red))

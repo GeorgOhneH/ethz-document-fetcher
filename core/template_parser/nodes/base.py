@@ -1,8 +1,8 @@
 import hashlib
 import os
 
+import core.utils
 from core.template_parser.nodes.utils import get_kwargs_hash, get_folder_name_from_hash
-from core.utils import safe_path_join
 from gui.constants import ASSETS_PATH
 from settings.config import Configs
 from settings.config_objs import ConfigDict, ConfigString, ConfigList, ConfigDummy
@@ -97,7 +97,7 @@ class TemplateNode(object):
         if self.parent.base_path is None:
             return
 
-        return safe_path_join(self.parent.base_path, self.folder_name)
+        return core.utils.safe_path_join(self.parent.base_path, self.folder_name)
 
     def _init_folder_name(self, folder_name):
         if folder_name is None:

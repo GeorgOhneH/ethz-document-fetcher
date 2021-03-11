@@ -3,7 +3,7 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.utils import widget_save_settings, widget_read_settings
+import gui.utils
 
 logger = logging.getLogger(__name__)
 
@@ -109,11 +109,11 @@ class ConfigsDialog(QDialog):
         ok_button.setDefault(valid_settings)
 
     def save_geometry(self):
-        widget_save_settings(self, save_state=False)
+        gui.utils.widget_save_settings(self, save_state=False)
 
     def read_settings(self):
         self.resize(self.sizeHint() + QSize(20, 20))
-        widget_read_settings(self, save_state=False)
+        gui.utils.widget_read_settings(self, save_state=False)
 
 
 class ConfigsScrollArea(QScrollArea):
@@ -128,17 +128,13 @@ class ConfigsScrollArea(QScrollArea):
 
         self.configs = configs
 
-        self.required = QGroupBox()
-        self.required.setTitle("General")
-        self.required.setLayout(QVBoxLayout())
-        self.optional = QGroupBox()
-        self.optional.setTitle("Optional")
-        self.optional.setLayout(QVBoxLayout())
+        self.general_box = QGroupBox()
+        self.general_box.setTitle("General")
+        self.general_box.setLayout(QVBoxLayout())
 
         self.layout = QVBoxLayout()
         self.main_widget.setLayout(self.layout)
-        self.layout.addWidget(self.required)
-        self.layout.addWidget(self.optional)
+        self.layout.addWidget(self.general_box)
 
         self.setWidget(self.main_widget)
 
@@ -146,17 +142,13 @@ class ConfigsScrollArea(QScrollArea):
         for config_obj in self.configs:
             widget = config_obj.get_widget()
             widget.data_changed_signal.connect(self.data_changed)
-            if config_obj.optional:
-                self.optional.layout().addWidget(widget)
-            else:
-                self.required.layout().addWidget(widget)
+            self.general_box.layout().addWidget(widget)
 
         for config_obj in self.configs:
             config_obj.update_visibility()
             config_obj.update_widget()
 
-        self.update_group_box_visibility(self.optional)
-        self.update_group_box_visibility(self.required)
+        self.update_group_box_visibility(self.general_box)
 
     @staticmethod
     def update_group_box_visibility(widget):
@@ -196,6 +188,5 @@ class ConfigsScrollArea(QScrollArea):
     def data_changed(self):
         self.update_widgets()
         self.update_visibility()
-        self.update_group_box_visibility(self.optional)
-        self.update_group_box_visibility(self.required)
+        self.update_group_box_visibility(self.general_box)
         self.data_changed_signal.emit()

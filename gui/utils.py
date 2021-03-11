@@ -5,13 +5,13 @@ from pathlib import Path
 from PyQt5.QtCore import QSettings
 from PyQt5.QtWidgets import QApplication
 
+import core.utils
 from core.constants import APP_NAME
-from core.utils import get_app_data_path
 
 
 @functools.lru_cache(maxsize=None)
 def get_empty_folder_path():
-    empty_folder_path = os.path.join(get_app_data_path(), "empty_folder")
+    empty_folder_path = os.path.join(core.utils.get_app_data_path(), "empty_folder")
     Path(empty_folder_path).mkdir(parents=True, exist_ok=True)
     return empty_folder_path
 

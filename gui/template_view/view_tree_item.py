@@ -6,10 +6,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui
 from core.storage import cache
-from gui.application import Application
 from gui.constants import ASSETS_PATH
-from gui.dynamic_widgets import DynamicIconLabel
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +58,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.children = []
         self.custom_parent = None
 
-        app = Application.instance()
+        app = gui.Application.instance()
 
         app.settings_saved.connect(self.emit_data_changed)
 
@@ -83,7 +82,7 @@ class TreeWidgetItem(QTreeWidgetItem):
         self.setTextAlignment(self.COLUMN_REPLACED_FILE, Qt.AlignRight | Qt.AlignVCenter)
 
     def load_from_cache(self, name):
-        download_settings = Application.instance().download_settings
+        download_settings = gui.Application.instance().download_settings
         if download_settings.save_path is None:
             return []
         path_name = download_settings.save_path.replace("\\", "").replace("/", "").replace(":", "").replace(
@@ -294,7 +293,7 @@ class TreeWidgetItemName(QWidget):
 
         size = self.check_box.sizeHint().width()
 
-        self.icon = DynamicIconLabel(icon_path, size, size, self)
+        self.icon = gui.DynamicIconLabel(icon_path, size, size, self)
 
         self.stateWidget = QStackedWidget()
         self.stateWidget.setMaximumSize(size, size)
@@ -310,11 +309,11 @@ class TreeWidgetItemName(QWidget):
         self.setLayout(main_layout)
 
         self.loading_movie = MovieLabel(self.LOADING_GIF_PATH, size, size, self)
-        self.idle_image = DynamicIconLabel(self.IDLE_IMAGE_PATH, size, size, self)
-        self.warning_svg = DynamicIconLabel(self.WARNING_SVG_PATH, size, size, self)
-        self.error_svg = DynamicIconLabel(self.ERROR_SVG_PATH, size, size, self)
+        self.idle_image = gui.DynamicIconLabel(self.IDLE_IMAGE_PATH, size, size, self)
+        self.warning_svg = gui.DynamicIconLabel(self.WARNING_SVG_PATH, size, size, self)
+        self.error_svg = gui.DynamicIconLabel(self.ERROR_SVG_PATH, size, size, self)
         self.error_svg.setToolTipDuration(10000000)
-        self.success_svg = DynamicIconLabel(self.SUCCESS_SVG_PATH, size, size, self)
+        self.success_svg = gui.DynamicIconLabel(self.SUCCESS_SVG_PATH, size, size, self)
 
         self.stateWidget.addWidget(self.loading_movie)
         self.stateWidget.addWidget(self.idle_image)

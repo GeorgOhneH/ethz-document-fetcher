@@ -8,15 +8,15 @@ from collections.abc import Iterable
 from functools import lru_cache
 from pathlib import Path
 
+import core.utils
 from core.storage import cache
-from core.utils import get_app_data_path
 
 logger = logging.getLogger(__name__)
 
 
 @lru_cache(maxsize=None)
 def get_cache_path():
-    cache_path = os.path.join(get_app_data_path(), "cache")
+    cache_path = os.path.join(core.utils.get_app_data_path(), "cache")
     Path(cache_path).mkdir(parents=True, exist_ok=True)
     return cache_path
 

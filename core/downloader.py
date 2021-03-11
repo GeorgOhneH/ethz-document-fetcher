@@ -9,11 +9,10 @@ import aiohttp
 import fitz
 from aiohttp.client import URL
 
+import core.utils
 from core import pdf_highlighter
 from core.constants import *
 from core.storage import cache
-from core.utils import get_extension, fit_sections_to_console, get_temp_path, add_extension, \
-    insert_text_before_extension
 
 logger = logging.getLogger(__name__)
 
@@ -107,15 +106,15 @@ async def download_if_not_exist(session,
 
     file_name = os.path.basename(absolute_path)
     dir_path = os.path.dirname(absolute_path)
-    file_extension = get_extension(file_name)
+    file_extension = core.utils.get_extension(file_name)
 
-    temp_file_name = add_extension(f"{random.getrandbits(64)}", file_extension)
-    temp_absolute_path = os.path.join(get_temp_path(), temp_file_name)
+    temp_file_name = core.utils.add_extension(f"{random.getrandbits(64)}", file_extension)
+    temp_absolute_path = os.path.join(core.utils.get_temp_path(), temp_file_name)
 
-    old_file_name = insert_text_before_extension(file_name, "-old")
+    old_file_name = core.utils.insert_text_before_extension(file_name, "-old")
     old_absolute_path = os.path.join(dir_path, old_file_name)
 
-    diff_file_name = insert_text_before_extension(file_name, "-diff")
+    diff_file_name = core.utils.insert_text_before_extension(file_name, "-diff")
     diff_absolute_path = os.path.join(dir_path, diff_file_name)
 
     force = False
@@ -249,7 +248,7 @@ async def download_if_not_exist(session,
             "cut": "front",
         }
 
-        logger.info(fit_sections_to_console(start, end, margin=1))
+        logger.info(core.utils.fit_sections_to_console(start, end, margin=1))
 
     finally:
         if os.path.exists(temp_absolute_path):

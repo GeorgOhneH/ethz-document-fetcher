@@ -38,9 +38,7 @@ always check the website if the file has any importance.
 See [this](./SITES.md) for a complete list, on which modules support updates
  
 Files which won't get normally updated can still be updated
-by enabling force download.<br>
-**Caution:** Force download is very stressful for a website
-and should only be rarely used.
+by enabling force download.
 
 ## VPN
 If a websites require a vpn, the application will not be able

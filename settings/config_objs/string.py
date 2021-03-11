@@ -4,6 +4,7 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+import gui
 from settings.config_objs.constants import NotSet
 
 logger = logging.getLogger(__name__)
@@ -77,10 +78,7 @@ class WidgetWrapper(QWidget):
         self.layout.addWidget(self.config_widget)
 
         if hint_text is not None:
-            hint = QLabel(hint_text)
-            hint.setTextInteractionFlags(Qt.TextBrowserInteraction)
-            hint.setOpenExternalLinks(True)
-            hint.setText(hint_text)
+            hint = gui.DynamicRichLabel(hint_text)
             hint.setStyleSheet("QLabel { color : gray; }")
             self.layout.addWidget(hint)
 
@@ -231,7 +229,7 @@ class ConfigString(object):
             value = None
         return value is not None or self.optional
 
-    def is_valid(self, value=NotSet, from_widget: bool = False)-> bool:
+    def is_valid(self, value=NotSet, from_widget: bool = False) -> bool:
         if value is NotSet:
             value = self._value
 

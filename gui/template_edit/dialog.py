@@ -5,10 +5,10 @@ import yaml
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.application import Application
+import gui
+import gui.utils
 from gui.constants import ROOT_PATH
 from gui.template_edit.view_tree import TemplateEditViewTree
-from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class TemplateEditDialog(QDialog):
         self.finished.connect(self.save_geometry)
         self.finished.connect(self.template_view.save_state)
 
-        app = Application.instance()
+        app = gui.Application.instance()
         self.accepted.connect(lambda: app.edit_saved.emit())
 
         self.is_new = template_path is None
@@ -64,7 +64,7 @@ class TemplateEditDialog(QDialog):
 
         template_dict = self.template_view.convert_to_dict()
 
-        template_path_settings = Application.instance().template_path_settings
+        template_path_settings = gui.Application.instance().template_path_settings
 
         path = template_path_settings.template_path
         if self.is_new or \
@@ -128,8 +128,8 @@ class TemplateEditDialog(QDialog):
         super().closeEvent(event)
 
     def save_geometry(self):
-        widget_save_settings(self, save_state=False)
+        gui.utils.widget_save_settings(self, save_state=False)
 
     def read_settings(self):
         self.resize(600, 500)
-        widget_read_settings(self, save_state=False)
+        gui.utils.widget_read_settings(self, save_state=False)

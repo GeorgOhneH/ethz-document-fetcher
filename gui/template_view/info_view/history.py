@@ -6,8 +6,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+import gui.utils
 from gui.template_view.info_view.base import InfoView
-from gui.utils import format_bytes, widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +114,7 @@ class LazyStandardItemModel(QStandardItemModel):
         items[self.COLUMN_NAME] = QStandardItem(QFileIconProvider().icon(file_info),
                                                 file_info.fileName())
 
-        column_size_item = QStandardItem(format_bytes(file_info.size()))
+        column_size_item = QStandardItem(gui.utils.format_bytes(file_info.size()))
         column_size_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         items[self.COLUMN_SIZE] = column_size_item
 
@@ -183,7 +183,7 @@ class HistoryInfoView(QTreeView, InfoView):
         menu.exec_(self.mapToGlobal(point))
 
     def save_state(self):
-        widget_save_settings(self.header(), name="infoActivityViewHeader")
+        gui.utils.widget_save_settings(self.header(), name="infoActivityViewHeader")
 
     def read_settings(self):
-        widget_read_settings(self.header(), name="infoActivityViewHeader")
+        gui.utils.widget_read_settings(self.header(), name="infoActivityViewHeader")

@@ -2,8 +2,8 @@ import json
 import logging
 import os
 
+import core.utils
 from core.storage.utils import get_json_cache_path
-from core.utils import get_extension_from_response, get_filename_from_response
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +78,7 @@ async def check_extension(session, url, session_kwargs=None):
         return table[url]
 
     async with session.get(url, raise_for_status=True, **session_kwargs) as response:
-        extension = get_extension_from_response(response)
+        extension = core.utils.get_extension_from_response(response)
 
     table[url] = extension
     logger.debug(f"Called filename_cache, url: {url}, extension: {extension}")
@@ -95,7 +95,7 @@ async def check_filename(session, url, session_kwargs=None):
         return table[url]
 
     async with session.get(url, raise_for_status=True, **session_kwargs) as response:
-        filename = get_filename_from_response(response)
+        filename = core.utils.get_filename_from_response(response)
 
     table[url] = filename
     logger.debug(f"Called filename_cache, url: {url}, extension: {filename}")

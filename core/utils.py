@@ -15,8 +15,8 @@ import requests
 from appdirs import user_data_dir
 from bs4 import BeautifulSoup
 
+import settings.settings
 from core.constants import APP_NAME
-from settings.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +176,7 @@ def fit_sections_to_console(*args, filler="..", min_length=10, margin=0):
 
 @functools.lru_cache(maxsize=None)
 def get_app_data_path():
-    args = Settings.parser.parse_args()
+    args = settings.settings.Settings.parser.parse_args()
     if args.app_data_path is not None:
         app_data_path = args.app_data_path
     else:

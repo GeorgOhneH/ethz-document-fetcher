@@ -3,8 +3,8 @@ import logging
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from gui.application import Application
-from gui.utils import widget_read_settings_func, widget_save_settings_func, widget_save_settings, widget_read_settings
+import gui
+import gui.utils
 from settings.logger import QtHandler
 
 
@@ -12,7 +12,7 @@ class Logger(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.setHidden(True)
-        behavior_settings = Application.instance().behavior_settings
+        behavior_settings = gui.Application.instance().behavior_settings
         self.handler = QtHandler(self)
         self.handler.setLevel(behavior_settings.loglevel if behavior_settings.loglevel else logging.INFO)
         self.log_text_box = QPlainTextEdit(self)
@@ -33,15 +33,15 @@ class Logger(QWidget):
 
         qApp.aboutToQuit.connect(self.save_state)
 
-        actions = Application.instance().actions
+        actions = gui.Application.instance().actions
         actions.logger.setChecked(not self.isHidden())
         actions.logger.triggered.connect(lambda checked: self.setVisible(checked))
 
     def save_state(self):
-        widget_save_settings_func(self, self.isHidden)
+        gui.utils.widget_save_settings_func(self, self.isHidden)
 
     def read_settings(self):
-        value = widget_read_settings_func(self)
+        value = gui.utils.widget_read_settings_func(self)
         if value is not None:
             self.setHidden(False if value == "false" else True)
 
@@ -52,5 +52,5 @@ class LoggerSplitter(QSplitter):
         self.setChildrenCollapsible(False)
         self.setOrientation(Qt.Vertical)
         self.setHandleWidth(1)
-        qApp.aboutToQuit.connect(lambda: widget_save_settings(self))
-        widget_read_settings(self)
+        qApp.aboutToQuit.connect(lambda: gui.utils.widget_save_settings(self))
+        gui.utils.widget_read_settings(self)

@@ -5,13 +5,9 @@ import time
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
+import gui
 from core.constants import VERSION, APP_NAME
-from gui.application import Application
 from gui.constants import ROOT_PATH
-from gui.controller import CentralWidget
-from gui.settings import SettingsDialog
-from gui.status_bar_widgets import DownloadSpeedWidget
-from gui.template_edit import TemplateEditDialog
 from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
@@ -20,14 +16,14 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        app = Application.instance()
+        app = gui.Application.instance()
 
-        self.central_widget = CentralWidget(parent=self)
+        self.central_widget = gui.CentralWidget(parent=self)
 
         status_bar = self.statusBar()
 
         status_bar.showMessage(f"Opened file: {app.get_template_path()}")
-        status_bar.addPermanentWidget(DownloadSpeedWidget(parent=status_bar))
+        status_bar.addPermanentWidget(gui.DownloadSpeedWidget(parent=status_bar))
         app.file_opened.connect(lambda new_template_path:
                                 status_bar.showMessage(f"Opened file: {app.get_template_path()}"))
 
@@ -39,7 +35,7 @@ class MainWindow(QMainWindow):
                                            )
 
         menu_bar = self.menuBar()
-        actions = Application.instance().actions
+        actions = gui.Application.instance().actions
         file_menu = menu_bar.addMenu("&File")
 
         file_menu.addAction(actions.new_file)
@@ -68,10 +64,10 @@ class MainWindow(QMainWindow):
 
         view_menu.addAction(actions.logger)
 
-        self.settings_dialog = SettingsDialog(download_settings=app.download_settings, parent=self)
+        self.settings_dialog = gui.SettingsDialog(download_settings=app.download_settings, parent=self)
         actions.settings.triggered.connect(lambda: self.settings_dialog.open())
 
-        self.template_edit_dialog = TemplateEditDialog(parent=self, template_path=None)
+        self.template_edit_dialog = gui.TemplateEditDialog(parent=self, template_path=None)
         actions.new_file.triggered.connect(lambda: self.open_edit(template_path=None))
         actions.edit_file.triggered.connect(lambda: self.open_edit(template_path=app.get_template_path()))
 
@@ -81,13 +77,13 @@ class MainWindow(QMainWindow):
         self.read_settings()
 
     def open_edit(self, template_path=None):
-        app = Application.instance()
+        app = gui.Application.instance()
         app.edit_opened.emit()
         self.template_edit_dialog.reset_template(template_path=template_path)
         self.template_edit_dialog.open()
 
     def init_menu(self, menu, path):
-        app = Application.instance()
+        app = gui.Application.instance()
         for file_name in os.listdir(path):
             sub_path = os.path.join(path, file_name)
             if not os.path.isfile(sub_path):
@@ -100,7 +96,7 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         widget_save_settings(self)
-        app = Application.instance()
+        app = gui.Application.instance()
         app.stop_worker()
         app.worker_thread.finished.connect(app.quit)
         if not app.worker_thread.isRunning():
@@ -110,7 +106,7 @@ class MainWindow(QMainWindow):
             QTimer.singleShot(100, lambda: self._force_quit_prompt())
 
     def _force_quit_prompt(self):
-        app = Application.instance()
+        app = gui.Application.instance()
         r = QMessageBox.question(self,
                                  "Are you sure?",
                                  "Force Quit",

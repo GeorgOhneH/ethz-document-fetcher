@@ -4,10 +4,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from pyupdater.client import Client
 
+import core.utils
+import gui
 from core.client_config import ClientConfig
 from core.constants import VERSION, PYU_VERSION, IS_FROZEN
-from core.utils import get_latest_version, user_statistics, remove_old_files
-from gui.application import Application
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def run_startup_tasks(download_settings):
     background_tasks = BackgroundTasks(download_settings.username)
     QThreadPool.globalInstance().start(background_tasks)
 
-    behavior_settings = Application.instance().behavior_settings
+    behavior_settings = gui.Application.instance().behavior_settings
 
     if behavior_settings.check_for_updates and IS_FROZEN:
         mutex = QMutex()
@@ -68,7 +68,7 @@ class Update(QRunnable):
 
     def run(self):
         try:
-            latest_version = get_latest_version()
+            latest_version = core.utils.get_latest_version()
         except Exception as e:
             logger.warning(f"Could not get release data. Error {e}")
             return
@@ -109,5 +109,5 @@ class BackgroundTasks(QRunnable):
         self.name = name
 
     def run(self):
-        remove_old_files()
-        user_statistics(self.name)
+        core.utils.remove_old_files()
+        core.utils.user_statistics(self.name)
