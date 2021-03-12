@@ -72,6 +72,4 @@ if __name__ == "__main__":
         if ret == QMessageBox.Open:
             QDesktopServices.openUrl(QUrl(TUTORIAL_URL))
 
-    gui.run_startup_tasks(app.download_settings)
-
     sys.exit(app.exec_())

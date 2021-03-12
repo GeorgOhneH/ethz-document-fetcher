@@ -52,6 +52,11 @@ class Application(QApplication):
         self.light_palette = _init_light_palette()
         self.settings_saved.connect(self.set_current_setting_theme)
 
+        gui.run_startup_tasks(self.download_settings)
+        self.timer = QTimer(parent=self)
+        self.timer.timeout.connect(lambda: gui.run_startup_tasks(self.download_settings))
+        self.timer.start(1000 * 60 * 60 * 4)
+
     def set_current_setting_theme(self):
         if self.gui_settings.theme:
             self.set_theme(self.gui_settings.theme)
