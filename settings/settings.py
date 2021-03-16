@@ -116,7 +116,8 @@ class DownloadSettings(Settings):
                                                "count is below the limit. (0 for unlimited)")
     force_download = ConfigBool(default=False,
                                 gui_name="Force Download",
-                                hint_text=f"This will update every file, which doesn't normally support updates.<br>"
+                                hint_text=f"This will check every file for updates. Affects only modules, "
+                                          f"which don't already support updates.<br>"
                                           f"See <a href=\"{SITES_URL}\">this</a> for a list "
                                           f"on which modules are affected.")
     allowed_extensions = ConfigListString(default=[], optional=True, gui_name="Allowed Extensions",
