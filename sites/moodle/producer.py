@@ -7,6 +7,7 @@ from core.utils import get_beautiful_soup_parser
 from settings.config_objs import ConfigList, ConfigDict, ConfigString, ConfigBool
 from sites.moodle.parser import parse_main_page
 from .constants import AUTH_URL
+from sites.utils import remove_vz_id
 
 PASSWORD_MAPPER_CONFIG = ConfigList(
     gui_name="Password Mapper",
@@ -66,5 +67,4 @@ async def get_folder_name(session, moodle_id, **kwargs):
 
     header = soup.find("div", class_="page-header-headings")
     header_name = str(header.h1.string)
-    header_name = re.sub("[0-9]{3}-[0-9]{4}-[0-9]{2}L", "", header_name)
-    return header_name.strip()
+    return remove_vz_id(header_name)

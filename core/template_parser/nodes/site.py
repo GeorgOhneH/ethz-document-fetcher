@@ -245,6 +245,7 @@ class Site(TemplateNode):
         logger.debug(f"Calling folder function: {function.__module__}."
                      f"{function.__name__}<{dict_to_string(self.function_kwargs)}>")
         folder_name = await function(session=session, download_settings=download_settings, **self.function_kwargs)
+        folder_name = folder_name.strip()
 
         folder_name_cache = cache.get_json("folder_name")
         folder_name_cache[self.kwargs_hash] = folder_name

@@ -1,9 +1,14 @@
 import logging
+import re
 
 from core.downloader import is_extension_forbidden
 from sites import zoom, polybox
 
 logger = logging.getLogger(__name__)
+
+
+def remove_vz_id(name):
+    return re.sub(r"[0-9]{3}-[0-9]{4}-[0-9]{2}L\s*", "", name)
 
 
 async def process_single_file_url(session, queue, base_path, download_settings, url, name, password=None):

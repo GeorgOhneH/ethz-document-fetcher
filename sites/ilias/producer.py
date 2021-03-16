@@ -11,6 +11,7 @@ from core.utils import get_beautiful_soup_parser, safe_path_join
 from settings.config import ConfigString
 from sites.ilias import login
 from sites.ilias.constants import GOTO_URL
+from sites.utils import remove_vz_id
 
 ILIAS_ID_CONFIG = ConfigString(gui_name="ID")
 
@@ -24,8 +25,7 @@ async def get_folder_name(session, ilias_id, **kwargs):
 
     ol = soup.find("ol", class_="breadcrumb")
     name = str(ol.find_all("li")[2].string)
-    name = re.sub("[0-9]{3}-[0-9]{4}-[0-9]{2}L", "", name)
-    return name
+    return remove_vz_id(name)
 
 
 async def producer(session, queue, base_path, download_settings, ilias_id: ILIAS_ID_CONFIG):
