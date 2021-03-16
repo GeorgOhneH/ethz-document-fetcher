@@ -23,7 +23,9 @@ async def get_folder_name(session, ilias_id, **kwargs):
     soup = BeautifulSoup(html, get_beautiful_soup_parser())
 
     ol = soup.find("ol", class_="breadcrumb")
-    return str(ol.find_all("li")[2].string)
+    name = str(ol.find_all("li")[2].string)
+    name = re.sub("[0-9]{3}-[0-9]{4}-[0-9]{2}L", "", name)
+    return name
 
 
 async def producer(session, queue, base_path, download_settings, ilias_id: ILIAS_ID_CONFIG):
