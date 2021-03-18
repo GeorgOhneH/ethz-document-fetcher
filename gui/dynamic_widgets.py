@@ -79,10 +79,16 @@ class DynamicRichLabel(QLabel):
         self.setTextInteractionFlags(Qt.TextBrowserInteraction)
         self.setOpenExternalLinks(True)
         self.setText(text)
+        self._text = text
 
         app = gui.Application.instance()
-        app.theme_changed.connect(lambda: self._set_text_new(text))
+        app.theme_changed.connect(self._set_text_new)
 
-    def _set_text_new(self, text):
+    def _set_text_new(self):
         self.setText("")
-        self.setText(text)
+        self.setText(self._text)
+
+    def __del__(self):
+        app = gui.Application.instance()
+        app.theme_changed.disconnect(self._set_text_new)
+
