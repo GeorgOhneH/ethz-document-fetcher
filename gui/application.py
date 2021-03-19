@@ -7,7 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import gui
-import settings
+from settings.config_objs.path import open_file_picker
 from core.constants import APP_NAME
 from gui.constants import ALL_THEMES, THEME_NATIVE, THEME_FUSION_DARK, THEME_FUSION_LIGHT
 from settings import settings
@@ -83,7 +83,7 @@ class Application(QApplication):
                 if ret == QMessageBox.Cancel:
                     return
                 if ret == QMessageBox.AcceptRole:
-                    self.open_edit()
+                    self.actions.edit_file.trigger()
                     return
 
         if self.download_settings.force_download:
@@ -119,7 +119,7 @@ class Application(QApplication):
         if file_path is None:
             config_obj = self.template_path_settings.get_config_obj("template_path")
             current_template_path = self.get_template_path()
-            file_path = settings.config_objs.path.open_file_picker(config_obj.only_folder,
+            file_path = open_file_picker(config_obj.only_folder,
                                          config_obj.file_extensions,
                                          os.path.dirname(current_template_path))
         if file_path is None:
