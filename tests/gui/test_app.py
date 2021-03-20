@@ -9,11 +9,11 @@ from gui import Application, CentralWidget
 
 
 @pytest.fixture(scope="function")
-def qapp():
-    print("BEFORE")
-    sys.argv = sys.argv + ["--username", "df"]
+def qapp(tmp_path):
+    sys_argv = sys.argv
+    sys.argv[:] = sys_argv + ["--app-data-path", str(tmp_path), "--username", "df"]
     yield Application([])
-    print("AFTER")
+    sys.argv[:] = sys_argv
 
 
 def test_hello(qtbot):
