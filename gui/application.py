@@ -33,6 +33,8 @@ class Application(QApplication):
 
         self.actions = gui.Actions()
 
+        self.actions.exit_app.triggered.connect(self.graceful_exit)
+
         self.actions.open_file.triggered.connect(lambda: self.open_file())
         self.edit_saved.connect(lambda: self._open_file())
 
@@ -159,6 +161,26 @@ class Application(QApplication):
 
     def get_template_path(self):
         return self.template_path_settings.template_path
+
+    def graceful_exit(self):
+        self.stop_worker()
+        self.worker_thread.finished.connect(self.quit)
+        if not self.worker_thread.isRunning():
+            self.quit()
+            return
+
+        QTimer.singleShot(100, lambda: self._force_quit_prompt())
+
+    def _force_quit_prompt(self):
+        r = QMessageBox.question(None,
+                                 "Are you sure?",
+                                 "Force Quit",
+                                 QMessageBox.Yes | QMessageBox.No)
+        if r == QMessageBox.Yes:
+            self.quit()
+            return
+
+        self.worker_thread.finished.disconnect(self.quit)
 
     # IMPORTANT: Set style AFTER palette
     def _to_native(self):

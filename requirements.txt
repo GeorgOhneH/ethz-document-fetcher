@@ -16,3 +16,6 @@ babel
 git+https://github.com/Digital-Sapphire/PyUpdater
 PyUpdater-S3-plugin
 pywin32; sys_platform == 'win32'
+pytest
+pytest-qt
+pytest-socket

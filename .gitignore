@@ -1,5 +1,6 @@
+.pytest_cache
 .idea
-test.py
+test.json
 test2.py
 __pycache__/
 cache/

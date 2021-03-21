@@ -76,6 +76,8 @@ class MainWindow(QMainWindow):
 
         self.read_settings()
 
+        app.aboutToQuit.connect(self.save_state)
+
     def open_edit(self, template_path=None):
         app = gui.Application.instance()
         app.edit_opened.emit()
@@ -95,26 +97,12 @@ class MainWindow(QMainWindow):
                                          app.open_file(file_path=file_path))
 
     def closeEvent(self, event):
-        widget_save_settings(self)
         app = gui.Application.instance()
-        app.stop_worker()
-        app.worker_thread.finished.connect(app.quit)
-        if not app.worker_thread.isRunning():
-            event.accept()
-        else:
-            event.ignore()
-            QTimer.singleShot(100, lambda: self._force_quit_prompt())
+        app.actions.exit_app.trigger()
+        event.ignore()
 
-    def _force_quit_prompt(self):
-        app = gui.Application.instance()
-        r = QMessageBox.question(self,
-                                 "Are you sure?",
-                                 "Force Quit",
-                                 QMessageBox.Yes | QMessageBox.No)
-        if r == QMessageBox.Yes:
-            app.quit()
-        else:
-            app.worker_thread.finished.disconnect(app.quit)
+    def save_state(self):
+        widget_save_settings(self)
 
     def read_settings(self):
         self.resize(900, 600)
