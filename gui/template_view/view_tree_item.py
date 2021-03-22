@@ -335,7 +335,9 @@ class TreeWidgetItemName(QWidget):
         self.check_box.show()
 
     def set_state(self, state, msg=None):
-        self.loading_movie.movie.stop()
+        if state != TreeWidgetItem.STATE_LOADING:
+            self.loading_movie.movie.stop()
+
         self.stateWidget.show()
         if state == TreeWidgetItem.STATE_IDLE:
             self.set_idle()

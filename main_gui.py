@@ -61,15 +61,4 @@ if __name__ == "__main__":
     main_window = gui.MainWindow()
     main_window.show()
 
-    if os.path.normcase(os.path.join("templates", "example.yml")) in os.path.normcase(app.get_template_path()):
-        msg_box = QMessageBox(main_window)
-        msg_box.setWindowTitle("Getting Started")
-        msg_box.setText(f"Are you unsure how to use this program?<br>"
-                        f"Have a look at this quick guide.<br>"
-                        f"(This will open a website in your browser)")
-        msg_box.setStandardButtons(QMessageBox.Open | QMessageBox.Close)
-        ret = msg_box.exec()
-        if ret == QMessageBox.Open:
-            QDesktopServices.openUrl(QUrl(TUTORIAL_URL))
-
     sys.exit(app.exec_())

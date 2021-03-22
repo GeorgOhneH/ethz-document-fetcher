@@ -17,7 +17,10 @@ def qapp(tmp_path):
                               "--username", os.getenv("ETHZ_USERNAME"),
                               "--password", os.getenv("ETHZ_PASSWORD"),
                               "--save-path", str(tmp_path),
-                              "--template-path", os.path.join(ROOT_PATH, "templates", "HS2020", "D-ITET", "semester3.yml")]
+                              "--template-path", os.path.join(ROOT_PATH, "templates", "HS2020", "D-ITET", "semester3.yml"),
+                              "--no-check-for-updates",
+                              "--highlight-difference",
+                              "--keep-replaced-files"]
     yield Application([])
     sys.argv[:] = sys_argv
 
@@ -29,6 +32,6 @@ def test_full(qtbot):
     qtbot.addWidget(main_window)
     app = Application.instance()
     app.actions.run.trigger()
-    qtbot.wait(1000)
+    qtbot.wait(10000)
     app.actions.exit_app.trigger()
-    qtbot.wait(1000)
+    qtbot.wait(10000)

@@ -4,10 +4,11 @@ import time
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
 import gui
 from core.constants import VERSION, APP_NAME
-from gui.constants import ROOT_PATH
+from gui.constants import ROOT_PATH, TUTORIAL_URL, SITES_URL
 from gui.utils import widget_read_settings, widget_save_settings
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,14 @@ class MainWindow(QMainWindow):
 
         view_menu.addAction(actions.logger)
 
+        help_menu = menu_bar.addMenu("&Help")
+        getting_started_action = help_menu.addAction("Getting Started")
+        getting_started_action.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(TUTORIAL_URL)))
+        site_action = help_menu.addAction("Site Documentation")
+        site_action.triggered.connect(lambda: QDesktopServices.openUrl(QUrl(SITES_URL)))
+
+        view_menu.addAction(actions.logger)
+
         self.settings_dialog = gui.SettingsDialog(download_settings=app.download_settings, parent=self)
         actions.settings.triggered.connect(lambda: self.settings_dialog.open())
 
@@ -95,6 +104,24 @@ class MainWindow(QMainWindow):
                 action = menu.addAction(str(file_name))
                 action.triggered.connect(lambda checked, file_path=sub_path:
                                          app.open_file(file_path=file_path))
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        app = gui.Application.instance()
+        if not event.spontaneous() and\
+                os.path.normcase(os.path.join("templates", "example.yml")) in os.path.normcase(app.get_template_path()):
+            QTimer().singleShot(200, self.show_help)
+
+    def show_help(self):
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle("Getting Started")
+        msg_box.setText(f"Are you unsure how to use this program?<br>"
+                        f"Have a look at this quick guide.<br>"
+                        f"(This will open a website in your browser)")
+        msg_box.setStandardButtons(QMessageBox.Open | QMessageBox.Close)
+        ret = msg_box.exec()
+        if ret == QMessageBox.Open:
+            QDesktopServices.openUrl(QUrl(TUTORIAL_URL))
 
     def closeEvent(self, event):
         app = gui.Application.instance()
