@@ -88,7 +88,7 @@ jobs:
       if: startsWith(matrix.os, 'windows')
       shell: cmd
       run: |
-        pip uninstall pyinstaller
+        pip uninstall pyinstaller -y
         git clone https://github.com/pyinstaller/pyinstaller.git
         cd pyinstaller
         git checkout tags/v4.2
