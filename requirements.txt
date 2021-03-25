@@ -10,12 +10,9 @@ pyyaml
 certifi
 PyMuPDF
 PyQt5==5.15.2
-pyinstaller
+pyinstaller==4.2
 tenacity
 babel
 git+https://github.com/Digital-Sapphire/PyUpdater
 PyUpdater-S3-plugin
 pywin32; sys_platform == 'win32'
-pytest
-pytest-qt
-pytest-socket
