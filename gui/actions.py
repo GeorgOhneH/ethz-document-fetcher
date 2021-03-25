@@ -12,7 +12,6 @@ class Actions(QObject):
         self.exit_app = QAction("&Exit")
         self.exit_app.setShortcut("Ctrl+Q")
         self.exit_app.setStatusTip("Exit application")
-        self.exit_app.triggered.connect(qApp.quit)
 
         self.run = QAction("&Run All")
         self.run.setShortcut("Ctrl+X")

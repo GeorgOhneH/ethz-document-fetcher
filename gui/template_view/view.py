@@ -113,10 +113,15 @@ class StackedWidgetView(QStackedWidget):
 
     def change_state_widget(self, *args):
         button = self.button_group.checkedButton()
+
+        for view in self.views:
+            view.update_current_button(button)
+
         if button is None:
             self.hide()
             return
         self.show()
+
         for view in self.views:
             if button is view.button:
                 self.setCurrentWidget(view)

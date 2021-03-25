@@ -25,7 +25,6 @@ class MovieLabel(QLabel):
         self.movie.setCacheMode(QMovie.CacheAll)
         self.movie.setSpeed(200)
         self.setMovie(self.movie)
-        self.movie.start()
 
 
 class TreeWidgetItem(QTreeWidgetItem):
@@ -312,7 +311,7 @@ class TreeWidgetItemName(QWidget):
         self.idle_image = gui.DynamicIconLabel(self.IDLE_IMAGE_PATH, size, size, self)
         self.warning_svg = gui.DynamicIconLabel(self.WARNING_SVG_PATH, size, size, self)
         self.error_svg = gui.DynamicIconLabel(self.ERROR_SVG_PATH, size, size, self)
-        self.error_svg.setToolTipDuration(10000000)
+        self.error_svg.setToolTipDuration(100000)
         self.success_svg = gui.DynamicIconLabel(self.SUCCESS_SVG_PATH, size, size, self)
 
         self.stateWidget.addWidget(self.loading_movie)
@@ -336,6 +335,10 @@ class TreeWidgetItemName(QWidget):
         self.check_box.show()
 
     def set_state(self, state, msg=None):
+        if state != TreeWidgetItem.STATE_LOADING:
+            self.loading_movie.movie.stop()
+
+        self.stateWidget.show()
         if state == TreeWidgetItem.STATE_IDLE:
             self.set_idle()
         elif state == TreeWidgetItem.STATE_LOADING:
@@ -348,6 +351,8 @@ class TreeWidgetItemName(QWidget):
             self.set_success(msg=msg)
         elif state == TreeWidgetItem.STATE_NOTHING:
             self.set_idle()
+        else:
+            raise ValueError("Must be a valid state")
 
     def set_idle(self):
         self.stateWidget.hide()
@@ -356,11 +361,10 @@ class TreeWidgetItemName(QWidget):
     def set_loading(self, msg=None):
         if msg is not None:
             self.loading_movie.setToolTip(msg)
-        self.stateWidget.show()
+        self.loading_movie.movie.start()
         self.stateWidget.setCurrentWidget(self.loading_movie)
 
     def set_error(self, msg=None):
-        self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.error_svg)
 
         if msg is not None:
@@ -373,11 +377,9 @@ class TreeWidgetItemName(QWidget):
     def set_warning(self, msg=None):
         if msg is not None:
             self.warning_svg.setToolTip(msg)
-        self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.warning_svg)
 
     def set_success(self, msg=None):
         if msg is not None:
             self.success_svg.setToolTip(msg)
-        self.stateWidget.show()
         self.stateWidget.setCurrentWidget(self.success_svg)
