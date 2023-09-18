@@ -6,7 +6,7 @@ import zipfile
 if __name__ == "__main__":
     ROOT = os.path.dirname(os.path.dirname(__file__))
 
-    file_name = os.listdir(os.path.join(ROOT, "pyu-data", "new"))[0]
+    file_name = os.listdir(os.path.join(ROOT, "dist", "new"))[0]
 
     if sys.platform == "win32":
         platform_dist = "win"

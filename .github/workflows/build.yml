@@ -84,19 +84,6 @@ jobs:
         pip install -r requirements.txt -U
         pip install boto3 -U
 
-    - name: Build Pyinstaller (Windows)
-      if: startsWith(matrix.os, 'windows')
-      shell: cmd
-      run: |
-        pip uninstall pyinstaller -y
-        git clone https://github.com/pyinstaller/pyinstaller.git
-        cd pyinstaller
-        git checkout tags/v4.2
-        cd bootloader
-        python ./waf all
-        cd ..
-        python setup.py install
-
     - name: Install dependencies (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
@@ -110,76 +97,25 @@ jobs:
         sudo apt-get -y install p7zip-full
         sudo apt-get -y install -qq libegl1-mesa
 
-    - name: Init PyUpdater
-      run: python .CI/prepare_files.py
-      env:
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
-
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
       shell: cmd
       run: |
-        set /p VERSION=<version.txt
-        pyupdater build --app-version=%VERSION:~1% win.spec --pyinstaller-log-info
+        pyinstaller win.spec
 
     - name: Build (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
-        VERSION="$(cat version.txt)"
-        pyupdater build --app-version=${VERSION:1} mac.spec --pyinstaller-log-info
+        pyinstaller mac.spec
 
     - name: Build (Ubuntu)
       if: startsWith(matrix.os, 'ubuntu')
       run: |
-        VERSION="$(cat version.txt)"
-        pyupdater build --app-version=${VERSION:1} linux.spec --pyinstaller-log-info
-
-    - name: Unzip
-      run: python .CI/unzip.py
-
-    - name: Create patches
-      run: pyupdater pkg --process
-
-    - name: Cryptographically Sign
-      run: pyupdater pkg --sign --slit-version
-
-    - name: Upload Release (Windows)
-      if: startsWith(matrix.os, 'windows')
-      run: pyupdater upload --service s3
-      env:
-        PYU_AWS_BUCKET: ethz-document-fetcher-win32
-        PYU_AWS_BUCKET_REGION: eu-central-1
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
-
-    - name: Upload Release (MacOS)
-      if: startsWith(matrix.os, 'macos')
-      run: pyupdater upload --service s3
-      env:
-        PYU_AWS_BUCKET: ethz-document-fetcher-darwin
-        PYU_AWS_BUCKET_REGION: eu-central-1
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
-
-    - name: Upload Release (Ubuntu)
-      if: startsWith(matrix.os, 'ubuntu')
-      run: pyupdater upload --service s3
-      env:
-        PYU_AWS_BUCKET: ethz-document-fetcher-linux
-        PYU_AWS_BUCKET_REGION: eu-central-1
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
-
-    - name: Upload PyUpdater Data
-      run: python .CI/upload_pyuppdate_data.py
-      env:
-        PYU_AWS_ID: ${{ secrets.PYU_AWS_ID }}
-        PYU_AWS_SECRET: ${{ secrets.PYU_AWS_SECRET }}
+        pyinstaller linux.spec
 
     - name: Package (Windows)
       if: startsWith(matrix.os, 'windows')
-      run: 7z a ethz-document-fetcher-windows-x86-64.zip ./distwin/ethz-document-fetcher/*
+      run: 7z a ethz-document-fetcher-windows-x86-64.zip ./dist/ethz-document-fetcher/*
 
     - name: Upload artifact (Windows)
       if: startsWith(matrix.os, 'windows')
@@ -222,7 +158,7 @@ jobs:
     - name: Package (MacOS)
       if: startsWith(matrix.os, 'macos')
       run: |
-        dmgbuild --settings ./.CI/dmg-settings.py -D app=./distmac/ethz-document-fetcher.app ethz-document-fetcher ethz-document-fetcher-osx.dmg
+        dmgbuild --settings ./.CI/dmg-settings.py -D app=./dist/ethz-document-fetcher.app ethz-document-fetcher ethz-document-fetcher-osx.dmg
 
     - name: Upload artifact (MacOS)
       if: startsWith(matrix.os, 'macos')

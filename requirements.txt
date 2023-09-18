@@ -10,7 +10,7 @@ pyyaml
 certifi
 PyMuPDF
 PyQt5==5.15.2
-pyinstaller==4.2
+pyinstaller==5.13
 tenacity
 babel
 git+https://github.com/Digital-Sapphire/PyUpdater

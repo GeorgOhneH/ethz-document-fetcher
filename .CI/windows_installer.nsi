@@ -101,7 +101,7 @@ Section "Main Component"
   SetOutPath $INSTDIR
 
   ;Put the following file in the SetOutPath
-  File /r ".\..\distwin\ethz-document-fetcher\*.*"
+  File /r ".\..\dist\ethz-document-fetcher\*.*"
 
   ;Store installation folder in registry
   WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
