@@ -1,7 +1,6 @@
 # -*- mode: python -*-
 import os
 import sys
-import pyupdater
 
 
 def collect_submodules(name):
@@ -46,7 +45,7 @@ a = Analysis([os.path.join(os.getcwd(), "main_gui.py")],
                  (os.path.join("core", "assets"), os.path.join("core", "assets")),
              ],
              hiddenimports=["encodings.idna", "babel.numbers"] + collect_submodules("sites"),
-             hookspath=[os.path.join(pyupdater.__path__[0], "hooks")],
+             hookspath=[],
              runtime_hooks=[],
              excludes=[],
              win_no_prefer_redirects=False,
