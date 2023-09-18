@@ -264,8 +264,8 @@ async def _add_pdf_highlights(download_settings,
                               out_path):
     if download_settings.highlight_page_limit != 0:
         with fitz.Document(old_absolute_path, filetype="pdf") as doc:
-            if doc.pageCount > download_settings.highlight_page_limit:
-                logger.debug(f"Skipping highlights. File: {absolute_path}. Page Count: {doc.pageCount} is to large")
+            if doc.page_count > download_settings.highlight_page_limit:
+                logger.debug(f"Skipping highlights. File: {absolute_path}. Page Count: {doc.page_count} is to large")
                 return
 
     logger.debug(f"Adding highlights to {absolute_path}")

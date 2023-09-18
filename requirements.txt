@@ -9,10 +9,8 @@ colorama
 pyyaml
 certifi
 PyMuPDF
-PyQt5==5.15.2
-pyinstaller==5.13
+PyQt5==5.15.9
+pyinstaller==5.13.2
 tenacity
 babel
-git+https://github.com/Digital-Sapphire/PyUpdater
-PyUpdater-S3-plugin
 pywin32; sys_platform == 'win32'

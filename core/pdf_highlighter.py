@@ -78,23 +78,23 @@ def add_differ_highlight(new_path, old_path, out_path):
             with open(EMPTY_TWO_COLUMN_LEFT_PDF_PATH, "rb") as f:
                 doc_preset = fitz.Document(stream=f.read(), filetype="pdf")
 
-            for i in range(max(doc_new.pageCount, doc_old.pageCount)):
+            for i in range(max(doc_new.page_count, doc_old.page_count)):
 
-                if i >= doc_old.pageCount:
+                if i >= doc_old.page_count:
                     bound = doc_new[i].bound()
-                    doc_preset.newPage(width=bound.x1, height=bound.y1)
+                    doc_preset.new_page(width=bound.x1, height=bound.y1)
 
                 else:
-                    doc_preset.insertPDF(doc_old,
+                    doc_preset.insert_pdf(doc_old,
                                          from_page=i,
                                          to_page=i,
                                          annots=True)
 
-                if i >= doc_new.pageCount:
+                if i >= doc_new.page_count:
                     bound = doc_old[i].bound()
-                    doc_preset.newPage(width=bound.x1, height=bound.y1)
+                    doc_preset.new_page(width=bound.x1, height=bound.y1)
                 else:
-                    doc_preset.insertPDF(doc_new,
+                    doc_preset.insert_pdf(doc_new,
                                          from_page=i,
                                          to_page=i,
                                          annots=True)
@@ -110,7 +110,7 @@ def add_differ_highlight(new_path, old_path, out_path):
 def get_all_boxes(doc):
     boxes = []
     for i, page in enumerate(doc):
-        text_page = page.getTextPage()
+        text_page = page.get_textpage()
         blocks = text_page.extractRAWDICT()["blocks"]
         for block in blocks:
             if block["type"] == 1:
@@ -168,8 +168,8 @@ def make_annotations(doc, boxes, similar_boxes):
             continue
         page = doc[box.page_index]
         try:
-            annot = page.addHighlightAnnot(box.get())
-            annot.setColors(stroke=box.colour)
+            annot = page.add_highlight_annot(box.get())
+            annot.set_colors(stroke=box.colour)
             annot.update()
         except ValueError as e:  # Bad quads error
             print(f"Error: {e}. Box: {box.get()}")
