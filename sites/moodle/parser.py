@@ -68,11 +68,9 @@ async def parse_sections(session,
                          index=None,
                          keep_section_order=False,
                          keep_file_order=False):
-    if "aria-labelledby" in section.attrs:
-        section_title_id = str(section["aria-labelledby"])
-        section_name = str(section.find("h3", id=section_title_id).string).strip()
-    else:
-        section_name = str(section["aria-label"]).strip()
+
+    title = section.find("h3", id=re.compile("sectionid-([0-9]+)-title"), recursive=True)
+    section_name = str(title.text).strip()
 
     if keep_section_order:
         section_name = f"[{index + 1:02}] {section_name}"
@@ -175,28 +173,23 @@ async def parse_module(session,
                        process_external_links,
                        keep_file_order,
                        password_mapper):
-    mtype = module["class"][1]
+    mtype = module["class"][2]
     module_id = int(re.search("module-([0-9]+)", module["id"])[1])
     if mtype == MTYPE_FILE:
-        instance = module.find("div", class_="activityinstance")
+        link = module.find("a")
         try:
-            file_name = str(instance.a.span.contents[0])
+            file_name = str(link.span.contents[0])
         except AttributeError:
             return
         last_updated = last_updated_dict[module_id]
 
-        with_extension = False
-        if "pdf-24" in instance.a.img["src"]:
-            file_name += ".pdf"
-            with_extension = True
-
         if keep_file_order:
             file_name = f"[{module_idx + 1:02}] {file_name}"
 
-        url = instance.a["href"] + "&redirect=1"
+        url = link["href"] + "&redirect=1"
         await queue.put({"path": safe_path_join(base_path, file_name),
                          "url": url,
-                         "with_extension": with_extension,
+                         "with_extension": False,
                          "checksum": last_updated})
 
     elif mtype == MTYPE_DIRECTORY:
@@ -207,9 +200,9 @@ async def parse_module(session,
         if not process_external_links:
             return
 
-        instance = module.find("div", class_="activityinstance")
-        url = instance.a["href"] + "&redirect=1"
-        name = str(instance.a.span.contents[0])
+        link = module.find("a")
+        url = link["href"] + "&redirect=1"
+        name = str(link.span.contents[0])
 
         if keep_file_order:
             name = f"[{module_idx + 1:02}] {name}"
@@ -226,13 +219,12 @@ async def parse_module(session,
                            password_mapper=password_mapper)
 
     elif mtype == MTYPE_ASSIGN:
-        instance = module.find("div", class_="activityinstance")
-        link = instance.a
+        link = module.find("a")
         if link is None:
             return
-        href = instance.a["href"]
+        href = link["href"]
         last_updated = last_updated_dict[module_id]
-        name = str(instance.a.span.contents[0])
+        name = str(link.span.contents[0])
 
         assign_file_tree_soup_soup = await call_function_or_cache(get_assign_files_tree,
                                                                   last_updated,
@@ -291,11 +283,11 @@ async def parse_folder(session, queue, download_settings, module, base_path, las
         await parse_folder_tree(queue, folder_tree.ul, base_path, last_updated)
         return
 
-    instance = module.find("div", class_="activityinstance")
-    folder_name = str(instance.a.span.contents[0])
+    link = module.find("a")
+    folder_name = str(link.span.contents[0])
     folder_path = safe_path_join(base_path, folder_name)
 
-    href = instance.a["href"]
+    href = link["href"]
 
     folder_soup = await call_function_or_cache(get_filemanager, last_updated, session, href)
 

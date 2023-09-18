@@ -23,6 +23,8 @@ async def process_single_file_url(session, queue, base_path, download_settings, 
                                         password=password)
 
     elif "zoom.us/rec/play" in url or "zoom.us/rec/share" in url:
+        # TODO: fix zoom
+        return
         allowed_extensions = []
         if download_settings.allowed_extensions:
             allowed_extensions += download_settings.allowed_extensions
