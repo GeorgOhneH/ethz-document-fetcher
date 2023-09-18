@@ -96,6 +96,7 @@ jobs:
         sudo apt-get update
         sudo apt-get -y install p7zip-full
         sudo apt-get -y install -qq libegl1-mesa
+        sudo apt-get -y install fuse libfuse2
 
     - name: Build (Windows)
       if: startsWith(matrix.os, 'windows')
