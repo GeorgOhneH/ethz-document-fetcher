@@ -15,7 +15,7 @@ USER_WEBDAV_URL = "https://polybox.ethz.ch/remote.php/dav/files/"
 
 BASIC_HEADER = {
     "Content-Type": "application/xml; charset=utf-8",
-    "Depth": "infinity",
+    "Depth": "256",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0",
 }
 
