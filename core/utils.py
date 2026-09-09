@@ -70,6 +70,26 @@ def get_extension_from_response(response):
     return extension[1:]
 
 
+# Fallback for files served without a usable filename or a generic/unknown
+# content-type (e.g. Moodle files uploaded without an extension), sniffed
+# from the first few bytes of the actual file content.
+_MAGIC_BYTES = (
+    (b"%PDF-", "pdf"),
+    (b"\x89PNG\r\n\x1a\n", "png"),
+    (b"\xff\xd8\xff", "jpg"),
+    (b"GIF87a", "gif"),
+    (b"GIF89a", "gif"),
+    (b"PK\x03\x04", "zip"),
+)
+
+
+def guess_extension_from_bytes(chunk):
+    for magic, extension in _MAGIC_BYTES:
+        if chunk.startswith(magic):
+            return extension
+    return None
+
+
 def remove_old_files():
     remove_all_temp_files()
     remove_old_log_files()

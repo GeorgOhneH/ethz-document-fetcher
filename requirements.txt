@@ -4,12 +4,12 @@ beautifulsoup4
 lxml
 aiodns
 appdirs
-cchardet
+# cchardet # Not strictly required
 colorama
 pyyaml
 certifi
 PyMuPDF
-PyQt5==5.15.9
+PyQt5==5.15.11
 pyinstaller==5.13.2
 tenacity
 babel
