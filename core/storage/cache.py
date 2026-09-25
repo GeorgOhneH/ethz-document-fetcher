@@ -79,8 +79,14 @@ async def check_extension(session, url, session_kwargs=None):
 
     async with session.get(url, raise_for_status=True, **session_kwargs) as response:
         extension = core.utils.get_extension_from_response(response)
+        if extension is None:
+            chunk = await response.content.read(16)
+            extension = core.utils.guess_extension_from_bytes(chunk)
 
-    table[url] = extension
+    # Don't persist a failed guess: an undetectable extension today may
+    # become detectable after a fix, and shouldn't be stuck forever.
+    if extension is not None:
+        table[url] = extension
     logger.debug(f"Called filename_cache, url: {url}, extension: {extension}")
 
     return extension

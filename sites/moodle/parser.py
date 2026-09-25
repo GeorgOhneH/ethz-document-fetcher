@@ -173,7 +173,8 @@ async def parse_module(session,
                        process_external_links,
                        keep_file_order,
                        password_mapper):
-    mtype = module["class"][2]
+    # class is "activity <type> modtype_<type> ...", e.g. "activity resource modtype_resource"
+    mtype = module["class"][1]
     module_id = int(re.search("module-([0-9]+)", module["id"])[1])
     if mtype == MTYPE_FILE:
         link = module.find("a")
@@ -301,20 +302,26 @@ async def parse_sub_folders(queue, soup, folder_path, last_updated):
 
 
 async def parse_folder_tree(queue, soup, folder_path, last_updated):
+    # Each entry is wrapped in a "fp-filename-icon" element (div or span,
+    # depending on Moodle version) containing an icon span and a
+    # "fp-filename" span. A folder entry has a nested <ul> of children and
+    # an empty fp-filename; a file entry has no nested <ul> and its
+    # fp-filename contains the download link.
     children = soup.find_all("li", recursive=False)
     for child in children:
-        if child.find("div", recursive=False) is not None:
-            sub_folder_path = safe_path_join(folder_path, child.div.span.img["alt"])
-        else:
-            sub_folder_path = folder_path
+        nested_ul = child.find("ul", recursive=False)
+        if nested_ul is not None:
+            icon_wrapper = child.find(class_="fp-filename-icon")
+            alt = icon_wrapper.span.img.get("alt", "") if icon_wrapper is not None else ""
+            sub_folder_path = safe_path_join(folder_path, alt)
+            await parse_folder_tree(queue, nested_ul, sub_folder_path, last_updated)
+            continue
 
-        if child.find("ul", recursive=False) is not None:
-            await parse_folder_tree(queue, child.ul, sub_folder_path, last_updated)
-
-        if child.find("span", recursive=False) is not None:
-            url = child.span.a["href"]
-            name = child.span.a.find("span", recursive=False, class_="fp-filename").get_text(strip=True)
-            item = {"path": safe_path_join(sub_folder_path, name), "url": url, "checksum": last_updated}
+        filename_span = child.find(class_="fp-filename")
+        link = filename_span.find("a") if filename_span is not None else None
+        if link is not None:
+            name = filename_span.get_text(strip=True)
+            item = {"path": safe_path_join(folder_path, name), "url": link["href"], "checksum": last_updated}
             await queue.put(item)
 
 

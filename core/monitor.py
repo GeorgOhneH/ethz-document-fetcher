@@ -33,8 +33,26 @@ class MonitorSession(aiohttp.ClientSession):
         headers_length = sum((len(key) + len(value) for key, value in response.raw_headers))
         if self.signals is not None:
             self.signals.downloaded_content_length.emit(headers_length)
-        response.content.read = async_monitor_length_bytes(response.content.read, signals=self.signals)
+        response.content = _MonitoredStreamReader(response.content, signals=self.signals)
         return response
+
+
+class _MonitoredStreamReader:
+    """Wraps a StreamReader to report read length via signals.
+
+    aiohttp's StreamReader uses __slots__ (no 'read' slot), so its
+    bound methods can no longer be monkey-patched on the instance.
+    """
+
+    def __init__(self, content, signals):
+        self._content = content
+        self._read = async_monitor_length_bytes(content.read, signals=signals)
+
+    async def read(self, *args, **kwargs):
+        return await self._read(*args, **kwargs)
+
+    def __getattr__(self, item):
+        return getattr(self._content, item)
 
 
 def async_monitor_length_bytes(func, signals):
